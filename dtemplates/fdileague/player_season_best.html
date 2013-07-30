@@ -1,0 +1,26 @@
+{% extends "fdileague/base.html" %}
+{% block content %}
+<p>Top Scorers</p>
+
+{% for score_list in top_scorers %}
+
+	<table class="sorttable">
+	<caption>{{ score_list.0 }}</caption>
+	<tr class="playeryearscores">
+		<th>Player</th>
+	    <th>Score</th>
+	    <th>Year</th>
+	</tr>
+	
+	{% for scorer in score_list.1 %}
+	    <tr>
+		<td><a href="/django/fdileague/players/{{scorer.pk}}/">{{ scorer }}</a></td>
+		<td>{{ scorer.yearscore__score__sum }}</td>
+		<td>{{ scorer.best_year }}</td>
+	    </tr>
+	{% endfor %}
+	</table>
+
+{% endfor %}
+
+{% endblock %}

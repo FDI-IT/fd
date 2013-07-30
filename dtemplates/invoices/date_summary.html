@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+
+<div id="title">
+	<div id="title-left">
+		<span id="name">Invoice Summary</span>
+		<span id="number"></span>
+	</div>
+	<div id="title-right">
+	</div>
+	<div id="related-links">
+	<ul>
+		
+	</ul>
+	</div>
+</div>
+
+<div id="content-main">
+<table>
+	<caption>Invoice Summary</caption>
+	<thead>
+		<tr>
+			<th>Day</th>
+			<th>Total Raw Material Cost</th>
+		</tr>
+	</thead>
+	{% for date_line in date_data %}
+	<tr>
+		<td><a href='/django/invoices/{{date_line.qb_date|date:"Y/m/d"}}/'>{{date_line.qb_date}}</a></td>
+		<td>${{date_line.lineitem__quantity_cost__sum|floatformat:2 }}</td>
+	</tr>
+	{% endfor %}
+</table>
+</div>
+
+
+
+<div id="content-right">
+	
+</div>
+
+{% endblock %}
+

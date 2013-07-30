@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"><title>Retain History</title>
+<link href="http://192.168.0.10:8000/css/qcsheets.css" rel="stylesheet" type="text/css">
+</head>
+<title>
+{%block title%}	
+{%endblock%}
+</title>
+<style type="tehttp://192.168.0.10:8000s">
+{% block style %}
+	@page {
+		size: {{pagesize}};
+		margin: 1cm;
+		@frame footer {
+    		-pdf-frame-content: footerContent;
+    		bottom: 1cm;
+    		margin-left: 1cm;
+    		margin-right: 1cm;
+    		height: 1cm;
+		}
+	}
+{%endblock%}	
+</style>
+</head>
+<body>
+<div>
+{%block page_header%}
+   <div>
+   		<h1>pisa html<span style="color: #FC0000;">thttp://192.168.0.10:8000an>pdhttp://192.168.0.10:8000>
+   		<h2>Python module for HThttp://192.168.0.10:8000S to PDF conversion - Ezpdf examplhttp://192.168.0.10:8000>
+  http://192.168.0.10:8000v>
+	<hr />
+{%endblock%}
+{%block content%}
+{%endblock%}
+</div>
+<div id="footerContent">
+{%block page_foot%}
+		<pdf:pagenumber>
+{%endblock%}
+</div>
+</body>
+</html>

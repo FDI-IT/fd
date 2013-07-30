@@ -1,0 +1,62 @@
+
+{% extends "fdileague/base.html" %}
+
+{% block content %}
+<div id="content-right">
+
+</div>
+    <div id="content-main">
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+  
+    <table width="100%">
+	<tr>
+		<th>Week</th>
+	    <th>Day</th>
+	    <th>Date</th>
+		<th>Link</th>
+	    <th>Away</th>
+	    <th>Home</th>
+	</tr>
+	{% for game in object_list %}
+	    <tr>
+	    <td>{{ game.week }}</td>
+		<td>{{ game.game_date|date:"D" }}</td>
+		<td>{{ game.game_date|date:"F d" }}</td>
+		<td><a href="/django/fdileague/games/{{game.pk}}/">boxscore</a></td>
+		<td>{{ game.away_team.full_name }}</td>
+		<td>{{ game.home_team.full_name }}</td>
+	    </tr>
+	{% endfor %}
+    </table>
+	</form>
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+    </div>
+{% endblock %}

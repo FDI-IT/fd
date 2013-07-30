@@ -1,0 +1,96 @@
+{% load humanize %}
+{% load blades %}
+{% load qstring %}
+
+<div class="float-container">
+	<div class="title-right">
+		<img class="padtest" src="/django/qc/barcode/{{retain_pk}}">
+	</div>
+	<div class="title-left" class="jqtextfill">
+		<div class="name">{{flavor.prefix}}-{{flavor.number}}<br>{{flavor.natart}} {{flavor.name}} {{flavor.label_type}}</div>
+	</div>
+</div>
+
+<div class="float-container info-section">
+	<div class="qc-info halfwidth">
+		<div>
+			<div class="label">Testing procedure</div>
+			<div>{{flavor.productinfo.testing_procedure}}</div>
+		</div>
+		<div>
+			<div class="label">QC Notes</div>
+			<div>{{flavor.productinfo.notes}}</div>
+		</div>
+		<div>
+			<div class="label">Organoleptic Properties</div>
+			<div>{{flavor.productinfo.organoleptic_properties}}</div>
+		</div>
+		<div>
+			<div class="label">Appearance</div>
+			<div>{{flavor.productinfo.appearance}}</div>
+		</div>
+		<div class="product-memo">
+			<span class="label">Memo</span>
+			{{flavor.productmemo}}
+		</div>
+		<div class="blades">
+			<ul>
+				<li>
+					<span class="label">Selling Price</span>
+					<span class="datum">{{ flavor.unitprice }}</span>
+				</li>
+				<li>
+					<span class="label">Last Updated</span>
+					<span class="datum">{{ flavor.lastspdate|date:"Y-m-d" }}</span>
+				</li>
+				<li>
+					<span class="label">Raw Material Cost</span>
+					<span class="datum">{{ flavor.rawmaterialcost }}</span>
+				</li>
+				<li>
+					<span class="label">Flash Point</span>
+					<span class="datum">{{ flavor.flashpoint }}</span>
+				</li>
+				<li>
+					<span class="label">Specific Gravity</span>
+					<span class="datum"></span>
+				</li>
+				<li>
+					<span class="label">Allergens</span>
+					<span class="datum">{{ flavor.allergen }}</span>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="signatures">
+		<fieldset class="signatures"><legend align="right">Signatures and Comments</legend></fieldset>
+	</div>
+</div>
+
+<div class="content-table">
+	<table width="100%">
+		<thead>
+			<tr class="header_row">
+				<th width="80px">Date</th>
+				<th width="70px">Lot</th>
+				<th width="50px">Retain</th>
+				<th width="60px">Amount</th>
+				<th width="70px">Status</th>
+				<th>Notes</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for retain in retains %}
+			<tr>
+				<td>{{ retain.date|date:"Y-m-d" }}</td>
+				<td>{{ retain.lot.number }}</td>
+				<td>{{ retain.retain }}</td>
+				<td>{{ retain.lot.amount|floatformat:0 }}</td>
+				<td>{{ retain.status }}</td>
+				<td>{{ retain.notes }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% if remaining_retains > 0 %}{{ remaining_retains }} more retains on record. Total weight: {{ remaining_weight }}, going back to {{ last_date|date:"Y-m-d" }}{% endif %}
+</div>

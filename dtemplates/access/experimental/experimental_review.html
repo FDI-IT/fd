@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load experimental_flat_review_table %}
+{% load blades %}
+{% load related_links %}
+{% block content %}
+
+<script type="text/javascript" src="/djangomedia/js/flavor_review.js?v=24"></script>
+<script>
+jQuery(document).ready(function(){	
+	$( "#flavor-tabs" ).tabs({ 
+		cache: true,
+		spinner: '',
+		ajaxOptions: {
+			error: function(xhr, status, index, anchor) {
+				$( anchor.hash ).html(
+					"Failed to load tab."
+				);
+			}
+		}
+	});
+	$( "#flat-table" ).tablesorter({
+			headers: {
+			0: {
+				sorter: 'link-digit'
+			},
+			1: {
+				sorter: 'text'
+			},
+			2: {
+				sorter: 'text'
+			},
+			3: {
+				sorter: 'text'
+			},
+			4: {
+				sorter: 'digit'
+			},
+			5: {
+				sorter: 'digit'
+			},
+			6: {
+				sorter: 'digit'
+			},
+			7: {
+				sorter: 'shortDate'
+			}
+	}});
+});
+</script>
+
+<div id="content-right">
+	{% blades experimental %}
+</div>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{experimental}} -- <a href="/django/access/experimental/{{experimental.experimentalnum}}/edit/">edit</a></span>
+</div>
+
+{% if status_message %}
+<h1 class="status_message">{{ status_message }}</h1>
+{% endif %}
+
+<div class="product-memo"><span class="label">Memo</span>{{ experimental.memo }}</div>
+<div class="product-memo"><span class="label">Mixing Instructions</span>{{ experimental.mixing_instructions }}</div>
+
+<div>
+	<table>
+		{% for digitized_row in digitized_table %}
+		<tr>
+			{% for cell in digitized_row %}
+			<td>
+				{{ cell }}
+			</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+	</table>
+</div>
+
+
+<h2 style="float:left;clear:both;"><a href="{{experimental.flavor.get_absolute_url}}">{{experimental.flavor}}</a></h2>
+<div id="flavor-tabs">
+	{% related_links experimental.flavor %}
+	
+	<input type="hidden" id="actual_adjusted_weight" value="1000">
+
+	{% flat_review_table experimental %}
+</div>
+
+</div>
+
+{% endblock %}

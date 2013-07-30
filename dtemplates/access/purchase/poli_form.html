@@ -1,0 +1,44 @@
+<fieldset id="poli">
+<legend>Purchase Order Line Items</legend>
+	<form action="" method="POST">
+	{{ management_form }}
+	<table id="poli-rows" width="100%">
+		<thead>
+		<tr>
+			<th>PIN</th>
+			<th>Quantity</th>
+			<th>Package Size</th>
+			<th>Name</th>
+			<th>Delete</th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for form, label in poli_rows %}
+		<tr>
+			<td class="pin-cell">
+				<input id="id_purchaseorderlineitem_set-{{forloop.counter0}}-raw_material__id" type="text" name="purchaseorderlineitem_set-{{forloop.counter0}}-raw_material__id" value="{{ form.instance.raw_material.id }}" size="40" />
+				{{form.raw_material}}
+				{{form.id}}
+				
+			</td>
+			<td class="quantity-cell">{{ form.quantity.as_text }}</td>
+			<td class="package_size-cell">{{ form.package_size }}</td>
+			<td class="name-cell">{{ form.instance.raw_material.art_nati }} {{ form.instance.raw_material.prefix }} {{ form.instance.raw_material.product_name }}</td>
+			<td class="del-row">{{ form.DELETE }}</td>
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+	<input id="po-submit-button" type="submit" value="Save" />		
+	</form>
+</fieldset>
+
+<ul id="formerrors">
+{% for form, label in poli_rows %}
+	{% for field in form %}
+		{% for error in field.errors %}
+			<li>{{field.label}} - {{ error }}</li>
+		{% endfor %}
+	{% endfor %}
+{% endfor %}
+</ul>

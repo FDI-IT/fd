@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load blades %}
+{% load related_links %}
+{% block content %}
+<div id="content-right">
+	{% blades highlighted_ingredient %}
+</div>
+
+<div id="content-main">
+	<div id="title-left">
+		<span id="name">{{highlighted_ingredient.id}} - {{highlighted_ingredient.art_nati}} {{ highlighted_ingredient.prefix }} {{ highlighted_ingredient.product_name }} {{ highlighted_ingredient.part_name2 }}</span>
+	</div>
+	{% related_links highlighted_ingredient %}
+	
+	<div class="product-memo"><span class="label">Memo</span>An ingredient memo would go here</div>
+	<div id="ingredient-detail">
+		
+		<table width="710px" id="rm-by-code">
+			<caption>Solution details</caption>
+			<thead>
+				<tr>
+				{% for header in table_headers %}
+					<th>{{ header }}</th>
+				{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+			{% for solution in related_solutions %}
+				<tr>
+					<td><a href="/django/access/ingredient/pin_review/{{ solution.ingredient.id }}/">{{ solution.ingredient.id }}</a></td>
+					<td><a href="/django/access/ingredient/pin_review/{{ solution.my_base.id }}/">{{ solution.my_base }}</a></td>
+					<td><a href="/django/access/ingredient/pin_review/{{ solution.my_solvent.id }}/">{{ solution.my_solvent }}</a></td>
+					<td>{{ solution.percentage }}</td>
+					<td>{{ solution.status }}</td>
+					<td>{{ solution.ingredient.unitprice }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>	
+	</div>
+</div>
+
+{% endblock %}
+

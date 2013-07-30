@@ -1,0 +1,20 @@
+{% for form in solution_formset.forms %}
+  <tr>
+  	<td>{{ form.instance }}</td>
+  {% for field in form.visible_fields %}
+    <td>
+    {# Include the hidden fields in the form #}
+    {% if forloop.first %}
+      {% for hidden in form.hidden_fields %}
+      {{ hidden }}
+      {% endfor %}
+	  {{ form.my_base }}
+	  {{ form.my_solvent }}
+	  <span class="solution_id" style="display:none;">{{ form.instance.id }}</span>
+    {% endif %}
+      {{ field.errors.as_ul }}
+      {{ field }}
+    </td>
+  {% endfor %}
+  </tr>
+{% endfor %}

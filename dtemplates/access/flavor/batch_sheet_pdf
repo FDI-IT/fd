@@ -1,0 +1,105 @@
+{% load review_table %}
+{% load blades %}
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+	
+<STYLE TYPE="text/css" MEDIA=screen>
+<!--
+  div#formula-tables{
+  	display:none;
+  }
+-->
+</STYLE>
+
+    {# this part includes some javascript, css, etc #}
+    {% include "htmlhead.html" %}
+
+    <title>
+	{% block page_title %}
+	Flavor Dynamics Intranet
+	{% endblock page_title %}
+    </title>
+
+</head>
+
+<body>
+
+{# every other div except this one is extendable with blocks #}
+<div id="welcome">
+
+    {# header includes the logo, title, navigation, etc #}
+	{% block header %}
+	{% include "header.html" %}
+	{% endblock %}
+
+    {# the main contents of the page #}
+
+ <div id="main">
+    {% block main %}
+    	<div id="content">
+		    <div id="content-title">
+		    	{% if help_link %}
+		    		{% ifnotequal help_link "" %} 
+		    			<a href="{{ help_link }}"><img src="/djangomedia/images/Icons/help.png"></a>
+		    		{% endifnotequal %}
+		    	{% endif %}
+		    	{% if page_title %}
+		    		{% ifnotequal page_title "" %}
+		    			<h2>{{ page_title }}</h2>	
+		    		{% endifnotequal %}
+				{% endif %}
+			</div>		
+			
+	<div id="title">
+		<div id="title-left">
+			<span id="name">{{flavor}}</span>
+			<span id="number">{{ flavor.prefix }}-{{ flavor.number }}</span>
+		</div>
+		<div id="title-right">
+			<span id="price">{{ flavor.unitprice }}<br />
+			Selling Price</span>
+		</div>
+		<div id="related-links">
+		<ul>
+			{% for formlink, formtitle in flavorforms %}
+		        <li><a href="{{ formlink }}">{{ formtitle }}</a></li>
+		    {% endfor %}
+		</ul>
+		</div>
+	</div>
+
+<div id="content-main">
+<div id="flavor-memo"><span class="label">Memo</span>{{flavor.productmemo}}</div>
+<div id="formula-tables">
+	<span id="exploded-table">
+		{% review_table flavor weight_factor %}
+	</span>
+	
+	<span id="consolidated-table">
+	</span>
+</div>
+</div>
+
+
+
+<div id="content-right">
+	{% blades flavor %}
+</div>
+
+<form id="exportform" action="/django/access/table_to_csv" method="post" target="_blank">
+<input type="hidden" id="exportdata" name="exportdata" />
+</form>
+{% endblock %}
+    <div id="bottom">
+	{% block bottom %}
+	{% endblock %}
+    </div>
+
+</div>
+
+</body>
+
+</html>

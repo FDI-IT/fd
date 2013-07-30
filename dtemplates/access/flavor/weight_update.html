@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div id="title">
+	<div id="title-left">
+		<span id="name">{{flavor.natart}} {{flavor.name}} {{flavor.type}}</span>
+		<span id="number">{{ flavor.prefix }}-{{ flavor.number }}</span>
+	</div>
+	<div id="title-right">
+		<span id="price">{{ flavor.unitprice }}<br />
+		Selling Price</span>
+	</div>
+</div>
+
+<div id="formula_form">
+{{ status_msg }}
+<form method="post" action="">
+    {{ mgmt_form }}
+    
+    <table>
+    {% for rm, form in formula_formset %}
+    	{{ form.as_table }}
+    {% endfor %}
+    </table>
+    <p><input type="submit" value="Update Formula Weight" /></p>
+</form>
+</div>
+
+
+{% endblock %}

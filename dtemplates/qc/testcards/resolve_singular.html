@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load resolve_testcards %}
+
+{% block htmlhead %}
+{{ block.super }}
+<script type="text/javascript" src="/djangomedia/js/resolve_testcards.js"></script>
+{% endblock  %}
+
+{% load related_links %}
+{% block content %}
+
+<div id="content-right">
+	<ul id="sidebar_links">
+		<li id="{{ testcard.pk }}"><a target="_blank" href="/django/admin/newqc/testcard/{{testcard.pk}}/">{{ testcard.retain }} - {{ testcard.retain.lot.flavor}}</a></li>
+	</ul>
+</div>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">Resolve Test Cards</span>
+</div>
+<div id="resolve_testcard_form_holder">
+{% testcard_singular_form testcard "current_loaded" %}
+{% testcard_singular_form testcard_ondeck "ondeck" %}
+</div>
+<input type="submit" name="submit" value="Submit" id="resolve_testcard_submit_button">
+</div>
+
+{% endblock %}

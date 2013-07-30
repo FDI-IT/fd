@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}    
+<div id="content-main">
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+    <table class="sorttable" width="100%" id="lot_list">
+	<tr class="qcheaders">
+		<th>Lot Number</th>
+	    <th>Sub Lot</th>
+	    <th>Flavor</th>
+		<th>Date</th>
+	    <th>Amount</th>
+	    <th class="sorttable_nosort">Status</th>
+	     <th>QC Tests</th>
+	     <th>Batchsheet</th>
+	</tr>
+	{% for lot in object_list %}
+	    <tr>
+	    <td><a href="{{lot.get_absolute_url}}">{{ lot.number }}</a></td>
+	    <td>
+	    	{% if lot.sub_lot %}
+	    	{{ lot.sub_lot }}
+	    	{% endif %}
+	    </td>
+		<td><a href="{{ lot.flavor.get_absolute_url }}">{{ lot.flavor }}</a></td>
+		<td>{{ lot.date|date:"Y-m-d" }}</td>
+		<td>{{ lot.amount|floatformat:0 }}</td>
+		<td>{{ lot.status }}</td>
+		<td>
+			{% if lot.testcards_present %}
+			<a href="{{lot.get_absolute_url}}"><img src="/djangomedia/images/Icons/16x16/accept.png"></a>
+			{% endif %}
+		</td>
+		<td>
+			{% if lot.batchsheets_present %}
+			<a href="{{lot.get_absolute_url}}"><img src="/djangomedia/images/Icons/16x16/accept.png"></a>
+			{% endif %}
+		</td>
+	    </tr>
+	{% endfor %}
+    </table>
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

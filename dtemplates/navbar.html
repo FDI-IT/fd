@@ -1,0 +1,16 @@
+{% for navstep in navigation %}
+    {% if forloop.last %}
+	{{ navstep.1 }}
+    {% else %}{% if forloop.first %}
+    <ul id="jsddm">
+	<li><a href="/">home</a>
+	<ul>
+	    <li><a href="/admin/">admin</a></li>
+	    <li><a href="/qc/">qc</a></li>
+	    <li><a href="/flavorbase/">flavorbase</a></li>
+	</ul>
+    </ul>>
+    {% else %}
+	<a href="{{ navstep.0 }}">{{ navstep.1 }}</a> >
+    {% endif %}{% endif %}
+{% endfor %}

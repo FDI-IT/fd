@@ -1,0 +1,27 @@
+<fieldset id="formula">
+<legend>Formula</legend>
+	<form action="" method="POST">
+	{{ management_form }}
+	<table id="formula-rows" width="100%">
+		<tr>
+			<th>Ingredient number</th>
+			<th>Amount</th>
+			<th>Name</th>
+			<th>Cost</th>
+			<th>Del</th>
+		</tr>
+		{% for form, label in formula_rows %}
+		<tr>
+			<td class="number-cell">{{ form.ingredient_number.as_text }}</td>
+			<td class="amount-cell">{{ form.amount.as_text }}</td>
+			<td class="name-cell">{{ label.name }}</td>
+			<td class="cost-cell">{{ label.cost }}</td>
+			<td class="del-row"><input type="button" value="X" onclick="delete_row(this.parentNode.parentNode.rowIndex)"></td>
+		</tr>
+		{% endfor %}
+	</table>
+	<input id="add-formula-row-button" type="submit" value="Add row" />
+	<input id="formula-submit-button" type="submit" value="Submit Formula" />
+	<input id="normalize-button" type="submit" value="Normalize weight to 1000" onclick="return normalize_weight();"/>	
+	</form>
+</fieldset>

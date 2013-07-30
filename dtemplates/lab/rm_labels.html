@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div>
+{{ status_msg }}
+<form method="get" action="" id="rm_label-form">
+    {{ form.as_p }}
+    <p><input type="submit" value="Submit" /></p>
+</form>
+</div>
+
+
+
+{% endblock %}

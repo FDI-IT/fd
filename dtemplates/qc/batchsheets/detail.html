@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+
+<div id="content-right">
+	
+</div>
+
+<div id="title-left">
+	<span id="name">{{ lot.flavor }} - {{ lot.number }}</span>
+</div>
+
+<div class="batchsheet_images">
+{% for batchsheet in lot.batchsheet_set.all.reverse %}
+<img src="{{ batchsheet.large.url }}">
+{% endfor %}
+</div>
+{% endblock %}

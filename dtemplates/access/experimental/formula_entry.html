@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load blades %}
+{% block content %}
+    <div id="content-right">
+    {% blades experimental %}
+	</div>
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{experimental}}</span>
+</div>
+
+    <div id="content-main">
+		{% if status_message %}
+		<h1>{{ status_message }}</h1>
+		{% endif %}
+		
+		{% include "access/experimental/formula_form.html" %}
+    </div>
+    
+    <div>
+	<table>
+		{% for digitized_row in digitized_table %}
+		<tr>
+			{% for cell in digitized_row %}
+			<td>
+				{{ cell }}
+			</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+	</table>
+</div>
+
+</div>
+{% endblock %}

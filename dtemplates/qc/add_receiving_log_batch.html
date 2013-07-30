@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form action="" method="GET">
+	{{ addreceivinglogbatch.management_form }}
+	{{ addreceivinglogbatch.as_p }}
+	<input id="retain-submit-button" type="submit" value="Add To Receing Log" />
+    </form>
+{% endblock %}

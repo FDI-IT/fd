@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load dashboard %}
+{% block toolbar %}
+{{ block.super }}
+<a href="../add_receiving_log/" title="Add To Receiving Log"><img src="/djangomedia/images/Icons/16x16/add.png"></a>
+{% endblock toolbar %}
+
+{% block content %}
+
+    <div id="content-right">
+		<ul>
+			<li><a href="/django/qc/receiving_log/">Latest</a></li>
+		{% for month in month_list %}
+			<li><a href="/django/qc/receiving_log/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+		{% endfor %}
+		</ul>
+	</div>
+    <div id="content-main">
+    <div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+	
+    <form name="receiving_log_selections" action="/django/qc/receiving_log_print/" method="post">
+    <table class="sorttable" class="receiving_logtable" width="100%">
+    <caption><a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a></caption>	
+	<tr class="qcheaders">
+		<th width="15px">Select</th>
+	    <th >RNum</th>
+	    <th>Pin</th>
+	    <th>Vendor</th>
+	    <th>Description</th>
+	    <th>Qty Pkgs.</th>
+	    <th>Lot</th>
+		<th>PO Number</th>
+	    <th>Trucking Company</th>
+	    <th>Kosher Group</th>
+	</tr>
+	{% for receiving_log in object_list %}
+	    <tr>
+	    <td><input type="checkbox" name="receiving_log_pks" value="{{ receiving_log.pk }}" {% if checkall %}checked{% endif %}></td>
+		<td>
+			<a href="{{ receiving_log.get_admin_url }}">{{ receiving_log.r_number }}</a>
+		</td>
+		<td>{{ receiving_log.pin }}</td>
+		<td>{{ receiving_log.supplier }}</td>
+		<td>{{ receiving_log.description }}</td>
+		<td>{{ receiving_log.quantity_of_packages }} x {{ receiving_log.package_size }} {{ receiving_log.units }}</td>
+		<td>{{ receiving_log.lot }}</td>
+		<td>{{ receiving_log.po_number }}</td>
+		<td>{{ receiving_log.trucking_co }}</td>
+		<td>{{ receiving_log.kosher_group }}</td>
+	    </tr>
+	{% endfor %}
+    </table>
+	</form>
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+    </div>
+{% endblock %}

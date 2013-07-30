@@ -1,0 +1,52 @@
+<div id="flat_review_table">
+	<span class="weight_form">
+		<form class="weightform" action="foo" method="get" onsubmit="return adjust_weight(this)">
+		Adjusted Weight:
+		<input type="text" name="wf" id="adjusted_weight" value="1000">
+		<input type="submit" value="Get adjusted formula" style="display:none;"/>
+		</form>
+	</span>
+	<span class="table_action_links">
+		<A HREF="/django/access/experimental/{{ experimental.experimentalnum }}/formula_entry/">edit</A> | 
+		<A HREF="javascript:$('#flat-table').table2CSV()">spreadsheet</A> |  
+		<A href="javascript:flat_review_popup({{ experimental.flavor.number }})">batch sheet</A>
+	</span>
+	<table id="flat-table" width="100%" class="tab_data">
+	    <thead>
+	        <tr>
+	            <th align="center">PIN</th>
+	            <th align="center">N-A</th>
+	            <th align="center">Prefix</th>
+	            <th align="center">Name</th>
+	            <th align="center">Amount</th>
+	            <th align="center">Unit Cost</th>
+	            <th align="center">Relative Cost</th>
+	            <th align="center">Last Update</th>
+	        </tr>
+	    </thead>
+		{% for formula_item in experimental.flavor.formula_set.all %}
+		{% if formula_item.ingredient.is_gazinta %}
+	    <tr data-ogw="{{ formula_item.amount }}" class="flavor_tr">
+	        <td align="center"><a href="{{ formula_item.ingredient.gazinta.url }}">{{ formula_item.ingredient.id }}</a></td>
+	        <td align="center">{{ formula_item.ingredient.gazinta.natart }}</td>
+	        <td align="center">{{ formula_item.ingredient.gazinta.prefix }}-{{ formula_item.ingredient.gazinta.number }}</td>
+	        <td>{{ formula_item.ingredient.gazinta.name }}</td>
+	        <td align="center">{{ formula_item.amount }}</td>
+	        <td align="center">{{ formula_item.ingredient.gazinta.rawmaterialcost|floatformat:2 }}</td>
+	        <td align="center">{{ formula_item.relative_cost|floatformat:2 }}</td>
+	        <td align="center">{{ formula_item.ingredient.gazinta.lastspdate|date:"Y-m" }}</td>
+	    {% else %}
+	    <tr data-ogw="{{ formula_item.amount }}" class="raw_material_tr">
+	        <td align="center"><a href="{{ formula_item.ingredient.url }}">{{ formula_item.ingredient.id }}</a></td>
+	        <td align="center">{{ formula_item.ingredient.art_nati }}</td>
+	        <td align="center">{{ formula_item.ingredient.prefix }}</td>
+	        <td>{{ formula_item.ingredient.table_name }}</td>
+	        <td align="center">{{ formula_item.amount }}</td>
+	        <td align="center">{{ formula_item.ingredient.unitprice|floatformat:2 }}</td>
+	        <td align="center">{{ formula_item.relative_cost|floatformat:2 }}</td>
+	        <td align="center">{{ formula_item.ingredient.purchase_price_update|date:"Y-m" }}</td>
+	    {% endif %}	
+	    </tr>
+		{% endfor %}
+	</table>
+</div>

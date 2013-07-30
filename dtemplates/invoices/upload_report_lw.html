@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="title">
+	<div id="title-left">
+		<span id="name">Upload Invoice Report</span>
+		<span id="number"></span>
+	</div>
+	<div id="title-right">
+	</div>
+	<div id="related-links">
+	<ul>
+		
+	</ul>
+	</div>
+</div>
+
+<div id="content-main">
+<form enctype="multipart/form-data" action="/django/invoices/upload_report_lw/" method="post">
+{{form.as_p}}
+<input type="submit" value="Submit" />
+</form>
+</div>
+
+
+
+<div id="content-right">
+	
+</div>
+
+</form>
+{% endblock %}
+

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block header_right %}
+    <div id="barcode-background">
+	<div id="barcodestyle">
+	    <img src="/flavorbase/barcode/{{ flavor.id }}" />
+	</div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+	<h2>{{ flavor.prefix }}-{{flavor.number }}&nbsp;&nbsp;&nbsp;{{ flavor.name }}
+	    <a href="/admin/flavorbase/flavor/{{ flavor.id }}">
+	       <img src="../../images/Icons/edit.png" />
+	    </a>
+	</h2>
+	<table width="900px">
+	    <tr>
+		<td width="50%" class="properties2">
+		    Organoleptic properties: {{ flavor.organoleptic_properties }}</td>
+		<td width="50%" class="properties2">
+		    Appearance: {{ flavor.appearance }}</td>
+	    </tr>
+	    <tr>
+		<td class="properties">
+		    Testing Procedure: {{ flavor.testing_procedure }}</td>
+		<td class="properties">
+		    Flash point: {{ flavor.flash_point }}</td>
+	    </tr>
+	    <tr>
+		<td class="properties2">
+		    Renumber: {{ flavor.renumber }}</td>
+		<td class="properties2">
+		    Specific gravity: {{ flavor.specific_gravity }}</td>
+	    </tr>
+	    <tr>
+		<td colspan="2" class="properties">
+		    Notes: {{ flavor.notes }}</td>
+	    </tr>
+	</table>
+	<br />
+	<table width="100%">
+	    <tr class="qcheaders">
+		<th width="10%" class="sorttable_nosort">Number</th>
+		<th width="15%">Date</th>
+		<th width="10%">Lot</th>
+		<th width="10%">Status</th>
+		<th width="10%">Amount</th>
+		<th>Notes</th>
+	    </tr>
+	    {% for retain in list_items.object_list %}
+	    <tr class="{% cycle 'qcbody' 'qcbody2' %}">
+		<td>
+		    <a href="/admin/qc/retain/{{ retain.id }}">
+			{{ retain.retain }}
+		    </a>
+		</td>
+		<td>{{ retain.date }}</td>
+		<td>{{ retain.lot }}</td>
+		<td>{{ retain.status }}</td>
+		<td>{{ retain.amount }}</td>
+		<td>{{ retain.notes }}</td>
+	    </tr>
+	    {% endfor %}
+	</table>
+    </div>
+{% endblock %}

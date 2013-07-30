@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load flat_review_table %}
+{% load blades %}
+{% load related_links %}
+{% block content %}
+
+<script type="text/javascript" src="/djangomedia/js/flavor_review.js?v=24"></script>
+<script>
+jQuery(document).ready(function(){	
+	$( "#flavor-tabs" ).tabs({ 
+		cache: true,
+		spinner: '',
+		ajaxOptions: {
+			error: function(xhr, status, index, anchor) {
+				$( anchor.hash ).html(
+					"Failed to load tab."
+				);
+			}
+		}
+	});
+	$( "#flat-table" ).tablesorter({
+			headers: {
+			0: {
+				sorter: 'link-digit'
+			},
+			1: {
+				sorter: 'text'
+			},
+			2: {
+				sorter: 'text'
+			},
+			3: {
+				sorter: 'text'
+			},
+			4: {
+				sorter: 'digit'
+			},
+			5: {
+				sorter: 'digit'
+			},
+			6: {
+				sorter: 'digit'
+			},
+			7: {
+				sorter: 'shortDate'
+			}
+	}});
+});
+</script>
+
+<div id="content-right">
+	{% blades flavor %}
+</div>
+
+<div id="content-main">
+	
+<div id="title-left">
+	<span id="name">{{flavor}}</span>
+</div>
+
+{% if status_message %}
+<h1 class="status_message">{{ status_message }}</h1>
+{% endif %}
+
+<div class="product-memo"><span class="label">Memo</span>{{flavor.linked_memo|safe}}</div>
+<div class="product-memo"><span class="label">Pricing Memo</span>{{flavor.pricing_memo}}</div>
+
+<div id="flavor-tabs">
+	{% related_links flavor %}
+	
+	<input type="hidden" id="actual_adjusted_weight" value="1000">
+
+	{% flat_review_table flavor %}
+</div>
+
+</div>
+
+
+
+
+
+<form id="exportform" action="/django/access/table_to_csv" method="post" target="_blank">
+<input type="hidden" id="exportdata" name="exportdata" />
+<input type="hidden" id="flavor_number" name="flavor_number" value="{{ flavor.number }}" />
+</form>
+{% endblock %}
+

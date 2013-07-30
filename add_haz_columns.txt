@@ -1,0 +1,15 @@
+ALTER TABLE "Raw Materials"
+ADD COLUMN acute_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN skin_corrosion_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN eye_damage_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN respiratory_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN aspiration_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN asphyxiation_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN flammable_liquid_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN flamamble_solid_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN self_reactive_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN emit_flammable_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN oxidizing_liquid_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN oxidizing_solid_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN organic_peroxide_hazard varchar(50) DEFAULT '' NOT NULL,
+ADD COLUMN metal_corrosifve_hazard varchar(50) DEFAULT '' NOT NULL;

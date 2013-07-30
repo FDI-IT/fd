@@ -1,0 +1,97 @@
+from django import forms
+from django.forms.formsets import BaseFormSet
+from django.forms import widgets
+from django.db import connection
+
+from access.models import Flavor
+from newqc.models import Retain, TestCard, Lot, ProductInfo, STATUS_CHOICES, UNITS_CHOICES
+
+class AddObjectsBatch(forms.Form):
+    number_of_objects = forms.IntegerField(label="Number of objects", min_value=1)
+
+class AddRetainBatch(forms.Form):
+    number_of_retains = forms.IntegerField(label="Number of retains", min_value=1)
+    
+class AddReceivingLogBatch(forms.Form):
+    number_received = forms.IntegerField(label="Number received", min_value=1)
+
+class NewFlavorRetainForm(forms.Form):
+    retain_number = forms.IntegerField(label="", min_value=1,
+                                       widget=forms.HiddenInput)
+    flavor_number = forms.IntegerField(label="", min_value=1)
+    lot_number = forms.CharField(label="")
+    weight = forms.IntegerField(label="", min_value=0)
+    
+    template_path = 'qc/add_retains.html'
+    
+class NewReceivingLogForm(forms.Form):
+    r_number = forms.IntegerField(label="", min_value=1, widget=forms.HiddenInput)
+    pin = forms.IntegerField(label="", min_value=1)
+    supplier = forms.CharField(label="", max_length=40)
+    description = forms.CharField(label="", max_length=120)
+    quantity_of_packages = forms.DecimalField(label="",max_digits=4, decimal_places=1)
+    package_size = forms.DecimalField(label="",max_digits=6, decimal_places=3)
+    units = forms.ChoiceField(label="",choices=UNITS_CHOICES)
+    lot = forms.CharField(label="",max_length=40)
+    po_number = forms.IntegerField(label="",min_value=1)
+    trucking_co = forms.CharField(label="",max_length=40)
+    kosher_group = forms.CharField(label="",max_length=40)
+    
+    template_path = 'qc/add_receiving_log.html'
+    
+class NewRMRetainForm(forms.Form):
+    r_number = forms.IntegerField(label="R Number", min_value=1)
+    pin = forms.IntegerField(min_value=1)
+    lot = forms.CharField()
+    supplier = forms.CharField()
+    
+    template_path = 'qc/add_rm_retains.html'
+
+class ResolveRetainForm(forms.ModelForm):
+    class Meta:
+        model = Retain
+        exclude = ('retain', 'lot', 'sub_lot', 'amount', 'content_type', 'object_id', 'product')
+
+class ResolveLotForm(forms.ModelForm):
+    class Meta:
+        model = Lot
+        exclude = ('date', 'number', 'sub_lot', 'amount', 'flavor')
+    
+class ResolveTestCardForm(forms.ModelForm):
+    class Meta:
+        model = TestCard
+        exclude = ('large', 'preview', 'image_hash', 'thumbnail')
+        widgets = {
+            'notes':forms.TextInput,
+            'retain':forms.HiddenInput,
+            'status':forms.Select,
+        }
+
+class ProductInfoForm(forms.ModelForm):
+    class Meta:
+        model = ProductInfo
+        exclude = ('flavor','retain_on_file','original_card','flash_point','specific_gravity',)
+        widgets = {
+            'testing_procedure':forms.TextInput,
+            'notes':forms.TextInput,
+        }
+        
+class RetainStatusForm(forms.ModelForm):
+    
+    class Meta:
+        model = Retain
+        fields = ('status', 'notes')
+        
+class LotFilterSelectForm(forms.Form):
+    cursor = connection.cursor()
+    cursor.execute('select distinct newqc_lot.status from newqc_lot')
+    status_choices = list(STATUS_CHOICES)
+    for choice in cursor.fetchall():
+        new_choice = (choice[0],choice[0])
+        if new_choice not in STATUS_CHOICES:
+            status_choices.append(new_choice)
+    status = forms.MultipleChoiceField(
+            widget = widgets.CheckboxSelectMultiple,
+            required=False,
+            choices=status_choices
+        )

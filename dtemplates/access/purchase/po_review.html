@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load blades %}
+{% load related_links %}
+{% block content %}
+
+<script type="text/javascript" src="/djangomedia/js/po_review.js?v=24"></script>
+
+<div id="content-right">
+	{% blades po %}
+</div>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{po}}</span>
+</div>
+{% related_links po %}
+
+<div class="product-memo"><span class="label">Memo 1</span>{{po.memo}}</div>
+<div class="product-memo"><span class="label">Memo 2</span>{{po.memo2}}</div>
+<div class="content-table">
+	<table>
+		<caption>Line Items</caption>
+		<thead>
+			<th>RM PIN</th>
+			<th>RM Code</th>
+			<th>RM Name</th>
+			<th>Due Date</th>
+			<th>Quantity</th>
+			<th>Package Size</th>
+		</thead>
+		<tbody>
+		{% for poli in po.purchaseorderlineitem_set.all reversed %}
+		<tr>
+			<td>{{ poli.raw_material.id }}</td>
+			<td>{{ poli.raw_material.rawmaterialcode }}</td>
+			<td>{{ poli.raw_material.product_name }}</td>
+			<td>{{ poli.due_date }}</td>
+			<td>{{ poli.quantity }}</td>
+			<td>{{ poli.package_size }}</td>
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</div>
+</div>
+
+
+
+
+
+<form id="exportform" action="/django/access/table_to_csv" method="post" target="_blank">
+<input type="hidden" id="exportdata" name="exportdata" />
+<input type="hidden" id="flavor_number" name="flavor_number" value="{{ flavor.number }}" />
+</form>
+{% endblock %}
+

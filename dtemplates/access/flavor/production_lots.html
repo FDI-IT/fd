@@ -1,0 +1,24 @@
+<div id="production_lots">
+    <form name="lot_selections" action="/django/qc/batch_print/" method="post">
+    <table class="sorttable tab_data" width="100%">
+    	<thead>
+		<tr class="qcheaders">
+			<th width="15px">Select</th>
+		    <th>Lot Number</th>
+			<th>Date</th>
+		    <th>Amount</th>
+		    <th class="sorttable_nosort">Status</th>
+		</tr>
+		</thead>
+	{% for lot in object_list %}
+	    <tr>
+	    <td><input type="checkbox" name="flavor_numbers" value="{{ lot.number }}" {% if checkall %}checked{% endif %}></td>
+		<td><a class="lot-history-link" href="/django/qc/lots/{{ lot.pk }}/">{{ lot.number }}</a></td>
+		<td>{{ lot.date|date:"Y-m-d" }}</td>
+		<td>{{ lot.amount|floatformat:0 }}</td>
+		<td>{{ lot.status }}</td>
+	    </tr>
+	{% endfor %}
+    </table>
+	</form>
+</div>

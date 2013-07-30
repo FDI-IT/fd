@@ -1,0 +1,35 @@
+<div id="ingredient-detail">
+	<table width="100%" id="rm-by-code">
+		<caption>Raw Material Details by Raw Material Code</caption>
+		<thead>
+			<tr>
+				<th>RMC</th>
+				<th>N-A</th>
+				<th>Name</th>
+				<th>Desc</th>
+				<th>Supplier</th>
+				<th>Unit Cost</th>
+				<th>Last update</th>
+				<th>Kosher</th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for ingredient in ingredients %}
+			{% if ingredient.discontinued %}
+			<tr class="discontinued">
+			{% else %}
+			<tr class="active">
+			{% endif %}
+				<td><a href="/django/access/ingredient/{{ ingredient.rawmaterialcode }}/">{{ ingredient.rawmaterialcode }}</a></td>
+				<td>{{ ingredient.art_nati }}</td>
+				<td>{{ ingredient.prefix }} {{ ingredient.product_name }} {{ ingredient.part_name2 }}</td>
+				<td>{{ ingredient.description }}</td>
+				<td>{{ ingredient.suppliercode }}</td>
+				<td>{{ ingredient.unitprice }}</td>
+				<td>{{ ingredient.purchase_price_update|date:"Y-m" }}</td>
+				<td>{{ ingredient.kosher }}</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>	
+</div>

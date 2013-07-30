@@ -1,0 +1,18 @@
+{% extends "fdileague/base.html" %}
+{% block content %}
+<p>{{ object.firstname }} {{object.lastname}}</p>
+
+<table class="sorttable">
+<tr class="playeryearscores">
+    <th>Year</th>
+    <th>Score</th>
+</tr>
+
+{% for score in object.yearscore_set.all %}
+    <tr>
+	<td>{{ score.year }}</td>
+	<td>{{ score.score }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock %}

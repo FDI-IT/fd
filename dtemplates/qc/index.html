@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div id="content-main">
+	<form method="POST" action="/qc/">
+	{{ formset.management_form }}
+
+	    <table class="sortable" width="700px">
+		<tr class="qcheaders">
+		    <th>Retain</th>
+		    <th>Number</th>
+		    <th>Lot</th>
+		    <th>Amount</th>
+		    <th>Reference</th>
+		    <th class="sorttable_nosort">Passed</th>
+		    <th class"sorttable_nosort">Rejected</th>
+		    <th class="sorttable_nosort">Resample</th>
+		    <th class="sorttable_nosort">Hold</th>
+		    <th class="sorttable_nosort">Pending</th>
+		</tr>
+		{% for form in formset.forms %}
+		    <tr>
+			<td class="qcbody">
+			    <a href="/flavorbase/{{ form.instance.product.number }}">
+				{{ form.instance.retain }}
+			    </a>
+			</td>
+			<td class="qcbody">{{ form.instance.product.number }}</td>
+			<td class="qcbody">{{ form.instance.amount }}</td>
+			<td class="qcbody">{{ form.instance.lot }}</td>
+			<td class="qcbody">{{ form.instance.product.retains.all.1 }}</td>
+			{% comment %} 
+			    This variable will output cells for all the radio buttons.
+			    They have the class "qcradiobutton" and contain nothing but a form element.
+			{% endcomment %}
+			{{ form.status }}
+			{{ form.id }}
+		    </tr>
+		{% endfor %}
+	    </table>
+
+	    <p><input type="submit" value="Update Statuses" /></p>
+
+	</form>
+    </div>
+    <div id="content-right">
+	<p><a href="/qc/addretains/">Add retains</a></p>
+	<form method="GET" action="/qc/">
+	    {{ statusselect.as_p }}
+	    <p><input type="submit" value="Filter Retains" /></p>
+	</form>
+    </div>
+{% endblock %}

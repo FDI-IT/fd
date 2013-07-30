@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load blades %}
+{% load related_links %}
+{% load rm_history %}
+{% block content %}
+<div id="content-right">
+	{% blades highlighted_ingredient %}
+</div>
+
+<div id="content-main">
+	<div id="title-left">
+		<span id="name">{{highlighted_ingredient.id}} - {{highlighted_ingredient.art_nati}} {{ highlighted_ingredient.prefix }} {{ highlighted_ingredient.product_name }} {{ highlighted_ingredient.part_name2 }}</span>
+	</div>
+	{% related_links highlighted_ingredient %}
+	
+	<div class="product-memo"><span class="label">Memo</span>{{highlighted_ingredient.memo}}</div>
+	<div id="ingredient-detail">
+		{% if updated_flavors %}
+		<div id="flavor-price-delta" >
+		<table width="100%" class="sorttable">
+			<caption>Flavor price changes</caption>
+			<thead>
+				<tr>
+					<th title="Two-character prefix">Pf</th>
+					<th title="Flavor Number" class="{sorter: 'link-digit'}">Num</th>
+					<th title="Nat-Art Label" class="{sorter: 'text'}" width="26px">N-A</th>
+					<th>Name</th>
+					<th>Type</th>
+					<th width="60px" title="New Cost - Old Cost" class="{sorter: 'digit'}">Delta</th>
+					<th title="old Raw Material Cost" class="{sorter: 'digit'}">Old RMC</th>
+					<th title="New Raw Material Cost" class="{sorter: 'digit'}">New RMC</th>
+					<th title="Sale Price" class="{sorter: 'digit'}">Sale $</th>
+					<th title="Profit Margin" class="{sorter: 'digit'}">PM</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for f, prices in updated_flavors.items %}
+				<tr>
+					<td>{{ f.prefix }}</td>
+					<td><a href="/django/access/{{ f.number }}/">{{ f.number }}</a></td>
+					<td>{{ f.natart }}</td>
+					<td>{{ f.name }}</td>
+					<td>{{ f.label_type }}</td>
+					<td>{{ prices.2 }}</td>
+					<td>{{ prices.0 }}</td>
+					<td>{{ prices.1 }}</td>
+					<td>{{ f.unitprice }}</td>
+					<td>{{ prices.3 }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		</div>
+		{% endif %}
+
+		<form id="ingredient-pin-price-update" action="/django/access/ingredient/pin_review/{{ highlighted_ingredient.id }}/" method="post">
+			{{icu.as_p}}
+			<input type="submit" value="Update unit price">
+		</form>
+		
+		<table width="100%" id="rm-by-code">
+			<caption>Raw Material Details by Raw Material Code</caption>
+			<thead>
+				<tr>
+				{% for header in table_headers %}
+					<th>{{ header }}</th>
+				{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+			{% for ingredient in ingredients %}
+				{% if ingredient.discontinued %}
+				<tr class="discontinued">
+				{% else %}
+				<tr class="active">
+				{% endif %}
+					<td><a href="/django/access/ingredient/{{ ingredient.rawmaterialcode }}/">{{ ingredient.rawmaterialcode }}</a></td>
+					<td>{{ ingredient.art_nati }}</td>
+					<td>{{ ingredient.prefix }} {{ ingredient.product_name }} {{ ingredient.part_name2 }}</td>
+					<td>{{ ingredient.description }}</td>
+					<td>{{ ingredient.suppliercode }}</td>
+					<td>{{ ingredient.unitprice }}</td>
+					<td>{{ ingredient.purchase_price_update|date:"Y-m" }}</td>
+					<td>{{ ingredient.kosher }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>	
+	</div>
+	<div id="retain_history">
+		{% rm_history highlighted_ingredient.id %}
+	</div>
+</div>
+
+{% endblock %}
+

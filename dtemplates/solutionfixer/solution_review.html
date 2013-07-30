@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load qstring %}
+
+{% block content %}
+
+<script LANGUAGE="JavaScript">
+function getmatch( match_id ) {
+	document.matchform.base_ingredient.value = match_id;
+	jQuery.post('/django/solutionfixer/process_baserm_update', 
+		{
+			solution_id: jQuery('#solution_id').html(),
+			baserm_id: match_id
+		},
+		function (data) {
+			var my_selector = "#" + match_id;
+			jQuery("#solution-baserm").html(jQuery(my_selector).html());
+	}, 'json');
+};
+
+function verify_solution() {
+	jQuery.post('/django/solutionfixer/process_status_update', 
+		{
+			solution_id: jQuery('#solution_id').html(),
+			status_id: 3
+		},
+		function (data) {
+			if (data.validation_message === undefined) {jQuery("#status-message").html("");
+				window.location = "/django/solutionfixer";
+			} else {
+				jQuery("#status-message").html("<h1>" + data.validation_message + "</h1>");
+				jQuery("#status-form input[name=status]:eq(0)").attr('checked','checked');
+				jQuery("#solution-status").html("unverified");
+			}
+	}, 'json');
+};
+	
+function flag_solution(){
+	jQuery.post('/django/solutionfixer/process_status_update', 
+		{
+			solution_id: jQuery('#solution_id').html(),
+			status_id: 2
+		},
+		function (data) {
+			if (data.validation_message === undefined) {jQuery("#status-message").html("");
+				window.location = "/django/solutionfixer";
+			} else {
+				jQuery("#status-message").html("<h1>" + data.validation_message + "</h1>");
+				jQuery("#status-form input[name=status]:eq(0)").attr('checked','checked');
+				jQuery("#solution-status").html("unverified");
+			}
+	}, 'json');
+};
+
+function unlist_solution(){
+	jQuery.post('/django/solutionfixer/process_status_update', 
+		{
+			solution_id: jQuery('#solution_id').html(),
+			status_id: 4
+		},
+		function (data) {
+			if (data.validation_message === undefined) {jQuery("#status-message").html("");
+				window.location = "/django/solutionfixer";
+			} else {
+				jQuery("#status-message").html("<h1>" + data.validation_message + "</h1>");
+				jQuery("#status-form input[name=status]:eq(0)").attr('checked','checked');
+				jQuery("#solution-status").html("unverified");
+			}
+	}, 'json');
+};
+
+</script>
+
+<form id="matchform" name="matchform" method="post" action="{{ request.get_full_path }}">
+
+<div id="content-right">
+<INPUT TYPE="button" NAME="solution_flag" Value="Flag" onClick="flag_solution();"><br/>
+<INPUT TYPE="button" NAME="solution_verify" Value="Verify" onClick="verify_solution();">
+<INPUT TYPE="button" NAME="solution_verify" Value="Not a solution" onClick="unlist_solution();">
+</div>
+
+<div id="content-main">
+	
+<div id="status-message">
+{% if status_message %}
+		<h1>{{ status_message }}</h1>
+{% endif %}
+</div>
+
+<span id="solution_id" style="display:none;">{{ solution.id }}</span>
+
+<h3>
+	#{{ solution.ingredient.id }} -
+	{{ solution.ingredient.art_nati }}
+	{{ solution.ingredient.prefix }}
+	{{ solution.ingredient.product_name }}
+	{{ solution.ingredient.part_name2 }}
+	{{ solution.ingredient.description }}
+</h3>
+
+<input type="hidden" name="base_ingredient" />
+
+<fieldset>
+	<legend>Solution Properties:</legend>
+	{{ solvent_form.as_p}}
+	{{ percentage_form.as_p }}
+	
+	<p>
+	<span>Base Raw Material:</span>
+	<span id="solution-baserm">{{ solution.my_base }}</span>
+	</p>
+	
+	<p>
+	<span>Status:</span>
+	<span id="solution-status">{{ solution.status.status_name }}</span>
+	</p>
+</fieldset>
+</form><br />
+
+<div id="solution-ingredient-autocomplete">
+	<span>Raw Material Search:</span>
+	<span><input type="text" /></span>
+</div>
+
+
+<div id="possible-raw-materials">
+	<p>
+Possible base raw materials:
+<ul>
+{% for match_count, match_list in sorted_matches %}
+{% for match in match_list %}
+<li><a href="javascript:getmatch({{ match.id }})" id="{{ match.id }}">{{ match }}</a></li>
+{% endfor %}
+{% endfor %}
+
+</ul>
+</p>
+</div>
+{% endblock %}

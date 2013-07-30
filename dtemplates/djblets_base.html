@@ -1,0 +1,100 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+
+    {# this part includes some javascript, css, etc #}
+    {% include "djblets_htmlhead.html" %}
+
+    <title>
+    	{% if window_title %}
+			{{ window_title }}
+		{% else %}
+			Flavor Dynamics Intranet
+		{% endif %}
+    </title>
+
+</head>
+
+<body>
+
+{# every other div except this one is extendable with blocks #}
+<div id="welcome">
+
+    {# header includes the logo, title, navigation, etc #}
+	{% block header %}
+	{% include "header.html" %}
+	{% endblock %}
+
+    {# the main contents of the page #}
+    <div id="main">
+    {% block main %}
+    	<div id="content">
+		    <div id="content-title">
+		    	<div id="toolbar">
+		    	{% block toolbar %}
+		    	{% if help_link %}
+		    		{% ifnotequal help_link "" %} 
+		    			<a href="{{ help_link }}"><img src="/djangomedia/images/Icons/16x16/help.png"></a>
+		    		{% endifnotequal %}
+		    	{% endif %}
+				{% if accept_link %}
+		    		{% ifnotequal accept_link "" %} 
+		    			<a href="{{ accept_link }}" title="{{accept_link_alt}}"><img src="/djangomedia/images/Icons/16x16/accept.png"></a>
+		    		{% endifnotequal %}
+		    	{% endif %}
+				{% if del_link %}
+		    		{% ifnotequal del_link "" %} 
+		    			<a href="{{ del_link }}" title="{{ del_link_alt}}"><img src="/djangomedia/images/Icons/16x16/delete.png"></a>
+		    		{% endifnotequal %}
+				{% endif %}
+				{% if repeat_link %}
+		    		{% ifnotequal repeat_link "" %} 
+		    			<a href="{{ repeat_link }}" title="{{repeat_link_alt}}"><img src="/djangomedia/images/Icons/16x16/repeat.png"></a>
+		    		{% endifnotequal %}
+		    	{% endif %}
+				{% if pause_link %}
+		    		{% ifnotequal pause_link "" %} 
+		    			<a href="{{ pause_link }}" title="{{pause_link_alt}}"><img src="/djangomedia/images/Icons/16x16/pause.png"></a>
+		    		{% endifnotequal %}
+		    	{% endif %}
+				{% if print_link %}
+		    		{% ifnotequal print_link "" %} 
+		    			<a href="{{ print_link }}"><img src="/djangomedia/images/Icons/16x16/print.png"></a>
+		    		{% endifnotequal %}
+		    	{% endif %}
+				{% endblock toolbar %}
+				{% if page_title %}
+		    		{% ifnotequal page_title "" %}
+		    			<h2>{{ page_title }}</h2>	
+		    		{% endifnotequal %}
+				{% endif %}
+				</div>
+			</div>			
+			
+		    {% block content %}
+		    {% endblock content%}
+		  
+		</div>
+	
+		<div id="footer">
+	    {% block footer %}
+	    {% endblock footer %}
+	</div>
+
+	{% endblock main %}
+    </div>
+
+    {# an extra div just in case some content is needed flush to the bottom of the entire page #}
+    <div id="bottom">
+	{% block bottom %}
+	{% endblock %}
+    </div>
+
+</div>
+
+</body>
+
+</html>

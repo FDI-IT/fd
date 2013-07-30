@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load dashboard %}
+{% block toolbar %}
+{{ block.super }}
+<a href="../add_retains/" title="Add Retains"><img src="/djangomedia/images/Icons/16x16/add.png"></a>
+{% endblock toolbar %}
+
+{% block content %}
+    <div id="content-right">
+    
+	</div>
+    <div id="content-main">
+    <div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+
+    <table class="sorttable"width="100%">
+    	
+	<tr class="qcheaders">
+		<th>A</th>
+	    <th>B</th>
+	    <th>Score</th>
+	</tr>
+	{% for jil in object_list %}
+	    <tr>
+		<td><a href="/django/access/{{jil.a}}">{{jil.a}}</a></td>
+		<td><a href="/django/access/{{jil.b}}">{{jil.b}}</a></td>
+		<td>{{jil.score}}</td>
+	    </tr>
+	{% endfor %}
+    </table>
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+    </div>
+{% endblock %}

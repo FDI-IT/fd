@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load blades %}
+{% block content %}
+
+
+<div id="content-right">
+	{% blades experimental.flavor %}
+</div>
+<div id="content-main">
+<div id="title-left">
+	<span id="name"><a href="{{experimental.get_absolute_url}}">{{ experimental }}</a></span>
+</div>
+	{% if status_message %}
+		<h1>{{ status_message }}</h1>
+		{% endif %}
+		
+		
+	
+	
+	<div class="product-memo"><span class="label">Memo</span>{{ experimental.memo }}</div>
+<div class="product-memo"><span class="label">Mixing Instructions</span>{{ experimental.mixing_instructions }}</div>
+	
+	
+	<form id="new-experimental-form" action="/django/access/experimental/{{experimental.experimentalnum}}/approve/" method="post">
+		{{ form.errors}}
+		{{form.non_form_errors}}
+		{{form.as_p}}
+		<br><p style="float:left;clear:both;"><input id="submit-button" type="submit" value="Submit" />
+	</form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+	<!-- this is to work around django formset processing -->
+	<script type="text/javascript">
+		jQuery(document).ready( function() {
+			jQuery('td.r-number-cell').each(function(index) {
+				jQuery(this).append(jQuery(this).find('input').val());
+			});	
+		});
+	</script>
+	
+    <form action="" method="POST">
+	{{ formset.management_form }}
+	
+	<table id="r-rows" width="100%">
+		<thead>
+			<tr>
+				<th width="15%">R number</th>
+				<th>Pin</th>
+			    <th>Vendor</th>
+			    <th>Description</th>
+			    <th>Qty of Pkgs</th>
+			    <th>Package Size</th>
+			    <th>Units</th>
+			    <th>Lot</th>
+				<th>PO Number</th>
+			    <th>Trucking Company</th>
+			    <th>Kosher Group</th>
+			</tr>
+		</thead>
+		<tbody>
+	    {% for form in formset.forms %}
+			<tr>
+				<td class="r-number-cell">{{ form.r_number }}</td>
+				<td>{{ form.pin }}</td>
+				<td>{{ form.supplier }}</td>
+				<td>{{ form.description }}</td>
+				<td>{{ form.quantity_of_packages }}</td>
+				<td>{{ form.package_size }}</td>
+				<td>{{ form.units }}</td>
+				<td>{{ form.lot }}</td>
+				<td>{{ form.po_number }}</td>
+				<td>{{ form.trucking_co }}</td>
+				<td>{{ form.kosher_group }}</td>
+			</tr>
+	    {% endfor %}
+		</tbody>
+	</table>
+	<input id="receiving-log-submit-button" type="submit" value="Submit Receiving Log" />
+    </form>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="title">
+	<div id="title-left">
+		<span id="name">Invoice Summary</span>
+		<span id="number"></span>
+	</div>
+	<div id="title-right">
+	</div>
+	<div id="related-links">
+	<ul>
+		
+	</ul>
+	</div>
+</div>
+
+<div id="content-main">
+<table class="sorttable">
+	<caption>Invoice Summary - Total Raw Material Cost: ${{ total_rmc }}</caption>
+	<thead>
+		<tr>
+			<th>Flavor</th>
+			<th>Amount Ordered</th>
+			<th>Unit Raw Material Cost</th>
+			<th>Relative Raw Material Cost</th>
+		</tr>
+	</thead>
+	{% for flavor, summary in flavors_ordered.iteritems %}
+	<tr>
+		<td><a href="/django/access/{{ flavor.number }}/">{{flavor.number}}</a></td>
+		<td>{{summary.0}}</td>
+		<td>{{summary.1}}</td>
+		<td>{{summary.2}}</td>
+	</tr>
+	{% endfor %}
+</table>
+</table>
+</div>
+
+
+
+<div id="content-right">
+	
+</div>
+
+</form>
+{% endblock %}
+

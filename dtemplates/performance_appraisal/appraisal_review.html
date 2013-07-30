@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+	<style>
+		body {
+			font-size:12px;
+		}
+		#container {
+			position:relative;
+		}
+		#header {
+			height:55px;
+		}
+		#logo {
+			position:absolute;
+		}
+		table.mini {
+			font-size:10px;
+		}
+		
+		div.relabs-container {
+			position:relative;
+			overflow:hidden;
+		}
+		table.bordered {
+			border-color:gray;
+			border-style:solid; 
+			border-width:1px;
+			border-collapse:collapse;
+		}
+		table.bordered td {
+			border-color:gray;
+			border-style:solid; 
+			border-width:1px;
+			padding:2px 8px 2px 8px;
+		}
+		table.bordered th {
+			font-weight:normal;
+		}
+		table.nested {
+			border:none;
+			border-collapse:collapse;
+		}
+		table.nested td {
+			padding: 2px 6px 2px 6px;
+		}
+		
+		td.number-column {
+			text-align:center;
+		}
+		div.left {
+			margin-right:160px;
+		}
+		div.left table {
+			width:100%;
+		}
+		*.right {
+			position:absolute;
+			top:0;
+			right:0;
+		}
+		table.mini td {
+			padding:1px 8px 1px 8px;
+		}
+		*.text-right {
+			float:right;
+		}
+	</style>
+	
+
+    <title>
+    	{{ appraisal }}
+    </title>
+
+</head>
+
+<body>
+<div id="container">
+<div id="header" class="relabs-container">
+	<h2 class="right">Flavor Dynamics, Inc. Performance Appraisal</h2>
+	<img id="logo" src="/djangomedia/images/logo.png">
+</div>
+
+<div id="name-section" class="relabs-container">
+	<div class="left">
+		<table class="bordered">
+			<tr>
+				<td width="100px" class="row-title">Employee Name</td> 
+				<td>{{ appraisal.employee_name }}</td>
+			</tr>
+			<tr>
+				<td class="row-title">Department</td> 
+				<td>{{ appraisal.department }}</td>
+			</tr>
+			<tr>
+				<td class="row-title">Title</td> 
+				<td>{{ appraisal.title }}</td>
+			</tr>
+		</table>
+		<div style="height:10px;"></div>
+		<table class="bordered">
+			<tr>
+				<td width="100px" class="row-title">Reason for Review</td> 
+				<td>{{ appraisal.reason_for_review }}</td>
+			</tr>
+			<tr>
+				<td class="row-title">Period Covered</td> 
+				<td>{{ appraisal.period_start }} to {{ appraisal.period_end }}</td>
+			</tr>
+		</table>
+	</div>
+	
+	<div class="right">
+		<table class="mini bordered">
+			<tr>
+				<td>Rating</td>
+				<td>Number</td>
+			</tr>
+			{% for rating in rating_choices %}
+			<tr>
+				<td>{{ rating.1 }}</td>
+				<td class="number-column">{{ rating.0 }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+</div>
+<div style="height:2px;"></div>
+<div id="comment-section" class="relabs-container">
+	<table width="100%" class="bordered">
+		<thead>
+		<tr>
+			<th width="200x">
+				AREA
+			</th>
+			<th width="25px">
+				RATING
+			</th>
+			<th>
+				COMMENTS
+			</th>
+		</tr>
+		</thead>
+		<tbody>
+		{% autoescape off %}
+		{% for row_data in appraisal_table %}
+		<tr>
+			<td>
+				{{ row_data.0 }}
+			</td>
+			<td class="number-column">
+				{{ row_data.1 }}
+			</td>
+			<td>
+				{{ row_data.2 }}
+			</td>
+		</tr>
+		{% endfor %}
+		{% endautoescape %}
+		<tr>
+			<td>
+				<b>Additional comments</b>
+			</td>
+			<td style="text-align:center">
+				n/a
+			</td>
+			<td>
+				{{ appraisal.additional_comments }}
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>TOTAL POINTS</b>
+			</td>
+			<td style="text-align:center">
+				{{ appraisal.get_score }}
+			</td>
+			<td style="padding:4px;">
+				<table width="100%" class="nested mini">
+					<tr>
+						<td>Unsatisfactory<span class="text-right">11-21 pts</span></td>
+						<td>Good<span class="text-right">44-54 pts</span></td>
+					</tr>
+					<tr>
+						<td>Improvement Needed<span class="text-right">22-32 pts</span></td>
+						<td>Very Good<span class="text-right">54-65 pts</span></td>
+					</tr>
+					<tr>
+						<td>Adequate<span class="text-right">33-43 pts</span></td>
+						<td>Excellent<span class="text-right">66 pts</span></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+</div>
+</body>
+</html>

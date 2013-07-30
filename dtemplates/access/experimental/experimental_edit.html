@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style type="text/css"><!--
+.errorlist {
+display:none;
+}
+--></style>
+
+<div id="title">
+	
+</div>
+
+<div id="content-main">
+	{% if status_message %}
+		<h1>{{ status_message }}</h1>
+		{% endif %}
+	<form id="new-experimental-form" action="/django/access/experimental/{{experimentalform.instance.experimentalnum}}/edit/" method="post">
+		{{ management_form }}
+		{{ experimentalform.errors}}
+		{{experimentalform.non_form_errors}}
+		{% for fieldset in experimentalform.iter_fieldsets %}
+			<div id="{{ fieldset.extra_content.divid }}">
+				<fieldset>
+					<legend>{{ fieldset.extra_content.legend }}</legend>
+					{% for field in fieldset %}
+					<p><label>{{ field.label }}</label>{{field}}{{ field.errors }}</p>
+					
+					{% endfor %}
+				</fieldset>
+			</div>
+		{% endfor %}
+		<p align="right"><input id="submit-button" type="submit" value="Submit Changes" />
+	</form>
+	<div>
+		<table>
+			{% for digitized_row in digitized_table %}
+			<tr>
+				{% for cell in digitized_row %}
+				<td>
+					{{ cell }}
+				</td>
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+	
+</div>
+
+<div id="content-right">
+	
+</div>
+{% endblock %}

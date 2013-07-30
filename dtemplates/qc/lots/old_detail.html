@@ -1,0 +1,86 @@
+
+
+{% extends "base.html" %}
+{% load resolve_testcards %}
+
+{% block htmlhead %}
+{{ block.super }}
+<script type="text/javascript" src="/djangomedia/js/resolve_testcards.js?v=24"></script>
+{% endblock  %}
+
+{% block content %}
+
+
+
+<div id="content-right">
+	<input type="submit" value="Submit" style="width:100%" id="lot_detail_submit">
+</div>
+
+<div id="title-left">
+	<span id="name"><a href="{{ form.instance.flavor.get_absolute_url }}">{{ form.instance.flavor }}</a></span>
+</div>
+<div class="lot_detail">
+	{#
+	<!-- Form to edit organoleptics and such. Not really fitting on this page anymore
+		as it's mostly used as a lot overview rather than lot editor
+	<div class="product_info_form">
+		{{product_info_form.non_field_errors}}
+		{{product_info_form.as_p}}
+		<input type="hidden" name="productinfo_pk" value="{{ form.instance.flavor.productinfo.pk }}">
+	</div>
+	-->
+	#}
+	<div class="batchsheet_images">
+		{% for bs in form.instance.batchsheet_set.all %}
+		<img src="{{ bs.large.url }}">
+	    {% endfor %}  
+	</div>
+	
+	<div class="float-container">
+		{% for retain in form.instance.retain_set.all %}
+		<div id="retain__{{retain.pk}}" class="parent_object_detail float-container">
+			<div class="parent_info">
+				<ul>
+					<li>{{ retain }}</li>
+					<li>{{ retain.date }}</li>
+					<li>{{ retain.status }}</li>
+				</ul>
+			</div>
+			{% for testcard in retain.testcard_set.all %}
+			<div id="testcard__{{testcard.pk}}" class="child_object_detail testcard_form_container">
+					<img src="{{ testcard_form.instance.large.url }}" align="right" class="testcard_resolve_image" >
+					<img src="{{ testcard_form.instance.large.url }}" class="hidden_image">
+			</div>
+			{% endfor %}
+		</div>
+		{% endfor %}
+	</div>
+	FFFFFFFFFFFFFfff
+
+	{#	
+	<!--Old verison of QC sheet review and edit -- no longer used because this
+		is an overview page now.
+	<div class="float-container">
+		{% for retain in form.instance.retain_set.all %}
+		<div id="retain__{{retain.pk}}" class="parent_object_detail float-container">
+			<div class="parent_info">
+				<ul>
+					<li>{{ retain }}</li>
+					<li>{{ retain.date }}</li>
+					<li>{{ retain.status }}</li>
+				</ul>
+			</div>
+			{% for testcard in retain.testcard_set.all %}
+			<div id="testcard__{{testcard.pk}}" class="child_object_detail testcard_form_container">
+					{% testcard_form testcard "current_loaded" %}	
+			</div>
+			{% endfor %}
+		</div>
+		{% endfor %}
+		
+	</div>
+	-->
+	#}
+</div>
+
+{% endblock %}

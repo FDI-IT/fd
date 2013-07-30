@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="content-right">
+		<ul>
+		{% for status in status_list %}
+			<li><a href="/django/qc/lots/{{ status }}/">{{ status }}</a></li>
+		{% endfor %}
+		</ul>
+		<ul>
+			<li><a href="/django/qc/lots/">Latest</a></li>
+		{% for month in month_list %}
+			<li><a href="/django/qc/lots/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+		{% endfor %}
+		</ul>
+</div>
+    <div id="content-main">
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+    <form name="lot_selections" action="/django/qc/batch_print/" method="post">
+    <table class="sorttable" width="100%">
+	<tr class="qcheaders">
+		<th width="15px">Select</th>
+	    <th>Lot Number</th>
+	    <th>Flavor</th>
+		<th>Date</th>
+	    <th>Amount</th>
+	    <th class="sorttable_nosort">Status</th>
+	</tr>
+	{% for lot in object_list %}
+	    <tr>
+	    <td><input type="checkbox" name="flavor_numbers" value="{{ lot.number }}" {% if checkall %}checked{% endif %}></td>
+		<td><a class="lot-history-link" href="/django/qc/lots/{{ lot.pk }}/">{{ lot.number }}</a></td>
+		<td><a href="{{ lot.flavor.get_absolute_url }}">{{ lot.flavor }}</a></td>
+		<td>{{ lot.date|date:"Y-m-d" }}</td>
+		<td>{{ lot.amount|floatformat:0 }}</td>
+		<td>{{ lot.status }}</td>
+	    </tr>
+	{% endfor %}
+    </table>
+	</form>
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+    </div>
+{% endblock %}

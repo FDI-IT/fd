@@ -1,0 +1,212 @@
+{% load humanize %}
+
+<table class="outer">
+	<thead>
+		<tr>
+			<th>
+				<span class="section_span" id="titleleft">
+					{{ flavor }}<br>
+					<span class="sub_heading">
+					<span class="section_title">Amount:</span> {{ batch_amount|floatformat:3 }} lbs, <span class="section_title">No. of ingredients:</span> {{ flavor.formula_set.all.count }}<br>
+					<span class="section_title">Yield:</span> {{ flavor.yield_field }}%
+					</span>
+				</span>
+				{% if lot_number %}
+				<span class="section_span" id="titleright">
+					<img src="/django/batchsheet/barcode/{{ lot_number }}/" align="top" />
+					<span>
+						Lot number<br>
+						{{ lot_number }}
+					</span>
+				</span>
+				{% endif %}
+				<span class="section_span" id="titlecenter">{% now "D d-M-y" %}</span>
+			</th>
+		</tr>
+	</thead>
+	<tfoot>
+	</tfoot>
+	<tbody>
+		<tr>
+			<td>
+				<table id="formula">
+					<thead>
+						<tr>
+							<th width="4%"><img class="sort_img" src="/djangomedia/images/sort.gif"></th>
+							<th width="4%"><img class="sort_img" src="/djangomedia/images/sort.gif"></th>
+							<th><img class="sort_img" src="/djangomedia/images/sort.gif"></th>
+							<th width="7%"><img class="sort_img" src="/djangomedia/images/sort.gif">Batch</th>
+							<th width="10%"><img class="sort_img" src="/djangomedia/images/sort.gif">Grams</th>
+							<th width="17%" colspan="5">Added</th>
+						</tr>
+						<tr>
+							<th>PIN</th>
+							<th>NA</th>
+							<th>Product Name</th>
+							<th>Amount</th>
+							<th>equivalent</th>
+							<th>1</th>
+							<th>2</th>
+							<th>3</th>
+							<th>4</th>
+							<th>5</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for formula_item in weighted_formula_set %}
+						<tr>
+							<td class="abbrev">{{ formula_item.ingredient.id }}</td>
+							<td class="abbrev">{{ formula_item.ingredient.art_nati }}</td>
+                                                        {% if formula_item.ingredient.sub_flavor %}
+							<td><a href="/django/batchsheet/?flavor_number={{ formula_item.ingredient.sub_flavor.number }}&batch_amount={{ formula_item.amount|floatformat:2 }}" target="_blank">
+								<span class="ingredient-name">{{ formula_item.ingredient.prefix }} {{ formula_item.ingredient.product_name }}</span>
+								<span class="ingredient-name-2">{{ formula_item.ingredient.part_name2 }}</span></a>
+								<span class="sensitive">{{ formula_item.ingredient.microsensitive }}</span>
+							</td>
+                                                        {% else %}
+							<td>
+								<span class="ingredient-name">{{ formula_item.ingredient.prefix }} {{ formula_item.ingredient.product_name }}</span>
+								<span class="ingredient-name-2">{{ formula_item.ingredient.part_name2 }}</span>
+								<span class="sensitive">{{ formula_item.ingredient.microsensitive }}</span>
+							</td>
+                                                        {% endif %}
+							<td class="numerical">{{ formula_item.amount|floatformat:2 }}</td>
+							<td class="numerical">{{ formula_item.totalweight|floatformat:2 }}</td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						{% endfor %}		
+					</tbody>
+					<tfoot>
+						<tr>
+							<td colspan="3"></td>
+							<td colspan="2"><span class="section_title">Batch Weight:<br>{{batch_amount|floatformat:3}} lbs.</span> </td>
+							<td colspan="5"></td>
+						</tr>
+					</tfoot>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td colspan=10 id="last_section">
+				<table id="batch_sheet_memo" width=100%>
+					<tr>
+						<td>
+							<div id="memorow">
+								<div class="container">
+									<div class="content">
+										<div class="left">
+											<span class="section_title">Compounder(s)</span><br>
+											__________________<br>
+											__________________<br>
+											__________________
+										</div>
+										
+										<div class="main">
+											<span class="section_title">Memo:</span><br>
+											{{ flavor.productmemo }}
+										</div>
+									</div>
+								</div>
+								<div class="sidebar">
+									<span class="section_title">Flash point:</span>
+									{% if flavor.flashpoint %}
+										{{ flavor.flashpoint }}
+									{% else %}
+										UNAVAILABLE
+									{% endif %}
+								</div>
+							</div>
+						</td>	
+					</tr>
+					<tr>
+						<td>
+							<div id="checklistrow">
+								<div class="container">
+									<div class="content">
+										<div class="left">
+											<span class="section_title">Allergens:</span> {{ flavor.allergen }}
+											{% if flavor.crustacean %}
+												CRUSTACEANS
+											{% else %}
+											{% endif %}
+											{% if flavor.eggs %}
+												EGGS
+											{% else %}
+											{% endif %}
+											{% if flavor.fish %}
+												FISH
+											{% else %}
+											{% endif %}
+											{% if flavor.milk %}
+												DAIRY
+											{% else %}
+											{% endif %}
+											{% if flavor.peanuts %}
+												PEANUTS
+											{% else %}
+											{% endif %}
+											{% if flavor.soybeans %}
+												SOYBEANS
+											{% else %}
+											{% endif %}
+											{% if flavor.treenuts %}
+												TREENUTS
+											{% else %}
+											{% endif %}
+											{% if flavor.wheat %}
+												WHEAT
+											{% else %}
+											{% endif %}
+											{% if flavor.sulfites %}
+												SULFITES
+											{% else %}
+											{% endif %}
+										</div>
+										<div class="main">
+											<span class="section_title">Micro test:</span> {{ flavor.microtest }}
+										</div>
+									</div>
+								</div>
+								<div class="sidebar">
+									{% if flavor.ccp1 %}
+										Sieve CCP 1 Recorded: [ ]<br>
+									{% else %}
+									{% endif %}
+									{% if flavor.ccp2 %}
+										Allergen Cleaning CCP 2 Recorded: [ ]<br>
+									{% else %}
+									{% endif %}
+									{% if flavor.ccp4 %}
+										Label Application CCP 4 Recorded: [ ]<br>
+									{% else %}
+									{% endif %}
+									{% if flavor.ccp5 %}
+										Non Detect GMO CP 5 Recorded: [ ]<br>
+									{% else %}
+									{% endif %}
+									{% if flavor.ccp6 %}
+										Thermal Kill Step CCP 6 Recorded: [ ]<br>
+									{% else %}
+									{% endif %}
+								</div>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td id="last_section">
+							Before the batch is begun, all utensils and equipment have been<br>
+							inspected for potential contamination by allergens by visual inspection.<br>
+							All product has been transferred from wooden to plastic pallets, and all<br>
+							labels and boxes have been counted.<br><br>
+							<span class="section_title">Signed:</span> _______________________________________ <span class="section_title">Date:</span> ____________________
+						</td>
+					</tr>
+				</table>	
+			</td>
+		</tr>	
+	</tbody>
+</table>

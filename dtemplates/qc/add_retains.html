@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<script type="text/javascript">
+		jQuery(document).ready( function() {
+			jQuery('td.retain-number-cell').each(function(index) {
+				jQuery(this).append(jQuery(this).find('input').val());
+			});	
+		});
+		
+	</script>
+	
+	<!--
+    {{ formset.non_form_errors }}
+	{{ formset.errors }}
+	-->
+	
+    <form action="" method="POST">
+	{{ formset.management_form }}
+	
+	<table id="retain-rows" width="100%">
+		<thead>
+			<tr>
+				<th width="15%">Retain number</th>
+				<th>Flavor number</th>
+				<th>Lot number</th>
+				<th>Weight</th>
+			</tr>
+		</thead>
+		<tbody>
+	    {% for form in formset.forms %}
+			<tr>
+				<td class="retain-number-cell">{{ form.retain_number }}{{form.retain_number.initial }}</td>
+				<td class="number-cell">{{ form.flavor_number }}
+					</td>
+				<td class="lot-cell">{{ form.lot_number }}</td>
+				<td class="weight-cell">{{ form.weight }}</td>
+			</tr>
+	    {% endfor %}
+		</tbody>
+	</table>
+	<input id="retain-submit-button" type="submit" value="Submit Retains" />
+    </form>
+{% endblock %}

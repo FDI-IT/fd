@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Experimentals By Customer</h2>
+
+<table width="100%">
+	<thead>
+		<tr>
+			<th>Customer</th>
+			<th>Number of experimentals</th>
+		</tr>
+	</thead>
+	<tfoot>
+	</tfoot>
+	<tbody>
+		{% for obj in queryset %}
+		
+		<tr>
+			<td><a href="/django/lab/experimentals_by_customer/{{obj.customer}}/">{{ obj.customer }}</a></td>
+			<td><a href="/django/lab/experimentals_by_customer/{{obj.customer}}/">{{ obj.customer__count }}</a></td>
+		</tr>
+		</a>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

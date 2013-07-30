@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load related_links %}
+{% block content %}
+
+<script type="text/javascript" src="/djangomedia/js/flavor_review.js?v=24"></script>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{experimental}} -- <a href="/django/access/experimental/{{experimental.experimentalnum}}/edit/">edit</a></span>
+</div>
+
+{% if status_message %}
+<h1 class="status_message">{{ status_message }}</h1>
+{% endif %}
+
+<div class="product-memo"><span class="label">Memo</span>{{ experimental.memo }}</div>
+<div class="product-memo"><span class="label">Mixing Instructions</span>{{ experimental.mixing_instructions }}</div>
+
+<p>
+	<form action="/django/access/experimental/{{experimental.experimentalnum}}/add_formula/" method="POST">
+	<input type="submit" value="Add Formula">
+	</form>
+</p>
+<div>
+	<table>
+		{% for digitized_row in digitized_table %}
+		<tr>
+			{% for cell in digitized_row %}
+			<td>
+				{{ cell }}
+			</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+	</table>
+</div>
+
+<div id="experimental-detail">
+	<div>
+	<ul>
+		{% if experimental.retain_present %}
+		<li>
+			Retain Number: {{ experimental.retain_number }}
+		</li>
+		{% else %}
+		<li>
+			NO RETAIN
+		</li>
+		{% endif %}
+		<li>
+			Customer: {{ experimental.customer }}
+		</li>
+		<li>
+			Usage level: {{ experimental.usagelevel }}
+		</li>
+		<li>
+			Specific Gravity: {{ experimental.spg }}
+		</li>
+		<li>
+			Flash Point: {{ experimental.flash }}
+		</li>
+		<li>Green Book Number: {{ experimental.product_number }}
+		</li>
+	</ul>
+	</div>
+	<div>
+	<form class="readonlyform">
+		<div id="leftfieldsets">
+		<fieldset>
+			<legend>Type</legend>
+			<input name="liquid" type="checkbox" onclick="return false" {% if experimental.liquid %}checked{% endif %}>Liquid<br>
+			<input name="dry" type="checkbox" onclick="return false" {% if experimental.dry %}checked{% endif %}>Dry<br>
+			<input name="spray_dried" type="checkbox" onclick="return false" {% if experimental.spray_dried %}checked{% endif %}>Spray Dried<br>
+			<input name="concentrate" type="checkbox" onclick="return false" {% if experimental.concentrate %}checked{% endif %}>Concentrate<br>
+			<input name="oilsoluble" type="checkbox" onclick="return false" {% if experimental.oilsoluble %}checked{% endif %}>Oil Soluble<br>
+		</fieldset>
+		<fieldset>
+			<legend>Label</legend>
+			<input name="na" type="checkbox" onclick="return false" {% if experimental.na %}checked{% endif %}>N/A<br>
+			<input name="natural" type="checkbox" onclick="return false" {% if experimental.natural %}checked{% endif %}>Natural<br>
+			<input name="organic" type="checkbox" onclick="return false" {% if experimental.organic %}checked{% endif %}>Organic<br>
+			<input name="wonf" type="checkbox" onclick="return false" {% if experimental.wonf %}checked{% endif %}>WONF<br>
+			
+		</fieldset>
+		<fieldset>
+			<legend>Marketing</legend>
+			<input name="duplication" type="checkbox" onclick="return false" {% if experimental.duplication %}checked{% endif %}>Duplication<br>
+			<input name="promotable" type="checkbox" onclick="return false" {% if experimental.promotable %}checked{% endif %}>Promotable<br>
+			<input name="holiday" type="checkbox" onclick="return false" {% if experimental.holiday %}checked{% endif %}>Holiday<br>
+			<input name="chef_assist" type="checkbox" onclick="return false" {% if experimental.chef_assist %}checked{% endif %}>Chef Assist<br>
+			<input name="flavor_coat" type="checkbox" onclick="return false" {% if experimental.flavor_coat %}checked{% endif %}>Flavor Coat<br>
+		</fieldset>
+		</div>
+		<div id="rightfieldsets">
+		<fieldset class="floater">
+			<legend>Category</legend>
+			<input name="coffee" type="checkbox" onclick="return false" {% if experimental.coffee %}checked{% endif %}>Coffee<br>
+			<input name="tea" type="checkbox" onclick="return false" {% if experimental.tea %}checked{% endif %}>Tea<br>
+			<input name="fruit" type="checkbox" onclick="return false" {% if experimental.fruit %}checked{% endif %}>Fruit<br>
+			<input name="sweet" type="checkbox" onclick="return false" {% if experimental.sweet %}checked{% endif %}>Sweet<br>
+			<input name="nutraceutical" type="checkbox" onclick="return false" {% if experimental.nutraceutical %}checked{% endif %}>Nutraceutical<br>
+			<input name="personal_care" type="checkbox" onclick="return false" {% if experimental.personal_care %}checked{% endif %}>Personal Care<br>
+			<input name="meat_and_savory" type="checkbox" onclick="return false" {% if experimental.meat_and_savory %}checked{% endif %}>Meat and Savory<br>
+			<input name="beverage" type="checkbox" onclick="return false" {% if experimental.beverage %}checked{% endif %}>Beverage<br>
+			<input name="chai" type="checkbox" onclick="return false" {% if experimental.chai %}checked{% endif %}>Chai<br>
+			<input name="baked_goods" type="checkbox" onclick="return false" {% if experimental.baked_goods %}checked{% endif %}>Baked Goods<br>
+			<input name="dairy" type="checkbox" onclick="return false" {% if experimental.dairy %}checked{% endif %}>Dairy<br>
+			<input name="pet" type="checkbox" onclick="return false" {% if experimental.pet %}checked{% endif %}>Pet<br>
+			<input name="snacks" type="checkbox" onclick="return false" {% if experimental.snacks %}checked{% endif %}>Snacks<br>
+			<input name="tobacco" type="checkbox" onclick="return false" {% if experimental.tobacco %}checked{% endif %}>Tobacco<br>
+			<input name="non_food" type="checkbox" onclick="return false" {% if experimental.non_food %}checked{% endif %}>Non-Food<br>
+		</fieldset>
+		</div>
+	</form>
+	</div>
+</div>
+
+</div>
+
+{% endblock %}

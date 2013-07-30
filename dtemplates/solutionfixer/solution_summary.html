@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load qstring %}
+
+{% block content %}
+<link href="/djangomedia/css/solutionfixer.css?v=24" type="text/css" rel="stylesheet">
+<script type="text/javascript" src="/djangomedia/js/solutionfixer.js?v=24"></script>
+{% if show_filter_form %}
+<div class="horizontal-list">
+{% else %}
+<div class="horizontal-list" style="display:none;">
+{%endif%}
+	<form id="filter-form">
+	{{ filter_form.status }}
+	</form>
+</div>
+	{{ mgmt_form }}
+
+	{{ solution_formset.non_form_errors }}
+<table id="solution-formset" class="form">
+  <thead><tr>
+  	<th>Solution Label</th>
+    
+    <th class="my_base_autocomplete">{{ first_form.my_base_autocomplete.label|capfirst }}</th>
+	<th class="percentage" width="10px">{{ first_form.percentage.label|capfirst }}</th>
+	<th class="solvent_choice">{{ first_form.solvent_choice.label|capfirst }}</th>
+	<th class="status">{{ first_form.status.label|capfirst }}</th>
+  </tr></thead>
+  <tbody id="solution-formset-tbody">
+  	{% autoescape off %}
+    {{ rendered_rows }}
+	{% endautoescape %}
+  </tbody>
+</table>
+
+{% endblock %}

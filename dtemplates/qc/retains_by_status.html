@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div id="content-main">
+	<h2>{{ status }}</h2>
+
+	<ul>
+	{% for statuslink in statuslinks %}
+	<li><a href="../{{ statuslink.0 }}/">{{ statuslink.0 }}</a></li>
+	{% endfor %}
+	</ul>
+	<p><a href="/qc/addretains/">Add retains</a></p>
+	<p>{% if is_paginated %}{% load paginator %}{% paginator 3 %}{% endif %}</p>
+	<table class="sortable" width="700px">
+	    <tr class="qcheaders">
+		<th>Retain</th>
+		<th>Date</th>
+		<th>Number</th>
+		<th>Lot</th>
+		<th>Amount</th>
+		<th>Reference</th>
+	    </tr>
+	    {% for retain in retain_list %}
+		<tr>
+		    <td class="qcbody">
+			<a href="/flavorbase/{{ form.instance.product.number }}">
+			    {{ retain.retain }}
+			</a>
+		    </td>
+		    <td class="qcbody">{{ retain.date }}</td>
+		    <td class="qcbody">{{ retain.product.number }}</td>
+		    <td class="qcbody">{{ retain.amount }}</td>
+		    <td class="qcbody">{{ retain.lot }}</td>
+		    <td class="qcbody">{{ retain.product.retains.all.1 }}</td>
+		    {% comment %} 
+			This variable will output cells for all the radio buttons.
+			They have the class "qcradiobutton" and contain nothing but a form element.
+		    {% endcomment %}
+		    {{ form.status }}
+		    {{ form.id }}
+		</tr>
+	    {% endfor %}
+	</table>
+	{% if is_paginated %}{% load paginator %}{% paginator 3 %}{% endif %}
+    </div>
+{% endblock %}

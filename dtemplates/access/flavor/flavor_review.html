@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load review_table %}
+{% load blades %}
+{% load related_links %}
+{% block content %}
+
+<script type="text/javascript" src="/djangomedia/js/flavor_review.js?v=24"></script>
+
+<div id="content-right">
+	{% blades flavor %}
+</div>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{flavor}}</span>
+</div>
+{% related_links flavor %}
+
+<input type="hidden" id="actual_adjusted_weight" value="{{ formula_weight }}">
+<div class="product-memo"><span class="label">Memo</span>{{flavor.productmemo}}</div>
+<div class="pricing-memo"><span class="label">Pricing Memo</span>{{flavor.pricing_memo}}</div>
+<div class="content-table">
+	<span id="weight_form">
+		<form id="weightform" action="/django/access/{{ flavor.number }}" method="get">
+		Adjusted Weight:
+		<input type="text" name="wf" id="adjusted_weight" />
+		<input type="submit" value="Get adjusted formula" style="display:none;"/>
+		</form>
+	</span>
+	<span id="exploded-table">
+		{% review_table flavor weight_factor %}
+	</span>
+	
+	<span id="consolidated-table">
+	</span>
+</div>
+</div>
+
+
+
+
+
+<form id="exportform" action="/django/access/table_to_csv" method="post" target="_blank">
+<input type="hidden" id="exportdata" name="exportdata" />
+<input type="hidden" id="flavor_number" name="flavor_number" value="{{ flavor.number }}" />
+</form>
+{% endblock %}
+

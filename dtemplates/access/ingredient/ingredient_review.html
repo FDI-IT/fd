@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load blades %}
+{% load related_links %}
+{% block content %}
+<div id="content-right">
+	{% blades ingredient %}
+</div>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{ingredient}}</span>
+</div>
+<div class="product-memo"><span class="label">Memo</span>{{ingredient.memo}}</div>
+<div id="ingredient-detail">
+	<table id="ingredient-detail-table" width="100%">
+		<caption>Raw Material Details</caption>
+		<thead>
+			<tr>
+				<th>Field</th>
+				<th>Value</th>
+			</tr>
+		</thead>
+		{% for field_name, field_value in field_details %}
+		<tr>
+			<td>{{ field_name }}</td>
+			<td>{{ field_value }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+
+</div>
+</div>
+
+{% endblock %}
+
