@@ -21,7 +21,7 @@ def dictify_formulae():
     a list of their formulae items.
     """
     d = {}
-    for k, g in groupby(Formula.objects.filter(flavor__valid=True).values(), xfunc):
+    for k, g in groupby(Formula.objects.filter(flavor__valid=True).values('amount','flavor_id','id','ingredient_id'), xfunc):
         d[k]=list(g)
     return d
 
@@ -30,9 +30,15 @@ def dictify_gaz():
     corresponding sub_flavor_id
     """
     d={}
-    for i in Ingredient.objects.all().select_related():
+    for i in Ingredient.objects.exclude(sub_flavor=None).select_related():
         if (i.flavornum != 0) and i.sub_flavor.valid==True:
             d[i.pk] = (i.sub_flavor_id, i.sub_flavor.yield_field)
+    return d
+
+def dictify_gazintas():
+    d = {}
+    for i in Ingredient.objects.exclude(sub_flavor=None).values_list('pk','sub_flavor_id'):
+        d[i[0]] = i[1]
     return d
 
 #this is fast but weight isn't calculated yet just wf.

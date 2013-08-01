@@ -416,13 +416,15 @@ class Ingredient(models.Model):
         ('1','1'),
         ('2','2'),
         ('3','3'),
-        ('4','4'),)
+        ('4','4'),
+        ('5','5'),)
     SKIN_CORROSION_CHOICES = (
         ('No','No'),
         ('1A','1A'),
         ('1B','1B'),
         ('1C','1C'),
-        ('2','2'),)
+        ('2','2'),
+        ('3','3'),)
     EYE_DAMAGE_CHOICES = (
         ('No','No'),
         ('1','1'),
@@ -433,14 +435,49 @@ class Ingredient(models.Model):
         ('1','1'),
         ('1A','1A'),
         ('1B','1B'),)
-
+    GERM_CELL_MUTAGENICITY_CHOICES = (
+        ('No','No'),
+        ('1A','1A'),
+        ('1B','1B'),
+        ('2','2'),)
+    CARCINOGENICTY_CHOICES = (
+        ('No','No'),
+        ('1A','1A'),
+        ('1B','1B'),
+        ('2','2'),)
+    REPRODUCTIVE_CHOICES = (
+        ('No','No'),
+        ('1A','1A'),
+        ('1B','1B'),
+        ('2','2'),
+        ('3','3'))
+    TOST_SINGLE_EXPOSURE_CHOICES = (
+         ('No','No'),
+        ('1','1'),
+        ('2','2'),
+        ('3','3'),)
+    TOST_REPEAT_EXPOSURE_CHOICES = (
+        ('No','No'),
+        ('1','1'),
+        ('2','2'), )
     ASPIRATION_CHOICES = (
         ('No','No'),
-        ('1','1'),)
+        ('1','1'),
+        ('2','2'),)
     ASPHYXIANT_CHOICES = (
         ('No','No'),
         ('Single Category','Single Category'),)
-    acute_hazard = models.CharField("Acute Toxicity", max_length=50,blank=True,
+    acute_hazard_not_specified = models.CharField("Acute Toxicity - Type Not Specified", max_length=50,blank=True,
+                               choices=ACUTE_TOXICITY_CHOICES)
+    acute_hazard_oral = models.CharField("Acute Toxicity - Oral", max_length=50,blank=True,
+                               choices=ACUTE_TOXICITY_CHOICES)
+    acute_hazard_dermal = models.CharField("Acute Toxicity - Dermal", max_length=50,blank=True,
+                               choices=ACUTE_TOXICITY_CHOICES)
+    acute_hazard_gases = models.CharField("Acute Toxicity - Gases", max_length=50,blank=True,
+                               choices=ACUTE_TOXICITY_CHOICES)
+    acute_hazard_vapors = models.CharField("Acute Toxicity - Vapors", max_length=50,blank=True,
+                               choices=ACUTE_TOXICITY_CHOICES)
+    acute_hazard_dusts_mists = models.CharField("Acute Toxicity - Dust & Mists", max_length=50,blank=True,
                                choices=ACUTE_TOXICITY_CHOICES)
     skin_corrosion_hazard = models.CharField("Skin Corrosion/Irritation", max_length=50,blank=True,
                                choices=SKIN_CORROSION_CHOICES)
@@ -448,10 +485,35 @@ class Ingredient(models.Model):
                                choices=EYE_DAMAGE_CHOICES)
     respiratory_hazard = models.CharField("Respiratory or Skin Sensitization", max_length=50,blank=True,
                                choices=RESPIRATORY_SENSITIZATION_CHOICES)
+    germ_cell_mutagenicity_hazard = models.CharField("Germ Cell Mutagenicity",max_length=50,blank=True,
+                                choices=GERM_CELL_MUTAGENICITY_CHOICES)
+    carcinogenicty_hazard = models.CharField("Carcinogenicty",max_length=50,blank=True,
+                                choices=CARCINOGENICTY_CHOICES)
+    reproductive_hazard = models.CharField("Reproductive Toxicity",max_length=50,blank=True,
+                                choices=REPRODUCTIVE_CHOICES)
+    tost_single_hazard = models.CharField("TOST Single Exposure",max_length=50,blank=True,
+                                choices=TOST_SINGLE_EXPOSURE_CHOICES)
+    tost_repeat_hazard = models.CharField("TOST Repeated Exposure",max_length=50,blank=True,
+                                choices=TOST_REPEAT_EXPOSURE_CHOICES) 
+    
     aspiration_hazard = models.CharField("Aspiration", max_length=50,blank=True,
                                choices=ASPIRATION_CHOICES)
     asphyxiation_hazard = models.CharField("Simple Asphyxiants", max_length=50,blank=True,
                                choices=ASPHYXIANT_CHOICES)
+
+    """
+    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_not_specified varchar(50) DEFAULT '' NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_oral varchar(50) DEFAULT '' NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_dermal varchar(50) DEFAULT '' NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_gases varchar(50) DEFAULT '' NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_vapors varchar(50) DEFAULT '' NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_dusts_mists varchar(50) DEFAULT '' NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN germ_cell_mutagenicity_hazard  varchar(50) DEFAULT '' NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN  carcinogenicty_hazard varchar(50) DEFAULT '' NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN  reproductive_hazard varchar(50) DEFAULT '' NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN TOST_single_hazard  varchar(50) DEFAULT '' NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN  TOST_repeat_hazard varchar(50) DEFAULT '' NOT NULL;
+    """
 
     FLAMMABLE_LIQUID_CHOICES = (
                 ('No','No'),

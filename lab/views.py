@@ -42,7 +42,7 @@ def calculate_location_code(inventory_choice):
         else:
             next_number = experimental_last_number+1
 
-        return "%s%s" % (inventory_choice, str(next_number+1)[1:])
+        return "%s%s" % (inventory_choice, str(next_number)[1:])
         
     elif inventory_choice == "":
         return ""
