@@ -7,8 +7,10 @@
 <script type="text/javascript" src="/djangomedia/js/flavor_review.js?v=24"></script>
 <script>
 jQuery(document).ready(function(){	
+	
 	$( "#flavor-tabs" ).tabs({ 
 		cache: true,
+		active: 1,
 		spinner: '',
 		ajaxOptions: {
 			error: function(xhr, status, index, anchor) {
@@ -18,6 +20,19 @@ jQuery(document).ready(function(){
 			}
 		}
 	});
+	$( "#flavor-tabs" ).bind("tabsshow",function(event,ui) {
+		window.location.hash = ui.tab.hash;
+	});
+	
+	window.onhashchange = function() {
+		if (location.hash !== '') {
+			var tabNum = $('a[href=' + location.hash + ']').parent().index();
+			$( "#flavor-tabs" ).tabs('select',tabNum);
+		} else {
+			$( "#flavor-tabs" ).tabs('select', 0);
+		}
+		document.body.scrollTop=0;
+	};
 	$( "#flat-table" ).tablesorter({
 			headers: {
 			0: {

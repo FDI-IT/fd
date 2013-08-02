@@ -1,0 +1,139 @@
+@charset "utf-8";
+/* CSS Document */
+#name{font:helvetica;
+font-size:19pt;
+color:#000000;
+text-align:left;
+float:left;
+margin-top:4px;}
+
+#number{font:helvetica;
+font-size:19pt;
+color:#000000;
+text-align:right;
+float:right;
+position:relative;
+margin-top:4px;}
+
+#price{font:helvetica;
+font-size:14px;
+color:#000000;
+text-align:right;
+float:right;
+text-transform:uppercase;
+margin-top:4px;
+font-weight:bold}
+
+#related-links{float:left;
+width:880px;
+padding:0px 10px 0px 10px;
+background-color:#d82417;
+color:#FFFFFF;
+margin-top:10px;
+height:18px;}
+
+#related-links ul{margin:2px 0px 0px -33px;}
+
+#related_links li{display:inline;
+list-style-type:none;
+padding-right:31px;
+font:helvetica;
+font-size:11px;}
+
+#related-links li a{color:#FFFFFF} 
+
+#formula-tables{
+position:relative;
+margin:10px 10px 20px 0px;
+float:left;
+background-color:#f2f2f3;
+width:730px;
+padding-top:10px;
+padding-bottom:10px}
+
+#flavor-memo{margin:10px 10px 0px 0px;
+padding: 10px 0px 10px 10px;
+float:left;
+background-color:#f2f2f3;
+width:720px;
+padding-top:10px;
+padding-bottom:10px}
+
+#exploded-table{float:left;
+}
+
+#consolidated-table{float:left;
+}
+
+#formula-tables table {background-color:#FFFFFF;
+margin:0px 0px 0px 10px;
+width:710px}
+
+#exploded caption {
+text-align:left;
+font:helvetica;
+font-size:11px;
+text-transform:uppercase;
+font-weight:bold;
+}
+
+#consolidated caption {
+text-align:left;
+font:helvetica;
+font-size:11px;
+text-transform:uppercase;
+font-weight:bold;
+}
+
+#blades{
+width:160px;
+margin-top:10px;
+float:left;
+background-color:#f2f2f3;
+text-align:right;}
+
+#blades ul{list-style: none;
+margin-top: 10px;
+padding-right:10px;
+padding-left:10px} 
+
+.label{font:helvetica;
+font-size:11px;
+text-transform:uppercase;
+display:block;
+font-weight:bold;
+}
+
+.datum{font:helvetica;
+font-size:11px;
+text-transform:uppercase;
+color:#F00;
+font-weight:bold;}
+
+#blades li{padding-bottom:8px;}
+
+#flavor-info{
+background-color:#f2f2f3;
+height:auto;
+margin-top:10px;}
+
+#applicable-info{
+background-color:#f2f2f3;
+height:auto;
+margin-top:10px;}
+
+.title{height:20px;
+width:150px;
+background-image:url(/djangomedia/images/blade_back.png);
+font:helvetica;
+font-size:11px;
+font-weight:bold;
+text-transform:uppercase;
+padding-right:10px;
+padding-top:3px;}
+
+#weight_form{
+position:absolute;
+top:8px;
+right:8px;	
+}

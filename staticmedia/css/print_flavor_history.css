@@ -1,0 +1,147 @@
+@charset "utf-8";
+body {
+	font-family:'liberation sans',arial;
+	font-size:11px;
+}
+
+#content-title{
+	display:none;
+}
+	
+thead {
+	display: table-header-group;
+}	
+
+a {
+	text-decoration: none;
+}
+
+#outermost {
+	width:800px;
+}
+
+fieldset {
+	border:1px solid black;
+}
+
+legend {
+	text-align:right;
+}
+
+div.newpage {
+	page-break-before:always;
+}  
+
+div.title-left{
+padding:0px;
+margin:0px;
+overflow:hidden;
+}
+
+div.title-right{
+	float:right;
+	margin-right:2px;
+}
+
+div.product-memo {
+	clear:left;
+	margin:0px 0px 10px 0px;
+}
+
+div.blades {
+	clear:both;
+}
+
+div.qc-info {
+	
+	float:left;
+}
+
+div.qc-info > div {
+	margin:10px 0px 10px 0px;
+}
+
+div.signatures {
+	width:49%;
+	float:right;
+}
+fieldset.signatures {
+	margin-top:5px;
+}
+
+
+#content-main{
+	padding-bottom:50px;
+	z-index:-1;
+}
+
+div.float-container {
+	overflow:hidden;
+}
+
+div.name{
+	font-family:'liberation sans',arial;
+	font-size:19pt;
+	margin:0px 0px 0px 0px;
+}
+
+div.content-table{
+	margin:10px 0px 0px 0px;
+	clear:left;
+}
+
+*.halfwidth{
+	width:49%;
+}
+
+table{
+	border-collapse:collapse;
+}
+th {
+	border-width:1px 0px 1px 0px;
+	border-style:solid;
+	border-color:black;
+}
+
+div.content-table td {
+	overflow:hidden;
+	padding:1px 8px 1px 8px;
+}
+
+div.blades div.title{
+	display:none;
+}
+
+div.blades ul{list-style: none;
+margin:0px;
+padding:0px;} 
+
+.label{font-family:'liberation sans',arial;
+font-size:11px;
+text-transform:uppercase;
+display:block;
+font-weight:bold;
+}
+
+span.datum{font-family:'liberation sans',arial;
+font-size:11px;
+text-transform:uppercase;
+color:#F00;
+font-weight:bold;}
+
+div.blades li{
+	width:120px;
+	float:left;
+	margin:0px 0px 0px 0px;
+	height:35px;
+}
+
+
+td.ralign-cell {
+	text-align: right;
+}
+
+img.padtest {
+	margin:0px 0px 0px 10px;
+	vertical-align:top;
+}

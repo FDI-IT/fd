@@ -1,0 +1,34 @@
+*.horizontal-list ul {
+	list-style-type:none;
+	padding-bottom:10px;
+}
+*.horizontal-list li{
+	display:inline;
+	padding-right:20px;
+}
+
+tr.unverified {
+	background-color:#FFFFE0;
+}
+
+tr.flagged {
+	background-color:#FFCCCC;
+}
+
+tr.verified {
+	background-color:#99FFFF;
+}
+
+solution-formset {
+	width:900px;
+}
+
+
+#countupdate {
+	margin:4px;
+	padding:4px;
+	position:fixed;
+	right:10px;
+	top:100px;
+	width:auto;
+}

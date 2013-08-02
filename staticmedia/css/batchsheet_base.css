@@ -1,0 +1,301 @@
+@page {size:landscape}
+
+html {
+	height: 100%;
+}
+
+#last_section {
+	padding:0px;
+}
+
+body {
+	height:100%;
+	margin:36px 0px 0px 0px;
+	font-family:"DejaVu Sans",Arial;
+}
+
+#print_warning {
+	display:none;
+}
+
+div.top_form_bar {
+	margin:0px;
+	padding:5px 5px 0px 5px;
+	background-color:#FCE0A5;
+	position:fixed;
+	top:0;
+	width:100%;
+	z-index:100;
+	height:28px;
+	-moz-box-shadow: 0px 6px 6px #888;
+	-webkit-box-shadow: 0px 6px 6px #888;
+	box-shadow: 0px 6px 6px #888;
+}
+
+div.top_form_bar ul {
+	margin-left:0;
+	padding-left:0;
+	display:inline;
+}
+
+div.top_form_bar ul li {
+	margin-left:0;
+	margin-bottom:0;
+	padding: 0px 25px 0px 0px;
+	list-style: none;
+	display:inline;
+}
+
+div.top_form_bar ul li a{
+	padding: 0px 8px 0px 0px;
+}
+
+div.top_form_bar img {
+	padding-right:20px;
+	position:fixed;
+	top: 4px;
+	border-style: none;
+}
+
+#bubble_container {
+	width:325px;
+	margin:0px;
+	padding:36px 0px 0px 8px;
+	position:absolute;
+	top:0;
+	right:0;
+	overflow:hidden;
+	background:#6686E5;
+	z-index:30;
+	font-size:12px;
+}
+
+#sidebar {
+	width:325px;
+	height:98%;
+	margin:0px;
+	padding:6px 0px 0px 8px;
+	position:fixed;
+	top:0;
+	bottom:0;
+	right:0;
+	height:100%;
+	overflow:hidden;
+	background:#6686E5;
+	z-index:20;
+	font-size:12px;
+}
+
+div.bubble {
+	z-index:40;
+	background:#9FB0E5;
+	border-radius:16px;
+	-moz-border-radius: 16px;
+	border: 2px solid #F3A908;
+	margin:10px;
+	-moz-box-shadow: 0px 6px 6px #222;
+	-webkit-box-shadow: 0px 6px 6px #222;
+	box-shadow: 0px 6px 6px #222;
+}
+
+div.bubble h1 {
+	margin:6px 8px 2px 8px;
+	font-size: 14px;
+	font-weight: bold;
+	border-bottom-style:solid;
+	border-width:2px;
+}
+
+div.bubble ul {
+	padding:0px 20px 0px 20px;
+}
+
+
+
+#batchsheet {
+	border-style:solid;
+	border-width:5px;
+	float:left;
+	width:1030px;
+	margin:16px 8px 32px 8px;
+}
+
+#batchsheet ul {
+	padding:0px;
+	margin:0px;
+}
+
+table {
+	font-size:13px;	
+	font-weight:bold;
+}
+
+thead {
+	display: table-header-group;
+}
+
+table.outer {
+	width:100%;
+}
+
+table.outer td {
+	padding:0px 0px 20px 0px;
+}
+
+table.outer > thead > tr > th {
+	font-size:18px;
+}
+
+#titleleft {
+	position:relative;
+	
+	text-align:left;
+	float:left;
+}
+
+#titlecenter {
+	text-align:center;
+	float:right;
+}
+
+#titleright {
+	width:200px;
+	text-align:center;
+	float:right;
+}
+#titleright span{
+	position:relative;
+}
+
+#titleright img {
+	float:right;
+}
+
+#formula {
+	width:100%;
+	table-layout:fixed;
+    border-spacing:0px;
+}
+
+#formula > thead > tr > th {
+	vertical-align:bottom;
+	padding: 0px;
+	background-color: white;
+	font-size:12px;
+}
+
+#formula td {
+	vertical-align:middle;
+	border:1px solid gray;
+	padding:2px 2px 1px 2px;
+	background-color: white;
+    height:32px;
+}
+
+#memorow *.container {
+	width:100%;
+	float:left;
+	margin:0px -100px 0px 0px;
+}
+
+#memorow *.content {
+	margin: 0px 100px 0px 0px;
+}
+
+#memorow *.left {
+	float:left;
+	width:145px;
+}
+
+#memorow *.main {
+	margin: 0px 40px 0px 160px;
+}
+
+#memorow *.sidebar {
+	float:right;
+	width:100px;
+}
+
+#checklistrow *.container {
+	width:100%;
+	float:left;
+	margin:0px -300px 0px 0px;
+}
+
+#checklistrow *.content {
+	margin: 0px 300px 0px 0px;
+}
+
+#checklistrow *.left {
+	float:left;
+	width:145px;
+}
+
+#checklistrow *.main {
+	margin: 0px 40px 0px 160px;
+}
+
+#checklistrow *.sidebar {
+	float:right;
+	width:300px;
+	text-align:right;
+}
+
+#allergens {
+	width:30%;
+}
+
+#haccp {
+	width:30%;
+}
+
+#ccps {
+	width:30%;
+	
+	
+}
+
+td.numerical {
+	text-align: right;
+}
+
+td.abbrev {
+	text-align: center;
+}
+
+span.ingredient-name {
+	margin:0px 0px 0px 5px;
+}
+
+span.ingredient-name-2 {
+	margin:2px 2px 2px 5px;
+	clear:left;
+}
+
+span.sensitive {
+	float:right;
+	margin:2px;
+}
+
+span.section_title {
+	/*font-style:italic;*/
+}
+
+
+span.section_span {
+	margin: 8px;
+	float:left;
+}
+
+span.sub_heading {
+	font-size:13px;
+}
+
+input[readonly] {
+	background:#FCE0A5;
+	color:red;
+}
+
+#last_section {
+	padding:0px;
+}

@@ -1,0 +1,16 @@
+th { 
+	font-weight:normal;
+}
+tr.required_field th {
+	font-weight:bold;
+}
+/*
+.module h2, .module caption, .inline-group h2 {
+    margin: 0;
+    padding: 2px 5px 3px 5px;
+    font-size: 11px;
+    text-align: left;
+    font-weight: bold;
+    background: #7CA0C7 url(../img/admin/default-bg.gif) top left repeat-x;
+    color: white;
+}*/

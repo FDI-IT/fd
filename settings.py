@@ -99,10 +99,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.media',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.request',
-    'djblets.util.context_processors.settingsVars',
-    'djblets.util.context_processors.siteRoot',
-    'djblets.util.context_processors.ajaxSerial',
-    'djblets.util.context_processors.mediaSerial',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -124,7 +120,6 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     '/usr/local/django/fd/dtemplates',
-    '/usr/local/lib/python2.6/dist-packages/Djblets-0.6.16-py2.6.egg/djblets/datagrid/templates/',
 )
 
 #
@@ -140,11 +135,6 @@ INSTALLED_APPS = (
     'django.contrib.formtools',
     'django.contrib.comments',
     'django.contrib.databrowse',
-    'djblets.datagrid',
-    'djblets.feedview',
-    'djblets.siteconfig',
-    'djblets.util',
-    'djblets.webapi',
     'djcelery',
     'pluggable',
     'homepage', 
