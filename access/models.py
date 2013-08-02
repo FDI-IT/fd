@@ -6,6 +6,8 @@ from operator import itemgetter
 
 from django.db import models
 from django.db.models import Q, F
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 
@@ -579,6 +581,7 @@ class Ingredient(models.Model):
                                choices=CORROSIVE_TO_METAL_CHOICES)
     
 
+    location_code_n = generic.GenericRelation('LocationCode')
     
 #    GERM_CELL_MUTAGENICITY_CHOICES = (
 #        ('No','No'),
@@ -1198,8 +1201,9 @@ class Flavor(FormulaInfo):
             blank=True,
             null=True)
     
-    location_code = models.CharField(max_length=20,blank=True,default='')
     keywords = models.TextField(blank=True)
+    
+    location_code_n = generic.GenericRelation('LocationCode')
     
     def save(self, *args, **kwargs):
         try:
@@ -1214,6 +1218,13 @@ class Flavor(FormulaInfo):
         ordering = ['-valid','number']
     
     import_order = 0
+    
+    @property
+    def location_code(self):
+        try:
+            return self.location_code_n.all().reverse()[0]
+        except:
+            return None
 #    
 #    @property
 #    def organoleptics(self):
@@ -1943,11 +1954,17 @@ class ExperimentalLog(models.Model):
     retain_present = models.BooleanField(db_column='RetainPresent',default=False)
     
     flavor = models.ForeignKey('Flavor',related_name='experimental_log',blank=True,null=True)
-    location_code = models.CharField(max_length=20,blank=True,default='')
     
     def __unicode__(self):
         return "%s-%s %s %s" % (self.experimentalnum, self.initials,
                                 self.product_name, self.datesent_short)
+    
+    @property
+    def location_code(self):
+        try:
+            return self.location_code_n.all().reverse()[0]
+        except:
+            return None
     
     @staticmethod
     def anonymize():
@@ -2821,4 +2838,12 @@ class DigitizedFormula(models.Model):
     ingredient_id = models.PositiveSmallIntegerField(blank=True,null=True)
     raw_row = models.TextField(blank=True,null=True)
     
+class LocationCode(models.Model):
+    location_code = models.CharField(max_length=20)
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('content_type','object_id')
+
+    def __unicode__(self):
+        return u"%s - %s" % (self.location_code, self.content_object)
     
