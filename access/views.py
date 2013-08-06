@@ -158,7 +158,7 @@ def experimental_add_formula(request, experimental):
                prefix='EX',
                natart=experimental.natart[:3],
                experimental=experimental.experimentalnum,
-               location_code=experimental.location_cde)
+               location_code=experimental.location_code)
     f.save()
     experimental.flavor = f
     experimental.save()
