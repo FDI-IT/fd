@@ -1968,6 +1968,11 @@ class ExperimentalLog(models.Model):
         except:
             return None
     
+    @property
+    def batchsheet_memo(self):
+        if self.mixing_instructions != "":
+            return "%s -- Mixing instructions: %s" % (self.memo, self.mixing_instructions)
+    
     @staticmethod
     def anonymize():
         for e in ExperimentalLog.objects.all():
