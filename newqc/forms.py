@@ -20,12 +20,10 @@ class NewFlavorRetainForm(forms.Form):
     
     @staticmethod
     def prepare_formset_kwargs(number_of_objects):
-        object_formset_initial = []
-        extra = 0
         next_object_number = Retain.get_next_object_number()
         for new_object_number in range(next_object_number, next_object_number+number_of_objects):
-            object_formset_initial.append({'object_number':new_object_number})
-        return extra, object_formset_initial
+            yield {'object_number':new_object_number}
+
                 
     def create_from_cleaned_data(self):
         cd = self.cleaned_data
@@ -55,13 +53,10 @@ class NewReceivingLogForm(forms.Form):
         
     @staticmethod
     def prepare_formset_kwargs(number_of_objects):
-        object_formset_initial = []
-        extra = 0
         next_r_number = ReceivingLog.get_next_r_number()
         for new_r_number in range(next_r_number, next_r_number+number_of_objects):
-            object_formset_initial.append({'r_number':new_r_number})
+            yield {'r_number':new_r_number}
             
-        return extra, object_formset_initial
     
                     
     def create_from_cleaned_data(self):
@@ -77,7 +72,9 @@ class NewRMRetainForm(forms.Form):
     
     @staticmethod
     def prepare_formset_kwargs(number_of_objects):
-        return number_of_objects, None
+        for x in range(0,number_of_objects):
+            yield {}
+        
             
     def create_from_cleaned_data(self):
         cd = self.cleaned_data
