@@ -259,7 +259,7 @@ class Retain(models.Model):
                              blank=True,
                              default='')
     ir = models.ForeignKey('ImportRetain', blank=True, null=True, default=None, editable=False)
-
+    browse_url = '/django/qc/retains/'
     class Meta:
         ordering = ['-date', '-retain']
 
@@ -277,6 +277,15 @@ class Retain(models.Model):
             if self.lot == other.lot:
                 return True
         return False
+    
+    @staticmethod
+    def get_next_object_number():
+        current_retains = Retain.objects.filter(date__year=date.today().year)
+        try:
+            last_retain = current_retains[0]
+        except:
+            return 0
+        return last_retain.retain + 1
 
 class ImportRetain(models.Model):
     number = models.PositiveSmallIntegerField(blank=True, null=True)
@@ -356,7 +365,8 @@ class RMRetain(models.Model):
 
     def get_admin_url(self):
         return "/django/admin/newqc/rmretain/%s/" % self.pk
-
+    
+    browse_url = "/django/qc/rm_retains/"
 
 class ReceivingLogManager(models.Manager):
     def get_query_set(self):

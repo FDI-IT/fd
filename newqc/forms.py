@@ -1,3 +1,4 @@
+from datetime import date
 from django import forms
 from django.forms.formsets import BaseFormSet
 from django.forms import widgets
@@ -16,13 +17,32 @@ class AddReceivingLogBatch(forms.Form):
     number_received = forms.IntegerField(label="Number received", min_value=1)
 
 class NewFlavorRetainForm(forms.Form):
-    retain_number = forms.IntegerField(label="", min_value=1,
+    object_number = forms.IntegerField(label="", min_value=1,
                                        widget=forms.HiddenInput)
     flavor_number = forms.IntegerField(label="", min_value=1)
     lot_number = forms.CharField(label="")
-    weight = forms.IntegerField(label="", min_value=0)
     
     template_path = 'qc/add_retains.html'
+    
+    @staticmethod
+    def prepare_formset_initial(number_of_objects):
+        object_formset_initial = []
+        next_object_number = Retain.get_next_object_number()
+        for new_object_number in range(next_object_number, next_object_number+number_of_objects):
+            object_formset_initial.append({'object_number':new_object_number})
+        return object_formset_initial
+                
+    def create_from_cleaned_data(self):
+        cd = self.cleaned_data
+        lot_number = cd['lot_number']
+        f = Flavor.objects.get(number=cd['flavor_number'])
+        l = Lot.objects.get(number=lot_number, flavor=f)
+        return Retain(
+                retain=cd['object_number'],
+                lot=l,
+                date=date.today(),
+                status="Pending",
+            )
     
 class NewReceivingLogForm(forms.Form):
     r_number = forms.IntegerField(label="", min_value=1, widget=forms.HiddenInput)
@@ -38,14 +58,34 @@ class NewReceivingLogForm(forms.Form):
     kosher_group = forms.CharField(label="",max_length=40)
     
     template_path = 'qc/add_receiving_log.html'
+        
+    @staticmethod
+    def prepare_formset_initial(*args):
+        return None
     
 class NewRMRetainForm(forms.Form):
-    r_number = forms.IntegerField(label="R Number", min_value=1)
+    object_number = forms.IntegerField(label="R Number", min_value=1)
     pin = forms.IntegerField(min_value=1)
     lot = forms.CharField()
     supplier = forms.CharField()
     
     template_path = 'qc/add_rm_retains.html'
+    
+    @staticmethod
+    def prepare_formset_initial(*args):
+        return None
+            
+    def create_from_cleaned_data(self):
+        cd = self.cleaned_data
+        return RMRetain(
+                date=date.date.today(),
+                pin=cd['pin'],
+                supplier=cd['supplier'],
+                lot=cd['lot'],
+                r_number=cd['object_number'],
+                status="Pending,"            
+            )
+    
 
 class ResolveRetainForm(forms.ModelForm):
     class Meta:

@@ -9,6 +9,5 @@ urlpatterns = patterns('unified_adapter.views',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    (r'^$', 'pa_list'),
 )
 #(r'^(?P<flavor_number>\d+)/batch_sheet/$', 'batch_sheet'),

@@ -122,6 +122,8 @@ class IndivisibleLeafWeight(models.Model):
     weight = models.DecimalField(decimal_places=3, max_digits=7)
     quant_weight = models.IntegerField(null=True)
     
+                  
+    
 class Formula(models.Model):
     """Constituent ingredients of a particular approved formula.
     Referenced by Flavor number.

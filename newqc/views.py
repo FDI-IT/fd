@@ -321,115 +321,54 @@ def get_last_retain_number():
         return 0
     return last_retain.retain
 
+# TODO
+def add_objects(request, page_title, ObjectClass, NewObjectForm):
+    if request.method == 'GET':
+        addobjectsbatch = AddObjectsBatch(request.GET)
+        if addobjectsbatch.is_valid():
+
+            ObjectFormSet = formset_factory(NewObjectForm, 
+                                            extra=0)
+            formset = ObjectFormSet(initial=NewObjectForm.prepare_formset_initial(addobjectsbatch.cleaned_data['number_of_objects']))
+            
+            return render_to_response(NewObjectForm.template_path, 
+                                      {'formset': formset,
+                                       'page_title': page_title},
+                                      context_instance=RequestContext(request))
+        else:
+            addobjectsbatch = AddObjectsBatch()
+            return render_to_response('qc/add_objects_batch.html',
+                                      {'addobjectsbatch': addobjectsbatch,
+                                       'page_title': page_title},
+                                      context_instance=RequestContext(request))
+            
+    
+    elif request.method == 'POST':
+        ObjectFormSet = formset_factory(NewObjectForm)
+        formset = ObjectFormSet(request.POST)
+        if formset.is_valid():
+            td = datetime.date.today()
+            for form in formset.forms:
+                cd = form.cleaned_data
+                cd['date'] = td
+                obj = form.create_from_cleaned_data()
+                obj.save()
+            return HttpResponseRedirect(ObjectClass.browse_url)
+        else:
+            return render_to_response('qc/add_objects_batch.html', 
+                                      {'formset': formset,
+                                       'page_title': page_title},
+                                      context_instance=RequestContext(request))
+    
+
 @login_required
 def add_retains(request):
-    page_title = "Add Retains"
-    status_message = ""
-    
-    if request.method == 'GET':
-        addretainbatch = AddRetainBatch(request.GET)
-        if addretainbatch.is_valid():
-            number_of_retains = addretainbatch.cleaned_data['number_of_retains']
-            
-            retain_formset_initial = []
-            last_retain_number = get_last_retain_number()+1
-            for new_retain_number in range(last_retain_number, last_retain_number+number_of_retains):
-                retain_formset_initial.append({'retain_number':new_retain_number})
-            
-            RetainFormSet = formset_factory(NewFlavorRetainForm, 
-                                            extra=0)
-            formset = RetainFormSet(initial=retain_formset_initial)
-            return render_to_response('qc/add_retains.html', 
-                                      {'formset': formset,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
-        else:
-            addretainbatch = AddRetainBatch()
-            return render_to_response('qc/add_retain_batch.html',
-                                      {'addretainbatch': addretainbatch,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
-            
-    
-    elif request.method == 'POST':
-        RetainFormSet = formset_factory(NewFlavorRetainForm)
-        formset = RetainFormSet(request.POST)
-        if formset.is_valid():
-            td = datetime.date.today()
-            for form in formset.forms:
-                cd = form.cleaned_data
-                lot_number = cd['lot_number']
-                f = Flavor.objects.get(number=cd['flavor_number'])
-                
-                try:
-                    l = Lot.objects.filter(number=lot_number, flavor=f)[0]
-                except:
-                    l = Lot(date=td,
-                            number=cd['lot_number'],
-                            status='Pending',
-                            amount=cd['weight'],
-                            flavor=f)
-                    l.save()
-                
-                r = Retain(retain=cd['retain_number'],
-                           lot=l,
-                           date=td,
-                           status='Pending',)
-                r.save()
-            return HttpResponseRedirect('/django/qc/retains/')
-        else:
-            return render_to_response('qc/add_retains.html', 
-                                      {'formset': formset,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
-            
+    #def add_objects(request, page_title, ObjectClass, NewObjectForm):
+    return add_objects(request, page_title="Add Retains", ObjectClass=Retain, NewObjectForm=NewFlavorRetainForm)
+
 @login_required
 def add_rm_retains(request):
-    page_title = "Add RM Retains"
-    status_message = ""
-    
-    if request.method == 'GET':
-        addretainbatch = AddRetainBatch(request.GET)
-        if addretainbatch.is_valid():
-            number_of_retains = addretainbatch.cleaned_data['number_of_retains']
-            
-            RetainFormSet = formset_factory(NewRMRetainForm, 
-                                            extra=number_of_retains)
-            formset = RetainFormSet()
-            return render_to_response('qc/add_rm_retains.html', 
-                                      {'formset': formset,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
-        else:
-            addretainbatch = AddRetainBatch()
-            return render_to_response('qc/add_retain_batch.html',
-                                      {'addretainbatch': addretainbatch,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
-            
-    
-    elif request.method == 'POST':
-        RetainFormSet = formset_factory(NewRMRetainForm)
-        formset = RetainFormSet(request.POST)
-        if formset.is_valid():
-            td = datetime.date.today()
-            for form in formset.forms:
-                cd = form.cleaned_data
-                r = RMRetain(
-                        date=td,
-                        pin=cd['pin'],
-                        supplier=cd['supplier'],
-                        lot=cd['lot'],
-                        r_number=cd['r_number'],
-                        status='Pending',
-                    )
-                r.save()
-            return HttpResponseRedirect('/django/qc/rm_retains/')
-        else:
-            return render_to_response('qc/add_retains.html', 
-                                      {'formset': formset,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
+    return add_objects(request, page_title="Add RM Retains", ObjectClass=RMRetain, NewObjectForm=NewRMRetainForm)
 
 def ajax_retain_status_change(request):
     rm_re = re.compile('rm_retains')
@@ -840,51 +779,7 @@ def add_receiving_log(request):
                                        'page_title': page_title},
                                       context_instance=RequestContext(request))
 
-# TODO
-def add_objects(request, page_title, ObjectClass, NewObjectForm):
-    if request.method == 'GET':
-        addobjectsbatch = AddObjectsBatch(request.GET)
-        if addobjectsbatch.is_valid():
-            number_of_objects = addobjectsbatch.cleaned_data['number_of_objects']
-            
-            object_formset_initial = []
-            next_object_number = ObjectClass.get_next_object_number()
-            for new_object_number in range(next_object_number, next_object_number+number_of_objects):
-                object_formset_initial.append({'object_number':new_object_number})
-            
-            ObjectFormSet = formset_factory(NewObjectForm, 
-                                            extra=0)
-            formset = ObjectFormSet(initial=object_formset_initial)
-            
-            return render_to_response(NewObjectForm.template_path, 
-                                      {'formset': formset,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
-        else:
-            addobjectsbatch = AddObjectsBatch()
-            return render_to_response('qc/add_objects_batch.html',
-                                      {'addobjectsbatch': addobjectsbatch,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
-            
-    
-    elif request.method == 'POST':
-        ObjectFormSet = formset_factory(NewObjectForm)
-        formset = ObjectFormSet(request.POST)
-        if formset.is_valid():
-            td = datetime.date.today()
-            for form in formset.forms:
-                cd = form.cleaned_data
-                cd['date'] = td
-                obj = ObjectClass.create_from_cleaned_data(cd)
-                obj.save()
-            return HttpResponseRedirect(ObjectClass.browse_url)
-        else:
-            return render_to_response('qc/add_objects_batch.html', 
-                                      {'formset': formset,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
-    
+
 #to generate pngs from a pdf file
 # convert -geometry 3000x3000 -density 300x300 -quality 100 test.pdf testdf.png
 
