@@ -327,10 +327,9 @@ def add_objects(request, page_title, ObjectClass, NewObjectForm):
         addobjectsbatch = AddObjectsBatch(request.GET)
         if addobjectsbatch.is_valid():
             number_of_objects = addobjectsbatch.cleaned_data['number_of_objects']
-            extra, initial = NewObjectForm.prepare_formset_kwargs(number_of_objects)
-            ObjectFormSet = formset_factory(NewObjectForm, 
-                                            extra=extra)
-            formset = ObjectFormSet(initial=initial)
+            initial = NewObjectForm.prepare_formset_kwargs(number_of_objects)
+            ObjectFormSet = formset_factory(NewObjectForm, extra=0)
+            formset = ObjectFormSet(initial=initial, )
             return render_to_response(NewObjectForm.template_path, 
                                       {'formset': formset,
                                        'page_title': page_title},
@@ -344,7 +343,8 @@ def add_objects(request, page_title, ObjectClass, NewObjectForm):
             
     
     elif request.method == 'POST':
-        ObjectFormSet = formset_factory(NewObjectForm)
+        #""", formset = VALIDATIONFORMSET"""
+        ObjectFormSet = formset_factory(NewObjectForm )
         formset = ObjectFormSet(request.POST)
         if formset.is_valid():
             td = datetime.date.today()
