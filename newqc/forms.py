@@ -5,16 +5,10 @@ from django.forms import widgets
 from django.db import connection
 
 from access.models import Flavor
-from newqc.models import Retain, TestCard, Lot, ProductInfo, STATUS_CHOICES, UNITS_CHOICES
+from newqc.models import Retain, RMRetain, TestCard, Lot, ReceivingLog, ProductInfo, STATUS_CHOICES, UNITS_CHOICES
 
 class AddObjectsBatch(forms.Form):
     number_of_objects = forms.IntegerField(label="Number of objects", min_value=1)
-
-class AddRetainBatch(forms.Form):
-    number_of_retains = forms.IntegerField(label="Number of retains", min_value=1)
-    
-class AddReceivingLogBatch(forms.Form):
-    number_received = forms.IntegerField(label="Number received", min_value=1)
 
 class NewFlavorRetainForm(forms.Form):
     object_number = forms.IntegerField(label="", min_value=1,
@@ -25,12 +19,13 @@ class NewFlavorRetainForm(forms.Form):
     template_path = 'qc/add_retains.html'
     
     @staticmethod
-    def prepare_formset_initial(number_of_objects):
+    def prepare_formset_kwargs(number_of_objects):
         object_formset_initial = []
+        extra = 0
         next_object_number = Retain.get_next_object_number()
         for new_object_number in range(next_object_number, next_object_number+number_of_objects):
             object_formset_initial.append({'object_number':new_object_number})
-        return object_formset_initial
+        return extra, object_formset_initial
                 
     def create_from_cleaned_data(self):
         cd = self.cleaned_data
@@ -40,7 +35,7 @@ class NewFlavorRetainForm(forms.Form):
         return Retain(
                 retain=cd['object_number'],
                 lot=l,
-                date=date.today(),
+                date=cd['date'],
                 status="Pending",
             )
     
@@ -56,12 +51,21 @@ class NewReceivingLogForm(forms.Form):
     po_number = forms.IntegerField(label="",min_value=1)
     trucking_co = forms.CharField(label="",max_length=40)
     kosher_group = forms.CharField(label="",max_length=40)
-    
     template_path = 'qc/add_receiving_log.html'
         
     @staticmethod
-    def prepare_formset_initial(*args):
-        return None
+    def prepare_formset_kwargs(number_of_objects):
+        object_formset_initial = []
+        extra = 0
+        next_r_number = ReceivingLog.get_next_r_number()
+        for new_r_number in range(next_r_number, next_r_number+number_of_objects):
+            object_formset_initial.append({'r_number':new_r_number})
+            
+        return extra, object_formset_initial
+    
+                    
+    def create_from_cleaned_data(self):
+        return ReceivingLog(**self.cleaned_data)
     
 class NewRMRetainForm(forms.Form):
     object_number = forms.IntegerField(label="R Number", min_value=1)
@@ -72,18 +76,18 @@ class NewRMRetainForm(forms.Form):
     template_path = 'qc/add_rm_retains.html'
     
     @staticmethod
-    def prepare_formset_initial(*args):
-        return None
+    def prepare_formset_kwargs(number_of_objects):
+        return number_of_objects, None
             
     def create_from_cleaned_data(self):
         cd = self.cleaned_data
         return RMRetain(
-                date=date.date.today(),
+                date=cd['date'],
                 pin=cd['pin'],
                 supplier=cd['supplier'],
                 lot=cd['lot'],
                 r_number=cd['object_number'],
-                status="Pending,"            
+                status="Pending"            
             )
     
 

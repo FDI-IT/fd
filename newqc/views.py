@@ -25,8 +25,8 @@ from elaphe import barcode
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import Flavor, Ingredient
 from access.views import flavor_info_wrapper
-from newqc.forms import NewFlavorRetainForm, AddRetainBatch, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, AddReceivingLogBatch, NewReceivingLogForm, AddObjectsBatch
-from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, get_next_r_number
+from newqc.forms import NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
+from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog
 from newqc.utils import process_jbg, get_card_file, scan_card
 from newqc.tasks import walk_scans_qccards
 
@@ -326,11 +326,11 @@ def add_objects(request, page_title, ObjectClass, NewObjectForm):
     if request.method == 'GET':
         addobjectsbatch = AddObjectsBatch(request.GET)
         if addobjectsbatch.is_valid():
-
+            number_of_objects = addobjectsbatch.cleaned_data['number_of_objects']
+            extra, initial = NewObjectForm.prepare_formset_kwargs(number_of_objects)
             ObjectFormSet = formset_factory(NewObjectForm, 
-                                            extra=0)
-            formset = ObjectFormSet(initial=NewObjectForm.prepare_formset_initial(addobjectsbatch.cleaned_data['number_of_objects']))
-            
+                                            extra=extra)
+            formset = ObjectFormSet(initial=initial)
             return render_to_response(NewObjectForm.template_path, 
                                       {'formset': formset,
                                        'page_title': page_title},
@@ -359,7 +359,7 @@ def add_objects(request, page_title, ObjectClass, NewObjectForm):
                                       {'formset': formset,
                                        'page_title': page_title},
                                       context_instance=RequestContext(request))
-    
+
 
 @login_required
 def add_retains(request):
@@ -369,6 +369,10 @@ def add_retains(request):
 @login_required
 def add_rm_retains(request):
     return add_objects(request, page_title="Add RM Retains", ObjectClass=RMRetain, NewObjectForm=NewRMRetainForm)
+
+@login_required
+def add_receiving_log(request):
+    return add_objects(request, page_title="Add To Receiving Log", ObjectClass=ReceivingLog, NewObjectForm=NewReceivingLogForm)
 
 def ajax_retain_status_change(request):
     rm_re = re.compile('rm_retains')
@@ -721,63 +725,6 @@ def review(request):
 def receiving_log_print(request):
     # TODO
     return
-
-def add_receiving_log(request):
-    page_title = "Add To Receiving Log"
-    
-    if request.method == 'GET':
-        addreceivinglogbatch = AddReceivingLogBatch(request.GET)
-        if addreceivinglogbatch.is_valid():
-            number_received = addreceivinglogbatch.cleaned_data['number_received']
-            
-            received_formset_initial = []
-            next_r_number = get_next_r_number()
-            for new_r_number in range(next_r_number, next_r_number+number_received):
-                received_formset_initial.append({'r_number':new_r_number})
-            
-            ReceivedFormSet = formset_factory(NewReceivingLogForm, 
-                                            extra=0)
-            formset = ReceivedFormSet(initial=received_formset_initial)
-            return render_to_response('qc/add_receiving_log.html', 
-                                      {'formset': formset,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
-        else:
-            addreceivinglogbatch = AddReceivingLogBatch()
-            return render_to_response('qc/add_receiving_log_batch.html',
-                                      {'addreceivinglogbatch': addreceivinglogbatch,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
-            
-    
-    elif request.method == 'POST':
-        ReceivedFormSet = formset_factory(NewReceivingLogForm)
-        formset = ReceivedFormSet(request.POST)
-        if formset.is_valid():
-            td = datetime.date.today()
-            for form in formset.forms:
-                cd = form.cleaned_data
-                
-                r = ReceivingLog(r_number=cd['r_number'],
-                           date=td,
-                           pin=cd['pin'],
-                           supplier=cd['supplier'],
-                           description=cd['description'],
-                           quantity_of_packages=cd['quantity_of_packages'],
-                           package_size=cd['package_size'],
-                           units=cd['units'],
-                           lot=cd['lot'],
-                           po_number=cd['po_number'],
-                           trucking_co=cd['trucking_co'],
-                           kosher_group=cd['kosher_group'],
-                           )
-                r.save()
-            return HttpResponseRedirect('/django/qc/receiving_log/')
-        else:
-            return render_to_response('qc/add_receiving_log.html', 
-                                      {'formset': formset,
-                                       'page_title': page_title},
-                                      context_instance=RequestContext(request))
 
 
 #to generate pngs from a pdf file
