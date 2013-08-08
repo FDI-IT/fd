@@ -7,7 +7,7 @@ from django.http import HttpResponse, QueryDict
 from django.utils import simplejson
 from django.db.models import Count
 
-from access.models import Ingredient, Flavor, ExperimentalLog
+from access.models import Ingredient, Flavor, ExperimentalLog, LocationCode
 from access.views import ingredient_autocomplete
 
 from lab.forms import SolutionForm, FinishedProductLabelForm, RMLabelForm, ExperimentalForm
@@ -27,29 +27,6 @@ INVENTORY_CHOICES = (
     ('None','None'),
 )
 
-number_re = re.compile('\d+')
-def calculate_location_code(inventory_choice):
-    if inventory_choice[:2] == "SL":
-        
-        flavor_last_slot = Flavor.objects.filter(location_code__istartswith=inventory_choice).order_by('-location_code')[0]
-        experimental_last_slot = ExperimentalLog.objects.filter(location_code__istartswith=inventory_choice).order_by('-location_code')[0]
-        
-        flavor_last_number = int(number_re.search(flavor_last_slot.location_code).group())
-        experimental_last_number = int(number_re.search(experimental_last_slot.location_code).group())
-        
-        if flavor_last_number > experimental_last_number:
-            next_number = flavor_last_number+1
-        else:
-            next_number = experimental_last_number+1
-
-        return "%s%s" % (inventory_choice, str(next_number)[1:])
-        
-    elif inventory_choice == "":
-        return ""
-    else:
-        return inventory_choice
-    
-    
 def rm_sample_labels(request):
     receiving_log = ReceivingLog.objects.all()[0]
     pdf_file = open(rm_sample_label(receiving_log),'rb')
@@ -61,16 +38,17 @@ def experimental_labels(request):
     page_title = "Experimental Labels"
     if 'experimental_number' in request.GET:
         experimental = ExperimentalLog.objects.get(experimentalnum=request.GET['experimental_number'])
-        
+
         if experimental.flavor == None:
             return redirect('%s?status_message=Unable to print label because a formula must be entered.' % experimental.get_absolute_url())
         if 'inventory_slot' in request.GET and request.GET['inventory_slot'] != "":
-            if experimental.location_code == u"":
-                loc_code = calculate_location_code(request.GET['inventory_slot'])
-                experimental.location_code = loc_code
-                experimental.flavor.location_code = loc_code
-                experimental.save()
-                experimental.flavor.save()
+            if experimental.location_code == u"" or experimental.location_code == "" or experimental.location_code is None:
+                loc_code = LocationCode.get_next_location_code(request.GET['inventory_slot'])
+                lc = LocationCode(
+                            location_code = loc_code,
+                            content_object = experimental        
+                        )
+                lc.save()
             else:
                 return redirect('%s?status_message=Unable to print label because a location code was requested, but this flavor already has one.' % experimental.get_absolute_url())
         pdf_file = open(experimental_label(request.GET['experimental_number']),'rb')
@@ -92,16 +70,13 @@ def finished_product_labels(request):
         flavor = Flavor.objects.get(number=request.GET['production_number'])
         
         if 'inventory_slot' in request.GET and request.GET['inventory_slot'] != "":
-            if flavor.location_code == u"":
-                next_location_code = calculate_location_code(request.GET['inventory_slot'])
-                
-                
-                flavor.location_code = next_location_code
-                flavor.save()
-                
-                for experimental in flavor.experimental_log.all():
-                    experimental.location_code = next_location_code
-                    experimental.save()
+            if flavor.location_code == u"" or flavor.location_code == "" or flavor.location_code is None:
+                loc_code = LocationCode.get_next_location_code(request.GET['inventory_slot'])
+                lc = LocationCode(
+                            location_code=loc_code,
+                            content_object=flavor
+                        )
+                lc.save()
             else:
                 return redirect('%s?status_message=Unable to print label because a location code was requested, but this flavor already has one.' % flavor.get_absolute_url())
                                                                 
@@ -123,17 +98,17 @@ def inventory(request):
     if 'loc_code' in request.GET:
         loc_code_query = request.GET.get('loc_code',"")
         if loc_code_query == "other":
-            queryset = ProductInfo.objects.exclude(location_code="").exclude(
-                location_code__istartswith="x").exclude(
+            queryset = LocationCode.objects.exclude(location_code="").exclude(
+                location_code__iexact="x").exclude(
                 location_code__istartswith="sl-8").exclude(
                 location_code__istartswith="sl-4").exclude(
                 location_code__istartswith="slf-l").exclude(
                 location_code__istartswith="slf-o").exclude(
                 location_code__istartswith="sd").exclude(
                 location_code__istartswith="conc").exclude(
-                location_code__istartswith="refri").order_by('location_code','name')
+                location_code__istartswith="refri").order_by('location_code')
         else:
-            queryset = ProductInfo.objects.exclude(location_code="").exclude(location_code__iexact="x").filter(location_code__istartswith=loc_code_query).order_by('location_code','name')
+            queryset = LocationCode.objects.exclude(location_code="").exclude(location_code__iexact="x").filter(location_code__istartswith=loc_code_query).order_by('location_code')
         return render_to_response('lab/inventory.html',
                                   {
                                    'queryset':queryset,
