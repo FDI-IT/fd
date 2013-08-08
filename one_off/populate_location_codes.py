@@ -21,8 +21,8 @@ def populate():
             pass
 
 def populate_location_codes_specific(ModelClass):
-    for x in ModelClass.objects.exclude(location_code=None).exclude(location_code=""):
-        lc = LocationCode(location_code=x.location_code,content_object=x)
+    for x in ModelClass.objects.exclude(location_code_old=None).exclude(location_code_old=""):
+        lc = LocationCode(location_code=x.location_code_old,content_object=x)
         lc.save()
         
 def populate_location_codes_generic():

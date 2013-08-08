@@ -39,7 +39,7 @@ def experimental_labels(request):
     if 'experimental_number' in request.GET:
         experimental = ExperimentalLog.objects.get(experimentalnum=request.GET['experimental_number'])
 
-        if experimental.flavor == None:
+        if experimental.flavor == None or experimental.flavor.formula_set.all().count() == 0:
             return redirect('%s?status_message=Unable to print label because a formula must be entered.' % experimental.get_absolute_url())
         if 'inventory_slot' in request.GET and request.GET['inventory_slot'] != "":
             if experimental.location_code == u"" or experimental.location_code == "" or experimental.location_code is None:
