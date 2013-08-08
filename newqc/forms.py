@@ -4,7 +4,7 @@ from django.forms.formsets import BaseFormSet
 from django.forms import widgets
 from django.db import connection
 from django.core.exceptions import ValidationError
-from django.core.validators import *
+from access.models import Flavor
 import re
 
 from access.models import Flavor
@@ -13,13 +13,47 @@ from newqc.models import Retain, RMRetain, TestCard, Lot, ReceivingLog, ProductI
 class AddObjectsBatch(forms.Form):
     number_of_objects = forms.IntegerField(label="Number of objects", min_value=1)
 
+
+def validate_flavor_number(num):
+    if Flavor.objects.filter(number = num).exists() == False:
+        raise ValidationError(u"Please input a valid flavor number.")
+    
+def validate_lot_number(num):
+    if Lot.objects.filter(number = num).exists() == False:
+        raise ValidationError(u"Please input a valid lot number.")
+        
+class FlavorNumberField(forms.IntegerField):
+    default_validators = [validate_flavor_number]
+    
+class LotNumberField(forms.CharField):
+    default_validators = [validate_lot_number]
+
 class NewFlavorRetainForm(forms.Form):
+       
     object_number = forms.IntegerField(label="", min_value=1,
-                                       widget=forms.HiddenInput)
-    flavor_number = forms.IntegerField(label="", min_value=1)
-    lot_number = forms.CharField(label="")
+                                       widget=forms.HiddenInput, )
+    flavor_number = FlavorNumberField(label="", min_value=1)
+    lot_number = LotNumberField(label="")
     
     template_path = 'qc/add_retains.html'
+    
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        flavor_number = cleaned_data.get("flavor_number")
+        lot_number = cleaned_data.get("lot_number")
+        
+        if flavor_number and lot_number: #only do this if both fields are valid so far
+            raise_error = True
+            lots = Lot.objects.filter(number = lot_number)
+            for lot in lots:
+                if lot.flavor.number == flavor_number:
+                    raise_error = False
+            if raise_error == True:
+                raise ValidationError(u"The given lot number does not correspond to the given flavor number.")
+        
+        return cleaned_data
+
+            
     
     @staticmethod
     def prepare_formset_kwargs(number_of_objects):
