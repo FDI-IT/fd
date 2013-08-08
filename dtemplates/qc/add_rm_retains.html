@@ -8,6 +8,7 @@
 	{{ formset.errors }}
 	-->
 	
+	
     <form action="" method="POST">
 	{{ formset.management_form }}
 	
@@ -22,11 +23,16 @@
 		</thead>
 		<tbody>
 	    {% for form in formset.forms %}
+	    	{% if form.errors %}
+	    		<tr bgcolor="#FF0000">
+	    			<td colspan = "4"><b> Please correct the error(s) shown. </b></td>
+	    		</tr>
+	    	{% endif %}
 			<tr>
-				<td class="object-number-cell">{{ form.object_number }}</td>
-				<td class="number-cell">{{ form.pin }}</td>
-				<td class="lot-cell">{{ form.lot }}</td>
-				<td class="weight-cell">{{ form.supplier }}</td>
+				<td class="object-number-cell">{{ form.object_number }}{{form.object_number.errors}}</td>
+				<td class="number-cell">{{ form.pin }}{{form.pin.errors}}</td>
+				<td class="lot-cell">{{ form.lot }}{{form.lot.errors}}</td>
+				<td class="weight-cell">{{ form.supplier }}{{form.supplier.errors}}</td>
 			</tr>
 	    {% endfor %}
 		</tbody>
