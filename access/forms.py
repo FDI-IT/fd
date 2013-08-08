@@ -191,8 +191,7 @@ class ExperimentalForm(ModelForm, FieldsetMixin):
         ('Hidden',{
             'fields': ('experimentalnum',
                        'datesent',
-                       'initials','experimental_number',
-                       
+                       'initials','experimental_number','location_code_old',
                    'promotable', 'product_number',   'retain_number', 'retain_present','flavor',
                        ),
             'extra_content':{'divid':'hidden',

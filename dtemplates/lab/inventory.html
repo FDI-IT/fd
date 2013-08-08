@@ -18,10 +18,10 @@
 		{% for obj in queryset %}
 		
 		<tr>
-			<td><a href="{{ obj.get_absolute_url }}">{{ obj.main_number }}</a></td>
-			<td><a href="{{ obj.get_absolute_url }}">{{ obj.nat_art }}</a></td>
-			<td><a href="{{ obj.get_absolute_url }}">{{ obj.name }}</a></td>
-			<td><a href="{{ obj.get_absolute_url }}">{{ obj.location_code }}</a></td>
+			<td><a href="{{ obj.content_object.get_absolute_url }}">{{ obj.content_object.main_number }}</a></td>
+			<td><a href="{{ obj.content_object.get_absolute_url }}">{{ obj.content_object.natart }}</a></td>
+			<td><a href="{{ obj.content_object.get_absolute_url }}">{{ obj.content_object.name }}</a></td>
+			<td><a href="{{ obj.content_object.get_absolute_url }}">{{ obj.location_code }}</a></td>
 		</tr>
 		</a>
 		{% endfor %}
