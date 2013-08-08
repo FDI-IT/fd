@@ -327,9 +327,9 @@ def add_objects(request, page_title, ObjectClass, NewObjectForm):
         addobjectsbatch = AddObjectsBatch(request.GET)
         if addobjectsbatch.is_valid():
             number_of_objects = addobjectsbatch.cleaned_data['number_of_objects']
-            initial = NewObjectForm.prepare_formset_kwargs(number_of_objects)
+            initial = list(NewObjectForm.prepare_formset_kwargs(number_of_objects))
             ObjectFormSet = formset_factory(NewObjectForm, extra=0)
-            formset = ObjectFormSet(initial=initial, )
+            formset = ObjectFormSet(initial=initial)
             return render_to_response(NewObjectForm.template_path, 
                                       {'formset': formset,
                                        'page_title': page_title},
@@ -354,8 +354,8 @@ def add_objects(request, page_title, ObjectClass, NewObjectForm):
                 obj = form.create_from_cleaned_data()
                 obj.save()
             return HttpResponseRedirect(ObjectClass.browse_url)
-        else:
-            return render_to_response('qc/add_objects_batch.html', 
+        else:            
+            return render_to_response(NewObjectForm.template_path, 
                                       {'formset': formset,
                                        'page_title': page_title},
                                       context_instance=RequestContext(request))
@@ -402,18 +402,22 @@ def batch_print(request):
     if request.method == 'POST':
         referer_re = re.compile('rm_retains')
         match = referer_re.search(request.META['HTTP_REFERER'])
+        print_checklist_min = 2
+
         if match:
             retain_checklist = []
             retain_pks = request.POST.getlist('retain_pks')
-            for pk in retain_pks:
-                pin = RMRetain.objects.get(pk=pk).pin
-                retain_checklist.append(build_rm_checklist_row(pin))
+            if len(retain_pks) > print_checklist_min: #only append to checklist if checklist is needed
+                for pk in retain_pks:
+                    pin = RMRetain.objects.get(pk=pk).pin
+                    retain_checklist.append(build_rm_checklist_row(pin))
             
             retain_checklist.sort(key=target_sorter, reverse=True)  
             return render_to_response('qc/ingredient/batch_print.html', 
                                   {
                                    'retain_pks':retain_pks,
                                    'retain_checklist':retain_checklist,
+                                   'print_checklist_min': print_checklist_min
                                    },
                                   context_instance=RequestContext(request))
         else:
@@ -428,6 +432,7 @@ def batch_print(request):
                                   {
                                    'retain_pks':retain_pks,
                                    'retain_checklist':retain_checklist,
+                                   'print_checklist_min': print_checklist_min
                                    },
                                   context_instance=RequestContext(request))
 

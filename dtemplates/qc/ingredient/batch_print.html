@@ -64,31 +64,33 @@
 		</div>
 		{% endfor %}
 		
-		<div class="newpage">
-			<table width="100%">
-			<h1> Raw Material Retain Checklist </h1>
-				<thead>
-					<tr>
-						<th width="70px">Target #</th>
-						<th width="100px">Pin</th>
-						<th>Notes</th>
-						<th width="70px">Alt #</th>
-						<th>Alt Notes</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for retain in retain_checklist %}
-					<tr>
-						<td>{{ retain.1.0.0|date:'y' }}-{{retain.1.0.1}}</td>
-						<td>{{ retain.0 }}</td>
-						<td>{{ retain.1.0.2 }}</td>
-						<td>{{ retain.1.1.0|date:'y' }}-{{retain.1.1.1}}</td>
-						<td>{{ retain.1.1.2 }}</td>
-					</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
+		{% if retain_pks|length > print_checklist_min %}
+			<div class="newpage">
+				<table width="100%">
+				<h1> Raw Material Retain Checklist </h1>
+					<thead>
+						<tr>
+							<th width="70px">Target #</th>
+							<th width="100px">Pin</th>
+							<th>Notes</th>
+							<th width="70px">Alt #</th>
+							<th>Alt Notes</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for retain in retain_checklist %}
+						<tr>
+							<td>{{ retain.1.0.0|date:'y' }}-{{retain.1.0.1}}</td>
+							<td>{{ retain.0 }}</td>
+							<td>{{ retain.1.0.2 }}</td>
+							<td>{{ retain.1.1.0|date:'y' }}-{{retain.1.1.1}}</td>
+							<td>{{ retain.1.1.2 }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% endif %}
 	</div>
 </table>
 </body>

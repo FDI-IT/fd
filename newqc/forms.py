@@ -3,6 +3,9 @@ from django import forms
 from django.forms.formsets import BaseFormSet
 from django.forms import widgets
 from django.db import connection
+from django.core.exceptions import ValidationError
+from django.core.validators import *
+import re
 
 from access.models import Flavor
 from newqc.models import Retain, RMRetain, TestCard, Lot, ReceivingLog, ProductInfo, STATUS_CHOICES, UNITS_CHOICES
@@ -61,9 +64,26 @@ class NewReceivingLogForm(forms.Form):
                     
     def create_from_cleaned_data(self):
         return ReceivingLog(**self.cleaned_data)
+
+
+def validate_rnumber(rnum):
+    checkRNum = re.compile(r"^[Rr]?[-\s]?[0-9]+$")
+    
+    m = checkRNum.match(rnum)
+    
+    if m is None:
+        raise ValidationError(u"Please input a valid R Number.")
+        
+        
+
+class RNumberField(forms.CharField):
+    default_error_messages = {
+        'invalid': (u'Enter a valid R Number.'),
+    }
+    default_validators = [validate_rnumber]
     
 class NewRMRetainForm(forms.Form):
-    object_number = forms.IntegerField(label="R Number", min_value=1)
+    object_number = RNumberField(label="R Number")
     pin = forms.IntegerField(min_value=1)
     lot = forms.CharField()
     supplier = forms.CharField()
@@ -76,14 +96,18 @@ class NewRMRetainForm(forms.Form):
             yield {}
         
             
-    def create_from_cleaned_data(self):
+    def create_from_cleaned_data(self):    
         cd = self.cleaned_data
+        
+        num = re.compile(r"[0-9]+$")
+        temp = num.search(cd['object_number'])
+  
         return RMRetain(
                 date=cd['date'],
                 pin=cd['pin'],
                 supplier=cd['supplier'],
                 lot=cd['lot'],
-                r_number=cd['object_number'],
+                r_number=temp.group(),
                 status="Pending"            
             )
     
