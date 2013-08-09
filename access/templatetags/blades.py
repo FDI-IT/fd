@@ -106,7 +106,7 @@ def flavor_blades(flavor):
     try:
         lc = flavor.location_code
         if lc != None and lc != "":
-            crit_list.append(("Location Code",flavor.location_code))
+            crit_list.append(("Location Code",flavor.location_code.location_code))
         else:
             crit_list.append(("Location Code",None))
     except:
