@@ -164,7 +164,10 @@ class ProductInfo(models.Model):
     
     @staticmethod
     def get_object_from_softkey(softkey):
-        softkey = int(softkey)
+        try:
+            softkey = int(softkey)
+        except:
+            return None
 
         finished_products = ProductInfo.objects.filter(production_number=softkey)
         experimentals = ProductInfo.objects.filter(experimental_number=softkey)

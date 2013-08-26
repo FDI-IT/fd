@@ -169,10 +169,6 @@ class Formula(models.Model):
     # this helps the import-data management command know which order to
     # import tables so that foreign-key dependencies are met
 
-    @property
-    def natart(self):
-        return self.art_nati
-    
     class Meta:
         db_table = u'access_integratedformula'
         ordering = ['acc_flavor',]
@@ -586,7 +582,9 @@ class Ingredient(models.Model):
     metal_corrosifve_hazard = models.CharField("Corrosive to Metals", max_length=50,blank=True,
                                choices=CORROSIVE_TO_METAL_CHOICES)
     
-
+    #ing
+    location_code_n = generic.GenericRelation('LocationCode')
+    
 #    GERM_CELL_MUTAGENICITY_CHOICES = (
 #        ('No','No'),
 #        ('1A','1A'),
@@ -622,9 +620,6 @@ class Ingredient(models.Model):
 #                               choices=STOT_SINGLE_CHOICES)
 #    stot_repeat_hazard = models.CharField("STOT Repeated Exposure", max_length=50,blank=True,
 #                               choices=STOT_REPEAT_CHOICES)
-    @property
-    def main_number(self):
-        return self.id
     
     @staticmethod
     def anonymize():
@@ -1109,6 +1104,7 @@ class Flavor(FormulaInfo):
     ADD COLUMN keywords text DEFAULT '' NOT NULL; 
     """
     
+    #retains = generic.GenericRelation(Retain)
     id = models.PositiveIntegerField(
             primary_key=True,
             default=get_next_flavorid)
@@ -1224,14 +1220,9 @@ class Flavor(FormulaInfo):
             null=True)
     
     keywords = models.TextField(blank=True)
-    
+    #flavor
     location_code_n = generic.GenericRelation('LocationCode')
-    location_code_old = models.CharField(max_length=20,blank=True,null=True)
-
-    @property
-    def main_number(self):
-        return self.number
-       
+    
     def save(self, *args, **kwargs):
         try:
             self.prefix = self.prefix.upper()
@@ -1249,16 +1240,9 @@ class Flavor(FormulaInfo):
     @property
     def location_code(self):
         try:
-            possible_location_code = self.location_code_n.all().reverse()[0].location_code
+            return self.location_code_n.all().reverse()[0]
         except:
-            possible_location_code = ""
-        if possible_location_code == "":
-            for e in self.experimental_log.all():
-                lcs = LocationCode.objects.filter(experimentallog=e)
-                if lcs.count() > 0:
-                    return lcs[0].location_code
-        else:
-            return possible_location_code
+            return None
 #    
 #    @property
 #    def organoleptics(self):
@@ -1965,7 +1949,7 @@ class ExperimentalLog(models.Model):
     product_number = models.PositiveIntegerField(null=True,blank=True,db_column='ProductNumber')
     #flavor = models.OneToOneField('Flavor',null=True)
     # END FOREIGN KEY
-    location_code_old = models.CharField(max_length=20,blank=True,null=True)
+    
     
     
     coffee = models.BooleanField(db_column='Coffee', default=False)
@@ -1988,37 +1972,19 @@ class ExperimentalLog(models.Model):
     retain_present = models.BooleanField(db_column='RetainPresent',default=False)
     
     flavor = models.ForeignKey('Flavor',related_name='experimental_log',blank=True,null=True)
-    
+    location_code_old = models.CharField(blank=True, default="",max_length=20)
     def __unicode__(self):
         return "%s-%s %s %s" % (self.experimentalnum, self.initials,
                                 self.product_name, self.datesent_short)
-        
-    location_code_n = generic.GenericRelation('LocationCode')
+    
+    #elog
     @property
     def location_code(self):
         try:
-            possible_location_code = self.location_code_n.all().reverse()[0].location_code
+            return self.location_code_n.all().reverse()[0]
         except:
-            possible_location_code = ""
-        if possible_location_code == "":
-            return self.flavor.location_code
-        else:
-            return possible_location_code
+            return None
     
-#    
-#    @property
-#    def location_code(self):
-#        try:
-#            possible_location_code = self.location_code_n.all().reverse()[0].location_code
-#        except:
-#            possible_location_code = ""
-#        if possible_location_code == "":
-#            for e in self.experimental_log.all():
-#                if e.location_code != "":
-#                    return e.location_code
-#        else:
-#            return possible_location_code
-#    
     @property
     def batchsheet_memo(self):
         if self.mixing_instructions != "":
@@ -2052,14 +2018,6 @@ class ExperimentalLog(models.Model):
     @property
     def datesent_short(self):
         return self.datesent.date()
-    
-    @property
-    def main_number(self):
-        return self.experimentalnum
-    
-    @property
-    def name(self):
-        return self.product_name
     
     def save(self, *args, **kwargs):
         if self.retain_number == -1:
@@ -2903,8 +2861,7 @@ class DigitizedFormula(models.Model):
     experimental_log = models.ForeignKey('ExperimentalLog')
     ingredient_id = models.PositiveSmallIntegerField(blank=True,null=True)
     raw_row = models.TextField(blank=True,null=True)
-   
-number_re = re.compile('\d+') 
+    
 class LocationCode(models.Model):
     location_code = models.CharField(max_length=20)
     content_type = models.ForeignKey(ContentType)
@@ -2914,16 +2871,3 @@ class LocationCode(models.Model):
     def __unicode__(self):
         return u"%s - %s" % (self.location_code, self.content_object)
     
-    
-    @staticmethod
-    def get_next_location_code(inventory_choice):
-        if inventory_choice[:2] == "SL":
-            lc = LocationCode.objects.filter(location_code__istartswith=inventory_choice).order_by('-location_code')[0]
-            number = int(number_re.search(lc.location_code).group())
-            number+=1
-            return "%s%s" % (inventory_choice, str(number)[1:])
-        elif inventory_choice == "":
-            return ""
-        else:
-            return inventory_choice
-        

@@ -423,10 +423,27 @@ def flavor_blades(flavor):
     except:
         crit_list.append(("Raw Material Cost", 0,''))
     crit_list.append(("Profit Ratio", profit_ratio,''))
+    
     try:
-        crit_list.append(("Location Code",flavor.location_code))
+        lc = flavor.location_code
+        if lc != None and lc != "":
+            crit_list.append(("Location Code",flavor.location_code.location_code))
+        else:
+            crit_list.append(("Location Code",None))
     except:
         pass
+    
+    if flavor.number < 60000 and flavor.number > 50000:
+        experimentals = flavor.experimental_log.all().order_by('experimentalnum')
+        if experimentals.count() != 0:
+            experimental_num = experimentals[0].experimentalnum
+            label_link = '<a href="/django/lab/experimental_labels/?experimental_number=%s&inventory_slot=">Click here</a>' % (experimental_num)
+        else:
+            label_link = '<a href="/django/lab/finished_product_labels/?production_number=%s&inventory_slot=">Click here</a>' % (flavor.number)
+    else:
+        label_link = '<a href="/django/lab/finished_product_labels/?production_number=%s&inventory_slot=">Click here</a>' % (flavor.number)
+    crit_list.append((("Get label"),label_link))
+
     # TODO fix retain / qc stuff
     try:
         qc_card_info = flavor.qc_card_info
@@ -650,7 +667,6 @@ def print_blades(flavor):
         measured_weight += fr.amount
     blade_list.append(("Formula Weight",measured_weight))
     try:
-        flavor.upi = ProductInfo.objects.filter(production_number=flavor.number)[0]
         blade_list.append(("Location Code", flavor.location_code))
     except:
         flavor.upi = None

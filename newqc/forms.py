@@ -21,6 +21,8 @@ def validate_flavor_number(num):
 def validate_lot_number(num):
     if Lot.objects.filter(number = num).exists() == False:
         raise ValidationError(u"Please input a valid lot number.")
+    if Lot.objects.filter(number = num).count() > 1:
+        raise ValidationError(u"Multiple lots exist with this lot number.")
         
 class FlavorNumberField(forms.IntegerField):
     default_validators = [validate_flavor_number]
