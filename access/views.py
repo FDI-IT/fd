@@ -29,6 +29,7 @@ from access.templatetags.ft_review_table import consolidated, explosion, product
 from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_guts
 from access.tasks import ingredient_replacer_guts
+from access.forms import IngredientFilterSelectForm, FormulaEntryFilterSelectForm
 
 from solutionfixer.models import Solution, SolutionStatus
 
@@ -816,6 +817,12 @@ def process_cell_update(request):
     
     return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')
 
+def sanity_check(resultant_objects):
+    if resultant_objects.count() == 1:
+        return ('redirect', resultant_objects[0])
+        #HttpResponseRedirect(resultant_objects[0].get_absolute_url()))
+    else:
+        return None
 
 @login_required
 @permission_required('access.change_formula')
@@ -824,7 +831,7 @@ def process_cell_update(request):
 @transaction.commit_on_success
 def formula_entry(request, flavor, status_message=None):
     page_title = "Formula Entry"
-    status_message = ""
+    status_message = "FOO"
     if request.method == 'POST':
         FormulaFormSet = formset_factory(forms.FormulaRow)
         formset = FormulaFormSet(request.POST)
@@ -857,18 +864,46 @@ def formula_entry(request, flavor, status_message=None):
             redirect_path = "/django/access/%s/recalculate/" % (flavor.number)
             return HttpResponseRedirect(redirect_path)
     # else:
-    initial_data, label_rows = forms.build_formularow_formset_initial_data(flavor)
+    initial_data, label_rows, ingredient_rows = forms.build_formularow_formset_initial_data(flavor)
     if len(label_rows) == 0:
         FormulaFormSet = formset_factory(forms.FormulaRow, extra=1)
         label_rows.append({'cost': '', 'name': ''})
     else:
         FormulaFormSet = formset_factory(forms.FormulaRow, extra=0)
+        
+    filterselect = FormulaEntryFilterSelectForm(request.GET.copy())
+    filters = Ingredient.build_kwargs(filterselect.data, {}, get_filter_kwargs)
+    resultant_objects = Ingredient.objects.all()
+    if filters:
+        resultant_objects = resultant_objects.filter(**filters).distinct()
+    sc = sanity_check(resultant_objects)
+    if sc: return sc
+    
     formset = FormulaFormSet(initial=initial_data)
     formula_rows = zip(formset.forms,
-                       label_rows)
+                       label_rows,
+                       ingredient_rows)
+    
+    art_nati_list = None
+    allergen_list = None
+    prop65_list = None
+    
+    for x in filters:
+        if x == 'art_nati__in':
+            art_nati_list = filters[x]
+        if x == 'allergen__in':
+            allergen_list = filters[x]
+        if x == 'prop65__in':
+            prop65_list = filters[x]
     
     return render_to_response('access/flavor/formula_entry.html', 
                                   {'flavor': flavor,
+                                   'filters': filters,
+                                   'art_nati_list': art_nati_list,
+                                   'allergen_list': allergen_list,
+                                   'prop65_list': prop65_list,
+                                   'filterselect': filterselect,
+                                   'resultant_objects': resultant_objects,
                                    'status_message': status_message,
                                    'window_title': page_title,
                                    'page_title': page_title,

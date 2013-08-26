@@ -687,12 +687,29 @@ class Ingredient(models.Model):
                 for my_arg in qdict.getlist(key):
                     arg_list.append(my_arg)
                 string_kwargs[keyword] = arg_list
-            else:
+            elif key == 'allergen':
+                keyword = '%s__in' % (key)
+                arg_list = []
+                for my_arg in qdict.getlist(key):
+                    arg_list.append(my_arg)
+                string_kwargs[keyword] = arg_list
+            elif key == 'prop65':
+                keyword = '%s__in' % (key)
+                arg_list = []
+                for my_arg in qdict.getlist(key):
+                    if my_arg == 'False':
+                        arg_list.append(False)
+                    else:
+                        arg_list.append(True)
+                string_kwargs[keyword] = arg_list
+            
+                '''else:
                 keyword = '%s__in' % (key)
                 arg_list = []
                 for my_arg in qdict.getlist(key):
                     arg_list.append(bool(int(my_arg)))
                 string_kwargs[keyword] = arg_list
+                '''
         return string_kwargs
 
     @staticmethod
@@ -1140,7 +1157,6 @@ class Flavor(FormulaInfo):
     approved = models.BooleanField(
             blank=True,
             default=False)
-
     
     sold = models.BooleanField(
             blank=True,

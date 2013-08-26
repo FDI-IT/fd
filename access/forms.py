@@ -271,6 +271,42 @@ class BaseIngredientFormSet(BaseModelFormSet):
         instance.purchase_price_update = datetime.now()
         return BaseModelFormSet.save_existing(self, form, instance, commit)
 
+class FormulaEntryFilterSelectForm(forms.Form):
+    cursor = connection.cursor()
+    cursor.execute('select distinct "Raw Materials"."ART_NATI" from "Raw Materials" ORDER BY "Raw Materials"."ART_NATI" ASC')
+    natart_choices = []
+    for choice in cursor.fetchall():
+        natart_choices.append((choice[0], choice[0]))
+        
+    cursor.execute('select distinct "Raw Materials"."Allergen" from "Raw Materials" ORDER BY "Raw Materials"."Allergen" ASC')
+    allergen_choices = []
+    for choice in cursor.fetchall():
+        allergen_choices.append((choice[0], choice[0]))
+                
+        
+
+    art_nati = forms.MultipleChoiceField(
+        label="Natural/Artificial",
+        widget=widgets.CheckboxSelectMultiple,
+        required=False,
+        choices=(tuple(natart_choices))
+        )
+
+    allergen = forms.MultipleChoiceField(
+        label="Allergens",
+        widget=widgets.CheckboxSelectMultiple,
+        required=False,
+        choices=(tuple(allergen_choices))
+        )
+    
+    prop65 = forms.MultipleChoiceField(
+        label="Contains Prop65",
+        widget=widgets.CheckboxSelectMultiple,
+        required=False,
+        choices=(
+            (True,"Yes"),
+            (False,"No"),
+        ))
 
 class IngredientFilterSelectForm(forms.Form):
     cursor = connection.cursor()
@@ -431,6 +467,7 @@ def build_poli_formset_initial_data(po):
 def build_formularow_formset_initial_data(flavor):
     initial_data = []
     label_rows = []
+    ingredient_rows = []
     ingredients = Formula.objects.filter(flavor=flavor)
     for ingredient in ingredients:
         formula_row = {}
@@ -444,7 +481,8 @@ def build_formularow_formset_initial_data(flavor):
         label_row['name'] = ingredient.ingredient.product_name
         initial_data.append(formula_row)
         label_rows.append(label_row)
-    return (initial_data, label_rows)
+        ingredient_rows.append(ingredient.ingredient)
+    return (initial_data, label_rows, ingredient_rows)
 
 def build_experimental_formularow_formset_initial_data(experimental):
     initial_data = []

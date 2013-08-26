@@ -714,6 +714,9 @@ def passed_finder(request):
     return render_to_response('qc/testcards/passed_finder.html',
                               {'testcards':testcards},
                               context_instance=RequestContext(request))
+    
+def test():
+    return 1
 
 def last_chance(request):
    

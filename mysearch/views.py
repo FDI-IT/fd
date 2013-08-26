@@ -131,7 +131,7 @@ def process_rows(object_list, headers):
         yield (obj, inner_row)
 
 def search(request):
-    context_dict = {'trufiness':True,'falsiness':False}
+    context_dict = {}
     context_dict['ms'] = MainSearch(request.GET)
     if not context_dict['ms'].is_valid():
         return HttpResponseRedirect('/django/')
@@ -152,6 +152,7 @@ def search(request):
         context_dict['profile'] = None 
     context_dict['print_link'] = 'javascript:search_results_popup()'
     context_dict['get'] = request.GET
+
     return render_to_response(
         'mysearch/search_results.html',
         context_dict,
