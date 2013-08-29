@@ -1929,9 +1929,9 @@ class ExperimentalLog(models.Model):
     wonf = models.BooleanField("WONF",db_column='WONF', default=False)
     
     duplication = models.BooleanField(db_column='Duplication')
-#    duplication_company = models.CharField(max_length=50,blank=True)
-#    duplication_id = models.CharField(max_length=50, blank=True)
-#    duplication_name = models.CharField(max_length=50)
+    duplication_company = models.CharField(max_length=50,blank=True)
+    duplication_id = models.CharField(max_length=50, blank=True)
+    duplication_name = models.CharField(max_length=50)
     promotable = models.BooleanField(db_column='Promotable', default=False)
     holiday = models.BooleanField(db_column='Holiday', default=False)
     chef_assist = models.BooleanField(db_column='Chef Assist', default=False) # Field renamed to remove spaces.lc
@@ -2128,6 +2128,8 @@ class ExperimentalLog(models.Model):
                     ('product_name','Name', ''),
                     ('initials','Initials', 'width=30x'),
                     ('datesent_short','Date sent', 'width=100px'),
+                    ('duplication_company','Dup. Company', 'width=100px'),
+                    ('duplication_id','Dup. ID', 'width=80px'),
                 )
     
     @staticmethod

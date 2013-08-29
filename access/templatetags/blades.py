@@ -3,7 +3,7 @@ from datetime import date
 
 from django import template
 
-from access.models import Flavor, Ingredient, PurchaseOrder
+from access.models import Flavor, Ingredient, PurchaseOrder, ExperimentalLog
 register = template.Library()
 
 default_flavor_blade_list = (
@@ -327,6 +327,12 @@ def blades(product):
         fb = FlavorBlades(product)
         blade_list = fb.get_blade_list(default_flavor_blade_list)
         return {'blade_list': blade_list}
+    
+    if type(product) == ExperimentalLog:
+        fb = FlavorBlades(product.flavor)
+        blade_list = fb.get_blade_list(default_flavor_blade_list)
+        return {'blade_list': blade_list}
+        
     
     if type(product) == Ingredient:
         ib = IngredientBlades(product)

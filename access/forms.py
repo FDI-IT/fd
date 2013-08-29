@@ -147,6 +147,9 @@ class ExperimentalForm(ModelForm, FieldsetMixin):
                        'oilsoluble',
                        'concentrate',
                        'duplication',
+                       'duplication_company',
+                       'duplication_id',
+                       'duplication_name',
                        ),
             'extra_content':{'divid':'type',
                              'legend':'Type'},
@@ -630,6 +633,9 @@ class NewExForm1(FormRequiredFields):
     memo = forms.CharField(widget=forms.Textarea,required=False)
     
 class NewExForm2(FormRequiredFields):
+    duplication_company = forms.CharField(max_length=50,required=False)
+    duplication_id = forms.CharField(label="Duplication ID Number", max_length=50,required=False)
+    duplication_name = forms.CharField(max_length=50,required=False)
     liquid = forms.BooleanField(required=False)
     dry = forms.BooleanField(required=False)
     spray_dried = forms.BooleanField(required=False)
