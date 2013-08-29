@@ -59,13 +59,14 @@ def sales_order_report(request):
     sales_orders = []
     so_by_due_date = {}
     for so in SalesOrderNumber.objects.all():
-        li = sales_orders.lineitem_set.all().order_by('due_date')[0]
         try:
+            li = so.lineitem_set.all().order_by('due_date')[0]
             so_by_due_date[li.due_date].append(so)
         except:
             so_by_due_date[li.due_date] = [so,]
     
-    due_dates = so_by_due_date.keys().sort()
+    due_dates = so_by_due_date.keys()
+    due_dates.sort()
     for dd in due_dates:
         sales_orders.extend(so_by_due_date[dd])
         
@@ -175,7 +176,7 @@ def sales_order_by_lineitem(request):
         extra_context= dict({
             'page_title':"Sales Orders",
             'month_list':None,
-        }, **STATUS_BUTTONS),
+        },),
     )
 
 #@login_required
@@ -262,19 +263,6 @@ def ingredients_required(request, status_message=None):
                                },
                                context_instance=RequestContext(request))    
     
-
-@login_required 
-def summary(request):
-    page_title="Sales Order Summary"
-    good_orders, bad_orders = parse_orders()
-    return render_to_response('salesorders/summary.html',
-                              {
-                               'good_orders':good_orders,
-                               'bad_orders':bad_orders,
-                               'page_title':page_title,
-                               'window_title':page_title,
-                               },
-                              context_instance=RequestContext(request))
 
 def coloractivation(request):
     response_dict = {}

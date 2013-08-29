@@ -467,7 +467,6 @@ def build_poli_formset_initial_data(po):
 def build_formularow_formset_initial_data(flavor):
     initial_data = []
     label_rows = []
-    ingredient_rows = []
     ingredients = Formula.objects.filter(flavor=flavor)
     for ingredient in ingredients:
         formula_row = {}
@@ -481,8 +480,7 @@ def build_formularow_formset_initial_data(flavor):
         label_row['name'] = ingredient.ingredient.product_name
         initial_data.append(formula_row)
         label_rows.append(label_row)
-        ingredient_rows.append(ingredient.ingredient)
-    return (initial_data, label_rows, ingredient_rows)
+    return (initial_data, label_rows,)
 
 def build_experimental_formularow_formset_initial_data(experimental):
     initial_data = []

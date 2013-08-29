@@ -1,4 +1,5 @@
 from decimal import Decimal, ROUND_HALF_UP
+from datetime import date
 
 from django import template
 
@@ -6,9 +7,19 @@ from access.models import Flavor, Ingredient, PurchaseOrder
 register = template.Library()
 
 default_flavor_blade_list = (
-    'selling_price', 'formula_weight', 'pin', 'profit_ratio', 'flagged', 'last_updated','raw_material_cost', 'location_cost', 
+    'selling_price', 'formula_weight', 'pin', 'profit_ratio', 'flagged', 'last_updated', 'oldest_price_date', 'raw_material_cost', 'location_code', 
     'keywords', 'solvent', 'flashpoint', 'kosher', 'allergen', 'sulfites', 'flavor_yield', 'diacetyl', 'pg', 'experimental_link',
     'new_usage', 'application_list')
+
+print_flavor_blade_list = (
+        'flagged',
+        'selling_price',
+        'last_updated',
+        'raw_material_cost',
+        'profit_ratio',
+        'formula_weight',
+        'location_code',
+    )
 
 class ObjectBlades():
     def get_blade_list(self, property_list):
@@ -67,12 +78,26 @@ class FlavorBlades(ObjectBlades):
         
         if allFlags != []:
             return ("Flagged", allFlags_string)
+        else:
+            return ("Approved","")
 
     
     @property
     def last_updated(self):
         return("Last Updated", self.flavor.lastspdate.date().strftime("%m-%d-%y"))  
     
+    @property
+    def oldest_price_date(self):
+        oldest_date = date.today()
+        oldest_rm_pin = 0
+        for lw in self.flavor.leaf_weights.all():
+            ppu_date = lw.ingredient.purchase_price_update.date()
+            if ppu_date < oldest_date:
+                oldest_date = ppu_date
+                oldest_rm_pin = lw.ingredient.id
+                
+        return ("Oldest RM Price", "PIN: %s -- %s" % (oldest_rm_pin, oldest_date))
+        
     @property
     def raw_material_cost(self):
         try:
@@ -82,7 +107,7 @@ class FlavorBlades(ObjectBlades):
         return("Raw Material Cost", rmc)
     
     @property
-    def location_cost(self):
+    def location_code(self):
         try:
             lc = self.flavor.location_code
         except:
@@ -158,7 +183,7 @@ class FlavorBlades(ObjectBlades):
     def experimental_link(self):
         ex_list = []
         for experimental in self.flavor.experimental_log.all():
-            ex_list.append(u'<a href="%s">%s</a><br>' % (experimental.get_absolute_url(), experimental.experimentalnum))
+            ex_list.append(u'<a href="%s">%s-%s</a><br>' % (experimental.get_absolute_url(), experimental.initials, experimental.experimentalnum))
         if len(ex_list) > 0:
             joined_exs = ''.join(ex_list)
             return ("Experimentals", joined_exs)
@@ -312,4 +337,11 @@ def blades(product):
         pob = PurchaseOrderBlades(product)
         blade_list = pob.get_blade_list(default_purchase_order_blade_list)
         return {'blade_list': blade_list}    
+    
+@register.inclusion_tag('access/blades.html')
+def print_blades(flavor):
+    fb = FlavorBlades(flavor)
+    blade_list = fb.get_blade_list(print_flavor_blade_list)
+    return {'flavor':flavor, 'blade_list':blade_list}
+    
     
