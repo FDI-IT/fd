@@ -5,10 +5,9 @@
 
 <div id="content-solo">
 <div class="hideable">
-	<a id="showhidetoggle" href="#" onclick="toggle_visible();">TRY OUT MATT'S INGREDIENT FILTER!!</a>
+	<a id="showhidetoggle" href="#" onclick="toggle_visible();">Show Ingredient Filter</a>
 	<form action="/django/access/{{flavor.number}}/formula_entry" id="mainsearch" method="GET">
 		<div id="advanced-search" class="hidden">
-			<div><input type="submit" value="Filter Results"></div>
 			<ul id="formulaedit-filterselect" class="filterselect_list">
 				<li></li>
 				{{ filterselect.as_ul }}
