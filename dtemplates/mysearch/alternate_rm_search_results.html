@@ -10,7 +10,7 @@
 	<form action="/django/mysearch/access/alternate_rm/" id="mainsearch" method="GET">
 		<div id="advanced-search" >
 			<div>{% rm_search %}<input type="submit" value="Filter Results"></div>
-			<ul id="filterselect">
+			<ul class="filterselect_list">
 				<li></li>
 				{{ filterselect.as_ul }}
 	    		

@@ -10,7 +10,7 @@
 	<form action="/django/mysearch/" id="mainsearch" method="GET">
 		<div id="advanced-search" class="hidden">
 			<div>{% mainsearch %}<input type="submit" value="Filter Results"></div>
-			<ul id="filterselect">
+			<ul class="filterselect_list">
 				<li></li>
 				{{ filterselect.as_ul }}
 	    		

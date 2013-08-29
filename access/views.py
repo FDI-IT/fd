@@ -30,6 +30,7 @@ from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_guts
 from access.tasks import ingredient_replacer_guts
 from access.forms import IngredientFilterSelectForm, FormulaEntryFilterSelectForm
+from access.formula_filters import ArtNatiFilter, Prop65Filter
 
 from solutionfixer.models import Solution, SolutionStatus
 
@@ -788,6 +789,31 @@ def ingredient_autocomplete(request):
     return HttpResponse(simplejson.dumps(ret_array), content_type='application/json; charset=utf-8')
 
 
+    
+
+def process_filter_update(request):
+    
+    return_messages = {}
+    
+    for FilterClass in (ArtNatiFilter, Prop65Filter):
+        checked_boxes = request.GET.getlist(FilterClass.key_string)
+        if checked_boxes != []: #only execute a filter query for the current filter category if there are checked boxes
+            my_query = FilterClass.get_q_list(checked_boxes)
+            filtered_ingredients = Ingredient.objects.filter(my_query)
+            
+            filtered_pks = filtered_ingredients.values_list('pk', flat=True)
+            
+            for pk in map(int, request.GET.getlist('pks[]')):
+                if pk not in filtered_pks: #the ingredient does not match the filter requirements 
+                    if pk in return_messages: #check if there is already an message for this ingredient
+                        return_messages[pk].append(FilterClass.label) #if there is, add the current category to the message list
+                    else:
+                        return_messages[pk] = [FilterClass.label] #if there isn't, create a message list
+    
+
+    
+    return HttpResponse(simplejson.dumps(return_messages), content_type='application/json; charset=utf-8')
+
 def process_cell_update(request):
     number = request.GET['number']
     amount = request.GET['amount']
@@ -864,7 +890,7 @@ def formula_entry(request, flavor, status_message=None):
             redirect_path = "/django/access/%s/recalculate/" % (flavor.number)
             return HttpResponseRedirect(redirect_path)
     # else:
-    initial_data, label_rows, ingredient_rows = forms.build_formularow_formset_initial_data(flavor)
+    initial_data, label_rows = forms.build_formularow_formset_initial_data(flavor)
     if len(label_rows) == 0:
         FormulaFormSet = formset_factory(forms.FormulaRow, extra=1)
         label_rows.append({'cost': '', 'name': ''})
@@ -881,27 +907,11 @@ def formula_entry(request, flavor, status_message=None):
     
     formset = FormulaFormSet(initial=initial_data)
     formula_rows = zip(formset.forms,
-                       label_rows,
-                       ingredient_rows)
-    
-    art_nati_list = None
-    allergen_list = None
-    prop65_list = None
-    
-    for x in filters:
-        if x == 'art_nati__in':
-            art_nati_list = filters[x]
-        if x == 'allergen__in':
-            allergen_list = filters[x]
-        if x == 'prop65__in':
-            prop65_list = filters[x]
+                       label_rows )
+  
     
     return render_to_response('access/flavor/formula_entry.html', 
                                   {'flavor': flavor,
-                                   'filters': filters,
-                                   'art_nati_list': art_nati_list,
-                                   'allergen_list': allergen_list,
-                                   'prop65_list': prop65_list,
                                    'filterselect': filterselect,
                                    'resultant_objects': resultant_objects,
                                    'status_message': status_message,

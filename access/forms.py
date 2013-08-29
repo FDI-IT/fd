@@ -228,6 +228,7 @@ class IngredientReplacerForm(forms.Form):
 class FormulaRow(forms.Form):
     ingredient_number = forms.CharField(label="")
     amount = forms.DecimalField(label="", max_digits=9, decimal_places=5)
+    ingredient_pk = forms.IntegerField()
     
 class ExperimentalFormulaRow(forms.Form):
     ingredient_number = forms.CharField(label="")
@@ -271,6 +272,20 @@ class BaseIngredientFormSet(BaseModelFormSet):
         instance.purchase_price_update = datetime.now()
         return BaseModelFormSet.save_existing(self, form, instance, commit)
 
+def make_exclude_tuples(x): #Don't want to have a "None" option
+    for y in x:
+        yield(y,y)
+
+class FormulaEntryExcludeSelectForm(forms.Form):
+    allergen_choices = make_exclude_tuples(Ingredient.aller_attrs)
+    allergen = forms.MultipleChoiceField(
+        label="Allergens",
+        widget=widgets.CheckboxSelectMultiple,
+        required=False,
+        choices=(tuple(allergen_choices))
+        )
+    
+
 class FormulaEntryFilterSelectForm(forms.Form):
     cursor = connection.cursor()
     cursor.execute('select distinct "Raw Materials"."ART_NATI" from "Raw Materials" ORDER BY "Raw Materials"."ART_NATI" ASC')
@@ -278,11 +293,12 @@ class FormulaEntryFilterSelectForm(forms.Form):
     for choice in cursor.fetchall():
         natart_choices.append((choice[0], choice[0]))
         
+    '''
     cursor.execute('select distinct "Raw Materials"."Allergen" from "Raw Materials" ORDER BY "Raw Materials"."Allergen" ASC')
     allergen_choices = []
     for choice in cursor.fetchall():
         allergen_choices.append((choice[0], choice[0]))
-                
+    '''          
         
 
     art_nati = forms.MultipleChoiceField(
@@ -291,13 +307,13 @@ class FormulaEntryFilterSelectForm(forms.Form):
         required=False,
         choices=(tuple(natart_choices))
         )
-
+    '''
     allergen = forms.MultipleChoiceField(
         label="Allergens",
         widget=widgets.CheckboxSelectMultiple,
         required=False,
         choices=(tuple(allergen_choices))
-        )
+    '''
     
     prop65 = forms.MultipleChoiceField(
         label="Contains Prop65",
@@ -467,22 +483,21 @@ def build_poli_formset_initial_data(po):
 def build_formularow_formset_initial_data(flavor):
     initial_data = []
     label_rows = []
-    ingredient_rows = []
-    ingredients = Formula.objects.filter(flavor=flavor)
-    for ingredient in ingredients:
-        formula_row = {}
+    for formula_row in Formula.objects.filter(flavor=flavor):
+        formula_form_row = {}
         label_row = {}
-        if ingredient.ingredient.is_gazinta:
-            formula_row['ingredient_number'] = str(ingredient.ingredient.flavornum) + 'f'
+        if formula_row.ingredient.is_gazinta:
+            formula_form_row['ingredient_number'] = str(formula_row.ingredient.flavornum) + 'f'
+
         else:
-            formula_row['ingredient_number'] = str(ingredient.ingredient.id)
-        formula_row['amount'] = str(ingredient.amount)
-        label_row['cost'] = str(ingredient.get_exploded_cost().quantize(Decimal('.001'), rounding=ROUND_HALF_UP))
-        label_row['name'] = ingredient.ingredient.product_name
-        initial_data.append(formula_row)
+            formula_form_row['ingredient_number'] = str(formula_row.ingredient.id)
+        formula_form_row['ingredient_pk'] = formula_row.ingredient.pk
+        formula_form_row['amount'] = str(formula_row.amount)
+        label_row['cost'] = str(formula_row.get_exploded_cost().quantize(Decimal('.001'), rounding=ROUND_HALF_UP))
+        label_row['name'] = formula_row.ingredient.product_name
+        initial_data.append(formula_form_row)
         label_rows.append(label_row)
-        ingredient_rows.append(ingredient.ingredient)
-    return (initial_data, label_rows, ingredient_rows)
+    return (initial_data, label_rows)
 
 def build_experimental_formularow_formset_initial_data(experimental):
     initial_data = []
@@ -556,6 +571,8 @@ def make_two_tuple_from_list(x):
     yield("None","None")
     for y in x:
         yield(y,y)
+        
+
 
 
 class NewRMForm5(FormRequiredFields):
