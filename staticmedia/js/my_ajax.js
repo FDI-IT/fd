@@ -55,8 +55,24 @@ function remove_filter_messages() {
 	message_rows.remove();
 }
 
+function remove_extra_rows() {
+	while (jQuery("#formula-rows tr").filter(":last").hasClass('formula_row') == false)
+		jQuery("#formula-rows tr").filter(":last").remove()
+}
+
+function remove_duplicate_messages() {
+	var seen = {};
+	jQuery('#formula-rows tr.filter_message').each(function() {
+	    var txt = jQuery(this).children('.filter_message_pk').text();
+	    if (seen[txt])
+	        jQuery(this).remove();
+	    else
+	        seen[txt] = true;
+	});
+}
 
 function filter_rows() {
+	jQuery('#formula-submit-button').show();
 	remove_filter_messages();
 
 	jQuery.get('/django/access/process_filter_update/',
@@ -65,8 +81,10 @@ function filter_rows() {
 			for (var key in data) {
 				var index = jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == key; }).closest("tr").index();
 				jQuery('#formula-rows tr').eq(index-1).after(
-					"<tr bgcolor='red'> <td colspan='5'> <b> The ingredient below doesn't meet the following filter categories: " + key + ":" + data[key] + " </b> </td> </tr>");
+					"<tr bgcolor='red'> <td colspan='5'> <b> The ingredient below doesn't meet the following filters: " + key + ":" + data[key] + " </b> </td>" +
+						"<td class='filter_message_pk' style='display:none'>" + key + "</td> </tr>");
 				jQuery('#formula-rows tr').eq(index).addClass('filter_message');
+				jQuery('#formula-submit-button').hide();
 			}
 		}, 'json');
 }
@@ -92,6 +110,8 @@ function filter_update() {
 	get_pks();
 	get_checked_boxes();
 	filter_rows();
+	remove_extra_rows();
+	remove_duplicate_messages();
 }
 
 function update_formula_row (row) {
@@ -114,7 +134,7 @@ function update_formula_row (row) {
 				jQuery('#formula-submit-button').show();
 				row.removeClass('invalid');
 			}
-			if(jQuery('.invalid').length == 0) {
+			if(jQuery('.invalid').length == 0 && jQuery('.filter_message').length == 0) {
 				jQuery('#formula-submit-button').show();
 			} else {
 				jQuery('#formula-submit-button').hide();
@@ -449,11 +469,12 @@ jQuery(document).ready(function(){
 		jQuery('#id_form-TOTAL_FORMS').val(Number(form_id)+1);
 		
 		jQuery('#formula-rows tr:last').after(
-			'<tr>' + 
+			'<tr class="formula_row">' + 
 			'<td class="number-cell"><input type="text" name="form-' + form_id + '-ingredient_number" id="id_form-' + form_id + '-ingredient_number" /></td>' +
 			'<td class="amount-cell"><input type="text" name="form-' + form_id + '-amount" id="id_form-' + form_id + '-amount" /></td>' +
 			'<td class="name-cell"></td>' +
 			'<td class="cost-cell"></td>' +
+			'<td class="ingredient_pk-cell" style="display:none"> <input> </td>' +
 			'<td class="del-row"><input type="button" value="X" onclick="delete_row(this.parentNode.parentNode.rowIndex)"></td>' +
 			'</tr>');
 		jQuery('#id_form-' + form_id + '-ingredient_number').focus();
@@ -500,18 +521,7 @@ jQuery(document).ready(function(){
 	});
 	
 	jQuery('#formulaedit-filterselect input:checkbox').change( function() {
-
-		
-		get_checked_boxes();
-		get_pks();
-			
-		console.log("Art/nat: " + FORMULA_FILTER.checked_boxes["art_nati"]);
-		//console.log("Allergens: " + allergen);
-		console.log("Prop65: " + FORMULA_FILTER.checked_boxes["prop65"]);
-	
-		filter_rows();
-
-		
+		filter_update();
 	});
 	
 	jQuery('#formula-rows').delegate('input', 'keyup', function (e) {
@@ -548,9 +558,14 @@ jQuery(document).ready(function(){
 	if(jQuery("#formula-rows").length > 0) {
 		jQuery(document).ready(function() {
 			console.log("The page has just been refreshed");
-			get_checked_boxes();
-			get_pks();
+			jQuery('input:checkbox').removeAttr('checked');
 			filter_rows();
+			t = setTimeout(console.log(jQuery('.filter_message').length),2000);
+			if(jQuery('.filter_message').length == 0) {
+				jQuery('#formula-submit-button').show();
+			} else {
+				jQuery('#formula-submit-button').hide();
+			}
 		});
 	}
 	
