@@ -1230,6 +1230,10 @@ class Flavor(FormulaInfo):
             pass
         super(Flavor, self).save(*args, **kwargs)
         
+    def gazintas(self,):
+        for ft in FormulaTree.objects.filter(root_flavor=self)[1:]:
+            if ft.node_flavor is not None:
+                yield ft.node_flavor
     
     class Meta:
         db_table = u'access_integratedproduct'
@@ -1925,6 +1929,9 @@ class ExperimentalLog(models.Model):
     wonf = models.BooleanField("WONF",db_column='WONF', default=False)
     
     duplication = models.BooleanField(db_column='Duplication')
+    duplication_company = models.CharField(max_length=50,blank=True)
+    duplication_id = models.CharField(max_length=50, blank=True)
+    duplication_name = models.CharField(max_length=50)
     promotable = models.BooleanField(db_column='Promotable', default=False)
     holiday = models.BooleanField(db_column='Holiday', default=False)
     chef_assist = models.BooleanField(db_column='Chef Assist', default=False) # Field renamed to remove spaces.lc
@@ -1974,8 +1981,8 @@ class ExperimentalLog(models.Model):
     flavor = models.ForeignKey('Flavor',related_name='experimental_log',blank=True,null=True)
     location_code_old = models.CharField(blank=True, default="",max_length=20)
     def __unicode__(self):
-        return "%s-%s %s %s" % (self.experimentalnum, self.initials,
-                                self.product_name, self.datesent_short)
+        return "%s-%s %s %s %s" % (self.experimentalnum, self.initials,
+                                self.natart, self.product_name, self.datesent_short)
     
     #elog
     @property
@@ -2121,6 +2128,8 @@ class ExperimentalLog(models.Model):
                     ('product_name','Name', ''),
                     ('initials','Initials', 'width=30x'),
                     ('datesent_short','Date sent', 'width=100px'),
+                    ('duplication_company','Dup. Company', 'width=100px'),
+                    ('duplication_id','Dup. ID', 'width=80px'),
                 )
     
     @staticmethod

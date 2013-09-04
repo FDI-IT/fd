@@ -137,6 +137,11 @@ def approve_experimental(request,experimental):
         form = forms.ApproveForm(request.POST, instance=experimental.flavor)
         if form.is_valid():
             form.save()
+            for gazinta in form.instance.gazintas():
+                if gazinta.prefix == "EX":
+                    gazinta.prefix = "GZ"
+                    gazinta.approved = True
+                    gazinta.save()
             experimental.product_number = form.instance.number
             experimental.save()
             return redirect(experimental.flavor.get_absolute_url())
@@ -414,7 +419,12 @@ def ft_review(request, flavor):
                    'formula_weight': formula_weight,
                    'print_link':'javascript:print_review(%s)' % flavor.number,
                    'recalculate_link':'/django/access/%s/recalculate/' % flavor.number,
-                   }   
+                   }
+    if flavor.prefix == "EX":
+        experimentals = flavor.experimental_log.order_by('-experimentalnum')
+        if experimentals.count() > 0:
+            context_dict['approve_link'] = experimentals[0].get_approve_link()
+             
     return render_to_response('access/flavor/ft_review.html',
                               context_dict,
                               context_instance=RequestContext(request))
@@ -857,7 +867,6 @@ def sanity_check(resultant_objects):
 @transaction.commit_on_success
 def formula_entry(request, flavor, status_message=None):
     page_title = "Formula Entry"
-    status_message = "FOO"
     if request.method == 'POST':
         FormulaFormSet = formset_factory(forms.FormulaRow)
         formset = FormulaFormSet(request.POST)

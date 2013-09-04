@@ -35,7 +35,6 @@
     <table class="sorttable" class="retaintable" width="100%">
     	
 	<tr class="qcheaders">
-		<th width="15px">Select</th>
 	    <th title="Sales Order Number">SO<br>Number</th>
 	    <th title="Order Date" class="{sorter: 'isoDate'}">Order<br>Date</th>
 	    <th title="Customer">Customer</th>
@@ -48,8 +47,7 @@
 	</tr>
 	{% for lineitem in object_list %}
 	    <tr>
-	    <td><input type="checkbox" name="lineitem_pks" value="{{ lineitem.pk }}" {% if checkall %}checked{% endif %}></td>
-		<td><!-- <a href="{{ lineitem.get_admin_url }}"> -->{{ lineitem.salesordernumber.number }}</a></td>
+	    <td><!-- <a href="{{ lineitem.get_admin_url }}"> -->{{ lineitem.salesordernumber.number }}</a></td>
 		<td>{{ lineitem.salesordernumber.create_date|date:"m-d" }}</td>
 		<td title="{{lineitem.salesordernumber.customer.companyname}}"><!-- <a href=""> -->{{ lineitem.salesordernumber.customer.companyname|slice:"0:11" }}{% if lineitem.salesordernumber.customer.companyname|length > 11 %}...{% endif %}</a></td>
 		<td title="{{lineitem.flavor}}"><a href="/django/access/{{lineitem.flavor.number}}/">{{ lineitem.flavor.prefix }}-{{ lineitem.flavor.number }} {{ lineitem.flavor.natart }} {{ lineitem.flavor.name|slice:"0:18" }}{% if lineitem.flavor.name|length > 18 %}...{% endif %} {{ lineitem.flavor.label_type }}</a></td>
