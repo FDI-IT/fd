@@ -273,12 +273,12 @@ float:left;
 	margin: 0px;
 }
 
-#filterselect > li {
+.filterselect_list > li {
 	float:left;
 	margin: 4px 30px 4px 0px;
 }
 
-#filterselect li {
+.filterselect_list li {
 	display:block;
 }
 

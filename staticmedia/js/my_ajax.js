@@ -1,8 +1,15 @@
 // this variable designates a timeout to recalculate the total cost
 var t;
 
-function setLocationHash(str) {
-  window.location.hash = str;
+var FORMULA_FILTER ={};
+
+function isNotEmpty(map) {  //I use this to check if FORMULA_FILTER is not empty
+   for(var key in map) {
+      if (map.hasOwnProperty(key)) {
+         return true;
+      }
+   }
+   return false;
 }
 
 function update_all_formula_rows () {
@@ -14,21 +21,96 @@ function update_all_formula_rows () {
 			update_formula_row(jQuery(this));
 		}
 	});
-		
+}
 
-};
-
+function get_checked_boxes() { 
+	FORMULA_FILTER.checked_boxes = {};
+	var checkboxes = jQuery('#formulaedit-filterselect input:checkbox:checked');
 	
+	for(var i = 0; i < checkboxes.length; i++) {
+		var my_box = checkboxes[i];
+		
+		if ( my_box.name in FORMULA_FILTER.checked_boxes ) {
+			FORMULA_FILTER.checked_boxes[my_box.name].push(my_box.value);
+		} else {
+			FORMULA_FILTER.checked_boxes[my_box.name] = [my_box.value];
+		}
+	}
+}
+
+function get_pks() {
+	FORMULA_FILTER.pks = [];
+	
+	jQuery("#formula-rows tr.formula_row").each(function () { //GET THE PK OF ALL ROWS WITH CLASS FORMULA_ROW 
+		
+		row_pk = jQuery(this).find('td.ingredient_pk-cell input').val();
+		FORMULA_FILTER.pks.push(row_pk);
+	});
+}
+
+
+
+function remove_filter_messages() {
+	var message_rows = jQuery("#formula-rows tr.filter_message");
+	message_rows.remove();
+}
+
+
+function filter_rows() {
+	remove_filter_messages();
+
+	jQuery.get('/django/access/process_filter_update/',
+		FORMULA_FILTER,
+		function(data) {
+			for (var key in data) {
+				var index = jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == key; }).closest("tr").index();
+				jQuery('#formula-rows tr').eq(index-1).after(
+					"<tr bgcolor='red'> <td colspan='5'> <b> The ingredient below doesn't meet the following filter categories: " + key + ":" + data[key] + " </b> </td> </tr>");
+				jQuery('#formula-rows tr').eq(index).addClass('filter_message');
+			}
+		}, 'json');
+}
+
+//obtain pk at given row
+//jQuery(this).children('.ingredient_pk-cell').children('input').val()
+
+//change pk at given row
+//jQuery(row).children('.ingredient_pk-cell').children('input').attr("value","86")
+
+//insert row at given index:
+//jQuery('#formula-rows tr').eq(index).after(html);
+//$('#my_table > tbody > tr').eq(i-1).after(html);
+
+
+//get the row where pk = 492
+//var row = jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == 492; }).closest("tr");
+
+//obtain the index of the row where pk = 722
+//jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == 722; }).closest("tr").index();
+
+function filter_update() {
+	get_pks();
+	get_checked_boxes();
+	filter_rows();
+}
+
 function update_formula_row (row) {
 	clearTimeout(t);	
+	
 	jQuery.get('/django/access/process_cell_update/', 
-		{number: row.find('.number-cell input').val(), amount: row.find('.amount-cell input').val()},
+		{
+		    number: row.find('.number-cell input').val(), 
+		    amount: row.find('.amount-cell input').val()
+		},
 		function (data) {
 			row.children('.name-cell').html(data.name).end().children('.cost-cell').html(data.cost);
+			jQuery(row).children('.ingredient_pk-cell').children('input').attr("value", data.pk)
+			
 			if (data.name == 'Invalid Number') {
 				row.addClass('invalid');
 			} else {	
 				t = setTimeout("recalculate_total_cost()", 750);
+				t2 = setTimeout("filter_update()", 750);
 				jQuery('#formula-submit-button').show();
 				row.removeClass('invalid');
 			}
@@ -38,9 +120,10 @@ function update_formula_row (row) {
 				jQuery('#formula-submit-button').hide();
 			}
 		}, 'json');	
-};
 
-	
+}
+
+
 
 function normalize_weight () {
 	var sum=0;
@@ -205,6 +288,8 @@ function recalculate_total_cost() {
 	total_weight = Math.round(total_weight*1000)/1000;
 	jQuery("#FormulaWeight").html(total_weight);
 };
+
+
 
 function ajax_retain_status_change( new_status ) {
 	var STATUS_INDEX;
@@ -414,6 +499,21 @@ jQuery(document).ready(function(){
 		return false;
 	});
 	
+	jQuery('#formulaedit-filterselect input:checkbox').change( function() {
+
+		
+		get_checked_boxes();
+		get_pks();
+			
+		console.log("Art/nat: " + FORMULA_FILTER.checked_boxes["art_nati"]);
+		//console.log("Allergens: " + allergen);
+		console.log("Prop65: " + FORMULA_FILTER.checked_boxes["prop65"]);
+	
+		filter_rows();
+
+		
+	});
+	
 	jQuery('#formula-rows').delegate('input', 'keyup', function (e) {
 		var $this = $(this);
 		var row = $this.closest("tr");
@@ -445,9 +545,19 @@ jQuery(document).ready(function(){
 		});
 	});
 	
+	if(jQuery("#formula-rows").length > 0) {
+		jQuery(document).ready(function() {
+			console.log("The page has just been refreshed");
+			get_checked_boxes();
+			get_pks();
+			filter_rows();
+		});
+	}
+	
 	jQuery('#formula-rows').delegate('.number-cell input', 'keyup', function(e) {
 		var $this = $(this);
 		var row = $this.closest("tr");
+		//update_formula_row(row);
 		$this.autocomplete({
 			source: '/django/access/ingredient_autocomplete',
 			minLength: 1,

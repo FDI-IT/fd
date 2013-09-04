@@ -181,7 +181,7 @@ margin-left:6px;
 display:block;
 }
 
-#filterselect > li {
+.filterselect_list > li {
 float:left;
 }
 
