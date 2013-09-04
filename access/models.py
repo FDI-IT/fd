@@ -1928,7 +1928,7 @@ class ExperimentalLog(models.Model):
     organic = models.BooleanField(db_column='Organic',blank=True,default=False)
     wonf = models.BooleanField("WONF",db_column='WONF', default=False)
     
-    duplication = models.BooleanField(db_column='Duplication')
+    duplication = models.BooleanField(db_column='Duplication',blank=True)
     duplication_company = models.CharField(max_length=50,blank=True)
     duplication_id = models.CharField(max_length=50, blank=True)
     duplication_name = models.CharField(max_length=50)

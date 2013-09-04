@@ -115,8 +115,9 @@ def experimental_edit(request, experimental):
         if form.is_valid():
             form.save()
             return redirect('/django/access/experimental/%s/' % experimental.experimentalnum)
+    else:
+        form = forms.ExperimentalForm(instance=experimental)
     page_title = "Experimental Edit"
-    form = forms.ExperimentalForm(instance=experimental)
     if request.user.get_profile().initials == experimental.initials or request.user.is_superuser:
         pass
     else:
