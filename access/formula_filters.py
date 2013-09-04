@@ -17,3 +17,7 @@ class Prop65Filter():
     def get_q_list(checked_boxes):
         q_list = [Q(prop65__iexact = prop65_filter) for prop65_filter in checked_boxes]
         return reduce(lambda x,y: x|y, q_list)
+    
+#class AllergenExcludeFilter():
+#    label = "Allergen"
+    
