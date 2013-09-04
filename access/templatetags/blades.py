@@ -7,7 +7,7 @@ from access.models import Flavor, Ingredient, PurchaseOrder, ExperimentalLog
 register = template.Library()
 
 default_flavor_blade_list = (
-    'selling_price', 'formula_weight', 'pin', 'profit_ratio', 'flagged', 'last_updated', 'oldest_price_date', 'raw_material_cost', 'location_code', 
+    'selling_price', 'formula_weight', 'pin', 'profit_ratio', 'flagged', 'last_updated', 'oldest_price_date', 'raw_material_cost', 'customer_list', 'location_code', 
     'keywords', 'solvent', 'flashpoint', 'kosher', 'allergen', 'sulfites', 'flavor_yield', 'diacetyl', 'pg', 'experimental_link',
     'new_usage', 'application_list')
 
@@ -105,6 +105,27 @@ class FlavorBlades(ObjectBlades):
         except:
             rmc = 0
         return("Raw Material Cost", rmc)
+    
+    @property
+    def customer_list(self):
+        customer_list = []
+        for experimental in self.flavor.experimental_log.all():
+            customer_list.append(u'<a href="%s">%s</a><br>' % (experimental.get_absolute_url(), experimental.customer))
+        if len(customer_list) > 0:
+            joined_cusomters = ''.join(customer_list)
+            return ("Customers", joined_cusomters)
+        else:
+            return ("Customers","None")
+#            
+#                ex_list = []
+#        for experimental in self.flavor.experimental_log.all():
+#            ex_list.append(u'<a href="%s">%s-%s</a><br>' % (experimental.get_absolute_url(), experimental.initials, experimental.experimentalnum))
+#        if len(ex_list) > 0:
+#            joined_exs = ''.join(ex_list)
+#            return ("Experimentals", joined_exs)
+#        else:
+#            return ("Experimentals", "None")
+            
     
     @property
     def location_code(self):

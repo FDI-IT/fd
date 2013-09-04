@@ -2,11 +2,6 @@
 
 {% block content %}
 
-<style type="text/css"><!--
-.errorlist {
-display:none;
-}
---></style>
 
 <div id="title">
 	
@@ -19,13 +14,13 @@ display:none;
 	<form id="new-experimental-form" action="/django/access/experimental/{{experimentalform.instance.experimentalnum}}/edit/" method="post">
 		{{ management_form }}
 		{{ experimentalform.errors}}
-		{{experimentalform.non_form_errors}}
+		{{experimentalform.non_field_errors}}
 		{% for fieldset in experimentalform.iter_fieldsets %}
 			<div id="{{ fieldset.extra_content.divid }}">
 				<fieldset>
 					<legend>{{ fieldset.extra_content.legend }}</legend>
 					{% for field in fieldset %}
-					<p><label>{{ field.label }}</label>{{field}}{{ field.errors }}</p>
+					<p><label>{{ field.label }}</label>{{field}}</p>
 					
 					{% endfor %}
 				</fieldset>
