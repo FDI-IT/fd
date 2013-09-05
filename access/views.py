@@ -609,12 +609,27 @@ def ingredient_gzl(request, ingredient):
     context_dict = {
                    'window_title': ingredient.__unicode__(),
                    'product': ingredient,
+                   'leafweights': LeafWeight.objects.filter(ingredient=ingredient).order_by('-weight'),
                    'page_title': page_title,
                    }   
-    return render_to_response('access/gzl.html',
+    return render_to_response('access/ingredient/gzl.html',
                               context_dict,
                               context_instance=RequestContext(request))
 
+
+@ingredients_by_pin_info_wrapper
+def ingredient_gzl_review(request, ingredients):
+    page_title = "Ingredient Gazitna List (GZL)"
+    ingredient = ingredients[0]
+    context_dict = {
+                   'window_title': ingredient.__unicode__(),
+                   'product': ingredient,
+                   'leafweights': LeafWeight.objects.filter(ingredient__in=ingredients).order_by('-weight'),
+                   'page_title': page_title,
+                   }   
+    return render_to_response('access/ingredient/gzl.html',
+                              context_dict,
+                              context_instance=RequestContext(request))
 
 @ingredients_by_pin_info_wrapper
 def ingredient_pin_review(request, ingredients):
