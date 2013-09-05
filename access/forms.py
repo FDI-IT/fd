@@ -285,7 +285,7 @@ class FormulaEntryExcludeSelectForm(forms.Form):
         label="Allergens",
         widget=widgets.CheckboxSelectMultiple,
         required=False,
-        choices=(tuple(allergen_choices))
+        choices=tuple(allergen_choices)
         )
     
 
@@ -303,7 +303,14 @@ class FormulaEntryFilterSelectForm(forms.Form):
         allergen_choices.append((choice[0], choice[0]))
     '''          
         
-
+    allergen_choices = make_exclude_tuples(Ingredient.aller_attrs)
+    allergen = forms.MultipleChoiceField(
+        label="Allergens",
+        widget=widgets.CheckboxSelectMultiple,
+        required=False,
+        choices=tuple(allergen_choices)
+        )
+    
     art_nati = forms.MultipleChoiceField(
         label="Natural/Artificial",
         widget=widgets.CheckboxSelectMultiple,

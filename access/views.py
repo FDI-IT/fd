@@ -29,8 +29,8 @@ from access.templatetags.ft_review_table import consolidated, explosion, product
 from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_guts
 from access.tasks import ingredient_replacer_guts
-from access.forms import IngredientFilterSelectForm, FormulaEntryFilterSelectForm
-from access.formula_filters import ArtNatiFilter, Prop65Filter
+from access.forms import IngredientFilterSelectForm, FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm
+from access.formula_filters import ArtNatiFilter, Prop65Filter, AllergenExcludeFilter
 
 from solutionfixer.models import Solution, SolutionStatus
 
@@ -797,12 +797,16 @@ def process_filter_update(request):
     
     return_messages = {}
     
-    for FilterClass in (ArtNatiFilter, Prop65Filter):
+    for FilterClass in (ArtNatiFilter, Prop65Filter, AllergenExcludeFilter):
         checked_boxes = request.GET.getlist(FilterClass.key_string)
         if checked_boxes != []: #only execute a filter query for the current filter category if there are checked boxes
             my_query = FilterClass.get_q_list(checked_boxes)
             
-            filtered_ingredients = Ingredient.objects.filter(my_query)
+            if FilterClass.exclude == False: 
+                filtered_ingredients = Ingredient.objects.filter(my_query) #filter for artnati, prop65 
+            else:         
+                filtered_ingredients = Ingredient.objects.exclude(my_query)  #exclude for allergens
+                return_messages["test"] = "foo"
             
             filtered_pks = filtered_ingredients.values_list('pk', flat=True)
             d = request.GET.getlist('pks[]')
@@ -813,8 +817,6 @@ def process_filter_update(request):
                     else:
                         return_messages[pk] = [FilterClass.label] #if there isn't, create a message list
     
-
-
     return HttpResponse(simplejson.dumps(return_messages), content_type='application/json; charset=utf-8')
 
 def process_cell_update(request):
@@ -894,12 +896,14 @@ def formula_entry(request, flavor, status_message=None):
         
         else:
             filterselect = FormulaEntryFilterSelectForm(request.GET.copy())
+            filterexclude = FormulaEntryExcludeSelectForm(request.GET.copy())
             label_rows = forms.build_formularow_formset_label_rows(formset)
             formula_rows = zip(formset.forms,
                        label_rows )
             return render_to_response('access/flavor/formula_entry.html', 
                               {'flavor': flavor,
                                'filterselect': filterselect,
+                               'filterexclude': filterexclude,
                                'status_message': status_message,
                                'window_title': page_title,
                                'page_title': page_title,
