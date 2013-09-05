@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 {% load blades %}
+{% block htmlhead %}
+    {% include "htmlhead.html" %}
+    <script type="text/javascript" src="/djangomedia/js/formula_filter.js?v=24"></script>
+    {% endblock %}
 {% block content %}
     <div id="content-right">
 		{% blades flavor %}

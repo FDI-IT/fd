@@ -147,6 +147,9 @@ class ExperimentalForm(ModelForm, FieldsetMixin):
                        'oilsoluble',
                        'concentrate',
                        'duplication',
+                       'duplication_company',
+                       'duplication_name',
+                       'duplication_id',
                        ),
             'extra_content':{'divid':'type',
                              'legend':'Type'},
@@ -499,6 +502,34 @@ def build_formularow_formset_initial_data(flavor):
         label_rows.append(label_row)
     return (initial_data, label_rows)
 
+def build_formularow_formset_label_rows(formset):
+    label_rows = []
+    for form in formset.forms:
+        label_row = {}
+        if len(form._errors) == 0:
+            try:
+                ingredient = Ingredient.get_formula_ingredient(form.cleaned_data['ingredient_number'])
+            except KeyError:
+                continue
+            try:
+                amount = form.cleaned_data['amount']
+            except KeyError:
+                amount = 0
+            
+            try:
+                label_row['cost'] = str((ingredient.unitprice*amount).quantize(Decimal('.001'), rounding=ROUND_HALF_UP))
+            except:
+                label_row['cost'] = "---"
+            try:
+                label_row['name'] = ingredient.product_name
+            except:
+                label_row['name'] = "---"
+        else:
+            label_row['cost'] = "---"
+            label_row['name'] = "---"
+        label_rows.append(label_row)
+    return label_rows
+
 def build_experimental_formularow_formset_initial_data(experimental):
     initial_data = []
     label_rows = []
@@ -659,6 +690,9 @@ class NewExForm2(FormRequiredFields):
     organic = forms.BooleanField(required=False)
     wonf = forms.BooleanField(required=False)
     duplication = forms.BooleanField(required=False)
+    duplication_company = forms.CharField(max_length=50,required=False)
+    duplication_name = forms.CharField(max_length=50,required=False)
+    duplication_id = forms.CharField(max_length=50,required=False)
     promotable = forms.BooleanField(required=False)
     holiday = forms.BooleanField(required=False)
     chef_assist = forms.BooleanField(required=False)

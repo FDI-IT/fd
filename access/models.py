@@ -1026,6 +1026,18 @@ class Ingredient(models.Model):
                     ('purchase_price_update_short','Price Update', 'width=86px'),
                            
                 )
+            
+    def retain_list(self):
+        from newqc.models import RMRetain
+        rmrs = RMRetain.objects.filter(pin=self.id)
+        csl = [retains[0],] # combed sorted list
+        for x in range(1,len(retains)):
+            if retains[x].similar_to(retains[x-1]):
+                pass
+            else:
+                csl.append(retains[x])
+            
+        return csl
     
     @staticmethod
     def text_search(search_string):
@@ -1931,7 +1943,7 @@ class ExperimentalLog(models.Model):
     duplication = models.BooleanField(db_column='Duplication',blank=True)
     duplication_company = models.CharField(max_length=50,blank=True)
     duplication_id = models.CharField(max_length=50, blank=True)
-    duplication_name = models.CharField(max_length=50)
+    duplication_name = models.CharField(max_length=50,blank=True)
     promotable = models.BooleanField(db_column='Promotable', default=False)
     holiday = models.BooleanField(db_column='Holiday', default=False)
     chef_assist = models.BooleanField(db_column='Chef Assist', default=False) # Field renamed to remove spaces.lc

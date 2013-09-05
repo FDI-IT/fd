@@ -131,6 +131,7 @@ def experimental_edit(request, experimental):
                               context_dict,
                               context_instance=RequestContext(request))
 
+
 @experimental_wrapper
 @permission_required('access.add_flavor')
 def approve_experimental(request,experimental):
@@ -138,11 +139,6 @@ def approve_experimental(request,experimental):
         form = forms.ApproveForm(request.POST, instance=experimental.flavor)
         if form.is_valid():
             form.save()
-            for gazinta in form.instance.gazintas():
-                if gazinta.prefix == "EX":
-                    gazinta.prefix = "GZ"
-                    gazinta.approved = True
-                    gazinta.save()
             experimental.product_number = form.instance.number
             experimental.save()
             return redirect(experimental.flavor.get_absolute_url())
@@ -420,12 +416,7 @@ def ft_review(request, flavor):
                    'formula_weight': formula_weight,
                    'print_link':'javascript:print_review(%s)' % flavor.number,
                    'recalculate_link':'/django/access/%s/recalculate/' % flavor.number,
-                   }
-    if flavor.prefix == "EX":
-        experimentals = flavor.experimental_log.order_by('-experimentalnum')
-        if experimentals.count() > 0:
-            context_dict['approve_link'] = experimentals[0].get_approve_link()
-             
+                   }   
     return render_to_response('access/flavor/ft_review.html',
                               context_dict,
                               context_instance=RequestContext(request))
@@ -810,10 +801,11 @@ def process_filter_update(request):
         checked_boxes = request.GET.getlist(FilterClass.key_string)
         if checked_boxes != []: #only execute a filter query for the current filter category if there are checked boxes
             my_query = FilterClass.get_q_list(checked_boxes)
+            
             filtered_ingredients = Ingredient.objects.filter(my_query)
             
             filtered_pks = filtered_ingredients.values_list('pk', flat=True)
-            
+            d = request.GET.getlist('pks[]')
             for pk in map(int, request.GET.getlist('pks[]')):
                 if pk not in filtered_pks: #the ingredient does not match the filter requirements 
                     if pk in return_messages: #check if there is already an message for this ingredient
@@ -822,7 +814,7 @@ def process_filter_update(request):
                         return_messages[pk] = [FilterClass.label] #if there isn't, create a message list
     
 
-    
+
     return HttpResponse(simplejson.dumps(return_messages), content_type='application/json; charset=utf-8')
 
 def process_cell_update(request):
@@ -899,6 +891,23 @@ def formula_entry(request, flavor, status_message=None):
             flavor.save()
             redirect_path = "/django/access/%s/recalculate/" % (flavor.number)
             return HttpResponseRedirect(redirect_path)
+        
+        else:
+            filterselect = FormulaEntryFilterSelectForm(request.GET.copy())
+            label_rows = forms.build_formularow_formset_label_rows(formset)
+            formula_rows = zip(formset.forms,
+                       label_rows )
+            return render_to_response('access/flavor/formula_entry.html', 
+                              {'flavor': flavor,
+                               'filterselect': filterselect,
+                               'status_message': status_message,
+                               'window_title': page_title,
+                               'page_title': page_title,
+                               'formula_rows': formula_rows,
+                               'management_form': formset.management_form,
+                               },
+                               context_instance=RequestContext(request))
+
     # else:
     initial_data, label_rows = forms.build_formularow_formset_initial_data(flavor)
     if len(label_rows) == 0:
@@ -908,13 +917,7 @@ def formula_entry(request, flavor, status_message=None):
         FormulaFormSet = formset_factory(forms.FormulaRow, extra=0)
         
     filterselect = FormulaEntryFilterSelectForm(request.GET.copy())
-    filters = Ingredient.build_kwargs(filterselect.data, {}, get_filter_kwargs)
-    resultant_objects = Ingredient.objects.all()
-    if filters:
-        resultant_objects = resultant_objects.filter(**filters).distinct()
-    sc = sanity_check(resultant_objects)
-    if sc: return sc
-    
+
     formset = FormulaFormSet(initial=initial_data)
     formula_rows = zip(formset.forms,
                        label_rows )
@@ -923,7 +926,6 @@ def formula_entry(request, flavor, status_message=None):
     return render_to_response('access/flavor/formula_entry.html', 
                                   {'flavor': flavor,
                                    'filterselect': filterselect,
-                                   'resultant_objects': resultant_objects,
                                    'status_message': status_message,
                                    'window_title': page_title,
                                    'page_title': page_title,
