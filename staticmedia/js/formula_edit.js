@@ -1,8 +1,6 @@
+var FORMULA_EDIT ={};
 
-var FORMULA_FILTER ={};
-
-
-function isNotEmpty(map) {  //I use this to check if FORMULA_FILTER is not empty
+function isNotEmpty(map) {  //I use this to check if FORMULA_EDIT is not empty
    for(var key in map) {
       if (map.hasOwnProperty(key)) {
          return true;
@@ -13,16 +11,16 @@ function isNotEmpty(map) {  //I use this to check if FORMULA_FILTER is not empty
 
 
 function get_checked_boxes() { 
-	FORMULA_FILTER.checked_boxes = {};
+	FORMULA_EDIT.checked_boxes = {};
 	var checkboxes = jQuery('#formulaedit-filterselect input:checkbox:checked');
 	
 	for(var i = 0; i < checkboxes.length; i++) {
 		var my_box = checkboxes[i];
 		
-		if ( my_box.name in FORMULA_FILTER.checked_boxes ) {
-			FORMULA_FILTER.checked_boxes[my_box.name].push(my_box.value);
+		if ( my_box.name in FORMULA_EDIT.checked_boxes ) {
+			FORMULA_EDIT.checked_boxes[my_box.name].push(my_box.value);
 		} else {
-			FORMULA_FILTER.checked_boxes[my_box.name] = [my_box.value];
+			FORMULA_EDIT.checked_boxes[my_box.name] = [my_box.value];
 		}
 	}
 }
@@ -32,7 +30,7 @@ function filter_rows() {
 	remove_filter_messages();
 
 	jQuery.get('/django/access/process_filter_update/',
-		FORMULA_FILTER,
+		FORMULA_EDIT,
 		function(data) {
 			for (var key in data) {
 				var index = jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == key; }).closest("tr").index();
@@ -44,13 +42,12 @@ function filter_rows() {
 }
 
 function get_pks() {
-	FORMULA_FILTER.pks = [];
+	FORMULA_EDIT.pks = [];
 	
 	jQuery("#formula-rows tr.formula_row").each(function () { //GET THE PK OF ALL ROWS WITH CLASS FORMULA_ROW 
 		
 		row_pk = jQuery(this).find('td.ingredient_pk-cell input').val();
-		FORMULA_FILTER.pks.push(row_pk);
-		console.log(row_pk)
+		FORMULA_EDIT.pks.push(row_pk);
 	});
 	
 }
@@ -94,9 +91,9 @@ jQuery(document).ready(function(){
 		get_checked_boxes();
 		get_pks();
 			
-		console.log("Art/nat: " + FORMULA_FILTER.checked_boxes["art_nati"]);
+		console.log("Art/nat: " + FORMULA_EDIT.checked_boxes["art_nati"]);
 		//console.log("Allergens: " + allergen);
-		console.log("Prop65: " + FORMULA_FILTER.checked_boxes["prop65"]);
+		console.log("Prop65: " + FORMULA_EDIT.checked_boxes["prop65"]);
 	
 		filter_rows();
 
