@@ -305,7 +305,8 @@ class FormulaEntryFilterSelectForm(forms.Form):
         required=False,
         choices=tuple(property_exclude_choices)
         )
-        
+
+
     allergen_choices = make_exclude_tuples(Ingredient.aller_attrs)
     allergen = forms.MultipleChoiceField(
         label="Allergens to Exclude",
