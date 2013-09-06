@@ -5,12 +5,13 @@
 
 <div id="content-solo">
 <div class="hideable">
-	
+	<a id="showhidetoggle" href="#" onclick="toggle_visible();">Show Ingredient Filter</a>
 	<form action="/django/access/{{flavor.number}}/formula_entry" id="mainsearch" method="GET">
 		<div id="advanced-search" class="hidden">
 			<ul id="formulaedit-filterselect" class="filterselect_list">
 				<li></li>
 				{{ filterselect.as_ul }}
+				{{ filterexclude.as_ul }}
 	    		
 	    	</ul>
 		</div>
@@ -22,11 +23,11 @@
 	{{ management_form }}
 	<table id="formula-rows" width="100%">
 		<tr>
-			<th>Ingredient number</th>
-			<th>Amount</th>
-			<th>Name</th>
-			<th>Cost</th>
-			<th>Del</th>
+			<th class="number-cell">Ingredient number</th>
+			<th class="amount-cell">Amount</th>
+			<th class="name-cell">Name</th>
+			<th class="cost-cell">Cost</th>
+			<th class="del-row">Del</th>
 		</tr>
 
 		{% for form, label in formula_rows %}
@@ -36,9 +37,9 @@
 			<td class="number-cell">{{ form.ingredient_number.as_text }}</td>
 			<td class="amount-cell">{{ form.amount.as_text }}</td>
 			<td class="name-cell">{{ label.name }}</td>
-			<td class="cost-cell">{{ label.cost }}</td>
+			<td class="cost-cell" >{{ label.cost }}</td>
 			<td class="ingredient_pk-cell" style="display:none">{{ form.ingredient_pk }}</td>
-			<td class="del-row"><input type="button" value="X" onclick="delete_row(this.parentNode.parentNode.rowIndex)"></td>
+			<td class="del-row" ><input type="button" value="X" onclick="delete_row(this.parentNode.parentNode.rowIndex)"></td>
 		</tr>
 		{% endfor %}
 	</table>

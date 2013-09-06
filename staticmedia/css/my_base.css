@@ -327,12 +327,7 @@ float:left;
 #formula {
 clear:left;
 }
-#formula th{
-width:25%;
-}
-#formula td{
-width:25%;
-}
+
 
 #label-preview{
 border: 2px solid black;
@@ -733,3 +728,20 @@ margin-right:auto;
 h1.status_message {
 color:red;
 }
+
+#formula-rows .number-cell,
+#formula-rows .number-cell input {
+	width:150px;
+}
+
+#formula-rows .amount-cell,
+#formula-rows .amount-cell input {
+	width:120px;
+}
+
+#formula-rows .cost-cell, 
+#formula-rows .del-row {
+	width:90px;
+	text-align:center;
+}
+

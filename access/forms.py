@@ -285,7 +285,7 @@ class FormulaEntryExcludeSelectForm(forms.Form):
         label="Allergens",
         widget=widgets.CheckboxSelectMultiple,
         required=False,
-        choices=(tuple(allergen_choices))
+        choices=tuple(allergen_choices)
         )
     
 
@@ -296,36 +296,21 @@ class FormulaEntryFilterSelectForm(forms.Form):
     for choice in cursor.fetchall():
         natart_choices.append((choice[0], choice[0]))
         
-    '''
-    cursor.execute('select distinct "Raw Materials"."Allergen" from "Raw Materials" ORDER BY "Raw Materials"."Allergen" ASC')
-    allergen_choices = []
-    for choice in cursor.fetchall():
-        allergen_choices.append((choice[0], choice[0]))
-    '''          
-        
-
+    allergen_choices = make_exclude_tuples(Ingredient.aller_attrs)
+    allergen = forms.MultipleChoiceField(
+        label="Allergens",
+        widget=widgets.CheckboxSelectMultiple,
+        required=False,
+        choices=tuple(allergen_choices)
+        )
+    
     art_nati = forms.MultipleChoiceField(
         label="Natural/Artificial",
         widget=widgets.CheckboxSelectMultiple,
         required=False,
         choices=(tuple(natart_choices))
         )
-    '''
-    allergen = forms.MultipleChoiceField(
-        label="Allergens",
-        widget=widgets.CheckboxSelectMultiple,
-        required=False,
-        choices=(tuple(allergen_choices))
-    '''
     
-    prop65 = forms.MultipleChoiceField(
-        label="Contains Prop65",
-        widget=widgets.CheckboxSelectMultiple,
-        required=False,
-        choices=(
-            (True,"Yes"),
-            (False,"No"),
-        ))
 
 class IngredientFilterSelectForm(forms.Form):
     cursor = connection.cursor()
@@ -497,7 +482,7 @@ def build_formularow_formset_initial_data(flavor):
         formula_form_row['ingredient_pk'] = formula_row.ingredient.pk
         formula_form_row['amount'] = str(formula_row.amount)
         label_row['cost'] = str(formula_row.get_exploded_cost().quantize(Decimal('.001'), rounding=ROUND_HALF_UP))
-        label_row['name'] = formula_row.ingredient.product_name
+        label_row['name'] = formula_row.ingredient.long_name
         initial_data.append(formula_form_row)
         label_rows.append(label_row)
     return (initial_data, label_rows)
@@ -521,7 +506,7 @@ def build_formularow_formset_label_rows(formset):
             except:
                 label_row['cost'] = "---"
             try:
-                label_row['name'] = ingredient.product_name
+                label_row['name'] = ingredient.long_name
             except:
                 label_row['name'] = "---"
         else:

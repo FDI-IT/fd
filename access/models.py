@@ -789,6 +789,16 @@ class Ingredient(models.Model):
             yield i.suppliercode
             
     @property
+    def long_name(self):
+        if self.sub_flavor:
+            my_name = "%s %s %s" % (self.art_nati, self.sub_flavor.table_name, self.sub_flavor.label_type)
+        elif self.discontinued:
+            my_name = "DISCONTINUED: %s %s %s" % (self.art_nati, self.product_name, self.part_name2)
+        else:
+            my_name = "%s %s %s" % (self.art_nati, self.product_name, self.part_name2)
+        return my_name.strip()
+    
+    @property
     def table_name(self):
         if self.sub_flavor:
             my_name = "%s %s" % (self.sub_flavor.table_name, self.sub_flavor.label_type)
