@@ -296,14 +296,19 @@ class FormulaEntryFilterSelectForm(forms.Form):
     for choice in cursor.fetchall():
         natart_choices.append((choice[0], choice[0]))
         
-    property_exclude_list = ['Diacetyl', 'Prop65', 'GMO']
+    misc_choices = (
+           # ('diacetyl','No Diacetyl'),
+            ('prop65','No Prop65'),
+            ('gmo','No GMO'),
+           # ('no_pg', 'No PG'),
+           # ('Organic','Organic')
+        )
     
-    property_exclude_choices = make_exclude_tuples(property_exclude_list)
-    property_exclude = forms.MultipleChoiceField(
-        label="Properties to Exclude",
+    misc = forms.MultipleChoiceField(
+        label="Miscellaneous Properties",
         widget=widgets.CheckboxSelectMultiple,
         required=False,
-        choices=tuple(property_exclude_choices)
+        choices=misc_choices
         )
 
 
@@ -319,7 +324,7 @@ class FormulaEntryFilterSelectForm(forms.Form):
         label="Natural/Artificial",
         widget=widgets.CheckboxSelectMultiple,
         required=False,
-        choices=(tuple(natart_choices))
+        choices=tuple(natart_choices)
         )
     
 
