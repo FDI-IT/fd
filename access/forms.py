@@ -302,10 +302,20 @@ class FormulaEntryFilterSelectForm(forms.Form):
     for choice in cursor.fetchall():
         allergen_choices.append((choice[0], choice[0]))
     '''          
+    
+    property_exclude_list = ['Diacetyl', 'Prop65', 'GMO']
+    
+    property_exclude_choices = make_exclude_tuples(property_exclude_list)
+    property_exclude = forms.MultipleChoiceField(
+        label="Properties to Exclude",
+        widget=widgets.CheckboxSelectMultiple,
+        required=False,
+        choices=tuple(property_exclude_choices)
+        )
         
     allergen_choices = make_exclude_tuples(Ingredient.aller_attrs)
     allergen = forms.MultipleChoiceField(
-        label="Allergens",
+        label="Allergens to Exclude",
         widget=widgets.CheckboxSelectMultiple,
         required=False,
         choices=tuple(allergen_choices)

@@ -806,10 +806,9 @@ def process_filter_update(request):
                 filtered_ingredients = Ingredient.objects.filter(my_query) #filter for artnati, prop65 
             else:         
                 filtered_ingredients = Ingredient.objects.exclude(my_query)  #exclude for allergens
-                return_messages["test"] = "foo"
             
             filtered_pks = filtered_ingredients.values_list('pk', flat=True)
-            d = request.GET.getlist('pks[]')
+
             for pk in map(int, request.GET.getlist('pks[]')):
                 if pk not in filtered_pks: #the ingredient does not match the filter requirements 
                     if pk in return_messages: #check if there is already an message for this ingredient
