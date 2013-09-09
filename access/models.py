@@ -1100,12 +1100,14 @@ class FormulaInfo(models.Model):
     organic = models.BooleanField(default=False)
     diacetyl = models.BooleanField("No Diacetyl", default=True)
     indivisible = models.BooleanField(blank=True)
+    
     no_pg = models.BooleanField("No PG", 
         blank=True,
         default=False)
     spraydried = models.BooleanField("Spray Dried",
         blank=True,
         default=False)
+    
     flashpoint = models.PositiveIntegerField("Flash Point", default=0)
     solubility = models.CharField(max_length=25,blank=True, default="")
     stability = models.CharField(max_length=25, blank=True, default="")
@@ -1244,7 +1246,7 @@ class Flavor(FormulaInfo):
     keywords = models.TextField(blank=True)
     #flavor
     location_code_n = generic.GenericRelation('LocationCode')
-    
+    location_code_old = models.CharField(blank=True, default="",max_length=20)
     def save(self, *args, **kwargs):
         try:
             self.prefix = self.prefix.upper()
@@ -2900,5 +2902,30 @@ class LocationCode(models.Model):
     content_object = generic.GenericForeignKey('content_type','object_id')
 
     def __unicode__(self):
-        return u"%s - %s" % (self.location_code, self.content_object)
+        return u"%s" % (self.location_code)
     
+    
+    number_re = re.compile('\d+')
+    
+    @staticmethod
+    def get_next_location_code(inventory_slot):
+        if inventory_slot[:2] == "SL":
+            last_slot = LocationCode.objects.filter(location_code__istartswith=inventory_slot).order_by('-location_code')[0]
+
+            last_number = int(LocationCode.number_re.search(last_slot.location_code).group())
+
+            next_number = last_number + 1
+            return "%s%s" % (inventory_slot, str(next_number)[1:])
+            
+        elif inventory_slot == "":
+            return ""
+        else:
+            return inventory_slot
+        
+        
+        
+        
+        
+        
+        
+        
