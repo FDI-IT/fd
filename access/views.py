@@ -609,7 +609,6 @@ def ingredient_gzl(request, ingredient):
     context_dict = {
                    'window_title': ingredient.__unicode__(),
                    'product': ingredient,
-                   'leafweights': LeafWeight.objects.filter(ingredient=ingredient).order_by('-weight'),
                    'page_title': page_title,
                    }   
     return render_to_response('access/ingredient/gzl.html',
