@@ -2,18 +2,6 @@ from django.db.models import Q
 
 from access.models import Ingredient
 
-#         checked_boxes = request.GET.getlist(FilterClass.key_string)
-#         if checked_boxes != []: #only execute a filter query for the current filter category if there are checked boxes
-#          
-# 
-#             for pk in map(int, request.GET.getlist('pks[]')):
-#                 if pk not in filtered_pks: #the ingredient does not match the filter requirements 
-#                     if pk in return_messages: #check if there is already an message for this ingredient
-#                         return_messages[pk].append(FilterClass.label) #if there is, add the current category to the message list
-#                     else:
-#                         return_messages[pk] = [FilterClass.label] #if there isn't, create a message list
-
-
 class ArtNatiFilter():
     error_label = "Natural/Artificial"
     key_string = "checked_boxes[art_nati][]"
@@ -83,13 +71,6 @@ class MiscFilter():
                 return_messages.append(return_message)
         if return_messages != []:
             return return_messages
-#     
-#     def __init__(self, querydict):
-#         self.q_list
-#     
-#     def get_q_list(checked_boxes):
-#         exclude_list = ['gmo', 'prop65']
-#         q_list = [Q(exclude_prop__icontains = 'no') for exclude_prop in exclude_list]
 
 class SingleFilter():
     def check_pk(self, pk):
@@ -121,5 +102,5 @@ class GMOFilter(SingleFilter):
             self.apply_filter = False
 
 # excludelist = diacetyl, nopg, gmo, prop65
-# q_list = [Q(property__icontains = 'no','none') for property in excludelist
+
     
