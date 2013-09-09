@@ -33,7 +33,7 @@ class ArtNatiFilter():
     
     def check_pk(self, pk):
         if pk not in self.filtered_pks: #the ingredient does not match the filter requirements
-            return self.error_label 
+            return self.error_label
 
     
 class AllergenExcludeFilter():
@@ -50,12 +50,13 @@ class AllergenExcludeFilter():
             for cb in checked_boxes:
                 allergen_filters[cb] = False 
             #finds the exclusion of any ingredients where the allergen_filter is True
-            #by including ingredients where all the allergen_filters are False
+            #including ingredients where all the allergen_filters are False
             self.filtered_pks = Ingredient.objects.filter(**allergen_filters).values_list('pk',flat=True)
         
     def check_pk(self, pk):
         if pk not in self.filtered_pks:
             return self.error_label
+
 
 class MiscFilter():
     key_string = "checked_boxes[misc][]"
@@ -80,7 +81,8 @@ class MiscFilter():
             return_message = my_filter.check_pk(pk)
             if return_message is not None:
                 return_messages.append(return_message)
-        return return_messages
+        if return_messages != []:
+            return return_messages
 #     
 #     def __init__(self, querydict):
 #         self.q_list
@@ -91,9 +93,9 @@ class MiscFilter():
 
 class SingleFilter():
     def check_pk(self, pk):
-        
         if pk not in self.filtered_pks:
             return self.error_label
+
 
 class Prop65Filter(SingleFilter):
     checked_box_name = "prop65"
