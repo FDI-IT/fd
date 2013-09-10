@@ -367,7 +367,7 @@ jQuery(document).ready(function(){
 			'<td class="amount-cell"><input type="text" name="form-' + form_id + '-amount" id="id_form-' + form_id + '-amount" /></td>' +
 			'<td class="name-cell"></td>' +
 			'<td class="cost-cell"></td>' +
-			'<td class="ingredient_pk-cell" style="display:none"> <input> </td>' +
+			'<td class="ingredient_pk-cell" style="display:none"> <input type="text"> </td>' +
 			'<td class="del-row"><input type="button" value="X" onclick="delete_row(this.parentNode.parentNode.rowIndex)"></td>' +
 			'</tr>');
 		jQuery('#id_form-' + form_id + '-ingredient_number').focus();

@@ -243,7 +243,7 @@ class IngredientReplacerForm(forms.Form):
 class FormulaRow(forms.Form):
     ingredient_number = forms.CharField(label="")
     amount = forms.DecimalField(label="", max_digits=9, decimal_places=5)
-    ingredient_pk = forms.IntegerField()
+    ingredient_pk = forms.IntegerField(required=False)
     
 class ExperimentalFormulaRow(forms.Form):
     ingredient_number = forms.CharField(label="")

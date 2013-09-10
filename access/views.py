@@ -907,7 +907,7 @@ def formula_entry(request, flavor, status_message=None):
             return HttpResponseRedirect(redirect_path)
         
         else:
-            filterselect = FormulaEntryFilterSelectForm(request.GET.copy())
+            filterselect = FormulaEntryFilterSelectForm(request.GET.copy()) 
             filterexclude = FormulaEntryExcludeSelectForm(request.GET.copy())
             label_rows = forms.build_formularow_formset_label_rows(formset)
             formula_rows = zip(formset.forms,
