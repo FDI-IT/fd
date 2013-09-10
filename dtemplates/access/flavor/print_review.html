@@ -37,9 +37,13 @@
 		<span class="label">Memo</span>
 		{{flavor.productmemo}}
 	</div>
-	<div class="pricing-memo">
+	<div class="product-memo">
 		<span class="label">Pricing Memo</span>
 		{{flavor.pricing_memo}}
+	</div>
+	<div class="product-memo">
+		<span class="label">Mixing Instructions</span>
+		{{flavor.mixing_instructions}}
 	</div>
 	{% print_blades flavor %}
 </div>
@@ -135,24 +139,24 @@
 		</div>
 		Specific Gravity
 		<div class="formvalue">
-			{% if flavor.productinfo.specific_gravity %}
-			{{flavor.productinfo.specific_gravity}}
+			{% if flavor.spg %}
+			{{flavor.spg}}
 			{% else %}
 			<br>
 			{% endif %}
 		</div>
 		Organoleptics
 		<div class="formvalue">
-			{% if flavor.productinfo.organoleptic_properties %}
-			{{flavor.productinfo.organoleptic_properties}}
+			{% if flavor.organoleptics %}
+			{{flavor.organoleptics}}
 			{% else %}
 			<br>
 			{% endif %}
 		</div>
 		Color & Appearance
 		<div class="formvalue">
-			{% if flavor.productinfo.appearance %}
-			{{flavor.productinfo.appearance}}
+			{% if flavor.color %}
+			{{flavor.color}}
 			{% else %}
 			<br>
 			{% endif %}

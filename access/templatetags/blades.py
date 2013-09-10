@@ -19,6 +19,7 @@ print_flavor_blade_list = (
         'profit_ratio',
         'formula_weight',
         'location_code',
+        'oldest_price_date',
     )
 
 class ObjectBlades():

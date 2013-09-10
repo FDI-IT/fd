@@ -1112,7 +1112,7 @@ class FormulaInfo(models.Model):
     solubility = models.CharField(max_length=25,blank=True, default="")
     stability = models.CharField(max_length=25, blank=True, default="")
     allergen = models.CharField("Allergens", max_length=50, blank=True, default="")
-    yield_field = models.PositiveIntegerField(default=100) # Field renamed because it was a Python reserved word.lc
+    yield_field = models.PositiveIntegerField("Percent Yield", blank=True, null=True) # Field renamed because it was a Python reserved word.lc
     
     reactionextraction = models.BooleanField("Reaction/Extraction",default=False)
     prop_65 = models.CharField("Prop 65", max_length=50,blank=True, default="") # Field renamed to remove spaces.lc
@@ -1940,7 +1940,7 @@ class ExperimentalLog(models.Model):
     color = models.CharField(max_length=50,blank=True)
     organoleptics = models.CharField(max_length=50,blank=True)
     mixing_instructions = models.TextField(blank=True)
-    
+    yield_field = models.PositiveIntegerField('Percent Yield', default=100) 
     liquid = models.BooleanField(db_column='Liquid')
     dry = models.BooleanField(db_column='Dry')
     spray_dried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc

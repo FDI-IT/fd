@@ -1178,6 +1178,17 @@ def jil_object_list(request):
 def new_rm_wizard(request):
     return forms.NewRMWizard([forms.NewRMForm1, forms.NewRMForm11, forms.NewRMForm2, forms.NewRMForm3, forms.NewRMForm4, forms.NewRMForm5])(request)
 
+
+@login_required
+@permission_required('access.change_formula')  
+@flavor_info_wrapper
+def formula_info_merge(request, flavor):
+    return render_to_response('access/flavor/formula_info_merge.html',
+                              {'flavor':flavor},
+                              context_instance=RequestContext(request))
+    
+    
+
 @login_required
 @flavor_info_wrapper
 def new_rm_wizard_flavor(request, flavor):
@@ -1380,7 +1391,7 @@ def allergen_list(request):
     return render_to_response('access/allergen_list.html',
                               {'flavors':Flavor.objects.exclude(allergen__iexact="None")}
                               )
-    
+
 def rm_allergen_list(request):
     
     return render_to_response('access/rm_allergen_list.html',

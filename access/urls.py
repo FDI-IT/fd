@@ -11,6 +11,7 @@ urlpatterns = patterns('access.views',
     # Uncomment the next line to enable the admin:
     url(r'^(?P<flavor_number>\d+)/$', 'ft_review', name='flavor_review'),
     (r'^(?P<flavor_number>\d+)/batch_sheet/$', 'batch_sheet'),
+    (r'^(?P<flavor_number>\d+)/formula_info_merge/$', 'formula_info_merge'),
     (r'^(?P<flavor_number>\d+)/recalculate/$', 'recalculate_flavor'),
     (r'^(?P<flavor_number>\d+)/batch_sheet/$', 'batch_sheet'),
     (r'^(?P<flavor_number>\d+)/formula_entry/$', 'formula_entry'),

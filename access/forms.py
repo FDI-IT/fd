@@ -39,13 +39,19 @@ class PurchaseOrderForm(ModelForm):
                    )
 
 class FlavorReviewForm(ModelForm):
+    
+    def __init__(self, *args, **kwargs):
+        super(FlavorReviewForm, self).__init__(*args, **kwargs)
+        
+        
     class Meta:
         model = Flavor
         fields = ('flashpoint','allergen','gmo','prop65','organic', 'no_pg',
                   'microtest','diacetyl','nutri_on_file','kosher',
                   'kosher_id','yield_field','reactionextraction',
                   'sulfites_ppm',
-                  'batfno','haccp','ccp1','ccp2','ccp3','ccp4','ccp5','ccp6'
+                  'batfno','haccp','ccp1','ccp2','ccp3','ccp4','ccp5','ccp6',
+                  'organoleptics','color','spg',
                   )
         widgets = {'kosher':widgets.TextInput(),}
         
@@ -136,6 +142,7 @@ class ExperimentalForm(ModelForm, FieldsetMixin):
                        'usagelevel',
                        'color',
                        'organoleptics',
+                       'yield_field',
                        ),
             'extra_content':{'divid':'extendedinfo',
                              'legend':'Specs'},
