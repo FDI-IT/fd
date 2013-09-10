@@ -11,11 +11,12 @@
 			<th>Del</th>
 		</tr>
 		{% for form, label in formula_rows %}
-		<tr>
+		<tr class="formula_row">
 			<td class="number-cell">{{ form.ingredient_number.as_text }}</td>
 			<td class="amount-cell">{{ form.amount.as_text }}</td>
 			<td class="name-cell">{{ label.name }}</td>
 			<td class="cost-cell">{{ label.cost }}</td>
+			<td class="ingredient_pk-cell" style="display:none">{{ form.ingredient_pk }}</td>
 			<td class="del-row"><input type="button" value="X" onclick="delete_row(this.parentNode.parentNode.rowIndex)"></td>
 		</tr>
 		{% endfor %}

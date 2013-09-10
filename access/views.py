@@ -149,6 +149,10 @@ def approve_experimental(request,experimental):
                               context_instance=RequestContext(request))
     experimental.flavor.prefix = ""
     experimental.flavor.number = ""
+    experimental.flavor.mixing_instructions = experimental.mixing_instructions
+    experimental.flavor.color = experimental.color
+    experimental.flavor.organoleptics = experimental.organoleptics
+    experimental.flavor.productmemo = experimental.memo
     f = forms.ApproveForm(instance=experimental.flavor)
     return render_to_response('access/experimental/approve.html',
                               {'form':f,
@@ -1002,6 +1006,9 @@ def experimental_formula_entry(request, experimental, status_message=None):
             flavor.save()
             redirect_path = "/django/access/experimental/%s/recalculate/" % (experimental.experimentalnum)
             return HttpResponseRedirect(redirect_path)
+        else:
+            errors =  formset.errors
+            print errors
     # else:
     initial_data, label_rows = forms.build_formularow_formset_initial_data(flavor)
     if len(label_rows) == 0:

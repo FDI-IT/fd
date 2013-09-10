@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+
+{% block htmlhead %}
+    {% include "htmlhead.html" %}
+    <script type="text/javascript" src="/djangomedia/js/formula_edit.js?v=24"></script>
+{% endblock %}
 {% load blades %}
 {% block content %}
     <div id="content-right">

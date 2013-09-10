@@ -224,7 +224,12 @@ class ApproveForm(ModelForm):
                   'label_type',
                   'unitprice',
                   'approved',
+                  'organoleptics',
+                  'color',
+                  'yield_field',
                   'productmemo',
+                  'pricing_memo',
+                  'mixing_instructions',
                   )
 
 class FlavorSearch(forms.Form):

@@ -14,12 +14,6 @@
 		<h1>{{ status_message }}</h1>
 		{% endif %}
 		
-		
-	
-	
-	<div class="product-memo"><span class="label">Memo</span>{{ experimental.memo }}</div>
-<div class="product-memo"><span class="label">Mixing Instructions</span>{{ experimental.mixing_instructions }}</div>
-	
 	
 	<form id="new-experimental-form" action="/django/access/experimental/{{experimental.experimentalnum}}/approve/" method="post">
 		{{ form.errors}}
