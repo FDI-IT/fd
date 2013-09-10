@@ -308,9 +308,25 @@ class FormulaEntryFilterSelectForm(forms.Form):
     for choice in cursor.fetchall():
         natart_choices.append((choice[0], choice[0]))
         
+    misc_choices = (
+           # ('diacetyl','No Diacetyl'),
+            ('prop65','No Prop65'),
+            ('gmo','No GMO'),
+           # ('no_pg', 'No PG'),
+           # ('Organic','Organic')
+        )
+    
+    misc = forms.MultipleChoiceField(
+        label="Miscellaneous Properties",
+        widget=widgets.CheckboxSelectMultiple,
+        required=False,
+        choices=misc_choices
+        )
+
+
     allergen_choices = make_exclude_tuples(Ingredient.aller_attrs)
     allergen = forms.MultipleChoiceField(
-        label="Allergens",
+        label="Allergens to Exclude",
         widget=widgets.CheckboxSelectMultiple,
         required=False,
         choices=tuple(allergen_choices)
@@ -320,7 +336,7 @@ class FormulaEntryFilterSelectForm(forms.Form):
         label="Natural/Artificial",
         widget=widgets.CheckboxSelectMultiple,
         required=False,
-        choices=(tuple(natart_choices))
+        choices=tuple(natart_choices)
         )
     
 

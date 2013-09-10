@@ -3,6 +3,7 @@ from datetime import date
 import re
 import copy
 import operator
+from collections import defaultdict
 
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.views.generic import list_detail
@@ -30,7 +31,7 @@ from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_guts
 from access.tasks import ingredient_replacer_guts
 from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm
-from access.formula_filters import ArtNatiFilter, Prop65Filter, AllergenExcludeFilter
+from access.formula_filters import ArtNatiFilter, AllergenExcludeFilter, MiscFilter
 
 from solutionfixer.models import Solution, SolutionStatus
 
@@ -814,27 +815,19 @@ def ingredient_autocomplete(request):
 def process_filter_update(request):
     
     return_messages = {}
+    pks = map(int, request.GET.getlist('pks[]'))
     
-    # removed Prop65Filter for now
-    for FilterClass in (ArtNatiFilter, AllergenExcludeFilter):
-        checked_boxes = request.GET.getlist(FilterClass.key_string)
-        if checked_boxes != []: #only execute a filter query for the current filter category if there are checked boxes
-            my_query = FilterClass.get_q_list(checked_boxes)
-            
-            if FilterClass.exclude == False: 
-                filtered_ingredients = Ingredient.objects.filter(my_query) #filter for artnati, prop65 
-            else:         
-                filtered_ingredients = Ingredient.objects.exclude(my_query)  #exclude for allergens
-                return_messages["test"] = "foo"
-            
-            filtered_pks = filtered_ingredients.values_list('pk', flat=True)
-            d = request.GET.getlist('pks[]')
-            for pk in map(int, request.GET.getlist('pks[]')):
-                if pk not in filtered_pks: #the ingredient does not match the filter requirements 
-                    if pk in return_messages: #check if there is already an message for this ingredient
-                        return_messages[pk].append(FilterClass.label) #if there is, add the current category to the message list
+    # removed Prop65Filter for now, AllergenExcludeFilter
+    for FilterClass in (ArtNatiFilter, MiscFilter, AllergenExcludeFilter):
+        fc = FilterClass(request.GET)
+        if fc.apply_filter:
+            for pk in pks:
+                return_message = fc.check_pk(pk)
+                if return_message is not None:
+                    if pk not in return_messages:
+                        return_messages[pk] = [return_message,]
                     else:
-                        return_messages[pk] = [FilterClass.label] #if there isn't, create a message list
+                        return_messages[pk].append(return_message)
     
     return HttpResponse(simplejson.dumps(return_messages), content_type='application/json; charset=utf-8')
 
