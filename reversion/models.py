@@ -25,6 +25,7 @@ class Revision(models.Model):
     comment = models.TextField(blank=True,
                                help_text="A text comment on this revision.")
     
+
     def revert(self, delete=False):
         """Reverts all objects in this revision."""
         versions = self.version_set.all()
@@ -68,6 +69,9 @@ class Version(models.Model):
     
     object_repr = models.TextField(help_text="A string representation of the object.")
     
+    def get_absolute_url(self):
+        return self.content_type.model_class().objects.get(pk=self.object_id).get_admin_url()+'/history'
+     
     def get_object_version(self):
         """Returns the stored version of the model."""
         data = self.serialized_data
