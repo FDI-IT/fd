@@ -1000,8 +1000,26 @@ def experimental_formula_entry(request, experimental, status_message=None):
             redirect_path = "/django/access/experimental/%s/recalculate/" % (experimental.experimentalnum)
             return HttpResponseRedirect(redirect_path)
         else:
-            errors =  formset.errors
-            print errors
+            label_rows = forms.build_formularow_formset_label_rows(formset)
+            formula_rows = zip(formset.forms,
+                       label_rows )
+            digitized_table = []
+            digitized_test_re = re.compile('\w')
+            for digitizedformula in experimental.digitizedformula_set.all().order_by('pk'):
+                contains_values = digitized_test_re.search(digitizedformula.raw_row)
+                if contains_values:
+                    digitized_table.append(digitizedformula.raw_row.split("|||"))
+            
+            return render_to_response('access/experimental/formula_entry.html', 
+                                      {'experimental': experimental,
+                                   'status_message': status_message,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'formula_rows': formula_rows,
+                                   'management_form': formset.management_form,
+                                   'digitized_table':digitized_table,
+                                       },
+                                      context_instance=RequestContext(request))
     # else:
     initial_data, label_rows = forms.build_formularow_formset_initial_data(flavor)
     if len(label_rows) == 0:

@@ -20,6 +20,15 @@ def validate_ingredient_number(number):
     if Ingredient.objects.filter(id=number).count() == 0:
         raise ValidationError(u'PIN %s is not in the database.' % number)
 
+def validate_formula_ingredient_number(number):
+    try:
+        Ingredient.get_formula_ingredient(number)
+    except:
+        raise ValidationError(u'%s is not a valid ingredient number' % number)
+    
+class FormulaIngredientField(forms.CharField):
+    default_validators = [validate_formula_ingredient_number]
+
 class IngredientField(forms.IntegerField):
     default_validators = [validate_ingredient_number]
 
@@ -241,7 +250,7 @@ class IngredientReplacerForm(forms.Form):
     new_ingredient = IngredientField()
 
 class FormulaRow(forms.Form):
-    ingredient_number = forms.CharField(label="")
+    ingredient_number = FormulaIngredientField(label="")
     amount = forms.DecimalField(label="", max_digits=9, decimal_places=5)
     ingredient_pk = forms.IntegerField(required=False)
     
@@ -530,7 +539,7 @@ def build_formularow_formset_label_rows(formset):
                 amount = 0
             
             try:
-                label_row['cost'] = str((ingredient.unitprice*amount).quantize(Decimal('.001'), rounding=ROUND_HALF_UP))
+                label_row['cost'] = str((ingredient.unitprice*amount/1000).quantize(Decimal('.001'), rounding=ROUND_HALF_UP))
             except:
                 label_row['cost'] = "---"
             try:
