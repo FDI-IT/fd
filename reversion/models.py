@@ -70,7 +70,10 @@ class Version(models.Model):
     object_repr = models.TextField(help_text="A string representation of the object.")
     
     def get_absolute_url(self):
-        return self.content_type.model_class().objects.get(pk=self.object_id).get_admin_url()+'/history'
+        try:
+            return self.content_type.model_class().objects.get(pk=self.object_id).get_admin_url()+'/history'
+        except:
+            pass
      
     def get_object_version(self):
         """Returns the stored version of the model."""
