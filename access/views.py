@@ -26,7 +26,7 @@ from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
 from access.my_profile import profile
 from access.templatetags.review_table import review_table as legacy_explosion
-from access.templatetags.ft_review_table import consolidated, explosion, production_lots, retains, raw_material_pin, gzl_ajax
+from access.templatetags.ft_review_table import consolidated, explosion, production_lots, retains, raw_material_pin, gzl_ajax, revision_history
 from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_guts
 from access.tasks import ingredient_replacer_guts
@@ -1113,6 +1113,7 @@ ajax_function = {
     'retains': (retains, 'access/flavor/retains.html'),    
     'raw_material_pin': (raw_material_pin, 'access/ingredient/raw_material_pin.html'),
     'gzl_ajax': (gzl_ajax, 'access/gzl_ajax.html'),
+    'revision_history': (revision_history, 'history_audit/revision_history.html')
 }
 
 #def ajax_dispatch(request, template_name, flavor_number):

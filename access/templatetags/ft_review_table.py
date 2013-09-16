@@ -7,6 +7,7 @@ from django.db.models import Sum
 from access.models import Flavor, FormulaTree, Ingredient, FormulaException, FormulaCycleException
 from access.utils import coster_headers
 from itertools import chain
+from reversion.models import Revision
 
 register = template.Library()
 
@@ -113,3 +114,47 @@ def raw_material_pin(flavor):
 @register.inclusion_tag('access/flavor/gzl_ajax.html')
 def gzl_ajax(flavor):
     return {'gt':FormulaTree.objects.filter(node_flavor=flavor).exclude(root_flavor=flavor).values('root_flavor__number').annotate(Sum('weight')).order_by('-weight'),}
+
+@register.inclusion_tag('history_audit/revision_history.html')
+def revision_history(flavor):
+    
+    revision_rows = []
+    
+    resultant_objects = Revision.objects.filter(version__object_id = flavor.pk).distinct().order_by('-date_created')
+    
+    paginator = Paginator(resultant_objects, 50)
+    page = int(request.GET.get('page', '1'))
+    try:
+        list_items = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        list_items = paginator.page(paginator.num_pages)
+        
+    for r in list_items.object_list:
+        version_urls = []
+        for v in r.version_set.all():
+            try:
+                object = v.content_type.model_class().objects.get(pk=v.object_id)
+                url = reverse('admin:%s_%s_change' %(object._meta.app_label, object._meta.module_name), args=[object.id]) + 'history'
+                version_urls.append((v, url))
+            except:
+                version_urls.append((v, 0))  
+        
+        revision_rows.append((r.date_created, version_urls, r.comment, r.user, r.id))
+
+    
+    return {        
+        'revision_rows': revision_rows,
+        'list_items': list_items,
+        'resultant_objs': resultant_objects,
+    }
+
+    
+    
+    
+    
+    
+
+
+
+
+
