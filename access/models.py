@@ -1422,6 +1422,7 @@ class Flavor(FormulaInfo):
                        ('/django/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
                        ('/django/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
                        ('/django/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
+                       ('/django/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
                        ]
         if self.retain_superset().count()>0:
             related_links.append(('/django/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))

@@ -207,7 +207,17 @@ jQuery(document).ready(function(){
 		width:"auto"
 	});
 	
-	
+	jQuery('#pagination-bar a#show_all_revisions').click(function() {
+	    if (window.confirm('Showing all objects may take some time to load.  Would you like to continue?')) {
+    		var url = $(this).attr('href');
+    		$('#content').load(url);
+	    }
+	    else {
+	    	return false;
+	    }
+	});
+
+
 	try {
 		jQuery('#adjusted_weight').val(urlParams['wf']);
 	} catch(err) {

@@ -1,8 +1,10 @@
 from decimal import Decimal, ROUND_HALF_UP
 
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django import template
 from django.core.urlresolvers import reverse
 from django.db.models import Sum
+from django.template import RequestContext
 
 from access.models import Flavor, FormulaTree, Ingredient, FormulaException, FormulaCycleException
 from access.utils import coster_headers
@@ -120,32 +122,22 @@ def revision_history(flavor):
     
     revision_rows = []
     
-    resultant_objects = Revision.objects.filter(version__object_id = flavor.pk).distinct().order_by('-date_created')
-    
-    paginator = Paginator(resultant_objects, 50)
-    page = int(request.GET.get('page', '1'))
-    try:
-        list_items = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        list_items = paginator.page(paginator.num_pages)
+    resultant_objects = Revision.objects.filter(version__object_id = flavor.pk).filter(version__content_type__id=23).distinct().order_by('-date_created')
+            
+    for r in resultant_objects:
+        v = r.version_set.all().get(object_id=flavor.pk)
+        try:
+            object = v.content_type.model_class().objects.get(pk=v.object_id)
+            url = reverse('admin:%s_%s_change' %(object._meta.app_label, object._meta.module_name), args=[object.id]) + 'history'
+            version_url = url
+        except:
+            version_url = 0
         
-    for r in list_items.object_list:
-        version_urls = []
-        for v in r.version_set.all():
-            try:
-                object = v.content_type.model_class().objects.get(pk=v.object_id)
-                url = reverse('admin:%s_%s_change' %(object._meta.app_label, object._meta.module_name), args=[object.id]) + 'history'
-                version_urls.append((v, url))
-            except:
-                version_urls.append((v, 0))  
-        
-        revision_rows.append((r.date_created, version_urls, r.comment, r.user, r.id))
+        revision_rows.append((r.date_created, v, version_url, r.version_set.all().count(), r.comment, r.user, r.id))
 
     
     return {        
         'revision_rows': revision_rows,
-        'list_items': list_items,
-        'resultant_objs': resultant_objects,
     }
 
     
