@@ -265,6 +265,14 @@ width:200px;
 float:left;
 }
 
+#alert span {
+	background-color: red;
+}
+
+.highlight {
+	background-color: red;
+}
+
 #flavorsearch {
 	overflow:auto;
 	width:100%;

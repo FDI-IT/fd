@@ -32,7 +32,9 @@ function remove_filters() {
 }	
 
 function filter_rows() {
+
 	remove_filters();
+
 	jQuery('#formula-submit-button').hide();	
 	
 	jQuery.get('/django/access/process_filter_update/',
@@ -43,13 +45,14 @@ function filter_rows() {
 				var filter_row = jQuery('#formula-rows tr').eq(index);
 				filter_row.addClass('filter_row');
 				filter_row.attr("title", "This ingredient does not meet the following filters: " + data[key]);
-				jQuery('#formula-rows tr.filter_row').css('background-color','#FF6666')
+				jQuery('#formula-rows tr.filter_row').css('background-color','#FF6666');
 			}
+				
+			if(jQuery('#formula-rows tr.filter_row').length == 0)
+				jQuery('#formula-submit-button').show();
+				
 		}, 'json');
 	
-	
-	if(jQuery('#formula-rows tr.filter_row').length == 0)
-		jQuery('#formula-submit-button').show();
 }
 
 function get_pks() {
@@ -82,10 +85,14 @@ function get_pks() {
 //jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == 722; }).closest("tr").index();
 
 function filter_update() {
+	
 	get_pks();
 	get_checked_boxes();
 	filter_rows();
+	
 }
+
+
 
 function update_all_formula_rows () {
 	var first = true;
@@ -115,16 +122,14 @@ function update_formula_row (row) {
 			} else {	
 				FORMULA_EDIT.t = setTimeout("recalculate_total_cost()", 750);
 				FORMULA_EDIT.t2 = setTimeout("filter_update()", 750);
-				jQuery('#formula-submit-button').show();
 				row.removeClass('invalid');
 			}
-			if(jQuery('.invalid').length == 0 && jQuery('#formula-rows tr.filter_row').length == 0) {
+			if(jQuery('.invalid').length == 0) {
 				jQuery('#formula-submit-button').show();
 			} else {
 				jQuery('#formula-submit-button').hide();
 			}
 		}, 'json');	
-
 }
 
 
@@ -149,6 +154,9 @@ function delete_row(i){
 				value_to_decrement += 1;
 			}
 	});
+	
+	if(jQuery('#formula-rows tr.filter_row').length == 0)
+		jQuery('#formula-submit-button').show();
 };
 
 function normalize_weight () {
@@ -192,16 +200,12 @@ jQuery(document).ready(function(){
 		jQuery(document).ready(function() {
 			console.log("The page has just been refreshed");
 			$('input:checkbox').removeAttr('checked');
-			get_checked_boxes();
-			get_pks();
-			filter_rows();
+			filter_update();
 		});
 	}
 
 	jQuery('#formulaedit-filterselect input:checkbox').change( function() {
-		get_checked_boxes();
-		get_pks();
-		filter_rows();
+		filter_update();
 	});
 	
 
