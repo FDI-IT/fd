@@ -366,7 +366,7 @@ jQuery(document).ready(function(){
 			}, 'json');	
 	};
 
-
+/*
 	jQuery('#add-formula-row-button').click(function(){
 		var form_id = $('#id_form-TOTAL_FORMS').val();
 		jQuery('#id_form-TOTAL_FORMS').val(Number(form_id)+1);
@@ -383,7 +383,7 @@ jQuery(document).ready(function(){
 		jQuery('#id_form-' + form_id + '-ingredient_number').focus();
 		return false;
 	});	
-	
+*/
 
 	jQuery("#matchform select[name=solvent]").delegate('', 'change', function (e) {
 		var $this = $(this)[0];

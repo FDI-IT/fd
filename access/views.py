@@ -855,7 +855,7 @@ def process_cell_update(request):
         if number == '':
             response_dict['name'] = ''
         else:
-            response_dict['name'] = "Invalid Number"
+            response_dict['name'] = "Invalid Ingredient Number"
         response_dict['cost'] = ''
     
     return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')
