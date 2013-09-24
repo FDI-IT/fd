@@ -3,7 +3,15 @@
 
 <span class="step-links">
 {% if list_items.has_previous %}
-<a href="?page={{ list_items.previous_page_number }}&{% qstring %}">previous</a>
+
+	{% if list_items.previous_page_number != 1 %}
+	    <a href="?page=1&{% qstring %}">
+	    first
+	    </a>
+	{% endif %}
+
+	<a href="?page={{ list_items.previous_page_number }}&{% qstring %}">previous</a>
+
 {% endif %}
 
 <span class="current">
@@ -14,7 +22,16 @@
     <a href="?page={{ list_items.next_page_number }}&{% qstring %}">
 	next
     </a>
+    
+    {% if list_items.next_page_number != list_items.paginator.num_pages %}
+	    <a href="?page={{ list_items.paginator.num_pages }}&{% qstring %}">
+	    last
+	    </a>
+	{% endif %}
+    
 {% endif %}
+
+
 </span>
 <span class="total-results">
 	Total results: {{resultant_objs.count}}

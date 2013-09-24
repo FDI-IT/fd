@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core import serializers
 from django.db import models
+from django.core.urlresolvers import reverse
 
 import reversion
 from reversion.managers import VersionManager
@@ -25,6 +26,7 @@ class Revision(models.Model):
     comment = models.TextField(blank=True,
                                help_text="A text comment on this revision.")
     
+
     def revert(self, delete=False):
         """Reverts all objects in this revision."""
         versions = self.version_set.all()
@@ -68,6 +70,15 @@ class Version(models.Model):
     
     object_repr = models.TextField(help_text="A string representation of the object.")
     
+    #def get_absolute_url(self):
+    #    try:
+    #        object = self.content_type.model_class().objects.get(pk=self.object_id)
+    #        url = reverse('admin:%s_%s_change' %(object._meta.app_label, object._meta.module_name), args=[object.id])
+    #        return url + 'history'
+    #    except:
+    #        pass
+            
+     
     def get_object_version(self):
         """Returns the stored version of the model."""
         data = self.serialized_data

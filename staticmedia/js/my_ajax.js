@@ -207,7 +207,17 @@ jQuery(document).ready(function(){
 		width:"auto"
 	});
 	
-	
+	jQuery('#pagination-bar a#show_all_revisions').click(function() {
+	    if (window.confirm('Showing all objects may take some time to load.  Would you like to continue?')) {
+    		var url = $(this).attr('href');
+    		$('#content').load(url);
+	    }
+	    else {
+	    	return false;
+	    }
+	});
+
+
 	try {
 		jQuery('#adjusted_weight').val(urlParams['wf']);
 	} catch(err) {
@@ -356,7 +366,7 @@ jQuery(document).ready(function(){
 			}, 'json');	
 	};
 
-
+/*
 	jQuery('#add-formula-row-button').click(function(){
 		var form_id = $('#id_form-TOTAL_FORMS').val();
 		jQuery('#id_form-TOTAL_FORMS').val(Number(form_id)+1);
@@ -373,7 +383,7 @@ jQuery(document).ready(function(){
 		jQuery('#id_form-' + form_id + '-ingredient_number').focus();
 		return false;
 	});	
-	
+*/
 
 	jQuery("#matchform select[name=solvent]").delegate('', 'change', function (e) {
 		var $this = $(this)[0];
