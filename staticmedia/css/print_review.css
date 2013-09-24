@@ -17,7 +17,7 @@ width:12px;
 #title-left{
 padding:0px;
 margin:0px;
-width:600px;
+width:100%;
 }
 
 div.float-left{
@@ -74,7 +74,7 @@ div.title{
 }
 
 
-#blades {
+div.blades {
 	clear:both;
 }
 
@@ -85,6 +85,18 @@ div.qc-info {
 
 div.qc-info > div {
 	margin:10px 0px 10px 0px;
+}
+div.left-memo {
+	margin-right:0px;
+	padding-right:0px;
+	float:left;
+	width:82%;
+}
+div.right-memo {
+	margin-left:0px;
+	padding-left:0px;
+	float:right;
+	width:15%;
 }
 
 div.float-container {
@@ -109,23 +121,22 @@ input {
 }
 div.testform {
 	float:left;
-	margin:4px 8px 4px 0px;
+	margin:4px 4px 4px 0px;
 }
 div.properties{
 	
 }
 div.specs {
-	width:120px;
+	width:17%;
 }
-div.labeldec {
-	width:120px;
-}
+
 div.ccps {
 }
   
-#blades ul{list-style: none;
+div.blades ul{list-style: none;
 margin:0px;
 padding:0px;} 
+
 
 .label{
 font-size:11px;
@@ -137,7 +148,7 @@ span.datum{
 font-size:11px;
 font-weight:bold;}
 
-#blades li{
+div.blades li{
 	width:110px;
 	float:left;
 	margin:0px 0px 0px 0px;
@@ -292,3 +303,7 @@ float:left;
 #rightfieldsets {
 width:20%;
 float:left;
+}
+div.last-fieldset {
+margin-right:0px;
+}

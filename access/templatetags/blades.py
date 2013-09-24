@@ -7,8 +7,8 @@ from access.models import Flavor, Ingredient, PurchaseOrder, ExperimentalLog
 register = template.Library()
 
 default_flavor_blade_list = (
-    'selling_price', 'formula_weight', 'pin', 'profit_ratio', 'flagged', 'last_updated', 'oldest_price_date', 'raw_material_cost', 'customer_list', 'location_code', 
-    'keywords', 'solvent', 'flashpoint', 'kosher', 'allergen', 'sulfites', 'flavor_yield', 'diacetyl', 'pg', 'experimental_link',
+    'selling_price', 'formula_weight', 'pin', 'experimental_link', 'profit_ratio', 'flagged', 'last_updated', 'oldest_price_date', 'raw_material_cost', 'customer_list', 'location_code', 
+    'keywords', 'solvent', 'flashpoint', 'kosher', 'allergen', 'sulfites', 'flavor_yield', 'diacetyl', 'pg', 
     'new_usage', 'application_list')
 
 print_flavor_blade_list = (
@@ -366,10 +366,15 @@ def blades(product):
         blade_list = pob.get_blade_list(default_purchase_order_blade_list)
         return {'blade_list': blade_list}    
     
-@register.inclusion_tag('access/blades.html')
+@register.inclusion_tag('access/print_blades.html')
 def print_blades(flavor):
     fb = FlavorBlades(flavor)
     blade_list = fb.get_blade_list(print_flavor_blade_list)
     return {'flavor':flavor, 'blade_list':blade_list}
-    
+
+@register.inclusion_tag('access/print_blades.html')
+def print_blades_side(flavor):
+    fb = FlavorBlades(flavor)
+    blade_list = fb.get_blade_list(['pin','experimental_link'])
+    return {'flavor':flavor, 'blade_list':blade_list}
     

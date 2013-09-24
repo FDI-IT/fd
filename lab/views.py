@@ -14,8 +14,6 @@ from lab.forms import SolutionForm, FinishedProductLabelForm, RMLabelForm, Exper
 from newqc.models import ReceivingLog
 from lab.glabels_scripts import rm_label, solution_label, experimental_label, solution_print, finished_product_label, rm_sample_label
 
-from unified_adapter.models import ProductInfo
-
 INVENTORY_CHOICES = (
     ('SL-8','SL-8'),
     ('SL-4','SL-4'),
@@ -46,7 +44,7 @@ def experimental_labels(request):
                 loc_code = LocationCode.get_next_location_code(request.GET['inventory_slot'])
                 lc = LocationCode(
                             location_code = loc_code,
-                            content_object = experimental        
+                            content_object = experimental.flavor        
                         )
                 lc.save()
             else:

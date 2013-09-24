@@ -80,17 +80,7 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.load_template_source',
 )
 
-# Celery configuration
-import djcelery
-djcelery.setup_loader()
-BROKER_TRANSPORT = "redis"
-BROKER_HOST = "localhost"  # Maps to redis host.
-BROKER_PORT = 6379         # Maps to redis port.
-BROKER_VHOST = "0"         # Maps to database number.
-CELERY_RESULT_BACKEND = "redis"
-CELERY_REDIS_HOST = "localhost"
-CELERY_REDIS_PORT = 6379
-CELERY_REDIS_DB = 0
+
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -135,7 +125,7 @@ INSTALLED_APPS = (
     'django.contrib.formtools',
     'django.contrib.comments',
     'django.contrib.databrowse',
-    'djcelery',
+    #'djcelery',
     'pluggable',
     'homepage', 
     'haccp',
@@ -159,3 +149,15 @@ INSTALLED_APPS = (
     #'history_audit',
     #'haystack',
 )
+
+# Celery configuration
+import djcelery
+djcelery.setup_loader()
+BROKER_TRANSPORT = "redis"
+BROKER_HOST = "localhost"  # Maps to redis host.
+BROKER_PORT = 6379         # Maps to redis port.
+BROKER_VHOST = "0"         # Maps to database number.
+CELERY_RESULT_BACKEND = "redis"
+CELERY_REDIS_HOST = "localhost"
+CELERY_REDIS_PORT = 6379
+CELERY_REDIS_DB = 0

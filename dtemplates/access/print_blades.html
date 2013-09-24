@@ -1,0 +1,14 @@
+{% autoescape off %}
+<div class="blades">
+	<div id="critical">
+		<ul>
+		{% for label, datum in blade_list %}
+			<li>
+			<span class="label">{{ label }}</span>
+			<span class="datum" id="{{label|cut:" "}}">{{ datum }}</span>
+			</li>	
+		{% endfor %}
+		</ul>
+	</div>
+</div>
+{% endautoescape %}

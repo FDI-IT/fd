@@ -6,9 +6,9 @@
 
 {% block htmlhead %}
 <script type="text/javascript" src="/djangomedia/js/jquery-1.7.1.min.js"></script>
-<script type="text/javascript" src="/djangomedia/js/jtextfill.js?v=24"></script>
-<link href="/djangomedia/css/print_review.css?v=24" type="text/css" rel="stylesheet">
-<link href="/djangomedia/css/print_review_screen.css?v=24" type="text/css" rel="stylesheet" media="screen">
+<script type="text/javascript" src="/djangomedia/js/jtextfill.js?v=25"></script>
+<link href="/djangomedia/css/print_review.css?v=25" type="text/css" rel="stylesheet">
+<link href="/djangomedia/css/print_review_screen.css?v=25" type="text/css" rel="stylesheet" media="screen">
 <script>
 	jQuery(document).ready(function(){
 		//jQuery("input").attr('readonly',true);
@@ -33,25 +33,31 @@
 </div>
 <hr>
 <div class="float-container">
-	<div class="product-memo">
-		<span class="label">Memo</span>
-		{{flavor.productmemo}}
+	<div class="left-memo">
+		<div class="product-memo">
+			<span class="label">Memo</span>
+			{{flavor.productmemo}}
+		</div>
+		<div class="product-memo">
+			<span class="label">Pricing Memo</span>
+			{{flavor.pricing_memo}}
+		</div>
+		<div class="product-memo">
+			<span class="label">Mixing Instructions</span>
+			{{flavor.mixing_instructions}}
+		</div>
 	</div>
-	<div class="product-memo">
-		<span class="label">Pricing Memo</span>
-		{{flavor.pricing_memo}}
-	</div>
-	<div class="product-memo">
-		<span class="label">Mixing Instructions</span>
-		{{flavor.mixing_instructions}}
+	<div class="right-memo">
+		{% print_blades_side flavor %}
 	</div>
 	{% print_blades flavor %}
+	
 </div>
 
 <div id="flavor-tabs">
 </div>
 <hr>
-<div class="float-container">
+<div class="float-container fieldset-container">
 
 <div class="testform ccps">
 	<fieldset>
@@ -93,7 +99,7 @@
 		</div>	
 	</fieldset>
 </div>
-<div class="testform labeldec">
+<div class="testform specs">
 	<fieldset>
 		<legend>Label Declarations</legend>
 		{{info_form.allergen.label}}
@@ -163,7 +169,7 @@
 		</div>
 	</fieldset>
 </div>
-<div class="testform specs">
+<div class="testform specs last-fieldset">
 	<fieldset>
 		<legend>Other</legend>
 		{{info_form.kosher_id.label}}

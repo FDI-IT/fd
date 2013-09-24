@@ -20,7 +20,6 @@ from django.views.generic.create_update import create_object
 
 from reversion import revision
 
-from unified_adapter.models import ProductInfo
 
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import *

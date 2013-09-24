@@ -1264,6 +1264,7 @@ class Flavor(FormulaInfo):
         ordering = ['-valid','number']
     
     import_order = 0
+
     
     @property
     def location_code(self):
@@ -2014,7 +2015,8 @@ class ExperimentalLog(models.Model):
         try:
             return self.location_code_n.all().reverse()[0]
         except:
-            return None
+            if self.flavor is not None:
+                return self.flavor.location_code
     
     @property
     def batchsheet_memo(self):
@@ -2884,8 +2886,7 @@ class FEMAIngredient(Ingredient):
 class AntisepticIngredient(models.Model):
     pin = models.PositiveSmallIntegerField()
     concentration = models.PositiveSmallIntegerField()
-    
-    
+        
     def __unicode__(self):
         return "%s -- %s%%" % (self.pin, self.concentration)
     
