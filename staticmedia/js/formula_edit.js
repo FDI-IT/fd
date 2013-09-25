@@ -1,7 +1,8 @@
 var FORMULA_EDIT = {};
+FORMULA_EDIT.checked_boxes = {};
 
-function get_checked_boxes() { 
-	FORMULA_EDIT.checked_boxes = {};
+FORMULA_EDIT.get_checked_boxes = function() { 
+	
 	var checkboxes = jQuery('#formulaedit-filterselect input:checkbox:checked');
 	
 	for(var i = 0; i < checkboxes.length; i++) {
@@ -13,8 +14,9 @@ function get_checked_boxes() {
 			FORMULA_EDIT.checked_boxes[my_box.name] = [my_box.value];
 		}
 	}
-}
-function validate_all_rows() {
+};
+
+FORMULA_EDIT.validate_all_rows = function () {
 	var invalid = false;
 	
 	jQuery('#formula-rows tr:gt(0)').each(function() {
@@ -42,17 +44,17 @@ function validate_all_rows() {
 	else {
 		return true;
 	}	
-} 
+};
 
 
-function remove_filters() {
+FORMULA_EDIT.remove_filters = function() {
 	jQuery('#formula-rows tr').removeAttr('title'); //the title attribute adds a tooltip
 	jQuery('#formula-rows tr').attr('class', 'formula_row');
 	jQuery('#formula-rows tr').css('background-color','white');
-}	
+};
 
 
-function add_error_messages() {
+FORMULA_EDIT.add_error_messages = function() {
 	jQuery('#formula-rows tr').each(function() {
 		var error_message = [];
 		if (jQuery(this).hasClass('invalid_number') || jQuery(this).hasClass('empty') || jQuery(this).hasClass('invalid_amount')){
@@ -69,13 +71,14 @@ function add_error_messages() {
 			jQuery(this).css('background-color', '#FF0000');
 		}
 	});
-}
+};
 
 
-function filter_rows() {
+FORMULA_EDIT.filter_rows = function() {
 	
+	var my_data = {pks:FORMULA_EDIT.pks};
 	jQuery.get('/django/access/process_filter_update/',
-		FORMULA_EDIT,
+		my_data,
 		function(data) {
 			for (var key in data) {
 				var index = jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == key; }).closest("tr").index();
@@ -84,14 +87,14 @@ function filter_rows() {
 				filter_row.attr("title", "This ingredient does not meet the following filters: " + data[key]);
 				jQuery('#formula-rows tr.filter_row').css('background-color','#FF6666');
 			}
-			add_error_messages();
-			toggle_submit();
+			FORMULA_EDIT.add_error_messages();
+			FORMULA_EDIT.toggle_submit();
 			
 		}, 'json');
 	
-}
+};
 
-function get_pks() {
+FORMULA_EDIT.get_pks = function () {
 	FORMULA_EDIT.pks = [];
 	
 	jQuery("#formula-rows tr.formula_row:gt(0)").each(function () { //GET THE PK OF ALL ROWS WITH CLASS FORMULA_ROW 
@@ -101,7 +104,7 @@ function get_pks() {
 			FORMULA_EDIT.pks.push(row_pk);
 	});
 	
-}
+};
 
 //obtain pk at given row
 //jQuery(this).children('.ingredient_pk-cell').children('input').val()
@@ -120,44 +123,35 @@ function get_pks() {
 //obtain the index of the row where pk = 722
 //jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == 722; }).closest("tr").index();
 
-function filter_update() {
+FORMULA_EDIT.filter_update = function() {
 	
-	remove_filters();
+	FORMULA_EDIT.remove_filters();
 	//number_validation();
 	//amount_validation();
 	//fields_are_not_empty();
-	validate_all_rows();
-	get_pks();
-	get_checked_boxes();
-	filter_rows();
+	FORMULA_EDIT.validate_all_rows();
+	FORMULA_EDIT.get_pks();
+	FORMULA_EDIT.get_checked_boxes();
+	FORMULA_EDIT.filter_rows();
 	
-}
+};
 
 
 
-function update_all_formula_rows () {
-	var first = true;
-	jQuery('#formula-rows tr').each( function() {
-		if (first == true) {
-			first = false;
-		} else {
-			update_formula_row(jQuery(this));
-		}
-	});
-}
 
-function toggle_submit () {
-	if(validate_all_rows()) {
+
+FORMULA_EDIT.toggle_submit = function() {
+	if(FORMULA_EDIT.validate_all_rows()) {
 		jQuery('#formula-submit-button').show();
 	}
 	else {
 		jQuery('#formula-submit-button').hide();
 	}
 	
-	//add_error_messages();
-}
+	//FORMULA_EDIT.add_error_messages();
+};
 
-function update_formula_row (row) {
+FORMULA_EDIT.update_formula_row = function(row) {
 	clearTimeout(t);	
 	
 	jQuery.get('/django/access/process_cell_update/', 
@@ -172,17 +166,27 @@ function update_formula_row (row) {
 			if (data.name == 'Invalid Ingredient Number') {
 				row.addClass('invalid_number');
 			} else {	
-				FORMULA_EDIT.t = setTimeout("recalculate_total_cost()", 750);
-				//FORMULA_EDIT.t2 = setTimeout("filter_update()", 750);
+				FORMULA_EDIT.t = setTimeout("FORMULA_EDIT.recalculate_total_cost()", 750);
+				//FORMULA_EDIT.t2 = setTimeout("FORMULA_EDIT.filter_update()", 750);
 				row.removeClass('invalid_number');
 			}
 			FORMULA_EDIT.invalid_number_rows = jQuery('.invalid_number').length;
-			//filter_update();
+			//FORMULA_EDIT.filter_update();
 		}, 'json');	
-}
+};
 
+FORMULA_EDIT.update_all_formula_rows = function() {
+	var first = true;
+	jQuery('#formula-rows tr').each( function() {
+		if (first == true) {
+			first = false;
+		} else {
+			FORMULA_EDIT.update_formula_row(jQuery(this));
+		}
+	});
+};
 
-function delete_row(i){
+FORMULA_EDIT.delete_row = function(i){
 	document.getElementById('formula-rows').deleteRow(i);
 	var form_id = $('#id_form-TOTAL_FORMS').val();
 	jQuery('#id_form-TOTAL_FORMS').val(Number(form_id)-1);
@@ -204,29 +208,10 @@ function delete_row(i){
 			}
 	});
 	
-	filter_update();
+	FORMULA_EDIT.filter_update();
 };
 
-function normalize_weight () {
-	var sum=0;
-	jQuery('.amount-cell input').each( function() {
-		sum = sum + parseFloat(this.value);
-	});
-	var correction_factor = 1000.0 / sum;
-	if(isNaN(correction_factor)) {
-		alert("Please enter a valid number in all the amount cells.");
-	} else {
-		jQuery('.amount-cell input').each( function() {
-			this.value = Math.round(this.value * correction_factor * 1000) / 1000;
-		});
-		update_all_formula_rows();
-		recalculate_total_cost();
-	}
-	
-	return false;
-}
-
-function recalculate_total_cost() {
+FORMULA_EDIT.recalculate_total_cost= function() {
 	var total_cost = 0;
 	var total_weight = 0;
 	jQuery('.cost-cell').each(function() {
@@ -242,41 +227,60 @@ function recalculate_total_cost() {
 	jQuery("#FormulaWeight").html(total_weight);
 };
 
+FORMULA_EDIT.normalize_weight = function() {
+	var sum=0;
+	jQuery('.amount-cell input').each( function() {
+		sum = sum + parseFloat(this.value);
+	});
+	var correction_factor = 1000.0 / sum;
+	if(isNaN(correction_factor)) {
+		alert("Please enter a valid number in all the amount cells.");
+	} else {
+		jQuery('.amount-cell input').each( function() {
+			this.value = Math.round(this.value * correction_factor * 1000) / 1000;
+		});
+		FORMULA_EDIT.update_all_formula_rows();
+		FORMULA_EDIT.recalculate_total_cost();
+	}
+	
+	return false;
+};
+
 jQuery(document).ready(function(){	
 
 	if(jQuery("#formula-rows").length > 0) {
 		jQuery(document).ready(function() {
 			console.log("The page has just been refreshed");
 			$('input:checkbox').removeAttr('checked');
-			update_all_formula_rows();
-			filter_update();
+			FORMULA_EDIT.update_all_formula_rows();
+			FORMULA_EDIT.filter_update();
 		});
 	}
 
 	jQuery('#formulaedit-filterselect input:checkbox').change( function() {
-		filter_update();
+		FORMULA_EDIT.filter_update();
 	});
 	
 	
 	jQuery('#formula-rows').delegate('input', 'keyup', function (e) {
 		var $this = $(this);
 		var row = $this.closest("tr");
-		update_formula_row(row);
-		FORMULA_EDIT.t2 = setTimeout("filter_update()", 750);
+		FORMULA_EDIT.update_formula_row(row);
+		FORMULA_EDIT.t2 = setTimeout("FORMULA_EDIT.filter_update()", 750);
 	});	
 	
 	jQuery('#formula-rows').delegate('.number-cell input', 'keyup', function(e) {
 		var $this = $(this);
 		var row = $this.closest("tr");
-		//update_formula_row(row);
+		//FORMULA_EDIT.update_formula_row(row);
 		$this.autocomplete({
 			source: '/django/access/ingredient_autocomplete',
 			minLength: 1,
 			select: function( event, ui ) {
 				// ui.item.value is the item of interest
 				row.find('.number-cell input').val( ui.item.value );
-				update_formula_row(row);
-				filter_update();
+				FORMULA_EDIT.update_formula_row(row);
+				FORMULA_EDIT.filter_update();
 			}
 		});
 	});
@@ -293,10 +297,10 @@ jQuery(document).ready(function(){
 			'<td class="name-cell"></td>' +
 			'<td class="cost-cell"></td>' +
 			'<td class="ingredient_pk-cell" style="display:none"> <input type="text"> </td>' +
-			'<td class="del-row"><input type="button" value="X" onclick="delete_row(this.parentNode.parentNode.rowIndex)"></td>' +
+			'<td class="del-row"><input type="button" value="X" onclick="FORMULA_EDIT.delete_row(this.parentNode.parentNode.rowIndex)"></td>' +
 			'</tr>');
 		jQuery('#id_form-' + form_id + '-ingredient_number').focus();
-		filter_update();
+		FORMULA_EDIT.filter_update();
 		return false;
 	});	
 
@@ -318,7 +322,7 @@ jQuery(document).ready(function(){
 						// ui.item.value is the item of interest
 						$this.val( ui.item.value );
 						jQuery("#solution-baserm").html(ui.item.label);
-						//update_formula_row(row);
+						//FORMULA_EDIT.update_formula_row(row);
 						return false;
 				}, 'json');
 			}

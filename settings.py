@@ -100,7 +100,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'reversion.middleware.RevisionMiddleware',
-    'history_audit.middleware.MyMiddleware',
+    #'history_audit.middleware.MyMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
