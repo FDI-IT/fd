@@ -75,10 +75,13 @@ FORMULA_EDIT.add_error_messages = function() {
 
 
 FORMULA_EDIT.filter_rows = function() {
-	
-	var my_data = {pks:FORMULA_EDIT.pks};
+	console.log(FORMULA_EDIT.checked_boxes);
 	jQuery.get('/django/access/process_filter_update/',
-		my_data,
+		{
+			pks: FORMULA_EDIT.pks,
+			checked_boxes: FORMULA_EDIT.checked_boxes,
+			invalid_number_rows: FORMULA_EDIT.invalid_number_rows,
+		},
 		function(data) {
 			for (var key in data) {
 				var index = jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == key; }).closest("tr").index();
@@ -303,68 +306,5 @@ jQuery(document).ready(function(){
 		FORMULA_EDIT.filter_update();
 		return false;
 	});	
-
-
-
-	jQuery('#solution-ingredient-autocomplete').delegate('input', 'keyup', function(e) {
-		var $this = $(this);
-//		var row = $this.closest("tr");
-		$this.autocomplete({
-			source: '/django/access/ingredient_autocomplete',
-			minLength: 1,
-			select: function( event, ui ) {
-				jQuery.post('/django/solutionfixer/process_baserm_update', 
-					{
-						solution_id: jQuery('#solution_id').html(),
-						baserm_id: ui.item.value
-					},
-					function (data) {
-						// ui.item.value is the item of interest
-						$this.val( ui.item.value );
-						jQuery("#solution-baserm").html(ui.item.label);
-						//FORMULA_EDIT.update_formula_row(row);
-						return false;
-				}, 'json');
-			}
-		});
-	});
-	
-		
-	// begin solution label code
-	// TODO this is essentially a repeat of the above which means some stuff needs 
-	// to be refactored. The only difference is the selectors, because the markup
-	// is not consistent between two views.
-	// which two views? formula edit, and solution label generator
-	jQuery('#solution-form').delegate('input,select', 'change', function (e) {
-		clearTimeout(t);
-		t = setTimeout("update_label_preview()", 750);
-	});
-
-	jQuery("#id_ingredient_picker").autocomplete({
-		source: '/django/access/ingredient_autocomplete/',
-		minLength: 1,
-		select: function(event, ui) {
-				jQuery.get('/django/lab/ingredient_label',
-					{ingredient_id:ui.item.value},
-					function (data) {
-						jQuery("#id_pin").val(ui.item.value);
-						jQuery("#id_nat_art").val(data.nat_art);
-						jQuery("#id_pf").val(data.pf);
-						jQuery("#id_product_name").val(data.product_name);
-						jQuery("#id_product_name_two").val(data.product_name_two);
-						update_label_preview();
-					}, 'json');
-			}
-	});
-	// end solution label js
-	// begin experimental label js
-	
-	jQuery('#new_solution_form #id_ingredient').autocomplete({
-		source: '/django/access/ingredient_autocomplete/',
-		minLength: 1,
-		select: function(event, ui) {
-			console.log(ui.item.value);
-		}
-	});
 	
 });
