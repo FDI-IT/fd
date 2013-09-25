@@ -82,6 +82,7 @@ FORMULA_EDIT.filter_rows = function() {
 		},
 		function(data) {
 			for (var key in data) {
+				// this weird filter is to select inputs by value with a variable
 				var filter_row = jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == key; }).closest("tr");
 				filter_row.addClass('filter_row')
 				          .attr("title", "This ingredient does not meet the following filters: " + data[key]);
