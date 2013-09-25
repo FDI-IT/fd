@@ -143,7 +143,7 @@ FORMULA_EDIT.filter_update = function() {
 
 
 FORMULA_EDIT.toggle_submit = function() {
-	if(FORMULA_EDIT.validate_all_rows()) {
+	if(FORMULA_EDIT.validate_all_rows() && jQuery("#formula-rows tr.filter_row").length == 0) {
 		jQuery('#formula-submit-button').show();
 	}
 	else {
@@ -154,7 +154,7 @@ FORMULA_EDIT.toggle_submit = function() {
 };
 
 FORMULA_EDIT.update_formula_row = function(row) {
-	clearTimeout(t);	
+	clearTimeout(FORMULA_EDIT.t);	
 	
 	jQuery.get('/django/access/process_cell_update/', 
 		{
