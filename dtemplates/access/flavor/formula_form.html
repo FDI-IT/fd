@@ -41,7 +41,7 @@
 			<td class="name-cell">{{ label.name }}</td>
 			<td class="cost-cell" >{{ label.cost }}</td>
 			<td class="ingredient_pk-cell" style="display:none">{{ form.ingredient_pk }}</td>
-			<td class="del-row" ><input type="button" value="X" onclick="delete_row(this.parentNode.parentNode.rowIndex)"></td>
+			<td class="del-row" ><input type="button" value="X" onclick="FORMULA_EDIT.delete_row(this.parentNode.parentNode.rowIndex)"></td>
 		</tr>
 		{% endfor %}
 	</table>

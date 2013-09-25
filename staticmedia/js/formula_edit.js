@@ -1,36 +1,34 @@
 var FORMULA_EDIT = {};
-FORMULA_EDIT.checked_boxes = {};
 
 FORMULA_EDIT.get_checked_boxes = function() { 
+	FORMULA_EDIT.checked_boxes = {};
 	
-	var checkboxes = jQuery('#formulaedit-filterselect input:checkbox:checked');
-	
-	for(var i = 0; i < checkboxes.length; i++) {
-		var my_box = checkboxes[i];
-		
-		if ( my_box.name in FORMULA_EDIT.checked_boxes ) {
-			FORMULA_EDIT.checked_boxes[my_box.name].push(my_box.value);
+	jQuery('#formulaedit-filterselect input:checkbox:checked').each( function() {
+		if ( this.name in FORMULA_EDIT.checked_boxes ) {
+			FORMULA_EDIT.checked_boxes[this.name].push(this.value);
 		} else {
-			FORMULA_EDIT.checked_boxes[my_box.name] = [my_box.value];
+			FORMULA_EDIT.checked_boxes[this.name] = [this.value];
 		}
-	}
+	});
 };
 
 FORMULA_EDIT.validate_all_rows = function () {
 	var invalid = false;
 	
 	jQuery('#formula-rows tr:gt(0)').each(function() {
-		if(jQuery(this).find('.name-cell').html() == 'Invalid Ingredient Number') {
-			jQuery(this).addClass('invalid_number');
+		var $this = jQuery(this);
+		if($this.find('.name-cell').html() == 'Invalid Ingredient Number') {
+			$this.addClass('invalid_number');
 			invalid = true;
 		}
-		if(isNaN(jQuery(this).find('.amount-cell input').val())) {
-			jQuery(this).addClass('invalid_amount');
+		if(isNaN($this.find('.amount-cell input').val())) {
+			$this.addClass('invalid_amount');
 			invalid = true;
 		}
-		jQuery(this).find('input').each(function() {
-			if(jQuery(this).val() == '') {
-				var currentRow = jQuery(this).closest('tr');
+		$this.find('input').each(function() {
+			var inputthis = jQuery(this);
+			if(inputthis.val() == '') {
+				var currentRow = inputthis.closest('tr');
 				currentRow.addClass('empty');
 				invalid = true;
 			}
@@ -48,34 +46,34 @@ FORMULA_EDIT.validate_all_rows = function () {
 
 
 FORMULA_EDIT.remove_filters = function() {
-	jQuery('#formula-rows tr').removeAttr('title'); //the title attribute adds a tooltip
-	jQuery('#formula-rows tr').attr('class', 'formula_row');
-	jQuery('#formula-rows tr').css('background-color','white');
+	jQuery('#formula-rows tr').removeAttr('title')
+	                          .attr('class', 'formula_row')
+	                          .css('background-color','white');
 };
 
 
 FORMULA_EDIT.add_error_messages = function() {
 	jQuery('#formula-rows tr').each(function() {
 		var error_message = [];
-		if (jQuery(this).hasClass('invalid_number') || jQuery(this).hasClass('empty') || jQuery(this).hasClass('invalid_amount')){
-			if (jQuery(this).hasClass('invalid_number')) {
-				error_message.push("Invalid ingredient number");
-			}
-			if (jQuery(this).hasClass('empty')) {
-				error_message.push("Empty field(s)");
-			}
-			if (jQuery(this).hasClass('invalid_amount')) {
-				error_message.push("Invalid amount");
-			}
-			jQuery(this).attr("title", "Please fix the following error(s): " + error_message.join(", "));
-			jQuery(this).css('background-color', '#FF0000');
+		var $this = jQuery(this);
+		if ($this.hasClass('invalid_number')) {
+			error_message.push("Invalid ingredient number");
+		}
+		if ($this.hasClass('empty')) {
+			error_message.push("Empty field(s)");
+		}
+		if ($this.hasClass('invalid_amount')) {
+			error_message.push("Invalid amount");
+		}
+		if (error_message.length > 0) {
+			$this.attr("title", "Please fix the following error(s): " + error_message.join(", "));
+			$this.css('background-color', '#FF0000');
 		}
 	});
 };
 
 
 FORMULA_EDIT.filter_rows = function() {
-	console.log(FORMULA_EDIT.checked_boxes);
 	jQuery.get('/django/access/process_filter_update/',
 		{
 			pks: FORMULA_EDIT.pks,
@@ -84,12 +82,12 @@ FORMULA_EDIT.filter_rows = function() {
 		},
 		function(data) {
 			for (var key in data) {
-				var index = jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == key; }).closest("tr").index();
-				var filter_row = jQuery('#formula-rows tr').eq(index);
-				filter_row.addClass('filter_row');
-				filter_row.attr("title", "This ingredient does not meet the following filters: " + data[key]);
-				jQuery('#formula-rows tr.filter_row').css('background-color','#FF6666');
+				var filter_row = jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == key; }).closest("tr");
+				filter_row.addClass('filter_row')
+				          .attr("title", "This ingredient does not meet the following filters: " + data[key]);
+				
 			}
+			jQuery('#formula-rows tr.filter_row').css('background-color','#FF6666');
 			FORMULA_EDIT.add_error_messages();
 			FORMULA_EDIT.toggle_submit();
 			
