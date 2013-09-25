@@ -836,10 +836,7 @@ def process_cell_update(request):
     response_dict = {}
     try:
         ingredient = Ingredient.get_formula_ingredient(number)
-        response_dict['name'] = "%s %s %s" % (
-                                   ingredient.art_nati,
-                                   ingredient.prefix,
-                                   ingredient.product_name)
+        response_dict['name'] = ingredient.long_name
         response_dict["pk"] = ingredient.pk
         try:
             try:
