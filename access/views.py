@@ -1171,6 +1171,14 @@ def digitized_entry(request):
 
 @login_required
 @revision.create_on_success
+def new_tsr(request):
+    return create_object(request,
+                         form_class = forms.TSRForm,
+                         template_name="access/tsr/new.html",
+                         post_save_redirect="/django/",)
+
+@login_required
+@revision.create_on_success
 def new_po(request):
     return create_object(request, 
                          form_class=forms.PurchaseOrderForm, 

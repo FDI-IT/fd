@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
 
 from pluggable.sets import AncestorSet
 
@@ -2594,7 +2595,74 @@ def next_po_number():
     except:
         next_po_number = ppn + 1
     return next_po_number
+
+class TSR(models.Model):
+    date_in = models.DateField(blank=True, default=date.today)
+    assigned_to = models.ForeignKey(User, related_name="assigned_TSRs")
+    entered_by = models.ForeignKey(User, related_name="entered_TSRs")
+    project_number = models.PositiveIntegerField(max_length=7)
+    date_out = models.DateField(blank=True)
     
+    SHIPPING_METHOD_CHOICES = (
+        ('red', 'UPS Red'),
+        ('blue', 'UPS Blue'),
+        ('orange', 'UPS Orange'),
+        ('ground', 'UPS Ground'),
+        ('international', 'International'),
+    )
+    
+    shipping_method = models.CharField(max_length=20,
+                                       choices=SHIPPING_METHOD_CHOICES)
+    
+    customer = models.ForeignKey('Customer')
+    contact = models.CharField(max_length=40)
+    title = models.CharField(max_length=40)
+    telephone = models.CharField(max_length=20)
+    country = models.CharField(max_length=30, blank = True)
+    email = models.CharField(max_length=50)
+    deadline = models.DateField(blank = True)
+    
+    #approvals needed
+    kosher_parve = models.BooleanField(default=False)
+    kosher_dairy = models.BooleanField(default=False)
+    usda = models.BooleanField(default=False, verbose_name="USDA")
+    msds = models.BooleanField(default=False, verbose_name="MSDS")
+    specs = models.BooleanField(default=False)
+    cont_guar = models.BooleanField(default=False)
+    finished_product = models.BooleanField(default=False)
+    
+    #flavor form
+    liquid = models.BooleanField(default=False)
+    dry = models.BooleanField(default=False)
+    emulsion = models.BooleanField(default=False)
+    natural = models.BooleanField(default=False)
+    wonf = models.BooleanField(default=False)
+    NA = models.BooleanField(default=False)
+    artificial = models.BooleanField(default=False)
+    organic_comp = models.BooleanField(default=False)
+    
+    #requirements
+    oil = models.BooleanField(default=False)
+    water = models.BooleanField(default=False)
+    coffee = models.BooleanField(default=False)
+    tea = models.BooleanField(default=False)
+    nopg = models.BooleanField(default=False)
+    prop65 = models.BooleanField(default=False)
+    nodiacetyl = models.BooleanField(default=False)
+    overseas = models.BooleanField(default=False)
+    
+    
+    max_price = models.DecimalField(max_digits=7, decimal_places=2)
+    lbs_per_year = models.PositiveIntegerField()
+    exposed_to_head = models.BooleanField(default=False)
+    temperature = models.DecimalField(max_digits=5, decimal_places=3)
+    minutes = models.PositiveIntegerField()
+    
+    japan = models.BooleanField(default=False)
+    whole_foods = models.BooleanField(default=False)
+    lab_select = models.BooleanField(default=False)
+    
+    description = models.TextField(max_length=200, verbose_name="Project Description")
     
 class PurchaseOrder(models.Model):
     number = models.PositiveIntegerField(max_length=7, blank=True, default=next_po_number) #, default=next_po_number)

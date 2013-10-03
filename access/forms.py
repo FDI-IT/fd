@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 
 from formfieldset.forms import FieldsetMixin
 
-from access.models import Flavor, Formula, ExperimentalLog, PurchaseOrderLineItem, PurchaseOrder, NATART_CHOICES, Ingredient, get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES
+from access.models import Flavor, Formula, ExperimentalLog, TSR, PurchaseOrderLineItem, PurchaseOrder, NATART_CHOICES, Ingredient, get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES
 from solutionfixer.models import SolutionStatus, Solution
 
 def validate_ingredient_number(number):
@@ -39,6 +39,12 @@ class DigitizedFormulaPasteForm(forms.Form):
 class IngredientCostUpdate(forms.Form):
     new_cost = forms.FloatField()
 
+class TSRForm(ModelForm):
+    
+    class Meta:
+        model = TSR
+        exclude = ('date_in')
+        
 class PurchaseOrderForm(ModelForm):
 
     class Meta:
