@@ -2924,7 +2924,16 @@ class LocationCode(models.Model):
         else:
             return inventory_slot
         
-        
+class MagentoFlavor(models.Model):
+    def __unicode__(self):
+        return 'MagentoFlavor: %s' % self.flavor
+    
+    flavor = models.ForeignKey(Flavor)
+    sku = models.CharField(blank=True, max_length=20)
+    description = models.TextField(blank=True)
+    price = models.CharField(blank=True, max_length=10)
+    short_description = models.TextField(blank=True)
+    
         
         
         

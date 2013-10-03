@@ -50,7 +50,8 @@ urlpatterns = patterns('',
     #(r'^fdileague/', include ('fdileague.urls')),
     #(r'^players/', include ('fdileague.player_urls')),
     (r'^unified_adapter/', include ('unified_adapter.urls')),
-    #(r'^history_audit/', include ('history_audit.urls')),
+    (r'^history_audit/', include ('history_audit.urls')),
+    (r'^export/', include ('export.urls')),
 )
 
 from access.models import Flavor, Ingredient, ExperimentalLog, Formula

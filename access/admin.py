@@ -10,6 +10,14 @@ from django.db.models import Q, F
 #class FlavorAdmin(admin.ModelAdmin):
 #    inlines = [FormulaInline]
 
+class MagentoAdmin(VersionAdmin):
+    list_display = ('flavor', 'sku', 'description', 'price', 'short_description')
+    list_editable = ('sku', 'description', 'price', 'short_description')
+    search_fields = ['flavor__number']
+    fields = ('flavor','sku','description','price','short_description')
+    raw_id_fields = ('flavor',)
+admin.site.register(models.MagentoFlavor, MagentoAdmin)
+
 class FlavorAdmin(VersionAdmin):
     search_fields = ['number', 'name']
     fields = ('number','name','prefix','natart','label_type',
