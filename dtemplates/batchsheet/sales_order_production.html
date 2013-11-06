@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if status_message %}
+	<h1>{{ status_message }}</h1>
+{% endif %}
+
+<div id="flavorsearch">
+	
+</div>
+
+<div id="content-main">
+	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
+	<form name="salesorder_selections" action="/django/batchsheet/batchsheet_batch_print/" method="post">
+	    {% csrf_token %}
+	
+	<table width="100%" class="sorttable">
+		<thead>
+			<tr>
+				<th title="Select Box">Select</th>
+				<th title="Flavor Number" class="{sorter: 'link-digit'}">Num</th>
+				<th title="Weight Ordered" class="{sorter: 'link-digit'}">Weight</th>
+				<th class="{sorter: 'link-digit'}" title="Unit Raw Material Cost">Unit $</th>
+				<th class="{sorter: 'link-digit'}" title="Total Raw Material Cost">Total $</th>
+				<th>Details</th>
+			</tr>
+		</thead><tbody>
+		{% for order in orders %}
+		<tr id="{{ order.0 }}">
+			<td>
+				<input type="checkbox" name="flavor_pks" value="[{'flavor-pk':'{{order.flavor.pk}}', 'weight':'{{order.total}}'}]"{% if checkall %}checked{% endif %}>
+			</td>
+			<td>
+				<a href="/django/access/{{ order.flavor.number }}?wf={{ order.total }}">{{ order.flavor.number }}</a>
+			</td>
+			<td>
+				{{ order.total }}
+			</td>
+			<td>
+				{{ order.flavor.rawmaterialcost }}
+			</td>
+			<td>
+				{{ order.totalcost }}
+			</td>
+			<td>	
+			{% for detail in order.details %}
+				<a href="/django/salesorders/{{ detail.salesordernumber.number }}/">{{ detail }};</a>
+			{% endfor %}
+			</td>
+		</tr>
+		{% endfor %}
+	    </tbody>
+	</table>
+	</form>
+</div>
+
+</form>
+{% endblock %}
+

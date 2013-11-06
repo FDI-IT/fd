@@ -143,3 +143,8 @@ class IngredientAllergenFixer(VersionAdmin):
     def queryset(self,request):
         return self.model.objects.exclude(allergen__iexact="None").exclude(suppliercode__iexact="FDI").order_by('allergen')
 admin.site.register(models.AllerIngredients, IngredientAllergenFixer)
+
+class TSRAdmin(VersionAdmin):
+    search_fields = ['number', 'customer__companyname', 'contact']
+admin.site.register(models.TSR, TSRAdmin)
+

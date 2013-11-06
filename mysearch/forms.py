@@ -18,6 +18,7 @@ class MainSearch(forms.Form):
             ('sales_order','Sales Orders'),
             ('purchase_order','Purchase Orders'),
             ('lot','Lots'),
+            ('tsr','TSRs'),
         )
     )
     search_string = forms.CharField(label="Search", required=False, widget=SearchInput(attrs={'placeholder':'Search'}))

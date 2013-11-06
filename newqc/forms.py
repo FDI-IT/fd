@@ -4,6 +4,9 @@ from django.forms.formsets import BaseFormSet
 from django.forms import widgets
 from django.db import connection
 from django.core.exceptions import ValidationError
+from django.utils.safestring import mark_safe
+from cgi import escape
+
 from access.models import Flavor
 import re
 
@@ -19,14 +22,18 @@ def validate_flavor_number(num):
         raise ValidationError(u"Please input a valid flavor number.")
     
 def validate_lot_number(num):
-    if Lot.objects.filter(number = num).exists() == False:
-        raise ValidationError(u"Please input a valid lot number.")
+#     if Lot.objects.filter(number = num).exists() == False:
+#         raise ValidationError(mark_safe("<a href='/django/qc/lots/'>Please enter a valid lot number."))
+    if num.isdigit() == False:
+        raise ValidationError("Lot number must be an integer.")
     if Lot.objects.filter(number = num).count() > 1:
-        raise ValidationError(u"Multiple lots exist with this lot number.")
+        num = str(num)
+        raise ValidationError(mark_safe("<a href='/django/admin/newqc/lot/?q=%s'>Multiple lots exist with this lot number." % escape(num)))
+
         
 class FlavorNumberField(forms.IntegerField):
     default_validators = [validate_flavor_number]
-    
+     
 class LotNumberField(forms.CharField):
     default_validators = [validate_lot_number]
 
@@ -43,15 +50,19 @@ class NewFlavorRetainForm(forms.Form):
         cleaned_data = self.cleaned_data
         flavor_number = cleaned_data.get("flavor_number")
         lot_number = cleaned_data.get("lot_number")
+        lot_pk = Lot.objects.get(number=lot_number).pk
         
         if flavor_number and lot_number: #only do this if both fields are valid so far
             raise_error = True
             lots = Lot.objects.filter(number = lot_number)
-            for lot in lots:
-                if lot.flavor.number == flavor_number:
-                    raise_error = False
-            if raise_error == True:
-                raise ValidationError(u"The given lot number does not correspond to the given flavor number.")
+            if Lot.objects.filter(number = lot_number).exists() == True:
+                for lot in lots:
+                    if lot.flavor.number == flavor_number:
+                        raise_error = False
+                if raise_error == True:
+                    raise ValidationError(mark_safe("The given lot number does not correspond to the given flavor number. <a href='/django/access/%s/#ui-tabs-5' style='color: #330066'>Find Lot</a> | <a href='/django/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))
+            else:
+                raise ValidationError(mark_safe("<a href='/django/access/%s/#ui-tabs-5' style='color: #330066'>Invalid lot number." % escape(str(flavor_number))))
         
         return cleaned_data
 

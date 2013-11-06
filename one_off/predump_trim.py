@@ -1,7 +1,6 @@
 from access.models import *
 from newqc.models import *
 from solutionfixer.models import *
-from unified_adapter.models import ProductInfo
 from django.db.models import Avg, Max, Min, Count
 
 complex_flavors = set(
@@ -9,7 +8,7 @@ complex_flavors = set(
     )
 
 
-def get_complete_flavors_and_ingredints(save_flavors):
+def get_complete_flavors_and_ingredients(save_flavors):
     complete_flavor_numbers = set()
     complete_ingredient_ids = set()
     for f in save_flavors:
@@ -49,7 +48,7 @@ def delete_other_flavors(complete_flavor_numbers):
 def find_most_made_flavors():
     most_made_flavors = set()
     for f in Flavor.objects.annotate(Count('lot')).order_by('-lot__count')[:10]:
-        most_made_flavors.add(f)
+        most_made_flavors.add(f.number)
     return most_made_flavors
 
 def add_some_invalid_flavors(save_flavors):
@@ -57,34 +56,55 @@ def add_some_invalid_flavors(save_flavors):
         save_flavors.add(f.number)
     return save_flavors
 
-def delete_other_digitized_formulas():
+def trim_experimental_logs():
     c = ExperimentalLog.objects.all().count()
     
     for e in ExperimentalLog.objects.annotate(Count('digitizedformula')).order_by('digitizedformula__count')[:c-9]:
         print e
         e.delete()
+        
+    for e in ExperimentalLog.objects.all():
+        if e.digitizedformula_set.count() > 1000:
+            e.delete()
 
-def delete_upis():
-    remaining_flavors = Flavor.objects.all().values_list('number',flat=True)
-    remaining_es = ExperimentalLog.objects.all().values_list('experimentalnum',flat=True)
+# DIGITIZED FORMULAS ARE AUTOMATICALLY DELETED
+# def trim_digitized_formulas(): #run after trimming experimental logs
+#     digitized_formula_ids = set()
+#     
+#     for e in ExperimentalLog.objects.all():
+#         for d in e.digitizedformula_set.all():
+#             digitized_formula_ids.add(d.id)
+#             
+#     for d in DigitizedFormula.objects.exclude(id__in=digitized_formula_ids):
+#         print d
+#         d.delete()
     
-    for pi in ProductInfo.objects.all():
-        if pi.production_number not in remaining_flavors and pi.experimental_number not in remaining_es:
-            print pi.production_number
-            pi.delete()
-            
-def main():
-    save_flavors = add_some_invalid_flavors(complex_flavors)
-    complete_flavor_numbers, complete_ingredient_ids = get_complete_flavors_and_ingredints(save_flavors)
+
+def trim_purchase_orders():
+    
+    c = PurchaseOrder.objects.count()
+    
+    for po in PurchaseOrder.objects.annotate(Count('purchaseorderlineitem')).order_by('purchaseorderlineitem__count')[:c-9]:
+        print po
+        po.delete()
+        
+def delete_jilist():
+    for j in JIList.objects.all():
+        print j
+        j.delete()
+        
+def trim_database():
+    most_made_flavors = find_most_made_flavors()
+    save_flavors = add_some_invalid_flavors(most_made_flavors)
+    complete_flavor_numbers, complete_ingredient_ids = get_complete_flavors_and_ingredients(save_flavors)
     
     delete_other_ingredients(complete_ingredient_ids)
     delete_other_flavors(complete_flavor_numbers)
-    
-    
-    delete_other_digitized_formulas()
-    
-    delete_upis()
+        
+    trim_experimental_logs()
+    trim_purchase_orders()
+
     JIList.objects.all().delete()
 
 if __name__ == "__main__":
-    main()
+    trim_database()

@@ -3,8 +3,8 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from mysearch.forms import MainSearch
 
-from access.models import Flavor, Ingredient, ExperimentalLog, PurchaseOrder, FEMAIngredient
-from access.forms import FlavorFilterSelectForm, IngredientFilterSelectForm, ExperimentalFilterSelectForm, PurchaseOrderFilterSelectForm
+from access.models import Flavor, Ingredient, ExperimentalLog, PurchaseOrder, FEMAIngredient, TSR
+from access.forms import FlavorFilterSelectForm, IngredientFilterSelectForm, ExperimentalFilterSelectForm, PurchaseOrderFilterSelectForm, TSRFilterSelectForm
 from newqc.models import Lot
 from newqc.forms import LotFilterSelectForm
 from salesorders.models import SalesOrderNumber
@@ -22,6 +22,7 @@ search_spaces = {
     'purchase_order':(PurchaseOrder, PurchaseOrderFilterSelectForm),
     'unified':(ProductInfo, ProductInfoFilterSelectForm),
     'lot':(Lot, LotFilterSelectForm),
+    'tsr':(TSR, TSRFilterSelectForm),
 }
 
 def get_filter_kwargs(qdict):
@@ -69,17 +70,20 @@ def search_guts(request, context_dict, paginate_by=None):
     if obj is not None:
         return ('redirect', obj)
     # get the raw list, and do a first check on the count
-    resultant_objects = MyModel.text_search(search_string)
+    resultant_objects = MyModel.text_search(search_string).distinct()
     sc = sanity_check(resultant_objects)
     if sc: return sc
     
     # filter the data
     filterselect = MyFilterSelectForm(request.GET.copy())  
     filters = MyModel.build_kwargs(filterselect.data, {}, get_filter_kwargs)
+
     if filters:
         resultant_objects = resultant_objects.filter(**filters).distinct()
     sc = sanity_check(resultant_objects)
     if sc: return sc
+    
+    
     # so now there are actual search results, some session stuff
     # happens including ordering the data
     last_search_space = request.session.get('last_space', None)

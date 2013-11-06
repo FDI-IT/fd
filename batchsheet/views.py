@@ -7,6 +7,7 @@ import logging
 import hashlib
 import os 
 from decimal import Decimal
+from operator import itemgetter
 
 from django.template import Context, loader
 from django.shortcuts import render_to_response, get_object_or_404
@@ -187,6 +188,71 @@ def batchsheet_print(request, flavor):
     
     return HttpResponse(simplejson.dumps(json_dict), mimetype="application/json")
 
+def batchsheet_batch_print(request):
+    if request.method == 'POST':
+
+        lot_checklist = []
+        selected_orders = request.POST.getlist('flavor_pks')
+        
+        for order in selected_orders:
+            pin = RMRetain.objects.get(pk=pk).pin
+            retain_checklist.append(build_rm_checklist_row(pin))
+        
+        retain_checklist.sort(key=target_sorter, reverse=True)  
+        return render_to_response('qc/ingredient/batch_print.html', 
+                              {
+                               'retain_pks':retain_pks,
+                               'retain_checklist':retain_checklist,
+                               'print_checklist_min': print_checklist_min
+                               },
+                              context_instance=RequestContext(request))
+
 
 def lot_notebook(request):
     pass
+
+def sales_order_list(request, status_message=None):
+    page_title="Sales Orders - Production"
+    help_link = "/wiki/index.php/Sales_orders"
+    hundredths = Decimal('0.00')
+    orders= {}
+    for order in LineItem.objects.filter(salesordernumber__open=True):
+        try:
+            orders[order.flavor] += [order]
+        except KeyError:
+            orders[order.flavor] = [order]
+           # 
+    summarized_orders = []
+    for flavor, details in orders.items():
+        total = Decimal('0')
+        for detail in details:
+            total += detail.quantity
+        try:
+            totalcost = flavor.rawmaterialcost * total
+            totalcost = totalcost.quantize(hundredths, rounding=ROUND_HALF_UP)
+            #flavor.update_cost()
+        except:
+            totalcost = 0
+        summarized_orders.append({'flavor': flavor,
+                                  'total': total,
+                                  'details':details,
+                                  'totalcost':totalcost,
+                                  })
+    summarized_orders = sorted(summarized_orders, key=itemgetter('total'))
+    resultant_orders = summarized_orders
+
+    return render_to_response('batchsheet/sales_order_production.html',
+                              {
+                               'window_title': page_title,
+                               'print_link': 'javascript:document.forms["salesorder_selections"].submit()',
+                               'orders':resultant_orders,
+                               'help_link': help_link,
+                               'status_message': status_message,
+                               'page_title':page_title,
+                               'get': request.GET,},
+                               context_instance=RequestContext(request))
+
+    
+
+
+

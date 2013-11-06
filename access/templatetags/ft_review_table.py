@@ -17,6 +17,10 @@ register = template.Library()
 def consolidated(flavor, weight_factor=1):
     return {'flavor':flavor}
 
+@register.inclusion_tag('access/flavor/consolidated_indivisible.html')
+def consolidated_indivisible(flavor, weight_factor=1):
+    return {'flavor':flavor}
+
 @register.inclusion_tag('access/flavor/explosion.html')
 def explosion(flavor, weight_factor=1):
     fts = FormulaTree.objects.filter(root_flavor=flavor)[1:]

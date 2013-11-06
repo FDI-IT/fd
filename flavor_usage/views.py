@@ -25,3 +25,10 @@ def new_usage(request, flavor):
     return render_to_response('flavor_usage/new_usage.html',
                               {'form':form},
                               context_instance=RequestContext(request))
+
+def test(request):
+    import os
+    x = os.environ.keys()
+    import getpass
+    u = getpass.getuser()
+    print x

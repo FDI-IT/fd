@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 
 from formfieldset.forms import FieldsetMixin
 
-from access.models import Flavor, Formula, ExperimentalLog, TSR, PurchaseOrderLineItem, PurchaseOrder, NATART_CHOICES, Ingredient, get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES
+from access.models import Flavor, Formula, ExperimentalLog, TSR, TSRLineItem, PurchaseOrderLineItem, PurchaseOrder, NATART_CHOICES, Ingredient, get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES
 from solutionfixer.models import SolutionStatus, Solution
 
 def validate_ingredient_number(number):
@@ -39,11 +39,46 @@ class DigitizedFormulaPasteForm(forms.Form):
 class IngredientCostUpdate(forms.Form):
     new_cost = forms.FloatField()
 
-class TSRForm(ModelForm):
+class TSRLIForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        try:
+            my_content_type = kwargs['instance'].content_type.model
+            
+            
+            if my_content_type == 'flavor':
+                # set the initial value of self.content_type_select to flavor
+                kwargs['initial'] = {'content_type_select': 'flavor'}
+            if my_content_type == 'experimentallog':
+                kwargs['initial'] = {'content_type_select': 'ex_log'}
+        except:
+            pass
     
+        super(TSRLIForm, self).__init__(*args, **kwargs)
+
     class Meta:
-        model = TSR
-        exclude = ('date_in')
+        model = TSRLineItem
+        exclude = ('content_type, object_id, product')
+        
+    TYPE = [('flavor', 'Flavor'),
+            ('ex_log', 'Experimental Log')]
+    content_type_select = forms.ChoiceField(choices=TYPE, widget=forms.RadioSelect())
+
+def make_tsr_form(request): #using closure to obtain logged in user from request and save it in entered_by
+    class TSRForm(ModelForm):
+        
+        class Meta:
+            model = TSR
+            exclude = ('date_in, entered_by')
+        
+        def save(self, commit=True):
+            f = super(TSRForm, self).save(commit=False)
+            if not f.pk:
+                f.entered_by = request.user
+            if commit: 
+                f.save()
+            return f
+        
+    return TSRForm
         
 class PurchaseOrderForm(ModelForm):
 
@@ -385,6 +420,27 @@ class IngredientFilterSelectForm(forms.Form):
         choices=(tuple(kosher_choices))
         )
     
+class TSRFilterSelectForm(forms.Form):
+    cursor = connection.cursor()
+    cursor.execute('select distinct id, auth_user.username from auth_user ORDER BY auth_user.username ASC')
+    user_choices = []
+    
+    for choice in cursor.fetchall():
+        user_choices.append((choice[0], choice[1]))
+        
+    assigned_to = forms.MultipleChoiceField(
+        widget=widgets.CheckboxSelectMultiple,
+        required=False,
+        choices=(tuple(user_choices))
+        )
+
+    other = forms.MultipleChoiceField(
+        widget=widgets.CheckboxSelectMultiple,
+        required=False,
+        choices=(
+            ('open', "Open TSRs"),
+        ))
+
 class PurchaseOrderFilterSelectForm(forms.Form):
     pass
 

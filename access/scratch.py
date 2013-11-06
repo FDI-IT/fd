@@ -10,7 +10,7 @@ from django.db.models import Q, F, Sum
 from django.conf import settings
 from django.db import connection
 import operator
-from access.models import Flavor, Ingredient, Formula, FormulaTree, LeafWeight, FormulaException, DIACETYL_PKS, PG_PKS, SOLVENT_NAMES
+from access.models import Flavor, Ingredient, Formula, FormulaTree, LeafWeight, IndivisibleLeafWeight, FormulaException, DIACETYL_PKS, PG_PKS, SOLVENT_NAMES
 ones = Decimal('1')
 tenths = Decimal('0.0')
 hundredths = Decimal('0.00')
@@ -350,9 +350,6 @@ def build_leaf_weights(flavor):
                         weight=w)
         lw.save()
         
-def build_indivisible_leaf_weights(flavor):
-    pass
-
 def build_all_leaf_weights(): 
     LeafWeight.objects.all().delete()
     bad_total_flavors = []
@@ -365,6 +362,28 @@ def build_all_leaf_weights():
     print "bad total flavors"
     print bad_total_flavors
 
+
+        
+def build_indivisible_leaf_weights(flavor):
+    indivisible_leafs = flavor.consolidated_indivisible_leafs
+    for i, w in indivisible_leafs.iteritems():
+        ilw = IndivisibleLeafWeight(root_flavor=flavor,
+                                   ingredient=i,
+                                   weight=w)
+        ilw.save()
+
+def build_all_indivisible_leaf_weights():
+    IndivisibleLeafWeight.objects.all().delete()
+    bad_total_flavors = []
+    for f in Flavor.objects.filter(valid=True):
+        print f
+        try:
+            build_indivisible_leaf_weights(f)
+        except FormulaException:
+            bad_total_flavors.append(f)
+        print "finished"
+    print "bad_total_flavors"
+    print bad_total_flavors
 
 def deep_flavor_search():
     formulas = {}

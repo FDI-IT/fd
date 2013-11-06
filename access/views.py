@@ -25,11 +25,11 @@ from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
 from access.my_profile import profile
 from access.templatetags.review_table import review_table as legacy_explosion
-from access.templatetags.ft_review_table import consolidated, explosion, production_lots, retains, raw_material_pin, gzl_ajax, revision_history
+from access.templatetags.ft_review_table import consolidated, consolidated_indivisible, explosion, production_lots, retains, raw_material_pin, gzl_ajax, revision_history
 from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_guts
 from access.tasks import ingredient_replacer_guts
-from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm
+from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_tsr_form
 from access.formula_filters import ArtNatiFilter, AllergenExcludeFilter, MiscFilter
 
 from solutionfixer.models import Solution, SolutionStatus
@@ -114,7 +114,6 @@ def experimental_edit(request, experimental):
         form = forms.ExperimentalForm(request.POST, instance=experimental)
         if form.is_valid():
             form.save()
-            experimental.process_changes_to_flavor()
             return redirect('/django/access/experimental/%s/' % experimental.experimentalnum)
     else:
         form = forms.ExperimentalForm(instance=experimental)
@@ -129,32 +128,6 @@ def experimental_edit(request, experimental):
                     'experimentalform':form,
                     }
     return render_to_response('access/experimental/experimental_edit.html',
-                              context_dict,
-                              context_instance=RequestContext(request))
-    
-@experimental_wrapper
-@login_required
-def experimental_name_edit(request, experimental):
-    if request.method == 'POST':
-        form = forms.ExperimentalNameForm(request.POST)
-        if form.is_valid():
-            form.process_data(experimental)
-            experimental.save()
-            experimental.process_changes_to_flavor()
-            return redirect('/django/access/experimental/%s/' % experimental.experimentalnum)
-    else:
-        form = forms.ExperimentalNameForm(initial=experimental.__dict__)
-    page_title = "Experimental Name Edit"
-    if request.user.get_profile().initials == experimental.initials or request.user.is_superuser:
-        pass
-    else:
-        return render_to_response('access/experimental/experimental_edit_permission.html',context_instance=RequestContext(request))
-    context_dict = {
-                    'experimental': experimental,
-                    'page_title': page_title,
-                    'experimental_name_form':form,
-                    }
-    return render_to_response('access/experimental/experimental_name_edit.html',
                               context_dict,
                               context_instance=RequestContext(request))
 
@@ -218,7 +191,6 @@ def experimental_review(request, experimental):
     
     
     context_dict = {
-                        
                         'status_message':status_message,
                         'digitized_table':digitized_table,
                         'window_title': experimental.__unicode__(),
@@ -241,7 +213,6 @@ def experimental_review(request, experimental):
         context_dict['approve_link'] = experimental.get_approve_link()
         context_dict['status_message'] = status_message
         context_dict['recalculate_link'] = '/django/access/experimental/%s/recalculate/' % experimental.experimentalnum
-        context_dict['edit_link'] = '#'
         return render_to_response('access/experimental/experimental_review.html',
                                   context_dict,
                                   context_instance=RequestContext(request))
@@ -292,7 +263,23 @@ def flavor_review(request, flavor):
     return render_to_response('access/flavor/flavor_review.html',
                               context_dict,
                               context_instance=RequestContext(request))
-    
+
+@login_required
+def tsr_review(request, tsr_number):
+    tsr = TSR.objects.get(number=tsr_number)
+    page_title = "TSR Review"
+    help_link = "/wiki/index.php/Purchase_Order_Review"
+    context_dict = {
+                    'window_title': tsr.__unicode__(),
+                   'tsr': tsr,
+                   'help_link': help_link,
+                   'page_title': page_title,
+                   'print_link':'/django/access/purchase/%s/print/' % tsr.number,
+                   }   
+    return render_to_response('access/tsr/tsr_review.html',
+                              context_dict,
+                              context_instance=RequestContext(request))
+
 @login_required
 @po_info_wrapper
 def po_review(request, po):
@@ -479,7 +466,102 @@ def recalculate_flavor(request,flavor):
 @transaction.commit_on_success
 def recalculate_experimental(request,experimental):
     flavor=experimental.flavor
-    old_new_attrs, flavor = recalculate_guts(flavor)
+    old_flavor_dict = copy.copy(flavor.__dict__)
+    
+    FormulaTree.objects.filter(root_flavor=flavor).delete()
+    LeafWeight.objects.filter(root_flavor=flavor).delete()
+    
+    my_valid = True
+    my_amount = 0
+    for fr in flavor.formula_set.all():
+        my_amount += fr.amount
+        gazinta = fr.ingredient.gazinta()
+        if gazinta is None:
+            continue
+        if gazinta.valid == False:
+            my_valid = False
+            break
+    if my_amount != Decimal(1000):
+        my_valid=False
+    flavor.valid = my_valid
+    
+    build_tree(flavor)
+    build_leaf_weights(flavor)
+    my_leaf_weights = LeafWeight.objects.filter(root_flavor=flavor).select_related()
+    
+    sulfites = Decimal('0')
+    allergens = {}
+    my_prop_65 = False
+    my_diacetyl = False
+    my_pg = False
+    my_solvents = {}
+    sorted_solvent_string_list = []
+    
+    for lw in my_leaf_weights:
+        
+        sulfites += lw.ingredient.sulfites_ppm * lw.weight / ONE_THOUSAND
+        
+        for allergen in Ingredient.aller_attrs:
+            if getattr(flavor, allergen):
+                allergens[allergen]=1
+                
+        if lw.ingredient.prop65 == True:
+            my_prop_65 = True
+        if lw.ingredient.pk in DIACETYL_PKS:
+            my_diacetyl = True
+        if lw.ingredient.pk in PG_PKS:
+            my_pg = True
+            
+        if lw.ingredient.id in SOLVENT_NAMES:
+            my_solvents[lw.ingredient.id] = lw.weight
+        
+    flavor.sulfites_ppm = sulfites.quantize(tenths)
+    if sulfites > 10:
+        flavor.sulfites = True
+        flavor.sulfites_usage_threshold = ONE_HUNDRED / (sulfites / TEN)    
+    else:
+        flavor.sulfites = False
+        flavor.sulfites_usage_threshold = 0
+        
+    allergens = allergens.keys()
+    if len(allergens) > 0:
+        flavor.allergen = "Yes: %s" % ','.join(allergens)
+        flavor.ccp2 = True
+        flavor.ccp4 = True
+    else:
+        flavor.allergen = "None"
+
+    flavor.prop_65 = my_prop_65
+    flavor.prop65 = my_prop_65
+    flavor.diacetyl = not my_diacetyl
+    flavor.no_pg = not my_pg
+
+    solvents_by_weight = sorted(my_solvents.iteritems(), key=operator.itemgetter(1))
+    solvents_by_weight.reverse()
+    for solvent_number, solvent_amount in solvents_by_weight:
+        if solvent_amount > 0:
+            relative_solvent_amount = (solvent_amount / 10).quantize(ones)
+            sorted_solvent_string_list.append("%s %s%%" % (SOLVENT_NAMES[solvent_number], relative_solvent_amount))
+    solvent_string = "; ".join(sorted_solvent_string_list)
+    flavor.solvent = solvent_string[:50]
+        
+    synchronize_price(flavor)
+    flavor.rawmaterialcost = flavor.rawmaterialcost.quantize(thousandths)
+    flavor.save()    
+    
+    old_new_attrs = [
+            ('Raw Material Cost',old_flavor_dict['rawmaterialcost'],flavor.rawmaterialcost),
+            ('Sulfites PPM',old_flavor_dict['sulfites_ppm'],flavor.sulfites_ppm),
+            ('Allergen',old_flavor_dict['allergen'],flavor.allergen),
+            ('Solvent',old_flavor_dict['solvent'],flavor.solvent),    
+            ('Prop 65',old_flavor_dict['prop_65'],flavor.prop65),
+            ('NO Diacetyl',old_flavor_dict['diacetyl'],flavor.diacetyl),
+            ('NO PG',old_flavor_dict['no_pg'],flavor.no_pg),   
+            ('Valid',old_flavor_dict['valid'],flavor.valid),           
+        ]
+        
+    
+    
     context_dict = {
                     'experimental':experimental,
                    'window_title': flavor.__unicode__(),
@@ -764,16 +846,47 @@ def process_filter_update(request):
     
     return HttpResponse(simplejson.dumps(return_messages), content_type='application/json; charset=utf-8')
 
+def process_tsrli_update(request):
+    try:
+        type = request.GET['type']
+    except:
+        type = None #user has not selected a product type (for the new row)
+    
+    number = request.GET['number']
+    response_dict = {}
+    
+    if type == 'flavor':
+        try: 
+            flavor = Flavor.objects.get(number=number)
+            response_dict['name'] = flavor.long_name
+        except:
+            if number == '':
+                response_dict['name'] = 'Please enter a flavor number.'
+            else:
+                response_dict['name'] = "Invalid Flavor Number"
+    
+    if type == 'ex_log':
+        try:
+            ex_log = ExperimentalLog.objects.get(experimentalnum = number)
+            response_dict['name'] = ex_log.__unicode__()
+        except:
+            if number == '':
+                response_dict['name'] = 'Please enter an experimental number.'
+            else:
+                response_dict['name'] = "Invalid Experimental Log Number"
+    
+    if type == None:
+        response_dict['name'] = "Please select a product type."
+        
+    return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')
+
 def process_cell_update(request):
     number = request.GET['number']
     amount = request.GET['amount']
     response_dict = {}
     try:
         ingredient = Ingredient.get_formula_ingredient(number)
-        response_dict['name'] = "%s %s %s" % (
-                                   ingredient.art_nati,
-                                   ingredient.prefix,
-                                   ingredient.product_name)
+        response_dict['name'] = ingredient.long_name
         response_dict["pk"] = ingredient.pk
         try:
             try:
@@ -983,8 +1096,68 @@ def experimental_formula_entry(request, experimental, status_message=None):
     
     
     
-    
-    
+
+@login_required
+#@revision.create_on_success
+#@transaction.commit_on_success
+def tsr_entry(request, tsr_number):
+    tsr = get_object_or_404(TSR, number=tsr_number)
+    page_title = "TSR Product Entry"
+    status_message = ""
+    TSRLIFormSet = inlineformset_factory(TSR, TSRLineItem, extra=1, form=forms.TSRLIForm, can_delete=True)
+    if request.method == 'POST':
+        formset = TSRLIFormSet(request.POST, instance=tsr)
+        if formset.is_valid():
+            formset.save()
+
+            for id, tsrli in enumerate(tsr.tsrlineitem_set.all()):
+                type = formset.cleaned_data[id]['content_type_select']
+
+                number = formset.cleaned_data[id]['code']
+                if type == 'flavor':
+                    line_product = Flavor.objects.get(number = number)
+                if type == 'ex_log':
+                    line_product = ExperimentalLog.objects.get(experimentalnum = number)
+                #line_product = Flavor.objects.get(number = 8851)
+                tsrli.product = line_product
+                tsrli.save()
+            
+            #foo = formset.cleaned_data
+            #print foo
+
+            
+            return HttpResponseRedirect("/django/access/tsr/%s/tsr_entry/" % tsr.number)
+        else:
+            return render_to_response('access/tsr/tsr_entry.html', 
+                                  {'tsr': tsr,
+                                   'status_message': status_message,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'tsr_rows': zip(formset.forms,),
+                                   'management_form': formset.management_form,
+                                   },
+                                   context_instance=RequestContext(request))
+    formset = TSRLIFormSet(instance=tsr)
+#    initial_data, label_rows = forms.build_poli_formset_initial_data(po)
+#    if len(label_rows) == 0:
+#        POLIFormSet = formset_factory(forms.POLIForm, extra=1)
+#        label_rows.append({'cost':'', 'name':''})
+#    else:
+#        POLIFormSet = formset_factory(forms.POLIForm, extra=0)
+#    formset = POLIFormSet(initial=initial_data)
+    tsrli_rows = zip(formset.forms,
+                   #    label_rows)
+                   )
+    return render_to_response('access/tsr/tsr_entry.html', 
+                                  {'tsr': tsr,
+                                   'status_message': status_message,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'tsr_rows': tsrli_rows,
+                                   'management_form': formset.management_form,
+                                   'extra':tsrli_rows[-1],
+                                   },
+                                   context_instance=RequestContext(request))    
     
     
     
@@ -1040,6 +1213,7 @@ def po_entry(request, po):
 
 ajax_function = {
     'consolidated': (consolidated, 'access/flavor/consolidated.html'),
+    'consolidated_indivisible': (consolidated_indivisible, 'access/flavor/consolidated_indivisible.html'),
     'explosion': (explosion, 'access/flavor/explosion.html'),
     'legacy_explosion': (legacy_explosion, 'access/flavor/legacy_explosion.html'),
     'production_lots': (production_lots, 'access/flavor/production_lots.html'),
@@ -1105,6 +1279,17 @@ def process_digitized_paste(request):
 def digitized_entry(request):
     form = forms.DigitizedFormulaPasteForm()
     return render_to_response('access/flavor/digitized_entry.html', {'form': form})
+
+@login_required
+@revision.create_on_success
+def new_tsr(request):
+    
+    TSRForm = make_tsr_form(request)
+    
+    return create_object(request,
+                         form_class = TSRForm,
+                         template_name="access/tsr/new.html",
+                         post_save_redirect="/django/access/tsr/%(number)s/tsr_entry",)
 
 @login_required
 @revision.create_on_success

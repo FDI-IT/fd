@@ -2,6 +2,7 @@ from decimal import Decimal
 from datetime import datetime, timedelta, date
 import re
 import Queue
+import os
 from operator import itemgetter
 
 from django.db import models
@@ -53,20 +54,15 @@ KOSHER_CHOICES = (
     ('Rabbi Present','Rabbi Present'),
 )
 
-RISK_ASSESSMENT_CHOICES = (
-    (0,"Antimicrobial"),
-    (1,"Regularly Monitored"),
-    (2,"Non-supportive"),
-    (3,"Bacteriostatic"),
-    (4,"Hot packed/heat treated"),
-    (5,"Low pH, <3.9"),
-    (6,"COA Salmonella"),
-    (7,"Not typically microsensitive"),
-    (8,"Apple Flakes"),
-    (9,"Spray Dried"),
-    (10,"Benzyl Alcohol"),
-    (11,"Testing Required"),
-    (12,"Pending"),
+RISK_ASSESSMENT_CHOICES = (  #NEW
+    (0, "Antimicrobial"),
+    (1, "Regularly Monitored"),
+    (2, "Bacteriostatic"),
+    (3, "Hot packed/heat treated"),
+    (4, "Low pH, <3.9"),
+    (5, "COA Salmonella"),
+    (6, "Spray Dried"),
+    (7, "Pending"),
 )
 
 DIACETYL_PKS = [262,]
@@ -105,6 +101,17 @@ class FormulaTree(models.Model):
         ordering = ['root_flavor', 'lft']
         
     @property
+    def indivisible_leaf(self):
+        if self.rgt == self.lft + 1:
+            return True
+        elif self.node_flavor.spraydried == True:
+            return True
+        elif self.node_flavor.yield_field != 100:
+            return True
+        else:
+            return False  
+        
+    @property
     def relative_cost(self):
         return self.get_exploded_cost()
 
@@ -123,6 +130,8 @@ class IndivisibleLeafWeight(models.Model):
     weight = models.DecimalField(decimal_places=3, max_digits=7)
     quant_weight = models.IntegerField(null=True)
     
+    def __unicode__(self):
+        return "%s, %s" % (self.ingredient, self.weight)
                   
     
 class Formula(models.Model):
@@ -1169,7 +1178,7 @@ class Flavor(FormulaInfo):
     
     entered = models.DateTimeField(auto_now_add=True)
     supportive_potential = models.BooleanField(blank=True)
-    risk_assessment_group = models.PositiveSmallIntegerField(default=11,choices=RISK_ASSESSMENT_CHOICES)
+    risk_assessment_group = models.PositiveSmallIntegerField(default=7,choices=RISK_ASSESSMENT_CHOICES)
     risk_assessment_memo = models.TextField(blank=True)
     
     discontinued = models.BooleanField(
@@ -1422,6 +1431,7 @@ class Flavor(FormulaInfo):
         related_links = [
                        ('#flat_review_table','Formula'),
                        ('/django/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
+                       ('/django/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
                        ('/django/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
                        ('/django/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
                        ('/django/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
@@ -1547,12 +1557,33 @@ class Flavor(FormulaInfo):
         return FormulaTree.objects.filter(root_flavor=self).filter(rgt=F('lft') + 1)
     
     @property
+    def indivisible_leaf_nodes(self):
+        right_number_check = 0
+        for ft in FormulaTree.objects.filter(root_flavor=self)[1:]:
+            if ft.lft < right_number_check:
+                continue
+            else:
+                if ft.indivisible_leaf:
+                    yield ft
+                    right_number_check = ft.rgt
+
+  
+    @property
     def consolidated_leafs(self):
         leaf_ingredients = self.leaf_nodes
         cons_leafs = {}
         for leaf in leaf_ingredients:
             cons_leafs[leaf.node_ingredient] = cons_leafs.get(leaf.node_ingredient, 0) + leaf.weight
         
+        return cons_leafs
+    
+    @property
+    def consolidated_indivisible_leafs(self):
+        indivisible_leafs = self.indivisible_leaf_nodes
+        cons_leafs = {}
+        for leaf in indivisible_leafs:
+            cons_leafs[leaf.node_ingredient] = cons_leafs.get(leaf.node_ingredient, 0) + leaf.weight
+            
         return cons_leafs
               
     @property
@@ -1575,6 +1606,14 @@ class Flavor(FormulaInfo):
         for ingredient, amount in cons_leafs:
             cons_formulae.append(Formula(ingredient=ingredient,amount=amount))
         return cons_formulae
+    
+    @property
+    def sorted_consolidated_indivisible_leafs(self):
+        cil=sorted(self.consolidated_indivisible_leafs.iteritems(), key=itemgetter(1), reverse=True)
+        cons_indivisible_formulae = []
+        for ingredient, amount in cil:
+            cons_indivisible_formulae.append(Formula(ingredient=ingredient, amount=amount))
+        return cons_indivisible_formulae
             
     
     @property
@@ -1675,6 +1714,7 @@ class Flavor(FormulaInfo):
         for ingredient in inner_traversal(self, weight_factor, row_id, parent_id, parent_flavors):
             yield ingredient
             
+  
                         
     def complete_formula_traversal(self, weight_factor=Decimal(1), row_id=1, 
                          parent_id=0, parent_flavors={},
@@ -2596,12 +2636,28 @@ def next_po_number():
         next_po_number = ppn + 1
     return next_po_number
 
+class TSRLISortedManager(models.Manager):
+    def get_query_set(self):
+        return super(TSRLISortedManager, self).get_query_set().order_by('tsr__number')  
+
+class TSRLineItem(models.Model):
+    objects = TSRLISortedManager()
+    tsr = models.ForeignKey('TSR')
+    
+    content_type = models.ForeignKey(ContentType, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    product = generic.GenericForeignKey('content_type', 'object_id')
+    
+    code = models.PositiveIntegerField(max_length = 10,)
+    usage = models.TextField(blank=True)
+    
+    
 class TSR(models.Model):
-    date_in = models.DateField(blank=True, default=date.today)
+    date_in = models.DateField(default=date.today)
     assigned_to = models.ForeignKey(User, related_name="assigned_TSRs")
     entered_by = models.ForeignKey(User, related_name="entered_TSRs")
-    project_number = models.PositiveIntegerField(max_length=7)
-    date_out = models.DateField(blank=True)
+    number = models.PositiveIntegerField(max_length=7, unique=True)
+    date_out = models.DateField(null=True, blank=True)
     
     SHIPPING_METHOD_CHOICES = (
         ('red', 'UPS Red'),
@@ -2616,11 +2672,22 @@ class TSR(models.Model):
     
     customer = models.ForeignKey('Customer')
     contact = models.CharField(max_length=40)
-    title = models.CharField(max_length=40)
+    title = models.CharField(max_length=40, blank=True)
     telephone = models.CharField(max_length=20)
     country = models.CharField(max_length=30, blank = True)
     email = models.CharField(max_length=50)
-    deadline = models.DateField(blank = True)
+    deadline = models.DateField(null=True, blank = True)
+    
+    headers = (
+                ('number','Number', ''),
+                ('date_in','Date In', ''),
+                ('date_out','Date Out', ''),
+                ('assigned_to', 'Assigned To', ''),
+                ('customer','Customer', ''),
+                ('contact','Contact', ''),
+                ('telephone', 'Phone Number', ''),
+                ('email','Email', ''),
+            )
     
     #approvals needed
     kosher_parve = models.BooleanField(default=False)
@@ -2654,15 +2721,78 @@ class TSR(models.Model):
     
     max_price = models.DecimalField(max_digits=7, decimal_places=2)
     lbs_per_year = models.PositiveIntegerField()
-    exposed_to_head = models.BooleanField(default=False)
-    temperature = models.DecimalField(max_digits=5, decimal_places=3)
-    minutes = models.PositiveIntegerField()
+    exposed_to_heat = models.BooleanField(default=False)
+    temperature = models.DecimalField(null=True, max_digits=5, decimal_places=3, blank=True)
+    minutes = models.PositiveIntegerField(null=True, blank=True)
     
     japan = models.BooleanField(default=False)
     whole_foods = models.BooleanField(default=False)
     lab_select = models.BooleanField(default=False)
     
     description = models.TextField(max_length=200, verbose_name="Project Description")
+    
+    def __unicode__(self):
+        return "%s - %s - %s" % (self.number, self.customer, str(self.date_in))    
+    
+    def get_related_links(self):
+        related_links = [('/django/access/tsr/%s/tsr_entry/' % self.number, 'Edit Items')]
+        return related_links
+    
+    def get_absolute_url(self):
+        return "/django/access/tsr/%s/" % self.number
+
+    @staticmethod
+    def get_object_from_softkey(softkey):
+        try:
+            return TSR.objects.get(number=softkey)
+        except:
+            pass
+        try:
+            return TSR.objects.filter(number=softkey)[0]
+        except:
+            pass
+        return None
+    
+    @staticmethod
+    def text_search(search_string):
+        return TSR.objects.filter( 
+            Q(customer__companyname__icontains=search_string) 
+            #Q(contact__icontains=search_string) |
+            #Q(shipping_method__icontains=search_string) |
+            #Q(tsrlineitem__code__icontains=search_string) #|
+            #Q(tsrlineitem__product__product_name__icontains=search_string) |
+            #Q(tsrlineitem__product__name__icontains=search_string)
+        )
+
+    @staticmethod
+    def build_kwargs(qdict, default, get_filter_kwargs):
+        string_kwargs = {}
+        for key in get_filter_kwargs(qdict):
+            if key == 'assigned_to':
+                keyword = '%s__id__in' % key 
+                arg_list = []
+                for my_arg in qdict.getlist(key):
+                    arg_list.append(my_arg)
+                string_kwargs[keyword] = qdict.getlist(key)
+            if key == 'other':
+                for my_arg in qdict.getlist(key):
+                    if my_arg == 'open':
+                        string_kwargs['date_out'] = None
+#            if key == 'art_nati':
+#                keyword = '%s__in' % (key)
+#                arg_list = []
+#                for my_arg in qdict.getlist(key):
+#                    arg_list.append(my_arg)
+#                string_kwargs[keyword] = arg_list
+#            elif key == 'kosher':
+#                keyword = '%s__in' % (key)
+#                arg_list = []
+#                for my_arg in qdict.getlist(key):
+#                    arg_list.append(my_arg)
+#                string_kwargs[keyword] = arg_list
+#            else:
+           
+        return string_kwargs
     
 class PurchaseOrder(models.Model):
     number = models.PositiveIntegerField(max_length=7, blank=True, default=next_po_number) #, default=next_po_number)
