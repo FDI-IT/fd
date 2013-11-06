@@ -113,8 +113,46 @@ receiving_log_list_info = {
 lot_list_queryset = Lot.objects.extra(select={'lotyear':'extract(year from date)','lotmonth':'extract(month from date)'})
 lls = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
 #Lot.objects.extra(select={'lotyear':'YEAR(date)','lotmonth':'MONTH(date)'}, order_by=['lotyear','lotmonth',],),
+
+
+@login_required
+def lot_list(request, paginate_by = 'default'):
+    lot_list_queryset = Lot.objects.extra(select={'lotyear':'extract(year from date)','lotmonth':'extract(month from date)'})   
+    queryset = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
+    
+    if (paginate_by != 'default'): #when the user clicks a new pagination value, save the new value into the user's userprofile
+        request.user.userprofile.lot_paginate_by = int(paginate_by)
+        pagination_count = int(paginate_by)
+    else:
+        pagination_count = request.user.userprofile.lot_paginate_by 
+        if pagination_count == None: #this only occurs once; when the user accesses the lots page for the first time it will no longer be None
+            request.user.userprofile.lot_paginate_by = 100
+            pagination_count = 100
+        
+    request.user.userprofile.save() #save new lot pagination value
+
+    return list_detail.object_list(
+        request,
+        queryset = queryset,
+        paginate_by = pagination_count,
+        extra_context = dict({
+            'page_title': 'Lots',
+            'print_link': 'javascript:document.forms["lot_selections"].submit()',
+            'month_list': lot_month_list,
+            'status_list': lot_status_list,
+            'filterselect':LotFilterSelectForm(),
+            'user': request.user.get_full_name(),
+            'pagination_list': [10, 25, 50, 100, 500, 1000],
+            'pagination_count': pagination_count
+            # fix this javascript...
+        }),
+    )
+
+
+
+
 lot_list_info =  {
-                  
+                 
     'queryset': lls,
     'paginate_by': 1000,
     'extra_context': dict({

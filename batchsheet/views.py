@@ -6,6 +6,7 @@ import sys
 import logging
 import hashlib
 import os 
+import json
 from decimal import Decimal
 from operator import itemgetter
 
@@ -35,7 +36,7 @@ from newqc.models import Lot, get_next_lot_number
 from salesorders.models import SalesOrderNumber, LineItem
 
 from access.views import flavor_info_wrapper
-from batchsheet.forms import BatchSheetForm
+from batchsheet.forms import BatchSheetForm, NewLotForm
 
 def batchsheet_home(request):
     batch_sheet_form = BatchSheetForm({
@@ -188,24 +189,28 @@ def batchsheet_print(request, flavor):
     
     return HttpResponse(simplejson.dumps(json_dict), mimetype="application/json")
 
-def batchsheet_batch_print(request):
+def add_lots(request):
     if request.method == 'POST':
 
+
+        lot_formset = formset_factory(NewLotForm)
+        
+        formset = lot_formset(request.POST, prefix = 'pfix')
+        if formset.is_valid():
+            pass
+    else:        
+
         lot_checklist = []
-        selected_orders = request.POST.getlist('flavor_pks')
+        selected_orders = request.GET.getlist('flavor_pks')
         
         for order in selected_orders:
-            pin = RMRetain.objects.get(pk=pk).pin
-            retain_checklist.append(build_rm_checklist_row(pin))
+            #this changes the format of the GET request to convert the json strings into python dicts
+            lot_checklist.append((json.loads(order.replace('\'','!').replace('\"','\'').replace('!','\"')))[0]) 
+
         
-        retain_checklist.sort(key=target_sorter, reverse=True)  
-        return render_to_response('qc/ingredient/batch_print.html', 
-                              {
-                               'retain_pks':retain_pks,
-                               'retain_checklist':retain_checklist,
-                               'print_checklist_min': print_checklist_min
-                               },
-                              context_instance=RequestContext(request))
+        
+        print lot_checklist
+        
 
 
 def lot_notebook(request):
@@ -244,7 +249,7 @@ def sales_order_list(request, status_message=None):
     return render_to_response('batchsheet/sales_order_production.html',
                               {
                                'window_title': page_title,
-                               'print_link': 'javascript:document.forms["salesorder_selections"].submit()',
+                               'accept_link': 'javascript:document.forms["salesorder_selections"].submit()',
                                'orders':resultant_orders,
                                'help_link': help_link,
                                'status_message': status_message,

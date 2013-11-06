@@ -11,7 +11,7 @@
 
 <div id="content-main">
 	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
-	<form name="salesorder_selections" action="/django/batchsheet/batchsheet_batch_print/" method="post">
+	<form name="salesorder_selections" action="/django/batchsheet/add_lots/" method="get">
 	    {% csrf_token %}
 	
 	<table width="100%" class="sorttable">

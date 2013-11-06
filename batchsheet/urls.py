@@ -23,6 +23,6 @@ urlpatterns = patterns('batchsheet.views',
     (r'^lot_notebook/$', 'lot_notebook'),
     (r'^barcode/(?P<barcode_contents>[a-zA-Z0-9_-]+)/$', 'get_barcode'),
     (r'^sales_orders/$', 'sales_order_list'),
-    (r'^batchsheet_batch_print/$', 'batchsheet_batch_print'),
+    (r'^add_lots/$', 'add_lots'),
 )
 #(r'^(?P<flavor_number>\d+)/batch_sheet/$', 'batch_sheet'),

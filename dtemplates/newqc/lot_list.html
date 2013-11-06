@@ -15,6 +15,18 @@
 	        {% if page_obj.has_next %}
 	            <a href="?page={{ page_obj.next_page_number }}">next</a>
 	        {% endif %}
+	        
+	        
+	        <div class="paginate_by" align="right">
+	        	Paginate By:
+	        	{% for count in pagination_list %}
+	        		{% if pagination_count == count %}
+	        			<b>{{ count }}</b>
+	        		{% else %}
+	        			<a href="/django/qc/lots/paginate{{count}}"> {{count}} </a>
+	        		{% endif %}
+	        	{% endfor %}
+	        </div>
 	    </span>
 	</div>
     <table class="sorttable" width="100%" id="lot_list">
