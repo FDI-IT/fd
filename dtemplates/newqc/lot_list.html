@@ -2,6 +2,8 @@
 
 {% block content %}    
 <div id="content-main">
+	
+	{% if pagination_count %}
 	<div class="pagination">
 	    <span class="step-links">
 	        {% if page_obj.has_previous %}
@@ -29,8 +31,15 @@
 	        </div>
 	    </span>
 	</div>
+	{% endif %}
+
+	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
+	<form name="lot_selections" action="/django/batchsheet/batch_print_batchsheets/" method="get">
+	    {% csrf_token %}
+	
     <table class="sorttable" width="100%" id="lot_list">
-	<tr class="qcheaders">
+	<tr class="lotheaders">
+		<th title="Select Box">Select</th>
 		<th>Lot Number</th>
 	    <th>Sub Lot</th>
 	    <th>Flavor</th>
@@ -42,6 +51,9 @@
 	</tr>
 	{% for lot in object_list %}
 	    <tr>
+	    <td>
+			<input type="checkbox" name="lot-info" value="[{'lot_number':'{{lot.number}}', 'amount':'{{lot.amount}}'}]"{% if checkall %}checked{% endif %}>
+		</td>	
 	    <td><a href="{{lot.get_absolute_url}}">{{ lot.number }}</a></td>
 	    <td>
 	    	{% if lot.sub_lot %}
@@ -49,7 +61,7 @@
 	    	{% endif %}
 	    </td>
 		<td><a href="{{ lot.flavor.get_absolute_url }}">{{ lot.flavor }}</a></td>
-		<td>{{ lot.date|date:"Y-m-d" }}</td>
+		<td><a href="/django/qc/lots/{{lot.date|date:'Y'}}/{{lot.date|date:'m'}}/{{lot.date|date:'d'}}/">{{ lot.date|date:"Y-m-d" }}</a></td>
 		<td>{{ lot.amount|floatformat:0 }}</td>
 		<td>{{ lot.status }}</td>
 		<td>
@@ -65,6 +77,9 @@
 	    </tr>
 	{% endfor %}
     </table>
+    </form>
+    
+    {% if pagination_count %}
 	<div class="pagination">
 	    <span class="step-links">
 	        {% if page_obj.has_previous %}
@@ -80,6 +95,7 @@
 	        {% endif %}
 	    </span>
 	</div>
+	{% endif %}
 </div>
 {% endblock %}
 

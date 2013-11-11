@@ -28,7 +28,7 @@
 		{% for order in orders %}
 		<tr id="{{ order.0 }}">
 			<td>
-				<input type="checkbox" name="flavor_pks" value="[{'flavor-pk':'{{order.flavor.pk}}', 'weight':'{{order.total}}'}]"{% if checkall %}checked{% endif %}>
+				<input type="checkbox" name="flavor_pks" value="[{'flavor_number':'{{order.flavor.number}}', 'amount':'{{order.total}}'}]"{% if checkall %}checked{% endif %}>
 			</td>
 			<td>
 				<a href="/django/access/{{ order.flavor.number }}?wf={{ order.total }}">{{ order.flavor.number }}</a>

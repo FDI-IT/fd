@@ -60,9 +60,9 @@ class NewFlavorRetainForm(forms.Form):
                     if lot.flavor.number == flavor_number:
                         raise_error = False
                 if raise_error == True:
-                    raise ValidationError(mark_safe("The given lot number does not correspond to the given flavor number. <a href='/django/access/%s/#ui-tabs-5' style='color: #330066'>Find Lot</a> | <a href='/django/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))
+                    raise ValidationError(mark_safe("The given lot number does not correspond to the given flavor number. <a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/django/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))
             else:
-                raise ValidationError(mark_safe("<a href='/django/access/%s/#ui-tabs-5' style='color: #330066'>Invalid lot number." % escape(str(flavor_number))))
+                raise ValidationError(mark_safe("<a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Invalid lot number." % escape(str(flavor_number))))
         
         return cleaned_data
 

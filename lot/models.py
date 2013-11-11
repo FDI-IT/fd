@@ -30,7 +30,7 @@ class Lot(models.Model):
     number = models.PositiveIntegerField(default=get_next_lot_number)
     sub_lot = models.PositiveSmallIntegerField(blank=True,default="")
     status = models.CharField(max_length=25, default="Pending")
-    amount = models.DecimalField(max_digits=6, decimal_places=1, blank=True, null=True) 
+    amount = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True) 
     flavor = models.ForeignKey(Flavor, related_name="plot")
     
     def __unicode__(self):

@@ -116,20 +116,25 @@ lls = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
 
 
 @login_required
-def lot_list(request, paginate_by = 'default'):
-    lot_list_queryset = Lot.objects.extra(select={'lotyear':'extract(year from date)','lotmonth':'extract(month from date)'})   
-    queryset = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
+def lot_list(request, paginate_by = 'default', queryset = 'default'):
     
-    if (paginate_by != 'default'): #when the user clicks a new pagination value, save the new value into the user's userprofile
-        request.user.userprofile.lot_paginate_by = int(paginate_by)
-        pagination_count = int(paginate_by)
+    if (queryset != 'default'): #use different queryset (lots by day)
+        queryset = queryset
+        pagination_count = None
     else:
-        pagination_count = request.user.userprofile.lot_paginate_by 
-        if pagination_count == None: #this only occurs once; when the user accesses the lots page for the first time it will no longer be None
-            request.user.userprofile.lot_paginate_by = 100
-            pagination_count = 100
-        
-    request.user.userprofile.save() #save new lot pagination value
+        lot_list_queryset = Lot.objects.extra(select={'lotyear':'extract(year from date)','lotmonth':'extract(month from date)'})   
+        queryset = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
+    
+        if (paginate_by != 'default'): #when the user clicks a new pagination value, save the new value into the user's userprofile
+            request.user.userprofile.lot_paginate_by = int(paginate_by)
+            pagination_count = int(paginate_by)
+        else:
+            pagination_count = request.user.userprofile.lot_paginate_by 
+            if pagination_count == None: #this only occurs once; when the user accesses the lots page for the first time it will no longer be None
+                request.user.userprofile.lot_paginate_by = 100
+                pagination_count = 100
+            
+        request.user.userprofile.save() #save new lot pagination value
 
     return list_detail.object_list(
         request,
@@ -148,7 +153,11 @@ def lot_list(request, paginate_by = 'default'):
         }),
     )
 
+@login_required
+def lots_by_day(request, year, month, day):
+    queryset = Lot.objects.filter(date__year=year, date__month=month, date__day=day)
 
+    return lot_list(request, queryset = queryset)
 
 
 lot_list_info =  {

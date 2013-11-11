@@ -111,6 +111,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.transaction.TransactionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'reversion.middleware.RevisionMiddleware',
     #'history_audit.middleware.MyMiddleware',
 )
@@ -138,6 +139,7 @@ INSTALLED_APPS = (
     'django.contrib.formtools',
     'django.contrib.comments',
     'django.contrib.databrowse',
+    'django.contrib.messages',
     #'djcelery',
     'pluggable',
     'homepage', 

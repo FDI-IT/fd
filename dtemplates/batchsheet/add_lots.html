@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+
+    <form action="" method="POST">
+	{{ formset.management_form }}
+	
+	<table id="lot-rows" width="100%">
+		<thead>
+			<tr>
+				<th>Lot Number</th>
+				<th>Flavor Number</th>
+				<th>Amount</th>
+			</tr>
+		</thead>
+		<tbody>
+	    {% for form in formset.forms %}
+	    	{% if form.errors %}
+	    		<tr bgcolor="#FF0000">
+	    			<td colspan = "4"><b> Please correct the error(s) in the following row. {{form.non_field_errors}}</b></td>
+	    		</tr>
+	    	{% endif %}
+			<tr>
+			
+				<td class="lot-number-cell">{{ form.lot_number }}{{form.lot_number.errors}}</td>
+				<td class="number-cell">{{ form.flavor_number }}{{form.flavor_number.errors}}
+					</td>
+				<td class="amount-cell">{{ form.amount }}{{form.amount.errors}}</td>
+			</tr>
+	    {% endfor %}
+		</tbody>
+	</table>
+	<input id="lot-submit-button" type="submit" value="Submit Lots" />
+    </form>
+{% endblock %}
