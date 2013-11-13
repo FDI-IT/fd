@@ -25,7 +25,8 @@ urlpatterns = patterns('batchsheet.views',
     (r'^sales_orders/$', 'sales_order_list'),
     (r'^add_lots/$', 'add_lots'),
     (r'^update_lots/$', 'update_lots'),
-    (r'^update_lots/(?P<lot_pk>\d+)/$', 'update_lots'),
+    (r'^update_lots/(?P<lot_pk>\d+)/(?P<amount>\d+(\.\d{1,2})?)/$', 'update_lots'),
+    (r'^lot_update_confirmation/$', 'lot_update_confirmation'),
 
 )
 #(r'^(?P<flavor_number>\d+)/batch_sheet/$', 'batch_sheet'),

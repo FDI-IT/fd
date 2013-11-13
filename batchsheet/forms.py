@@ -47,8 +47,8 @@ class NewLotForm(forms.Form):
         cleaned_data = self.cleaned_data
         flavor_number = cleaned_data.get("flavor_number")
         lot_number = cleaned_data.get("lot_number")
-        
-        
+        new_amount = cleaned_data.get("amount")
+                
         
         if flavor_number and lot_number: #only do this if both fields are valid so far
             
@@ -60,8 +60,10 @@ class NewLotForm(forms.Form):
             if lot != None:     
                 lot_pk = lot.pk
 
-                if lot.flavor.number == flavor_number:
-                    raise ValidationError(mark_safe("This lot/flavor combination already exists. <a href='/django/batchsheet/update_lots/%s' style='color: #330066'>Update Lot</a>" % escape(str(lot_pk))))
+                if new_amount == lot.amount:
+                    raise ValidationError(mark_safe("<a href='/django/access/%s/#ui-tabs-6' style='color: #330066'> This lot already exists with the same flavor and amount. </a>" % escape(str(flavor_number))))
+                elif lot.flavor.number == flavor_number:
+                    raise ValidationError(mark_safe("This lot/flavor combination already exists. <a href='/django/batchsheet/update_lots/%s/%s' style='color: #330066'>Update Lot</a>" % (escape(str(lot_pk)), escape(str(new_amount)))))
                 else:
                     raise ValidationError(mark_safe("There already exists a lot corresponding to a different flavor. <a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/django/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))
 
@@ -77,6 +79,7 @@ class UpdateLotForm(forms.Form):
         cleaned_data = self.cleaned_data
         flavor_number = cleaned_data.get("flavor_number")
         lot_number = cleaned_data.get("lot_number")
+        new_amount = cleaned_data.get("amount")
         
         if flavor_number and lot_number: #only do this if both fields are valid so far
             
@@ -88,11 +91,50 @@ class UpdateLotForm(forms.Form):
             
             if lot.flavor.number != flavor_number:
                 raise ValidationError(mark_safe("There already exists a lot corresponding to a different flavor. <a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/django/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))                      
-    
-            if lot.status != ('Created' | 'Batchsheet Printed'):
+            elif lot.status != ('Created' or 'Batchsheet Printed'):
                 raise ValidationError("This lot has status %s and cannot be updated." % lot.status)
+            elif new_amount == lot.amount:
+                raise ValidationError(mark_safe("<a href='/django/access/%s/#ui-tabs-6' style='color: #330066'> This lot already exists with the same flavor and amount. </a>" % escape(str(flavor_number))))
+                
             
         return cleaned_data            
+
+def build_confirmation_rows(formset):
+    confirmation_rows = []
+
+    for form in formset.forms:
+        info_row = {}
+        if len(form._errors) == 0:
+            cd = form.cleaned_data
+            try:
+                update_lot = Lot.objects.get(number = cd['lot_number'])
+                #update_lot = Ingredient.get_formula_ingredient(form.cleaned_data['ingredient_number'])
+            except KeyError:
+                print "KEYERROR BUILDIN OLD INFO ROWS"
+            
+            info_row['lot_number'] = cd['lot_number']
+            info_row['flavor_number'] = cd['flavor_number']
+            info_row['old_amount'] = update_lot.amount
+            info_row['old_status'] = update_lot.status
+            info_row['new_amount'] = cd['amount']
+            info_row['new_status'] = 'Created'
+            
+            '''
+            #VALIDATION, should be located elsewhere?
+            if info_row['new_amount'] == info_row['old_amount']:
+                warning = 'The specified lot already has an amount of %s.' % old_amount
+            else:
+                warning = None
+            
+            info_row['warning'] = warning
+            '''
+            confirmation_rows.append(info_row)
+                
+        else:
+            print "THERE ARE ERRORS IN THE FORM, BUILD_OLD_INFO_ROWS"
+        
+
+    return confirmation_rows
 
 '''
 class AddLotRow(forms.Form):

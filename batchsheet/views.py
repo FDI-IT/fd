@@ -37,7 +37,7 @@ from salesorders.models import SalesOrderNumber, LineItem
 
 from access.views import flavor_info_wrapper
 from batchsheet import forms
-from batchsheet.forms import BatchSheetForm, NewLotForm, UpdateLotForm
+from batchsheet.forms import BatchSheetForm, NewLotForm, UpdateLotForm, build_confirmation_rows
 
 def batchsheet_home(request):
     batch_sheet_form = BatchSheetForm({
@@ -190,7 +190,80 @@ def batchsheet_print(request, flavor):
     
     return HttpResponse(simplejson.dumps(json_dict), mimetype="application/json")
 
-def update_lots(request, lot_pk=None):
+
+def update_lots(request, lot_pk, amount, extra=1): #change this - if updating one lot from add lots screen, go straight to update confirmation
+    if request.method == 'GET':
+        #get list of ot numbers and amounts from request.get
+        #if list exists:
+            #confirmation page
+        #else:
+            #update page
+        
+        LotFormSet = formset_factory(forms.UpdateLotForm, extra=extra) #default, empty formset
+        formset = LotFormSet()
+        
+        try:
+            LotFormSet = formset_factory(forms.UpdateLotForm, extra=0)
+            formset = LotFormSet(request.GET)
+            #print 'z'
+        except:
+            try:
+                #redirected from Add Lots page
+                if lot_pk != None and amount != None:
+                    update_lot = Lot.objects.get(pk = lot_pk)
+                    update_row = [{'lot_number': update_lot.number, 'flavor_number': update_lot.flavor.number, 'amount': amount}]
+                    
+                    LotFormSet = formset_factory(forms.UpdateLotForm, extra = 0)
+                    formset = LotFormSet(initial = update_row)
+                #print 'y'
+            except:
+                pass
+                #print 'x'
+ 
+        
+        #else:    
+        #    LotFormSet = formset_factory(forms.UpdateLotForm)
+        #    formset = LotFormSet(request.GET)        
+        
+        if formset.is_valid():
+            
+                            
+            display_info = build_confirmation_rows(formset)
+            confirmation_rows = zip(formset.forms, display_info)
+                
+                
+            return render_to_response('batchsheet/lot_update_confirmation.html',
+                                        {'formset': formset,
+                                         'management_form': formset.management_form,
+                                         #'confirmation_info': confirmation_info,
+                                         'confirmation_rows': confirmation_rows,
+                                         #'confirm': confirm,
+                                         },
+                                         context_instance=RequestContext(request))    
+        else:    
+            return render_to_response('batchsheet/update_lots.html',
+                                        {'formset': formset,
+                                         'management_form': formset.management_form,
+                                         },
+                                         context_instance=RequestContext(request))      
+    elif request.method == 'POST':
+        LotFormSet = formset_factory(forms.UpdateLotForm)
+        formset = LotFormSet(request.POST)  
+        
+        if formset.is_valid():
+            for form in formset.forms:
+                cd = form.cleaned_data
+                
+                update_lot = Lot.objects.get(number = cd['lot_number'])
+                update_lot.amount = cd['amount']
+                update_lot.status = 'Created'
+                
+        
+        else:
+            print 'AKJSHF'
+
+
+'''    
     if request.method == 'POST':
         LotUpdateFormSet = formset_factory(UpdateLotForm)
         
@@ -202,9 +275,10 @@ def update_lots(request, lot_pk=None):
                 
                 new_lots.append((cd['lot_number'], cd['flavor_number'], cd['amount']))
                 
+            request.method = 'GET'
             return lot_update_confirmation(request, new_lots)
         else:        
-            return render_to_response('batchsheet/update_lots.html', 
+            return render_to_response('batchsheet/lot_update_confirmation.html', 
                                       {'formset': formset,
                                        'management_form': formset.management_form},
                                       context_instance=RequestContext(request))
@@ -230,9 +304,82 @@ def update_lots(request, lot_pk=None):
                                          'management_form': formset.management_form,
                                          },
                                          context_instance=RequestContext(request))
+'''
+                
+def lot_update_confirmation(request, lot_list=None): #go straight here if clicking url from add_lots
+    if request.method == 'POST':
         
-def lot_update_confirmation(request, lot_list):
-    pass #TODO
+        LotUpdateFormSet = formset_factory(UpdateLotForm)
+        
+        formset = LotUpdateFormSet(request.POST)
+        if formset.is_valid():
+            for form in formset.forms:
+                cd = form.cleaned_data
+                update_lot = Lot.objects.get(cd['lot_number'])
+                
+                update_lot.amount = cd['amount']
+                update_lot.status = 'Created'
+                
+                update_lot.save()        
+        
+            redirect_path = "/django/qc/lots"
+            return HttpResponseRedirect(redirect_path)
+        
+        else:
+            return render_to_response('batchsheet/lot_update_confirmation.html', 
+                                      {'formset': formset,
+                                       'management_form': formset.management_form},
+                                      context_instance=RequestContext(request))        
+        '''
+        for lot_number, flavor_number, amount in lot_list:
+            ''''''
+            try:
+                lot_flavor = Flavor.objects.get(number=lot['flavor_number'])
+            except KeyError:
+                print "LOT UPDATE CONFIRMATION KEYERROR"
+            ''''''
+            
+            update_lot = Lot.objects.get(number = lot_number)
+            
+            update_lot.amount = amount
+            update_lot.status = 'Created'
+            
+            update_lot.save()
+        
+        redirect_path = "/django/qc/lots"
+        return HttpResponseRedirect(redirect_path)
+        '''
+    else:
+        if lot_list != None:
+            LotFormSet = formset_factory(forms.UpdateLotForm, extra=0)
+            formset = LotFormSet(initial=lot_list)
+        #else:
+        #    formset = None
+        
+        
+        confirm = True
+        update_info = []
+        for lot_number, flavor_number, amount in lot_list:
+            old_amount = Lot.objects.get(number = lot_number).amount
+            old_status = Lot.objects.get(number = lot_number).status
+            
+            if amount == old_amount:
+                warning = 'The specified lot already has an amount of %s.' % old_amount
+            else:
+                warning = None
+            
+            update_info.append((lot_number, flavor_number, old_amount, old_status, amount, 'Created', warning))
+            
+            if warning:
+                confirm = False
+            
+        return render_to_response('batchsheet/lot_update_confirmation.html',
+                                    {'update_info': update_info,
+                                     'formset': formset,
+                                     'management_form': formset.management_form,
+                                     'confirm': confirm},
+                                    context_instance = RequestContext(request))
+            
                 
             
         

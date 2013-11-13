@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if status_message %}
+	<h1>{{ status_message }}</h1>
+{% endif %}
+
+<div id="flavorsearch">
+	
+</div>
+
+<div id="content-main">
+	
+    <form action="" method="POST">
+	{{ formset.management_form }}
+	
+	<table width="100%" class="sorttable">
+		<thead>
+			<tr>
+				<th title="Lot Number">Lot Number</th>
+				<th title="Flavor Number" class="{sorter: 'link-digit'}">Flavor Number</th>
+				<th title="Old Amount" class="{sorter: 'link-digit'}">Old Amount</th>
+				<th title="Old Status" class="{sorter: 'link-digit'}">Old Status</th>
+				<th title="New Amount" class="{sorter: 'link-digit'}">New Amount</th>
+				<th title="New Status" class="{sorter: 'link-digit'}">New Status</th>
+			</tr>
+		</thead><tbody>
+		{% for form in formset.forms %}
+			{{ form.errors }}
+		{% endfor %}
+		{% for form, display_info in confirmation_rows %}
+			{% if warning %}
+	    		<tr bgcolor="#FF0000">
+	    			<td colspan = "6"><b> {{warning}} </b></td>
+	    		</tr>
+	    	{% endif %}
+			<tr id="{{ order.0 }}">
+				<td style="display:none"> {{ form.lot_number }} </td>
+				<td style="display:none"> {{ form.flavor_number }} </td>
+				<td style="display:none"> {{ form.amount }} </td>
+				<td>
+					<a href="/django/qc//lots/{{ lot_number }}">{{ display_info.lot_number }}</a>
+				</td>
+
+				<td>
+					<a href="/django/access/{{ lot.flavor.number }}">{{ display_info.flavor_number }}</a>
+				</td>
+				<td>{{ display_info.old_amount }}</td>
+				<td>{{ display_info.old_status }}</td>
+				<td>{{ display_info.new_amount }}</td>
+				<td>{{ display_info.new_status }}</td>
+	
+			</tr>
+		{% endfor %}
+	    </tbody>
+	</table>
+	<input id="lot-confirm-button" type="submit" value="Confirm Update" />
+	</form>
+</div>
+
+
+{% endblock %}
+
