@@ -97,9 +97,13 @@
 			<li><a href="{{ form.instance.get_admin_url }}">Admin</a></li>
 		{% else %}{% if admin_link %}
 			<li><a href="{{ admin_link }}">Admin</a></li>
+		{% else %}{% if lot %}
+			<li><a href="{{ lot.get_admin_url }}">Admin</a></li>
+		{% else %}{% if lot_list_admin %}
+			<li><a href="{{ lot_list_admin }}">Admin</a></li>
 		{% else %}
 			<li><a href="/django/admin">Admin</a></li>
-		{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+		{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
         <li><a href="/wiki">Wiki</a></li>
 		</ul>
       	<br style="clear: left" />

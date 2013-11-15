@@ -10,7 +10,7 @@
 	<table id="lot-rows" width="100%">
 		<thead>
 			<tr>
-				<th>Lot Number</th>
+			<!--<th>Lot Number</th> -->
 				<th>Flavor Number</th>
 				<th>Amount</th>
 			</tr>
@@ -24,7 +24,7 @@
 	    	{% endif %}
 			<tr>
 			
-				<td class="lot-number-cell">{{ form.lot_number }}{{form.lot_number.errors}}</td>
+				<!--<td class="lot-number-cell">{{ form.lot_number }}{{form.lot_number.errors}}</td>-->
 				<td class="number-cell">{{ form.flavor_number }}{{form.flavor_number.errors}}
 					</td>
 				<td class="amount-cell">{{ form.amount }}{{form.amount.errors}}</td>
@@ -32,6 +32,6 @@
 	    {% endfor %}
 		</tbody>
 	</table>
-	<input id="lot-submit-button" type="submit" value="Submit Lots" />
+	<input id="lot-submit-button" type="submit" value="Create Lots" />
     </form>
 {% endblock %}

@@ -148,7 +148,8 @@ def lot_list(request, paginate_by = 'default', queryset = 'default'):
             'filterselect':LotFilterSelectForm(),
             'user': request.user.get_full_name(),
             'pagination_list': [10, 25, 50, 100, 500, 1000],
-            'pagination_count': pagination_count
+            'pagination_count': pagination_count,
+            'lot_list_admin': "/django/admin/newqc/lot/"
             # fix this javascript...
         }),
     )

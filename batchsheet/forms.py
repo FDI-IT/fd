@@ -40,9 +40,10 @@ class LotNumberField(forms.CharField):
 
 class NewLotForm(forms.Form):
     flavor_number = FlavorNumberField(label="", min_value=1)
-    lot_number = LotNumberField(label="")
+    #lot_number = LotNumberField(label="")
     amount = forms.DecimalField(max_digits=9, decimal_places=2) 
     
+    '''
     def clean(self):
         cleaned_data = self.cleaned_data
         flavor_number = cleaned_data.get("flavor_number")
@@ -69,7 +70,8 @@ class NewLotForm(forms.Form):
 
         
         return cleaned_data
-
+    '''
+    
 class UpdateLotForm(forms.Form):
     flavor_number = FlavorNumberField(label="", min_value=1)
     lot_number = LotNumberField(label="")

@@ -381,8 +381,25 @@ def lot_update_confirmation(request, lot_list=None): #go straight here if clicki
                                     context_instance = RequestContext(request))
             
                 
-            
+def batchsheet_batch_print(request):
+    if request.method == 'POST':
+        lot_pks = request.POST.getlist('lot_pks')
         
+        test = []
+        
+        for lot_pk in lot_pks:
+            lot = Lot.objects.get(pk = lot_pk)
+            lot.status = 'Batchsheet Printed'
+            lot.save()
+            test.append((lot_pk, lot.status))
+                
+        return render_to_response('batchsheet/batchsheet_batch_print.html', 
+                      {
+                       'lot_pks':lot_pks,
+                       },
+                      context_instance=RequestContext(request))
+        
+
 
 def add_lots(request):
     if request.method == 'POST':
@@ -399,7 +416,8 @@ def add_lots(request):
                 except KeyError:
                     print "LKJASLDFJAF ERROR"
                                                 
-                new_lot = Lot(number = cd['lot_number'],
+                new_lot = Lot(#number = cd['lot_number'],
+                              number = get_next_lot_number(),
                               flavor = lot_flavor,
                               amount = cd['amount'],
                               status = 'Created')
@@ -430,14 +448,16 @@ def add_lots(request):
         lot_checklist = []
         selected_orders = request.GET.getlist('flavor_pks')
         
+        
         for order in selected_orders:
             #this changes the format of the GET request to convert the json strings into python dicts
             lot_checklist.append((json.loads(order.replace('\'','!').replace('\"','\'').replace('!','\"')))[0]) 
-
+        
         #print lot_checklist
         
-        lot_number = get_next_lot_number()
+        #lot_number = get_next_lot_number()
         
+        '''
         #assign lot numbers to new lots 
         for lot in lot_checklist:
             #if lot['amount'][-2:] == '00':
@@ -445,7 +465,7 @@ def add_lots(request):
             #lot['amount'] = int(lot['amount'])
             lot['lot_number'] = lot_number
             lot_number = lot_number + 1
-            
+        '''    
         
         LotFormSet = formset_factory(forms.NewLotForm, extra=0)
         
