@@ -53,29 +53,50 @@ def batchsheet_home(request):
 def next_lot(request):
     return HttpResponse(simplejson.dumps({'lot_number':get_next_lot_number()}), content_type='application/json; charset=utf-8')
 
+def check_lot_number(request):
+    try:
+        lot_number = request.GET.get('lot_number', None)
+#         
+#         if lot_number is None: #if no lot number is input, let the batchsheet continue to create a new lot and print
+#             return HttpResponse(simplejson.dumps({'used':'false'}), content_type='application/json; charset=utf-8')
+#         else:
+        if Lot.objects.filter(number=lot_number).exists() == True:# and (lot_number is not None): #if the lot number has been used before, return the used lot information
+            lot = Lot.objects.filter(number=lot_number)[0]
+            return HttpResponse(simplejson.dumps({'used':'true', 'lot_number':lot.number, 'flavor_number':lot.flavor.number, 'amount':str(lot.amount), 'next_lot_number': get_next_lot_number()}), content_type='application/json; charset=utf-8')
+        else: #if the lot has not been used before or if the lot number was not entered, allow the batchsheet to continue to create a new lot and print
+            return HttpResponse(simplejson.dumps({'used':'false'}), content_type='application/json; charset=utf-8')       
+    except Exception as e:
+        return HttpResponse(simplejson.dumps({'err':str(e)}), content_type='application/json; charset=utf-8')        
+            
+
 def lot_init(request):
     #if request.is_ajax():
     try:
         lot_number = request.GET.get('lot_number', None)
-        if lot_number is None or lot_number is get_next_lot_number():
-            l = Lot(
-                amount=request.GET['amount'],
-                flavor=get_object_or_404(Flavor,number=request.GET['flavor_number']),
-            )
-            l.save()
-        else:
-            try:
-                test_lot = Lot.objects.get(number=lot_number)
-                if test_lot:
-                    raise Lot.DoesNotExist
-            except:
+        
+        #only make a new lot if the lot had not just been created; otherwise, just return the lot number and re-print the page
+        if Lot.objects.filter(number=lot_number).exists() == False:
+            if lot_number is None or lot_number is get_next_lot_number():
                 l = Lot(
-                    number=lot_number,
                     amount=request.GET['amount'],
                     flavor=get_object_or_404(Flavor,number=request.GET['flavor_number']),
                 )
                 l.save()
+            else:
+                try:
+                    test_lot = Lot.objects.get(number=lot_number)
+                    if test_lot:
+                        raise Lot.DoesNotExist
+                except:
+                    l = Lot(
+                        number=lot_number,
+                        amount=request.GET['amount'],
+                        flavor=get_object_or_404(Flavor,number=request.GET['flavor_number']),
+                    )
+                    l.save()
+                    
         return HttpResponse(simplejson.dumps({'lot_number':l.number}), content_type='application/json; charset=utf-8')
+                    
     except Exception as e:
         return HttpResponse(simplejson.dumps({'err':str(e)}), content_type='application/json; charset=utf-8')
 #    else:

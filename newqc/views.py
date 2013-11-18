@@ -118,10 +118,12 @@ lls = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
 @login_required
 def lot_list(request, paginate_by = 'default', queryset = 'default'):
     
-    if (queryset != 'default'): #use different queryset (lots by day)
+    
+    if (queryset != 'default'): #use different queryset (eg. lots by day)
         queryset = queryset
         pagination_count = None
     else:
+        
         lot_list_queryset = Lot.objects.extra(select={'lotyear':'extract(year from date)','lotmonth':'extract(month from date)'})   
         queryset = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
     

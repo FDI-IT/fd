@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}    
+<div id="content-main">
+	
+	{% if pagination_count %}
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	        
+	        
+	        <div class="paginate_by" align="right">
+	        	Paginate By:
+	        	{% for count in pagination_list %}
+	        		{% if pagination_count == count %}
+	        			<b>{{ count }}</b>
+	        		{% else %}
+	        			<a href="/django/qc/lots/paginate{{count}}"> {{count}} </a>
+	        		{% endif %}
+	        	{% endfor %}
+	        </div>
+	    </span>
+	</div>
+	{% endif %}
+
+	<script>
+		$(document.forms["lot_selections"]).submit(function(){
+			alert("HI");
+			if(validate() == true) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		});
+	
+		function validate()
+		{
+			var printedIds = [];
+			
+			$("#lot_list :checked").closest('tr').each(function() {
+				if ($(this).children('.status').text() == 'Batchsheet Printed') {
+					printedIds.push($(this).children('.lot_number').text());
+				}
+			});
+			
+			if(printedIds.length > 0) {
+				var lotstring = printedIds.join(", ");
+				var message = "Lots " + lotstring + " have been printed before.  Would you still like to print?";
+				if(confirm(message)) {
+
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+			
+		}
+	</script>
+
+	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
+	<form onsubmit="return validate()" id="form" name="lot_selections" method="post" action="/django/batchsheet/batchsheet_batch_print/" >
+	    {% csrf_token %}
+	
+    <table class="sorttable" width="100%" id="lot_list">
+	<tr class="lotheaders">
+		<th title="Select Box">Select</th>
+		<th>Lot Number</th>
+	    <th>Sub Lot</th>
+	    <th>Flavor</th>
+		<th>Date</th>
+	    <th>Amount</th>
+	    <th class="sorttable_nosort">Status</th>
+	     <th>QC Tests</th>
+	     <th>Batchsheet</th>
+	</tr>
+	{% for lot in object_list %}
+	    <tr>
+	    <td>
+			<input type="checkbox" name="lot_pks" value="{{lot.pk}}"{% if checkall %}checked{% endif %}>
+		</td>	
+	    <td class="lot_number"><a href="{{lot.get_absolute_url}}">{{ lot.number }}</a></td>
+	    <td>
+	    	{% if lot.sub_lot %}
+	    	{{ lot.sub_lot }}
+	    	{% endif %}
+	    </td>
+		<td><a href="{{ lot.flavor.get_absolute_url }}">{{ lot.flavor }}</a></td>
+		<td><a href="/django/qc/lots/{{lot.date|date:'Y'}}/{{lot.date|date:'m'}}/{{lot.date|date:'d'}}/">{{ lot.date|date:"Y-m-d" }}</a></td>
+		<td>{{ lot.amount|floatformat:0 }}</td>
+		<td class="status">{{ lot.status }}</td>
+		<td>
+			{% if lot.testcards_present %}
+			<a href="{{lot.get_absolute_url}}"><img src="/djangomedia/images/Icons/16x16/accept.png"></a>
+			{% endif %}
+		</td>
+		<td>
+			{% if lot.batchsheets_present %}
+			<a href="{{lot.get_absolute_url}}"><img src="/djangomedia/images/Icons/16x16/accept.png"></a>
+			{% endif %}
+		</td>
+	    </tr>
+	{% endfor %}
+    </table>
+    </form>
+    
+    {% if pagination_count %}
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+	{% endif %}
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

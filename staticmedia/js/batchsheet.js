@@ -15,7 +15,7 @@ var getParameterByName = function (name) {
     return "";
   else
     return decodeURIComponent(results[1].replace(/\+/g, " "));
-}
+};
 
 
 var refresh_batchsheet = function(e) {
@@ -26,7 +26,7 @@ var refresh_batchsheet = function(e) {
 				put_batchsheet_data, 'json');
 			return false;
 		}, 100);
-}
+};
 
 var put_batchsheet_data = function(data) {
 	$('#bubble_container').html(data.sidebar);
@@ -42,7 +42,7 @@ var put_batchsheet_data = function(data) {
 		}
 	});		
 	$('#id_lot_number').val(data.lot_number);
-}
+};
 
 var populate_form_from_string = function() {
   jQuery('#id_flavor_number').val( getParameterByName('flavor_number') );
@@ -59,28 +59,71 @@ jQuery(document).ready(function(){
 	$('#id_lot_number').keyup( refresh_batchsheet );
 	
 	$('#print_link').click(function(e) {
-		var batch_amount = jQuery('#id_batch_amount').val();
-		if (batch_amount == 0) {
-			alert("Batch amount should not be zero.");
-			return false;
+		
+		var print = true;
+
+
+		if(!jQuery("#batchsheet").hasClass('do_not_print')) {
+			if(confirm("Would you like to re-print this batch sheet?")) {
+				print = true;
+			}
+			else {
+				print = false;
+			}
 		}
-		$('input').attr('readonly', 'readonly');
-		jQuery.get('/django/batchsheet/lot_init/',
-			{
-				flavor_number:jQuery('#id_flavor_number').val(),
-				amount: batch_amount,
-				lot_number: jQuery('#id_lot_number').val()
-			},
-			function(data) {
-				var img_link='<img src=/django/batchseet/barcode/' + data.lot_number + ' align="top" />';
-				jQuery('#titleright img').html(img_link);
-				jQuery('#lot_number').html(data.lot_number);
-				jQuery('#print_warning').hide();
-				jQuery('#batchsheet').removeClass('do_not_print');
-				//console.log("print");
-				window.print();
-                                //$('#print_link').remove();
-		}, 'json');
+		else {
+			jQuery.ajax({
+			     async: false,
+			     type: 'GET',
+			     url: '/django/batchsheet/check_lot_number/',
+			     data: 
+			     	{
+			     		lot_number:jQuery('#id_lot_number').val()
+			     	},
+			     success: function(data) {
+			          //callback
+					if (data.used == 'true') {
+						var message = "Lot number " + data.lot_number + " has already been taken: " +
+										"\nFlavor number: " + data.flavor_number + 
+										"\nAmount: " + data.amount + 
+										"\nWould you like to use the next available lot number?";
+						if(confirm(message)) {
+							jQuery('#id_lot_number').attr("value", data.next_lot_number);
+						}
+						else {
+							print = false;
+						}
+					}
+			     }
+			     
+			});
+		}
+
+		
+		if(print == true) {
+			var batch_amount = jQuery('#id_batch_amount').val();
+			if (batch_amount == 0) {
+				alert("Batch amount should not be zero.");
+				return false;
+			}
+			$('input').attr('readonly', 'readonly');
+			jQuery.get('/django/batchsheet/lot_init/',
+				{
+					flavor_number:jQuery('#id_flavor_number').val(),
+					amount: batch_amount,
+					lot_number: jQuery('#id_lot_number').val()
+				},
+				function(data) {
+					var img_link='<img src=/django/batchseet/barcode/' + data.lot_number + ' align="top" />';
+					jQuery('#titleright img').html(img_link);
+					jQuery('#lot_number').html(data.lot_number);
+					jQuery('#print_warning').hide();
+					jQuery('#batchsheet').removeClass('do_not_print');
+					//console.log("print");
+					window.print();
+	                                //$('#print_link').remove();
+			}, 'json');
+		}
 	});
 	
 	$('#next_lot_link').click(function(e) {
