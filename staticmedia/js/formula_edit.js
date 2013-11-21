@@ -1,5 +1,37 @@
 var FORMULA_EDIT = {};
 
+
+FORMULA_EDIT.toggle_filter_options = function() {
+	var ele = document.getElementById("filter_search");
+	var txt = document.getElementById("visibility_toggle");
+	if (ele.style.display == "block") {
+		txt.innerHTML = "Show Ingredient Filter";
+	} else {
+		txt.innerHTML = "Hide filter options";
+	}
+	jQuery(ele).toggle();	
+};
+
+FORMULA_EDIT.validate_form = function() {
+	var invalid = false;
+		
+	jQuery('#formula-rows tr:gt(0)').each(function() {
+		FORMULA_EDIT.filter_update_row(this);
+		if(FORMULA_EDIT.validate_row(this) == false) {
+			invalid = true;
+		}
+		jQuery(this).removeClass("justAdded");
+	});
+
+	if (invalid) {
+		alert("Please fix the error(s) in the highlighted rows before submitting.");
+		return false;
+	}
+	else {
+		return true;
+	}		
+};
+
 FORMULA_EDIT.get_checked_boxes = function() { 
 	FORMULA_EDIT.checked_boxes = {};
 	
@@ -89,7 +121,7 @@ FORMULA_EDIT.add_row_error_messages = function(row) {
 	}
 	if (error_message.length > 0) {
 		row.attr("title", "Please fix the following error(s): " + error_message.join(", "));
-		row.css('background-color', '#FF0000');
+		row.css('background-color', '#FF6666');
 	}
 	
 };
@@ -199,10 +231,10 @@ FORMULA_EDIT.filter_update_row = function(row) {
 
 FORMULA_EDIT.toggle_submit = function() {
 	if(FORMULA_EDIT.validate_all_rows() && jQuery("#formula-rows tr.filter_row").length == 0) {
-		jQuery('#formula-submit-button').show();
+		jQuery('#formula-submit-button').attr('disabled', false).removeAttr('title');
 	}
 	else {
-		jQuery('#formula-submit-button').hide();
+		jQuery('#formula-submit-button').attr('disabled', true).attr('title', 'Fix the error(s) in the highlighted rows above.');
 	}
 	
 	//FORMULA_EDIT.add_all_error_messages();
@@ -239,6 +271,8 @@ FORMULA_EDIT.update_all_formula_rows = function() {
 };
 
 FORMULA_EDIT.delete_row = function(i){
+	FORMULA_EDIT.filter_update_all();
+	
 	document.getElementById('formula-rows').deleteRow(i);
 	var form_id = $('#id_form-TOTAL_FORMS').val();
 	jQuery('#id_form-TOTAL_FORMS').val(Number(form_id)-1);
@@ -260,19 +294,18 @@ FORMULA_EDIT.delete_row = function(i){
 			}
 	});
 	
-	FORMULA_EDIT.filter_update_all();
 };
 
 FORMULA_EDIT.recalculate_total_cost= function() {
 	var total_cost = 0;
 	var total_weight = 0;
-	jQuery('.cost-cell').each(function() {
+	jQuery('.cost-cell:gt(0)').each(function() {
 		total_cost += Number($(this).html());
 	});
 	total_cost = Math.round(total_cost*1000)/1000;
 	jQuery("#RawMaterialCost").html(total_cost);
 	
-	jQuery('.amount-cell').each(function() {
+	jQuery('.amount-cell:gt(0)').each(function() {
 		total_weight += Number($(this).find('input').val());
 	});
 	total_weight = Math.round(total_weight*1000)/1000;
@@ -318,9 +351,11 @@ jQuery(document).ready(function(){
 		var row = $this.closest("tr");
 		FORMULA_EDIT.update_formula_row(row);
 		//FORMULA_EDIT.t2 = setTimeout("FORMULA_EDIT.filter_update_all()", 750);
-		FORMULA_EDIT.t2 = setTimeout(function() {
-					FORMULA_EDIT.filter_update_row(row);
-				}, 750);
+		if(!jQuery(row).hasClass("justAdded")){
+			FORMULA_EDIT.t2 = setTimeout(function() {
+						FORMULA_EDIT.filter_update_row(row);
+					}, 750);
+		}
 	});	
 	
 	jQuery('#formula-rows').delegate('.number-cell input', 'keyup', function(e) {
@@ -358,7 +393,9 @@ jQuery(document).ready(function(){
 			'<td class="del-row"><input type="button" value="X" onclick="FORMULA_EDIT.delete_row(this.parentNode.parentNode.rowIndex)"></td>' +
 			'</tr>');
 		jQuery('#id_form-' + form_id + '-ingredient_number').focus();
-		FORMULA_EDIT.filter_update_row(jQuery('#formula-rows tr:last'));
+		
+		jQuery('#formula-rows tr:last').addClass("justAdded");
+		//FORMULA_EDIT.filter_update_row(jQuery('#formula-rows tr:last'));
 		return false;
 	});	
 	

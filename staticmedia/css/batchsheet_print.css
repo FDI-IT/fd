@@ -28,6 +28,11 @@ div.top_form_bar {
 #print_warning {
 	display:block;
 }
+
+div.newpage {
+    page-break-before: always;
+}
+
 div.do_not_print {
 	display:none;
 }
