@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+
+{% block htmlhead %}
+{% include "htmlhead.html" %}
+<!-- <script type="text/javascript" src="/djangomedia/js/sales_order_production.js?v=25"></script> DO NOT USE-->
+{% endblock %}
+
 {% block content %}
 
 {% if status_message %}
@@ -14,7 +20,7 @@
 	<form name="salesorder_selections" action="/django/batchsheet/add_lots/" method="get">
 	    {% csrf_token %}
 	
-	<table width="100%" class="sorttable">
+	<table id="sales_order-rows" width="100%" class="sorttable">
 		<thead>
 			<tr>
 				<th title="Select Box">Select</th>
@@ -26,11 +32,15 @@
 			</tr>
 		</thead><tbody>
 		{% for order in orders %}
-		<tr id="{{ order.0 }}">
+		{% if order.contains_discontinued_ingredients %}
+			<tr id="{{ order.0 }}" class="discontinued" title="{{order.discontinued_ingredients}}" bgcolor="#FF0000">
+		{% else %}
+			<tr id="{{ order.0 }}">
+		{% endif %}
 			<td>
 				<input type="checkbox" name="flavor_pks" value="[{'flavor_number':'{{order.flavor.number}}', 'amount':'{{order.total}}'}]"{% if checkall %}checked{% endif %}>
 			</td>
-			<td>
+			<td class="number-cell">
 				<a href="/django/access/{{ order.flavor.number }}?wf={{ order.total }}">{{ order.flavor.number }}</a>
 			</td>
 			<td>

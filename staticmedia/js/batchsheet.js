@@ -94,26 +94,26 @@ var dialog_create = function() {
 jQuery(document).ready(function(){	
 	$("#update_dialog").dialog({
 		resizable: false,
-		width: 600,
-		height: 600,
+		width: 850,
+		height: 210,
 		modal: true,
 		autoOpen: false,
 		buttons: {
 			"Cancel":dialog_cancel,
 			"Update Lot with New Weight": dialog_update,
-			"Create New Lot": dialog_create,
+			"Create New Lot with Next Number": dialog_create,
 		}		
 	});
 	
 	$("#create_dialog").dialog({
 		resizable: false,
-		width: 600,
-		height: 600,
+		width: 550,
+		height: 210,
 		modal: true,
 		autoOpen: false,
 		buttons: {
 			"Cancel": dialog_cancel,
-			"Create new lot with next lot number": dialog_create,
+			"Create New Lot with Next Lot Number": dialog_create,
 		}		
 	});
 	
@@ -152,17 +152,15 @@ jQuery(document).ready(function(){
 						console.log(data.flavor_number);
 						console.log(data.flavor_number == jQuery("#id_flavor_number").val());
 						if (data.flavor_number == jQuery("#id_flavor_number").val()) {
-							var title = "This lot number already exists with the same flavor number and weight: " + data.amount;
-							jQuery("#update_dialog").html("Old weight: " + data.amount + "\nNew weight: " + jQuery("#id_batch_amount").val());
-							jQuery("#update_dialog").dialog("option","title",title).dialog("open");
+							var title = "This lot number already exists with the same flavor number, but different weight.";
+							jQuery("#update_dialog").html("<b>Lot Number:</b> " + jQuery('#id_lot_number').val() + "<br\><b>Flavor Number:</b> " + data.flavor_number + "<br\><b>Old weight:</b> " + data.amount + " <b>New weight:</b> " + jQuery("#id_batch_amount").val());
+							jQuery("#update_dialog").dialog("option","title",title).dialog("open").css("text-align","center");
 						}
 						
 						else {
-							var title = "This lot exists with a different flavor: " +
-										"\nFlavor number: " + data.flavor_number +
-										"\nAmount: " + data.amount;
-							jQuery("#create_dialog").html(text_value)="hi";
-							jQuery("#create_dialog").dialog("option","title",title).dialog("open");
+							var title = "This lot number already exists with a different flavor.";
+							jQuery("#create_dialog").html("<b>Lot Number:</b> " + jQuery('#id_lot_number').val() + "<br\><b>Existent Flavor Number:</b> " + data.flavor_number + "<br\><b>Existent Amount:</b> " + data.amount);
+							jQuery("#create_dialog").dialog("option","title",title).dialog("open").css("text-align","center");
 						}
 					}
 					else {
