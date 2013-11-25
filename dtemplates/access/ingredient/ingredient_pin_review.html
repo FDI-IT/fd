@@ -59,7 +59,13 @@
 		</form>
 		
 		<table width="100%" id="rm-by-code">
-			<caption>Raw Material Details by Raw Material Code</caption>
+			<caption>
+				<p style="text-align:left;">
+					Raw Material Details by Raw Material Code
+					<span style="float:right;"><a href="/django/access/ingredient/pin_review/{{ ingredient.id }}update_raw_materials/"> Discontinue/Activate Raw Materials </a></span>
+				</p>
+			</caption>
+			
 			<thead>
 				<tr>
 				{% for header in table_headers %}

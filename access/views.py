@@ -649,6 +649,35 @@ def ingredient_gzl_review(request, ingredients):
     return render_to_response('access/ingredient/gzl.html',
                               context_dict,
                               context_instance=RequestContext(request))
+    
+@ingredients_by_pin_info_wrapper
+def update_raw_materials(request, ingredients):
+        
+    page_title = "Activate/Discontinue Raw Materials"
+    table_headers = (
+                    "RM Code",
+                    "Supplier",
+                    "Price",
+                    "Active",
+    )
+    activated_ingredient = ingredients[0]
+    for ing in ingredients:
+        if ing.discontinued == False:
+            activated_ingredient = ing
+            break   
+         
+    context_dict = {
+                    'window_title': activated_ingredient.__unicode__(),
+                    'activated_ingredient': activated_ingredient,
+                    'ingredients': ingredients,
+                    'page_title': page_title,
+                    'table_headers': table_headers,
+                    'icu': icu, #TODO
+                    'updated_flavors': updated_flavors_threshold,  #TODO                  
+    }
+    return render_to_response('access/ingredient/ingredient_pin_review.html',
+                              context_dict,
+                              context_instance=RequestContext(request))   
 
 @ingredients_by_pin_info_wrapper
 def ingredient_pin_review(request, ingredients):
