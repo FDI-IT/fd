@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load blades %}
+{% load related_links %}
+{% load rm_history %}
+{% block htmlhead %}
+    {% include "htmlhead.html" %}
+    <script type="text/javascript" src="/djangomedia/js/batchsheet.js"></script>
+{% endblock %}
+
+
+{% block content %}
+<div id="content-right">
+	{% blades activated_ingredient %}
+</div>
+
+
+<div id="content-main">
+	<div id="title-left">
+		<span id="name">{{activated_ingredient.id}} - {{activated_ingredient.art_nati}} {{ activated_ingredient.prefix }} {{ activated_ingredient.product_name }} {{ activated_ingredient.part_name2 }}</span>
+	</div>
+	{% related_links activated_ingredient %}
+	
+	<div id="ingredient-detail">
+
+		<table width="100%" id="rm-by-code">
+			<caption>
+				<p style="text-align:left;">
+					Raw Material Details
+				</p>
+			</caption>
+			
+			<thead>
+				<tr>
+				{% for header in table_headers %}
+					<th>{{ header }}</th>
+				{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+			{% for ingredient in ingredients %}
+				{% if ingredient.discontinued %}
+				<tr class="discontinued">
+				{% else %}
+				<tr class="active">
+				{% endif %}
+					<td><a href="/django/access/ingredient/{{ ingredient.rawmaterialcode }}/">{{ ingredient.rawmaterialcode }}</a></td>
+					<td>{{ ingredient.suppliercode }}</td>
+					<td>{{ ingredient.unitprice }}</td>
+					<td>
+						{% if ingredient.discontinued %}
+							<input type="radio" name="activated" />
+						{% else %}
+							<input type="radio" name="activated" checked/>
+						{% endif %}
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>	
+		<button id="update-submit-button" type="button"> Update Raw Materials </button>
+		BLAHBLAHBLHA
+	</div>
+	<div id="retain_history">
+		{% rm_history activated_ingredient.id %}
+	</div>
+</div>
+
+{% endblock %}
+

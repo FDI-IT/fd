@@ -986,7 +986,6 @@ def recalculate_guts(flavor):
     else:
         flavor.allergen = "None"
 
-    flavor.prop65 = my_prop_65
     flavor.prop_65 = my_prop_65
     flavor.diacetyl = not my_diacetyl
     flavor.no_pg = not my_pg

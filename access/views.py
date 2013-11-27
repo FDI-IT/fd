@@ -650,8 +650,62 @@ def ingredient_gzl_review(request, ingredients):
                               context_dict,
                               context_instance=RequestContext(request))
     
-@ingredients_by_pin_info_wrapper
-def update_raw_materials(request, ingredients):
+def rm_update_review(request, raw_material_code=False): 
+    #if no raw material code provided, discontinue all was selected
+    if raw_material_code == False:
+        pass
+    else:
+        new_active_ingredient = Ingredient.objects.get(rawmaterialcode=raw_material_code)
+        
+        #find the old active ingredient (id is the same)
+        for ingredient in Ingredient.objects.filter(id=new_active_ingredient.id):
+            if ingredient.discontinued == False:
+                old_active_ingredient = ingredient
+                break
+            
+        #get old prices?
+            
+        #replace all foreignkeys to the old ingredient with the new active ingredient
+        for lw in LeafWeight.objects.filter(ingredient=old_active_ingredient):
+            lw.ingredient = new_active_ingredient
+            lw.save()
+            
+        for formula in Formula.objects.filter(ingredient=old_active_ingredient):
+            formula.ingredient=new_active_ingredient
+            formula.save()
+            
+        for ft in FormulaTree.objects.filter(node_ingredient=old_active_ingredient):
+            ft.node_ingredient=new_active_ingredient
+            ft.save()
+        
+                    
+        #create dictionary with flavor numbers as keys
+        updated_flavors = {}
+        #find all flavors that contain the raw material
+        for lw in LeafWeight.objects.filter(ingredient=new_active_ingredient):
+            root_flavor = lw.root_flavor
+            old_total = root_flavor.rawmaterialcost
+            
+            
+            #new_total = old_total - old_unit_price * weight + new_unit_price * weight
+            new_total = old_total + lw.weight * (new_active_ingredient.unitprice - old_active_ingredient.unitprice)
+            root_flavor.rawmaterialcost = new_total  #overwrite and save the new total rawmaterialcost
+            root_flavor.save()
+                   
+            updated_flavors[root_flavor] = [old_total, new_total] #add flavor to dictionary
+            
+        context_dict = {
+                        'updated_flavors': updated_flavors,
+                        'page_title': page_title,
+                        'table_headers': table_headers,   #TODO             
+        }
+        return render_to_response('access/ingredient/activate_raw_materials.html',
+                                  context_dict,)  
+
+
+def update_raw_materials(request, raw_material_id):
+    
+    ingredients = Ingredient.objects.filter(id=raw_material_id)    
         
     page_title = "Activate/Discontinue Raw Materials"
     table_headers = (
@@ -671,13 +725,10 @@ def update_raw_materials(request, ingredients):
                     'activated_ingredient': activated_ingredient,
                     'ingredients': ingredients,
                     'page_title': page_title,
-                    'table_headers': table_headers,
-                    'icu': icu, #TODO
-                    'updated_flavors': updated_flavors_threshold,  #TODO                  
+                    'table_headers': table_headers,                
     }
-    return render_to_response('access/ingredient/ingredient_pin_review.html',
-                              context_dict,
-                              context_instance=RequestContext(request))   
+    return render_to_response('access/ingredient/activate_raw_materials.html',
+                              context_dict,)   
 
 @ingredients_by_pin_info_wrapper
 def ingredient_pin_review(request, ingredients):
@@ -692,13 +743,19 @@ def ingredient_pin_review(request, ingredients):
                      "Price",
                      "Last Update",
                      "Kosher",
+                     "Activate",
     )
     highlighted_ingredient = ingredients[0]
+    
+    all_discontinued = True
+    
     for ing in ingredients:
         if ing.discontinued == False:
             highlighted_ingredient = ing
+            all_discontinued = False
             break
-        
+    
+         
     if request.method == 'POST':
         icu = forms.IngredientCostUpdate(request.POST)
         if icu.is_valid():
@@ -715,7 +772,8 @@ def ingredient_pin_review(request, ingredients):
                         updated_flavors_threshold[f]=prices
                 except:
                     pass
-            
+        
+        
         
     else:
         icu = forms.IngredientCostUpdate()
@@ -728,7 +786,8 @@ def ingredient_pin_review(request, ingredients):
                     'page_title': page_title,
                     'table_headers': table_headers,
                     'icu': icu,
-                    'updated_flavors': updated_flavors_threshold,                   
+                    'updated_flavors': updated_flavors_threshold,    
+                    'all_discontinued': all_discontinued               
     }
     return render_to_response('access/ingredient/ingredient_pin_review.html',
                               context_dict,
