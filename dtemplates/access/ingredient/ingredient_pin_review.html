@@ -113,10 +113,41 @@
 				<td align="center" colspan=8> ALL DISCONTINUED </td>
 				<td> <input type="radio" name="activate" /> </td>
 			{% endif %}
+				<td class="ingredient_id-cell" style="display:none">{{ highlighted_ingredient.id }}</td>
 			</tr>
 			</tbody>
 		</table>	
 		<button id="update-submit-button" type="button" style="float:right"> Activate/Discontinue </button>
+		
+		{% if all_discontinued %}
+			<br/><br/>
+		
+			<table border="1" width=60% id="discontinued_flavors">
+				<caption>
+					The flavors below contain this discontinued ingredient.
+				</caption>
+				
+				<thead>
+					<tr>
+						<th>Flavor</th>
+						<th>Raw Material Amount</th>
+					</tr>
+				</thead>
+				
+				<tbody>
+					{% for flavor, weight in discontinued_flavors %}
+					<tr align="center" >
+						<td><a href="/django/access/{{ flavor.number }}/">{{ flavor }}</a></td>
+						<td>{{ weight }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		
+			<br/><br/>
+		{% endif %}
+		
+		
 	</div>
 	<div id="retain_history">
 		{% rm_history highlighted_ingredient.id %}

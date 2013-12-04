@@ -27,7 +27,8 @@ jQuery(document).ready(function(){
 		// var rm_id = jQuery("#rm_id").text();
 		
 		if(rm_code == "") {
-			rm_code = "discontinue_all";
+			var ingredient_id = jQuery(row).find('.ingredient_id-cell').text();
+			rm_code = "discontinue_all/" + ingredient_id;
 		}
 		
 		console.log(rm_code);
