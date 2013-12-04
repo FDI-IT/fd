@@ -35,6 +35,8 @@ def parse_orders(saved_report):
             flavor = Flavor.objects.get(number=flavor_number)
         except Flavor.DoesNotExist:
             continue
+        except ValueError:
+            continue
         li = LineItem(
                 salesordernumber=so,
                 flavor=flavor,

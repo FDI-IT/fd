@@ -1,8 +1,5 @@
-
-
 {% extends "base.html" %}
-{% load resolve_testcards %}
-
+{% load batchsheet_print %}
 {% block htmlhead %}
 {{ block.super }}
 <script type="text/javascript" src="/djangomedia/js/resolve_testcards.js?v=25"></script>
@@ -28,8 +25,6 @@
 		<input type="hidden" name="productinfo_pk" value="{{ lot.flavor.productinfo.pk }}">
 	</div>
 	-->
-	
-	
 	<div class="float-container">
 		{% for retain in lot.retain_set.all %}
 		<div id="retain__{{retain.pk}}" class="parent_object_detail float-container">

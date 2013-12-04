@@ -397,10 +397,7 @@ def add_objects(request, page_title, ObjectClass, NewObjectForm):
         ObjectFormSet = formset_factory(NewObjectForm )
         formset = ObjectFormSet(request.POST)
         if formset.is_valid():
-            td = datetime.date.today()
             for form in formset.forms:
-                cd = form.cleaned_data
-                cd['date'] = td
                 obj = form.create_from_cleaned_data()
                 obj.save()
             return HttpResponseRedirect(ObjectClass.browse_url)
@@ -606,7 +603,7 @@ def lot_detail(request, lot_pk):
     lot = get_object_or_404(Lot, pk=lot_pk)
     return render_to_response('qc/lots/detail.html',
                               {'lot':lot,
-                               'page_title':"Lot %s  --  Issued: %s  --  Status: %s"% (lot.number, lot.date.strftime('%B, %d %Y'), lot.status)},
+                               'page_title':"Lot %s  --  %s-%s %s lbs  --  Status: %s"% (lot.number, lot.flavor.prefix, lot.flavor.number, lot.amount, lot.status)},
                               context_instance=RequestContext(request))
 
 
