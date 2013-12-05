@@ -22,7 +22,9 @@
 	
 	<div id="ingredient-detail">
 
-		<table width="100%" id="rm-by-code">
+		
+
+		<table border="1" width="100%" id="rm-by-code">
 			<caption>
 				<p style="text-align:left;">
 					Raw Material Details
@@ -43,7 +45,7 @@
 				{% else %}
 				<tr class="active">
 				{% endif %} -->
-				<tr>
+				<tr align="center">
 					<td><a href="/django/access/{{ flavor.number }}/">{{ flavor.number }}</a></td>
 					<!-- <td><a href="/django/access/ingredient/{{ ingredient.rawmaterialcode }}/">{{ ingredient.rawmaterialcode }}</a></td> -->
 					<td>{{ weight }}</td>
