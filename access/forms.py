@@ -184,8 +184,30 @@ class ExperimentalFlavorForm(FlavorForm):
 class ExperimentalForm(ModelForm, FieldsetMixin):
     #product_name = forms.CharField(label="Experimental Name")
     fieldsets = (
+         ('Hidden',{
+            'fields': ('experimentalnum','product_name',
+                       'datesent',
+                       'initials','experimental_number','location_code_old',
+                   'promotable', 'product_number',   'retain_number', 'retain_present','flavor',
+                   'label_type','liquid',
+                       'dry',
+                       'spray_dried',
+                       'oilsoluble',
+                       'concentrate',
+                       'flavorcoat',
+                       'na',
+                       'natural',
+                       'organic',
+                       'wonf',
+                       'artificial',
+                       'nfi',
+                       'natural_type',
+                       ),
+            'extra_content':{'divid':'hidden',
+                             'legend':'Hidden'}
+        }),
         ('Extended Info', {
-            'fields': ('product_name',
+            'fields': (
                        'customer',
                        'spg',
                        'flash',
@@ -197,28 +219,15 @@ class ExperimentalForm(ModelForm, FieldsetMixin):
             'extra_content':{'divid':'extendedinfo',
                              'legend':'Specs'},
         }),
-        ('Type', {
-            'fields': ('liquid',
-                       'dry',
-                       'spray_dried',
-                       'oilsoluble',
-                       'concentrate',
+        ('Duplication Info', {
+            'fields': (
                        'duplication',
                        'duplication_company',
                        'duplication_name',
                        'duplication_id',
                        ),
             'extra_content':{'divid':'type',
-                             'legend':'Type'},
-        }),
-        ('Label', {
-            'fields': ('na',
-                       'natural',
-                       'organic',
-                       'wonf',
-                       ),
-            'extra_content':{'divid':'label',
-                             'legend':'Label'},
+                             'legend':'Duplication Info'},
         }),
         ('Product Application & Usage', {
             'fields': ('holiday',
@@ -232,7 +241,6 @@ class ExperimentalForm(ModelForm, FieldsetMixin):
                        'dairy',
                        'snacks',
                        'non_food',
-                       'flavor_coat',
                        'sweet',
                        'personal_care',
                        'beverage',
@@ -248,20 +256,13 @@ class ExperimentalForm(ModelForm, FieldsetMixin):
             'extra_content':{'divid':'memo',
                              'legend':'Memo'}
         }),
-        ('Hidden',{
-            'fields': ('experimentalnum',
-                       'datesent',
-                       'initials','experimental_number','location_code_old',
-                   'promotable', 'product_number',   'retain_number', 'retain_present','flavor',
-                       ),
-            'extra_content':{'divid':'hidden',
-                             'legend':'Hidden'}
-        }),
+
     )
     
     class Meta:
         model = ExperimentalLog
         exclude = ('ingredients','natart')
+
 
 class ApproveForm(ModelForm):
     class Meta:
@@ -758,21 +759,86 @@ class NewRMWizard(FormWizard):
     
     
     
-class NewExForm1(FormRequiredFields):
-    customer = forms.CharField(max_length=30)
-    product_name = forms.CharField(max_length=50)
-    memo = forms.CharField(widget=forms.Textarea,required=False)
+class NewExForm1(FormRequiredFields, FieldsetMixin):
+    fieldsets = (
+        ('Name',{
+             'fields': ('natart', 'product_name',),
+             'extra_content':{
+                              'divid':'name_fields',
+                              'legend':''
+                              }
+        }),
+        ('Natural Categories',{
+             'fields': ('wonf','natural_type','organic',),
+             'extra_content':{
+                              'divid':'natcat_fields',
+                              'legend':'Natural Categories'
+                              }
+        }),  
+        ('Physical Properties',{
+             'fields': ('liquid','dry','spray_dried','flavorcoat'),
+             'extra_content':{
+                              'divid':'physical_fields',
+                              'legend':'Physical Properties - Required'
+                              }
+        }),
+        ('Other',{
+             'fields': ('concentrate','oilsoluble',),
+             'extra_content':{
+                              'divid':'other_fields',
+                              'legend':'Other'
+                              }
+        }),
+        ('Hidden',{
+            'fields': ('label_type',),
+            'extra_content':{'divid':'hidden',
+                             'legend':'Hidden'}
+        }),
+    )
+
     
-class NewExForm2(FormRequiredFields):
+    natart = forms.ChoiceField(label="Nat/Art",
+                        choices=(
+                                 ('',''),
+                                 ('N/A','N/A'),
+                                 ('Art','Art'),
+                                 ('Nat','Nat'),
+                                 ('NFI','NFI'),
+                                 ))
+    product_name = forms.CharField(max_length=50) 
+    wonf = forms.BooleanField(label="Natural WONF", required=False)
+    natural_type = forms.BooleanField(label="Natural Type", required=False)
+    organic = forms.BooleanField(label="Organic Compliant", required=False)
+    flavorcoat = forms.BooleanField(label="Flavorcoat", required=False)
     liquid = forms.BooleanField(required=False)
     dry = forms.BooleanField(required=False)
     spray_dried = forms.BooleanField(required=False)
     concentrate = forms.BooleanField(required=False)
-    oilsoluble = forms.BooleanField(required=False)
-    na = forms.BooleanField(required=False)
-    natural = forms.BooleanField(required=False)
-    organic = forms.BooleanField(required=False)
-    wonf = forms.BooleanField(required=False)
+    oilsoluble = forms.BooleanField(label="Oil Soluble", required=False)
+    label_type = forms.CharField(max_length=50,required=False)
+    natart_processor = {
+        'N/A':'na',
+        'Art':'artificial',
+        'Nat':'natural',
+        'NFI':'nfi',           
+    }
+    
+    def process_data(self, experimental, ):
+        kvlist = []
+        
+        for k,v in self.cleaned_data.iteritems():
+            kvlist.append((k,v))
+            setattr(experimental, k, v)
+        experimental.na = False
+        experimental.natural = False
+        experimental.artificial = False
+        experimental.nfi = False
+        setattr(experimental, self.natart_processor[self.cleaned_data['natart']], True)
+        return experimental
+    
+class NewExForm2(FormRequiredFields):
+    memo = forms.CharField(widget=forms.Textarea,required=False)
+    customer = forms.CharField(max_length=30)
     duplication = forms.BooleanField(required=False)
     duplication_company = forms.CharField(max_length=50,required=False)
     duplication_name = forms.CharField(max_length=50,required=False)
@@ -780,7 +846,6 @@ class NewExForm2(FormRequiredFields):
     promotable = forms.BooleanField(required=False)
     holiday = forms.BooleanField(required=False)
     chef_assist = forms.BooleanField(required=False)
-    flavor_coat = forms.BooleanField(required=False)
     
 class NewExForm3(FormRequiredFields):    
     coffee = forms.BooleanField(required=False)
@@ -800,27 +865,35 @@ class NewExForm3(FormRequiredFields):
     non_food = forms.BooleanField(required=False)
     
 class NewExFormWizard(FormWizard):
+    def get_template(self, step):
+        return ['access/experimental/wizard_%s.html' % step, 'forms/wizard.html']
+    
     def done(self, request, form_list):
         ex = ExperimentalLog()
-        for form in form_list:
+        for form in form_list[1:]:
             for k,v in form.cleaned_data.iteritems():
                 setattr(ex,k,v)
+        form_list[0].process_data(ex)
         ex.experimentalnum = get_next_experimentalnum()
         ex.datesent = datetime.now()
         ex.initials = "%s%s" % (request.user.first_name[0], request.user.last_name[0])
         f = Flavor(number=Flavor.get_next_tempex_number(),
                    name=ex.product_name,
                    prefix='EX',
-                   natart=ex.natart[:3],
+                   natart=ex.natart,
                    experimental=ex.experimentalnum,
+                   label_type=ex.label_type,
+                   yield_field=ex.yield_field,
                    )
         f.save()
         ex.flavor = f
         ex.save()
-        
-        
+             
         return HttpResponseRedirect('/django/access/experimental/%s/' % ex.experimentalnum)
-    
+
+class ExperimentalNameForm(NewExForm1):
+    pass    
+
 class NewSolutionForm(forms.Form):
     PIN = forms.CharField()
     concentration = forms.ChoiceField(

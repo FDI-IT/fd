@@ -72,6 +72,15 @@
 		    			<a href="{{ recalculate_link }}"><img src="/djangomedia/images/Icons/16x16/calculator.png"></a>
 		    		{% endifnotequal %}
 		    	{% endif %}
+		    	{% if edit_link %}
+		    		{% ifnotequal edit_link "" %} 
+	    			<a id="experimental_edit_link" href="{{ edit_link }}"><img src="/djangomedia/images/Icons/16x16/edit.png"></a>
+		    		<ul id="edit_menu">
+	    				<li><a href="/django/access/experimental/{{experimental.experimentalnum}}/name_edit/">name</a></li>
+	    				<li><a href="/django/access/experimental/{{experimental.experimentalnum}}/edit/">properties</a></li>
+	    			</ul>
+		    		{% endifnotequal %}
+		    	{% endif %}
 		    	{% if approve_link %}
 		    		{% ifnotequal approve_link "" %} 
 		    			<a href="{{ approve_link }}"><img src="/djangomedia/images/Icons/16x16/accept.png"></a>

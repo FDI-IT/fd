@@ -747,3 +747,9 @@ color:red;
 #alert span {
 	background-color: red;
 }
+
+#edit_menu {
+    display: none;
+    position: absolute;
+    width: 150px;
+}

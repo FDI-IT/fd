@@ -114,6 +114,7 @@ def experimental_edit(request, experimental):
         form = forms.ExperimentalForm(request.POST, instance=experimental)
         if form.is_valid():
             form.save()
+            experimental.process_changes_to_flavor()
             return redirect('/django/access/experimental/%s/' % experimental.experimentalnum)
     else:
         form = forms.ExperimentalForm(instance=experimental)
@@ -191,6 +192,7 @@ def experimental_review(request, experimental):
     
     
     context_dict = {
+                        
                         'status_message':status_message,
                         'digitized_table':digitized_table,
                         'window_title': experimental.__unicode__(),
@@ -213,10 +215,10 @@ def experimental_review(request, experimental):
         context_dict['approve_link'] = experimental.get_approve_link()
         context_dict['status_message'] = status_message
         context_dict['recalculate_link'] = '/django/access/experimental/%s/recalculate/' % experimental.experimentalnum
+        context_dict['edit_link'] = '#'
         return render_to_response('access/experimental/experimental_review.html',
                                   context_dict,
                                   context_instance=RequestContext(request))
-
 @experimental_wrapper    
 def digitized_review(request, experimental):
     page_title = "Digitized Review"
@@ -585,7 +587,34 @@ def print_review(request,flavor):
     return render_to_response('access/flavor/print_review.html',
                               context_dict,
                               context_instance=RequestContext(request))
-    
+
+@experimental_wrapper
+@login_required
+def experimental_name_edit(request, experimental):
+    if request.method == 'POST':
+        form = forms.ExperimentalNameForm(request.POST)
+        if form.is_valid():
+            form.process_data(experimental)
+            experimental.save()
+            experimental.process_changes_to_flavor()
+            return redirect('/django/access/experimental/%s/' % experimental.experimentalnum)
+    else:
+        form = forms.ExperimentalNameForm(initial=experimental.__dict__)
+    page_title = "Experimental Name Edit"
+    if request.user.get_profile().initials == experimental.initials or request.user.is_superuser:
+        pass
+    else:
+        return render_to_response('access/experimental/experimental_edit_permission.html',context_instance=RequestContext(request))
+    context_dict = {
+                    'experimental': experimental,
+                    'page_title': page_title,
+                    'experimental_name_form':form,
+                    }
+    return render_to_response('access/experimental/experimental_name_edit.html',
+                              context_dict,
+                              context_instance=RequestContext(request))
+
+
 @experimental_wrapper
 def experimental_print_review(request,experimental):
     try:

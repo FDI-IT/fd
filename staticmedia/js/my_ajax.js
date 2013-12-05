@@ -400,7 +400,20 @@ jQuery(document).ready(function(){
 		}, 'json');
 	
 	});
-	
+	var menu = jQuery('#edit_menu');
+	menu.menu();
+	jQuery('#experimental_edit_link').click(function(event) {
+		jQuery('#edit_menu').show().position({
+			my:'left top',
+			at:'left bottom',
+			of:event,
+		});
+		jQuery(document).one("click", function() {
+			menu.hide();
+		});
+		return false;
+	});
+
 
 
 });

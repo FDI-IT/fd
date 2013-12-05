@@ -1973,6 +1973,9 @@ class ExperimentalLog(models.Model):
     product_name = models.CharField(
                             max_length=100, 
                             db_column='ProductName')
+    label_type = models.CharField(
+            max_length=50,
+            blank=True)
     natart = models.CharField(max_length=20,blank=True)
     initials = models.CharField(
                             max_length=2, 
@@ -1983,17 +1986,21 @@ class ExperimentalLog(models.Model):
     color = models.CharField(max_length=50,blank=True)
     organoleptics = models.CharField(max_length=50,blank=True)
     mixing_instructions = models.TextField(blank=True)
-    yield_field = models.PositiveIntegerField('Percent Yield', blank=True, null=True) 
+    yield_field = models.PositiveIntegerField('Percent Yield', blank=True, null=True, default=100) 
     liquid = models.BooleanField(db_column='Liquid')
     dry = models.BooleanField(db_column='Dry')
     spray_dried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
+    flavorcoat = models.BooleanField( default=False)
     concentrate = models.BooleanField(db_column='Concentrate', default=False)
     oilsoluble = models.BooleanField("Oil soluble", db_column='OilSoluble')
         
     na = models.BooleanField("N/A",db_column='N/A')
     natural = models.BooleanField(db_column='Natural')
+    artificial = models.BooleanField(blank=True,default=False)
+    nfi = models.BooleanField("NFI", blank=True,default=False)
     organic = models.BooleanField(db_column='Organic',blank=True,default=False)
-    wonf = models.BooleanField("WONF",db_column='WONF', default=False)
+    wonf = models.BooleanField("Natural WONF",db_column='WONF', default=False)
+    natural_type = models.BooleanField("Natural Type", blank=True, default=False)
     
     duplication = models.BooleanField(db_column='Duplication',blank=True)
     duplication_company = models.CharField(max_length=50,blank=True)
@@ -2002,8 +2009,7 @@ class ExperimentalLog(models.Model):
     promotable = models.BooleanField(db_column='Promotable', default=False)
     holiday = models.BooleanField(db_column='Holiday', default=False)
     chef_assist = models.BooleanField(db_column='Chef Assist', default=False) # Field renamed to remove spaces.lc
-    flavor_coat = models.BooleanField(db_column='Flavor Coat', default=False) # Field renamed to remove spaces.lc
-    
+
     experimental_number = models.PositiveIntegerField(db_column='Experimental Number', default=0) # Field renamed to remove spaces.lc
     spg = models.DecimalField(decimal_places=3,
                               max_digits=4, 
@@ -2048,8 +2054,8 @@ class ExperimentalLog(models.Model):
     flavor = models.ForeignKey('Flavor',related_name='experimental_log',blank=True,null=True)
     location_code_old = models.CharField(blank=True, default="",max_length=20)
     def __unicode__(self):
-        return "%s-%s %s %s %s" % (self.experimentalnum, self.initials,
-                                self.natart, self.product_name, self.datesent_short)
+        return "%s-%s %s %s %s %s" % (self.experimentalnum, self.initials,
+                                self.natart, self.product_name, self.label_type, self.datesent_short)
     
     #elog
     @property
@@ -2082,6 +2088,10 @@ class ExperimentalLog(models.Model):
             q.put(lorem_three)
             q.put(lorem_four)
     
+    @property
+    def table_name(self):
+        return " ".join((self.product_name, self.label_type))
+    
     def get_approve_link(self):
         if self.flavor.approved==True:
             return None
@@ -2094,23 +2104,26 @@ class ExperimentalLog(models.Model):
     def datesent_short(self):
         return self.datesent.date()
     
+    def process_changes_to_flavor(self):
+        if self.flavor.prefix == "EX":
+            self.flavor.name = self.product_name
+            self.flavor.natart = self.natart
+            self.flavor.label_type = self.label_type
+
+            if self.yield_field != None:
+                self.flavor.yield_field = self.yield_field
+            else:
+                self.flavor.yield_field = 100
+            self.flavor.save()     
+            
     def save(self, *args, **kwargs):
         if self.retain_number == -1:
             self.retain_number = 0
-            
-        if self.na:
-            if self.natural or self.organic or self.wonf:
-                self.natart = "!!!"
-            self.natart = "N/A"
-        else:
-            natart = []
-            if self.natural:
-                natart.append("Nat")
-            if self.organic:
-                natart.append("Org")
-            if self.wonf:
-                natart.append("WONF")
-            self.natart = " ".join(natart)
+#         if self.flavor.prefix == "EX":
+#             self.flavor.name = self.product_name
+#             self.flavor.natart = self.natart
+#             self.flavor.label_type = self.label_type
+#             self.flavor() 
         super(ExperimentalLog, self).save(*args, **kwargs)
     
     def get_absolute_url(self):
@@ -2193,7 +2206,7 @@ class ExperimentalLog(models.Model):
     headers = (
                     ('experimentalnum','Number', 'width="80px"'),
                     ('natart','N-A', 'width="90px"'),
-                    ('product_name','Name', ''),
+                    ('table_name','Name', ''),
                     ('initials','Initials', 'width=30x'),
                     ('datesent_short','Date sent', 'width=100px'),
                     ('duplication_company','Dup. Company', 'width=100px'),
