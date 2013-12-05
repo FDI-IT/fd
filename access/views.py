@@ -591,6 +591,9 @@ def print_review(request,flavor):
 @experimental_wrapper
 @login_required
 def experimental_name_edit(request, experimental):
+    """
+    This view uses a lot of logic in javascript.
+    """
     if request.method == 'POST':
         form = forms.ExperimentalNameForm(request.POST)
         if form.is_valid():
