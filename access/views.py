@@ -20,6 +20,7 @@ from django.views.generic.create_update import create_object
 
 from reversion import revision
 
+from access.controller import discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors
 
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
@@ -693,9 +694,8 @@ def ingredient_activate(request, raw_material_code=False, ingredient_id=False):
                 old_active_ingredient = ingredient
                 break 
         
-        old_active_ingredient.discontinued = True
-        old_active_ingredient.save()
-               
+        discontinue_ingredient(old_active_ingredient)
+
         #redirect_path = "/django/access/%s/recalculate/" % (flavor.number)
         redirect_path = "/django/access/ingredient/pin_review/%s" % ingredient_id
         return HttpResponseRedirect(redirect_path)
@@ -714,7 +714,6 @@ def ingredient_activate(request, raw_material_code=False, ingredient_id=False):
         new_active_ingredient = Ingredient.objects.get(rawmaterialcode=raw_material_code)
         
         #find the old active ingredient (id is the same), if there is one
-        
         all_discontinued = True
         
         for ingredient in Ingredient.objects.filter(id=new_active_ingredient.id):
@@ -735,62 +734,26 @@ def ingredient_activate(request, raw_material_code=False, ingredient_id=False):
                     updated_flavors.append((lw.root_flavor, lw.weight, price, price, price_change))
                 
             else:
-                old_active_ingredient.discontinued = True
-                old_active_ingredient.save()
-                
-                new_active_ingredient.discontinued = False
-                new_active_ingredient.save()
+                discontinue_ingredient(old_active_ingredient)
+                activate_ingredient(new_active_ingredient)
                     
                 #replace all foreignkeys to the old ingredient with the new active ingredient
-                for lw in LeafWeight.objects.filter(ingredient=old_active_ingredient):
-                    lw.ingredient = new_active_ingredient
-                    lw.save()
-                    
-                for formula in Formula.objects.filter(ingredient=old_active_ingredient):
-                    formula.ingredient=new_active_ingredient
-                    formula.save()
-                    
-                for ft in FormulaTree.objects.filter(node_ingredient=old_active_ingredient):
-                    ft.node_ingredient=new_active_ingredient
-                    ft.save()
+                replace_ingredient_foreignkeys(new_active_ingredient)
+                                            
+                updated_flavors = update_prices_and_get_updated_flavors(old_active_ingredient, new_active_ingredient)
                 
-                            
-                #find all flavors that contain the raw material
-                for lw in LeafWeight.objects.filter(ingredient=new_active_ingredient):
-                    root_flavor = lw.root_flavor
-                    old_total = root_flavor.rawmaterialcost
-                    
-                    
-                    #new_total = old_total - old_unit_price * weight/1000 + new_unit_price * weight/1000
-                    new_total = old_total + lw.weight/1000 * (new_active_ingredient.unitprice - old_active_ingredient.unitprice)
-                    root_flavor.rawmaterialcost = new_total  #overwrite and save the new total rawmaterialcost
-                    root_flavor.save()
-                    
-                    price_change = new_total - old_total
-                    
-                           
-                    updated_flavors.append((root_flavor, lw.weight, old_total, new_total, price_change))
-                    #updated_flavors[root_flavor] = [old_total, new_total] #add flavor to dictionary
+
             
         else: #if all ingredients were previously discontinued, activate the single ingredient
             new_active_ingredient.discontinued = False
             new_active_ingredient.save()
             
-            for lw in LeafWeight.objects.filter(ingredient__id=new_active_ingredient.id):
-                lw.ingredient = new_active_ingredient
-                lw.save()
-                
-            for formula in Formula.objects.filter(ingredient__id=new_active_ingredient.id):
-                formula.ingredient=new_active_ingredient
-                formula.save()
-                
-            for ft in FormulaTree.objects.filter(node_ingredient__id=new_active_ingredient.id):
-                ft.node_ingredient=new_active_ingredient
-                ft.save()            
+            replace_ingredient_foreignkeys(new_active_ingredient)
+                      
             
             updated_flavors = []
             for lw in LeafWeight.objects.filter(ingredient=new_active_ingredient):
-                updated_flavors.append((lw.root_flavor, lw.weight, "All Discontinued", lw.root_flavor.rawmaterialcost, "-"))
+                updated_flavors.append((lw.root_flavor, lw.weight, "Discontinued", lw.root_flavor.rawmaterialcost, "-"))
             
         context_dict = {
                         'activated_ingredient': new_active_ingredient,

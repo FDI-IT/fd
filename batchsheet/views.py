@@ -69,7 +69,7 @@ def check_lot_number(request):
             lot = Lot.objects.filter(number=lot_number)[0]
             return HttpResponse(simplejson.dumps({'used':'true', 'lot_number':lot.number, 'flavor_number':lot.flavor.number, 'amount':str(lot.amount), 'next_lot_number': get_next_lot_number()}), content_type='application/json; charset=utf-8')
         elif lot_number == None: #if no lot number is input, use next lot number
-            return HttpResponse(simplejson.dumps({'used':'false', 'lot_number': get_next_lot_number()}), content_type='application/json; charset=utf-8')  
+            return HttpResponse(simplejson.dumps({'used':'false', 'next_lot_number': get_next_lot_number(), 'use_next_lot':1}), content_type='application/json; charset=utf-8')  
         else: #if an unused lot number is input, return the lot number
             return HttpResponse(simplejson.dumps({'used':'false'}), content_type='application/json; charset=utf-8')       
     except Exception as e:
