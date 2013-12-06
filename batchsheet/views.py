@@ -25,19 +25,25 @@ from django.template.loader import get_template
 from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.db.models import Sum
+from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
 
 from sorl.thumbnail import get_thumbnail
 
+from reversion import revision
+
+
 from elaphe import barcode
 
 from access.models import Flavor
-from newqc.models import Lot, get_next_lot_number
+from newqc.models import Lot, get_next_lot_number, LotSOLIStamp
 from salesorders.models import SalesOrderNumber, LineItem
 
 from access.views import flavor_info_wrapper
 from batchsheet import forms
 from batchsheet.forms import BatchSheetForm, NewLotForm, UpdateLotForm, build_confirmation_rows
+from batchsheet.controller import BatchAddLots
+from batchsheet.exceptions import BatchLotAddException
 
 def batchsheet_home(request):
     batch_sheet_form = BatchSheetForm({
@@ -418,114 +424,6 @@ def batchsheet_batch_print(request):
                       context_instance=RequestContext(request))
         
 
-
-def add_lots(request):
-    if request.method == 'POST':
-        LotFormSet = formset_factory(NewLotForm)
-        
-        formset = LotFormSet(request.POST)
-        if formset.is_valid():
-            for form in formset.forms:
-                cd = form.cleaned_data
-                #cd['status'] = 'Created'
-                
-                try:
-                    lot_flavor = Flavor.objects.get(number=cd['flavor_number'])
-                except KeyError:
-                    print "LKJASLDFJAF ERROR"
-                                                
-                new_lot = Lot(#number = cd['lot_number'],
-                              number = get_next_lot_number(),
-                              flavor = lot_flavor,
-                              amount = cd['amount'],
-                              status = 'Created')
-                
-                new_lot.save()
-                              
-                '''
-                lot_list['lot_number'] = cd['lot_number']
-                lot_list['flavor_number'] = cd['flavor_number'] 
-                lot_list['amount'] = cd['amount']
-                lot_list['status'] = cd['status']
-                '''
-                
-            redirect_path = "/django/qc/lots"
-            return HttpResponseRedirect(redirect_path)
-        
-        else:            
-            return render_to_response('batchsheet/add_lots.html', 
-                                      {'formset': formset,
-                                       'management_form': formset.management_form},
-                                      context_instance=RequestContext(request))
-
-                
-                
-
-    else:        
-
-        lot_checklist = []
-        selected_orders = request.GET.getlist('flavor_pks')
-        
-        
-        for order in selected_orders:
-            #this changes the format of the GET request to convert the json strings into python dicts
-            lot_checklist.append((json.loads(order.replace('\'','!').replace('\"','\'').replace('!','\"')))[0]) 
-        
-        #print lot_checklist
-        
-        #lot_number = get_next_lot_number()
-        
-        '''
-        #assign lot numbers to new lots 
-        for lot in lot_checklist:
-            #if lot['amount'][-2:] == '00':
-            #    lot['amount'] = lot['amount'][:-1] #get rid of the second decimal digit in amount, since the lot model only takes one
-            #lot['amount'] = int(lot['amount'])
-            lot['lot_number'] = lot_number
-            lot_number = lot_number + 1
-        '''    
-        
-        LotFormSet = formset_factory(forms.NewLotForm, extra=0)
-        
-        formset = LotFormSet(initial=lot_checklist)
-        #lot_list = formset.forms
-        
-        return render_to_response('batchsheet/add_lots.html',
-                                        {'formset': formset,
-                                         'management_form': formset.management_form,
-                                         },
-                                         context_instance=RequestContext(request))
-        
-        '''
-    # else:
-    initial_data, label_rows = forms.build_formularow_formset_initial_data(flavor)
-    if len(label_rows) == 0:
-        FormulaFormSet = formset_factory(forms.FormulaRow, extra=1)
-        label_rows.append({'cost': '', 'name': ''})
-    else:
-        FormulaFormSet = formset_factory(forms.FormulaRow, extra=0)
-        
-    filterselect = FormulaEntryFilterSelectForm(request.GET.copy())
-
-    formset = FormulaFormSet(initial=initial_data)
-    formula_rows = zip(formset.forms,
-                       label_rows )
-  
-    
-    return render_to_response('access/flavor/formula_entry.html', 
-                                  {'flavor': flavor,
-                                   'filterselect': filterselect,
-                                   'status_message': status_message,
-                                   'window_title': page_title,
-                                   'page_title': page_title,
-                                   'formula_rows': formula_rows,
-                                   'management_form': formset.management_form,
-                                   },
-                                   context_instance=RequestContext(request))
-    
-        '''
-
-
 def lot_notebook(request):
     pass
 
@@ -555,7 +453,7 @@ def sales_order_list(request, status_message=None):
     help_link = "/wiki/index.php/Sales_orders"
     hundredths = Decimal('0.00')
     orders= {}
-    for order in LineItem.objects.filter(salesordernumber__open=True):
+    for order in LineItem.objects.filter(covered=False).filter(salesordernumber__open=True):
         try:
             orders[order.flavor] += [order]
         except KeyError:
@@ -596,7 +494,7 @@ def sales_order_list(request, status_message=None):
     return render_to_response('batchsheet/sales_order_production.html',
                               {
                                'window_title': page_title,
-                               'accept_link': 'javascript:document.forms["salesorder_selections"].submit()',
+                               'accept_link': 'javascript:salesorder_selections_submit()',
                                'orders':resultant_orders,
                                'help_link': help_link,
                                'status_message': status_message,
@@ -605,6 +503,79 @@ def sales_order_list(request, status_message=None):
                                context_instance=RequestContext(request))
 
     
+
+
+@revision.create_on_success
+#@transaction.commit_manually
+def add_lots(request):
+    if request.method == 'POST':
+        LotFormSet = formset_factory(NewLotForm)
+        
+        formset = LotFormSet(request.POST)
+        if formset.is_valid():
+            try:
+                BatchAddLots.add_lots(formset.forms)
+            except BatchLotAddException:
+                #transaction.rollback()
+                return render_to_response('batchsheet/add_lots.html', 
+                                  {'formset': formset,
+                                   'status_message': "Some of the sales order that you tried to create lots for are already covered. Please go back to the sales order screen and refresh the page to get the most up to date list of open sales orders.",
+                                   'management_form': formset.management_form},
+                                  context_instance=RequestContext(request))
+
+            #transaction.commit()
+            redirect_path = "/django/qc/lots"
+            return HttpResponseRedirect(redirect_path)
+        
+        else:
+            #transaction.rollback()   
+            for form in formset:
+                form.fields['amount'].widget.attrs['readonly'] = True         
+            return render_to_response('batchsheet/add_lots.html', 
+                                      {'formset': formset,
+                                       'management_form': formset.management_form},
+                                      context_instance=RequestContext(request))
+
+                
+                
+
+    else:        
+
+        lot_checklist = []
+        selected_orders = request.GET.getlist('flavor_pks')
+        
+        
+        for order in selected_orders:
+            #this changes the format of the GET request to convert the json strings into python dicts
+            lot_checklist.append((json.loads(order.replace('\'','!').replace('\"','\'').replace('!','\"')))[0]) 
+
+        #print lot_checklist
+        
+        #lot_number = get_next_lot_number()
+        
+        '''
+        #assign lot numbers to new lots 
+        for lot in lot_checklist:
+            #if lot['amount'][-2:] == '00':
+            #    lot['amount'] = lot['amount'][:-1] #get rid of the second decimal digit in amount, since the lot model only takes one
+            #lot['amount'] = int(lot['amount'])
+            lot['lot_number'] = lot_number
+            lot_number = lot_number + 1
+        '''    
+        
+        LotFormSet = formset_factory(forms.NewLotForm, extra=0)
+        
+        formset = LotFormSet(initial=lot_checklist)
+        for form in formset:
+            form.fields['amount'].widget.attrs['readonly'] = True
+        #lot_list = formset.forms
+       # transaction.rollback()
+        return render_to_response('batchsheet/add_lots.html',
+                                        {'formset': formset,
+                                         'management_form': formset.management_form,
+                                         },
+                                         context_instance=RequestContext(request))
+        
 
 
 

@@ -29,6 +29,7 @@ from newqc.forms import NewFlavorRetainForm, ResolveTestCardForm, RetainStatusFo
 from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog
 from newqc.utils import process_jbg, get_card_file, scan_card
 from newqc.tasks import walk_scans_qccards
+from salesorders.models import SalesOrderNumber, LineItem
 
 def lot_month_list():
     return Lot.objects.all().dates('date', 'month').reverse()

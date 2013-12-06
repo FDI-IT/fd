@@ -27,6 +27,10 @@ class SalesOrderNumber(models.Model):
     # TODO - remove the above field in production
 
     @staticmethod
+    def get_next_internal_number():
+        return SalesOrderNumber.objects.filter(number__gte=100000).order_by('-number').values_list('number', flat=True)[0] + 1
+
+    @staticmethod
     def get_absolute_url_from_softkey(softkey):
         try:
             get_object_or_404(SalesOrderNumber, number=softkey).get_absolute_url()
@@ -88,6 +92,7 @@ class LineItem(models.Model):
     quantity_price = models.DecimalField(max_digits=9, decimal_places=3) # $1,234.123 called Amount
     ship_date = models.DateField()
     due_date = models.DateField()
+    covered = models.BooleanField(default=False)
     
     def __unicode__(self):
         return u"%s - %s %s lbs $%s" % (self.salesordernumber,

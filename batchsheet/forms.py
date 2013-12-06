@@ -42,7 +42,8 @@ class NewLotForm(forms.Form):
     flavor_number = FlavorNumberField(label="", min_value=1)
     #lot_number = LotNumberField(label="")
     amount = forms.DecimalField(max_digits=9, decimal_places=2) 
-    
+    extra_weight = forms.DecimalField(max_digits=9, decimal_places=2, initial=0, required=False) 
+    details = forms.CharField(widget=forms.HiddenInput,)
     '''
     def clean(self):
         cleaned_data = self.cleaned_data

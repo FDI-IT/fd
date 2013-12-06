@@ -3,6 +3,17 @@
 {% block htmlhead %}
 {% include "htmlhead.html" %}
 <!-- <script type="text/javascript" src="/djangomedia/js/sales_order_production.js?v=25"></script> DO NOT USE-->
+<script>
+var salesorder_selections_submit = function() {
+	jQuery( ":checked" ).each( function()  {
+		var $this = jQuery(this);
+		var v = $this.val();
+		var newv = v.replace(/[ \t\r\n]/g, '');
+		$this.val(newv);
+	});
+	document.forms["salesorder_selections"].submit();
+};
+</script>
 {% endblock %}
 
 {% block content %}
@@ -38,7 +49,12 @@
 			<tr id="{{ order.0 }}">
 		{% endif %}
 			<td>
-				<input type="checkbox" name="flavor_pks" value="[{'flavor_number':'{{order.flavor.number}}', 'amount':'{{order.total}}'}]"{% if checkall %}checked{% endif %}>
+				<input type="checkbox" name="flavor_pks" value="[{'flavor_number':'{{order.flavor.number}}', 'amount':'{{order.total}}',
+				'details':[
+				{% for detail in order.details %}
+				'{{detail.pk}}'{% if forloop.last %}{% else %},{%endif%}
+				{% endfor %}]
+				}]"{% if checkall %}checked{% endif %}>
 			</td>
 			<td class="number-cell">
 				<a href="/django/access/{{ order.flavor.number }}?wf={{ order.total }}">{{ order.flavor.number }}</a>

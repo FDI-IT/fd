@@ -246,6 +246,12 @@ class Lot(models.Model):
         )
 
     
+class LotSOLIStamp(models.Model):
+    lot = models.ForeignKey('Lot')
+    salesordernumber = models.PositiveIntegerField()
+    quantity = models.DecimalField(max_digits=9,decimal_places=2)
+    
+    
 class Retain(models.Model):
     """
     Data related to the retained sample of a production lot.

@@ -9,6 +9,10 @@ from access.models import Flavor, Ingredient, Customer
 from salesorders.report_parser import SalesOrderGenerator
 from salesorders.models import SalesOrderNumber, LineItem
 
+from newqc.models import LotSOLIStamp
+
+
+
 def parse_orders(saved_report):
     """
     """
@@ -37,6 +41,15 @@ def parse_orders(saved_report):
             continue
         except ValueError:
             continue
+
+        # this part checks wheter a SOLI is covered by a lot already
+        try:
+            solistamp = LotSOLIStamp.objects.get(salesordernumber=so.number, quantity=li['Qty'])
+            if solistamp:
+                covered=True
+        except:
+            covered=False
+
         li = LineItem(
                 salesordernumber=so,
                 flavor=flavor,
@@ -45,6 +58,7 @@ def parse_orders(saved_report):
                 quantity_price=li['Amount'],
                 ship_date=li['Ship Date'],
                 due_date=li['Due Date'],
+                covered=covered,
             )
         li.save()
     return lis
