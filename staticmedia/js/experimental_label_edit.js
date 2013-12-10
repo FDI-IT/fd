@@ -93,7 +93,6 @@ EXPERIMENTAL_LABEL_EDIT.incompatible_categories = [
 EXPERIMENTAL_LABEL_EDIT.check_tail_indices = function(token_indices, label_tokens) {
 	for (var token_index in token_indices) {
 		var my_token = token_indices[token_index];
-		console.log(my_token);
 		if ($.inArray(my_token, EXPERIMENTAL_LABEL_EDIT.checked_boxes) != -1) {
 			label_tokens.push(EXPERIMENTAL_LABEL_EDIT.category_human_map[my_token]);
 		}
@@ -176,11 +175,12 @@ jQuery(document).ready(function(){
 		
 		if (($.inArray(3, EXPERIMENTAL_LABEL_EDIT.checked_boxes) != -1) ||
 			($.inArray(4, EXPERIMENTAL_LABEL_EDIT.checked_boxes) != -1) ||
-			($.inArray(5, EXPERIMENTAL_LABEL_EDIT.checked_boxes) != -1)) {
+			($.inArray(5, EXPERIMENTAL_LABEL_EDIT.checked_boxes) != -1) ||
+			($.inArray(8, EXPERIMENTAL_LABEL_EDIT.checked_boxes) != -1)) {
 			
 		} else {
 			event.preventDefault();
-			alert("Must select one of the following phyiscal properties: liquid, dry or spray dried.");
+			alert("Must select one of the following phyiscal properties: liquid, dry, spray dried or flavorcoat.");
 			return;
 		}
 		

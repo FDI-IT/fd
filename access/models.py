@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from decimal import Decimal
 from datetime import datetime, timedelta, date
 import re
@@ -7,6 +8,7 @@ from operator import itemgetter
 
 from django.db import models
 from django.db.models import Q, F
+from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.db import transaction
@@ -1952,6 +1954,7 @@ class FlavorIterOrder(models.Model):
     def __unicode__(self):
         return self.flavor.__unicode__()
 
+
 class ExperimentalLog(models.Model):
     """
     Records of completed ExperimentalProducts.
@@ -1986,11 +1989,12 @@ class ExperimentalLog(models.Model):
     color = models.CharField(max_length=50,blank=True)
     organoleptics = models.CharField(max_length=50,blank=True)
     mixing_instructions = models.TextField(blank=True)
-    yield_field = models.PositiveIntegerField('Percent Yield', blank=True, null=True, default=100) 
+    yield_field = models.PositiveIntegerField('Percent Yield', blank=True, null=True, default=100)
+     
     liquid = models.BooleanField(db_column='Liquid')
     dry = models.BooleanField(db_column='Dry')
     spray_dried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
-    flavorcoat = models.BooleanField( default=False)
+    flavorcoat = models.BooleanField(u"Flavorcoat®", default=False)
     concentrate = models.BooleanField(db_column='Concentrate', default=False)
     oilsoluble = models.BooleanField("Oil soluble", db_column='OilSoluble')
         
@@ -1998,7 +2002,7 @@ class ExperimentalLog(models.Model):
     natural = models.BooleanField(db_column='Natural')
     artificial = models.BooleanField(blank=True,default=False)
     nfi = models.BooleanField("NFI", blank=True,default=False)
-    organic = models.BooleanField(db_column='Organic',blank=True,default=False)
+    organic = models.BooleanField("Organic Compliant", db_column='Organic',blank=True,default=False)
     wonf = models.BooleanField("Natural WONF",db_column='WONF', default=False)
     natural_type = models.BooleanField("Natural Type", blank=True, default=False)
     
@@ -2053,9 +2057,137 @@ class ExperimentalLog(models.Model):
     
     flavor = models.ForeignKey('Flavor',related_name='experimental_log',blank=True,null=True)
     location_code_old = models.CharField(blank=True, default="",max_length=20)
+    
     def __unicode__(self):
         return "%s-%s %s %s %s %s" % (self.experimentalnum, self.initials,
                                 self.natart, self.product_name, self.label_type, self.datesent_short)
+    
+    label_properties = (
+        'wonf',
+        'natural_type',
+        'organic',
+        'liquid',
+        'dry',
+        'spray_dried',
+        'concentrate',
+        'oilsoluble',
+        'flavorcoat', # ®
+        'na',
+        'natural',
+        'artificial',
+        'nfi',
+    )  
+    incompatible_categories = {
+        'wonf':(
+            'natural_type',
+            'na',
+            'artificial',
+        ),
+        'liquid':(
+            'dry',
+            'spray_dried',
+        ),
+        'spray_dried':(
+            'oilsoluble',
+            'dry',
+        ),
+        'flavorcoat':(
+            'liquid',
+            'dry',
+            'spray_dried',
+            'concentrate',
+            'oilsoluble',
+        ),
+        'na':(
+            'natural_type',
+            'organic',
+            'natural',
+            'artificial',
+            'nfi',
+        ),
+        'artificial':(
+            'natural_type',
+            'natural',
+            'nfi',
+            'organic',
+        ),
+        'nfi':(
+            'wonf',
+            'natural_type',
+            'organic',
+            'na',
+            'natural',
+            'artificial',
+        ),
+    }
+    mandatory_categories = (
+        ('na','natural','artificial','nfi'),
+        ('liquid','dry','spray_dried','flavorcoat'),
+    )
+    
+    def clean_incompatible_categories(self):
+        errors = []
+        for p, incompatible_p in self.incompatible_categories.iteritems():
+            if getattr(self, p) == True:
+                for ip in incompatible_p:
+                    if getattr(self, ip) == True:
+                        errors.append('%s and %s.' % (
+                            self._meta.get_field_by_name(p)[0].verbose_name,
+                            self._meta.get_field_by_name(ip)[0].verbose_name,
+                        ))
+                
+        if len(errors) > 0:
+            return ["Incompatible categories for experimental %s: %s" % (self.experimentalnum, " ".join(errors)),]
+        else:
+            return []
+            
+    def clean_mandatory_categories(self):
+        errors = []
+        for category in self.mandatory_categories:
+            has_one = False
+            for prop in category:
+                if getattr(self, prop) == True:
+                    has_one = True
+            if not has_one:
+                errors.append(unicode(category))
+        if len(errors) > 0:
+            return ["Missing property in required categories for experimental %s: %s" % (self.experimentalnum, " ".join(errors)),]
+        else:
+            return []
+        
+    def clean(self):
+        errors = []
+        errors.extend(self.clean_incompatible_categories())
+        errors.extend(self.clean_mandatory_categories())
+        if len(errors) > 0:
+            raise ValidationError(" ".join(errors))
+
+
+    def get_natart(self):
+        for natart in ('na','artificial','natural','nfi'):
+            if getattr(self, natart) == True:
+                return self._meta.get_field_by_name(natart)[0].verbose_name
+
+    def get_label_type(self):
+        def check_tail_indices(tokens, label_tokens):
+            for token in tokens:
+                if getattr(self, token) == True:
+                    label_tokens.append(self._meta.get_field_by_name(token)[0].verbose_name)
+
+        label_tokens = [];
+        tokens = ('dry','spray_dried','oilsoluble','natural_type')
+        
+        check_tail_indices(tokens, label_tokens)        
+        
+        if self.flavorcoat == True:
+            label_tokens.append(u"Flavorcoat®")
+        else:
+            label_tokens.append("Flavor")
+        
+        tokens = ('concentrate','wonf','organic')
+        
+        check_tail_indices(tokens, label_tokens)
+        return " ".join(label_tokens)
     
     #elog
     @property
@@ -2226,7 +2358,6 @@ class ExperimentalLog(models.Model):
             return 'datesent'
         else:
             return header
- 
 
 class ShipTo(models.Model):
     """Incoming shipping destinations
