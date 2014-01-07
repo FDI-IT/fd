@@ -15,8 +15,6 @@ class BatchSheetForm(forms.Form):
                                       min_value=0, 
                                       max_digits=9, 
                                       decimal_places=3, required=False)
-    lot_number=forms.IntegerField(label="Lot Number", required=False)
-
 
 def validate_flavor_number(num):
     if Flavor.objects.filter(number = num).exists() == False:

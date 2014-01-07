@@ -667,10 +667,7 @@ class Ingredient(models.Model):
     
     @property
     def url(self):
-        if self.discontinued == False:
-            return "/django/access/ingredient/pin_review/%s/" % self.id
-        else:
-            return "/django/access/ingredient/%s/" % self.rawmaterialcode
+        return "/django/access/ingredient/pin_review/%s/" % self.id
     
     def get_absolute_url(self):
         if self.discontinued == False:
@@ -900,6 +897,7 @@ class Ingredient(models.Model):
             related_links.append(
                 ('/django/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions')
             )
+        related_links.append(('/django/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'))
         return related_links
 
     def resembles(self, ingredient):
@@ -1162,7 +1160,7 @@ class Flavor(FormulaInfo):
             blank=True,
             choices=NATART_CHOICES)
     label_type = models.CharField(
-            max_length=25,
+            max_length=50,
             blank=True,
             db_column="type")
     unitprice = models.DecimalField(

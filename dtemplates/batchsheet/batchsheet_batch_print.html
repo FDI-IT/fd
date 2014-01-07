@@ -69,9 +69,9 @@
 	<div id="outermost">
 		{% for lot_pk in lot_pks %}
 		{% if forloop.first %}
-		<div>
+		<div id="batchsheet">
 		{% else %}
-		<div class="newpage">
+		<div class="newpage" id="batchsheet">
 		{% endif %}
 			{% batchsheet_print lot_pk %}
 		</div>

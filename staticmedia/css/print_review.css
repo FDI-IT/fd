@@ -20,9 +20,17 @@ margin:0px;
 width:100%;
 }
 
+div.top-container {
+	padding-top:20px;
+}
+
+#mainlogo {
+	margin-top:-18px;
+}
+
 div.float-left{
 	float:left;
-	padding-right:60px;
+	padding-right:25px;
 }
 
 span.label-half-width{
@@ -34,12 +42,14 @@ div.float-right{
 }
 div.bold-right-subheadding {
 	float:right;
+	font-size:18px;
 	padding-left:20px;
 }
 
 div.bold-right-title {
 	font-size:24px;
 	font-weight:bold;
+	margin-top:-4px;
 }
 
 #name{

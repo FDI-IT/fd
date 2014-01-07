@@ -60,18 +60,32 @@ def next_lot(request):
     return HttpResponse(simplejson.dumps({'lot_number':get_next_lot_number()}), content_type='application/json; charset=utf-8')
 
 def check_lot_number(request):
-    try:
-        lot_number = request.GET.get('lot_number', None)
-        if lot_number == '':
-            lot_number = None
+    """This is a function that looks at lot number that someone wants to use 
+    in a batchsheet, and checks if it is ok to use.
+    
+    The lot number might already be used, for that flavor or another flavor.
+    
+    The lot number might be out of sequence, meaning higher than the next lot
+    number.
+    
+    Or the lot number might be equal to the next lot number. If that is the
+    case then we should init the lot immediately to avoid de-sync errors
+    later.
+    """
+    lot_number = request.GET.get('lot_number', None)
+    flavor_number = request.GET.get('flavor_number', None)
+    if lot_number == '' or lot_number == None:
+        return HttpResponse(simplejson.dumps({'err':'no lot given'}, content_type='application/json; charset=utf-8'))        
 
-        if Lot.objects.filter(number=lot_number).exists() == True: #if the lot number has been used, return used = 'true'
+    try:
+        if Lot.objects.filter(number=lot_number).exists() == True: 
             lot = Lot.objects.filter(number=lot_number)[0]
             return HttpResponse(simplejson.dumps({'used':'true', 'lot_number':lot.number, 'flavor_number':lot.flavor.number, 'amount':str(lot.amount), 'next_lot_number': get_next_lot_number()}), content_type='application/json; charset=utf-8')
-        elif lot_number == None: #if no lot number is input, use next lot number
-            return HttpResponse(simplejson.dumps({'used':'false', 'next_lot_number': get_next_lot_number(), 'use_next_lot':1}), content_type='application/json; charset=utf-8')  
-        else: #if an unused lot number is input, return the lot number
-            return HttpResponse(simplejson.dumps({'used':'false'}), content_type='application/json; charset=utf-8')       
+        else:
+            if lot_number != get_next_lot_number():
+                return HttpResponse(simplejson.dumps({'out_of_sequence':'true'}), content_type='application/json; charset=utf-8')
+            else:
+                return HttpResponse(simplejson.dumps({'used':'false'}), content_type='application/json; charset=utf-8')       
     except Exception as e:
         return HttpResponse(simplejson.dumps({'err':str(e)}), content_type='application/json; charset=utf-8')        
             
@@ -90,15 +104,15 @@ def lot_init(request):
                 l = Lot(
                     amount=request.GET['amount'],
                     flavor=get_object_or_404(Flavor,number=request.GET['flavor_number']),
+                    status='Batchsheet Printed'
                 )
                 l.save()
         elif update == 'true':
             update_lot = Lot.objects.get(number=lot_number)
             update_lot.amount = request.GET['amount']
             update_lot.save()
-                
                     
-        return HttpResponse(simplejson.dumps({'lot_number':lot_number}), content_type='application/json; charset=utf-8')
+        return HttpResponse(simplejson.dumps({'success':'success'}), content_type='application/json; charset=utf-8')
                     
     except Exception as e:
         return HttpResponse(simplejson.dumps({'err':str(e)}), content_type='application/json; charset=utf-8')
@@ -132,34 +146,31 @@ def batchsheet_print(request, flavor):
     json_dict['sidebar'] = ""
      
     try:
-        
         batch_sheet_form = BatchSheetForm(request.GET)
-        t = loader.get_template('batchsheet/batchsheet_print.html')
-            
         if batch_sheet_form.is_valid():
             dci =  flavor.discontinued_ingredients
             qv = flavor.quick_validate()
+            
             if qv != True:
                 c = Context({'flavor':u"%s -- NOT APPROVED -- %s" % (flavor.__unicode__(), qv)})
                 json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)
             elif len(dci) != 0:
                 c = Context({'flavor':u"%s -- NOT APPROVED -- Contains discontinued ingredients: %s" % (flavor.__unicode__(), ", ".join(dci))})
-                json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)            
+                json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)
             elif flavor.approved == False:
                 c = Context({'flavor':u"%s -- NOT APPROVED" % flavor.__unicode__()})
                 json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)
             else:
-                
-                
                 try:
                     batch_amount = Decimal(batch_sheet_form.cleaned_data['batch_amount'])
-                except:
-                    batch_amount = Decimal("0")
+                except TypeError:
+                    batch_amount = Decimal('0')
+                    
                 if 'get_next_lot' in request.GET:
                     lot_number = get_next_lot_number()
                     json_dict['lot_number'] = lot_number
                 else:
-                    lot_number = batch_sheet_form.cleaned_data['lot_number']
+                    lot_number = None
                 
                 if flavor.yield_field and flavor.yield_field != 100:
                     batch_amount = batch_amount/(flavor.yield_field/Decimal("100"))
@@ -200,14 +211,7 @@ def batchsheet_print(request, flavor):
                     'bubbles':bubbles,
                 })
                 json_dict['sidebar'] = loader.get_template('batchsheet/batchsheet_sidebar.html').render(c)
-                
-        else:
-            c = Context({
-                    'bsf':batch_sheet_form
-                })
-            # uh do something
-        
-        return HttpResponse(simplejson.dumps(json_dict), mimetype="application/json") 
+                    
     except Exception as e:
         json_dict['errors'] = repr(e)
         return HttpResponse(simplejson.dumps(json_dict), mimetype="application/json")

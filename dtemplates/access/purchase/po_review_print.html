@@ -11,7 +11,10 @@
 {% endblock %}
 {% block main %}
 
-<div class="float-container">
+<div class="float-container top-container">
+	<div class="float-left">
+		<img id="mainlogo" src="/djangomedia/images/logo.png" class="header_image" width="180px" height="87px">
+	</div>
 	<div class="float-left" class="jtextfill">
 		Flavor Dynamics, Inc.<br>
 		640 Montrose Avenue<br>
@@ -19,9 +22,7 @@
 		Phone: 908-822-8855<br>
 		Fax: 908-822-8547<br>
 	</div>
-	<div class="float-left">
-		<img src="/djangomedia/images/logo.png" class="header_image">
-	</div>
+	
 	<div class="float-right">
 		<div class="bold-right-title">PURCHASE ORDER</div>
 		<div class="bold-right-subheadding">
@@ -34,11 +35,10 @@
 		</div>
 	</div>
 </div>
-<hr>
+<br>
 <div class="float-container">
 	<div class="half-width-left">
 		<div class="border-section">
-			<div class="label">Attention: Order Dept:</div>
 			{{ po.supplier.suppliername }}<br>
 			{{ po.supplier.address }}<br>
 			{{ po.supplier.city }}, {{ po.supplier.region }} {{ po.supplier.postalcode }}<br>
@@ -50,6 +50,8 @@
 	<div class="half-width-right">
 		<div class="border-section">
 			<div class="label">Attention: Order Dept:</div>
+			 ALL KOSHER PRODUCTS MUST ARRIVE PER YOUR KOSHER CERTIFICATE OR THEY WILL BE REJECTED.<br>
+			 C OF A MUST ACCOMPANY SHIPMENT OR BE FAXED PRIOR TO RECEIVING ITEM.<br>
 		</div>
 	</div>
 </div>
@@ -65,14 +67,17 @@
 		</div>
 	</div>
 </div>
-<hr>
+<br>
 <div class="float-container">
 	<table id="polis">
 		<thead>
 			<tr>
-				<th>Product I.D.</th>
-				<th>Ingredient</th>
+				<th>Product<br>I.D.</th>
+				<th width="33%">Name</th>
 				<th>Amount</th>
+				<th>Kosher<br>Code</th>
+				<th>Allergen</th>
+				<th>Micro-<br>sensitivity</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -80,7 +85,10 @@
 			<tr>
 				<td>{{ poli.raw_material.id }}</td>
 				<td>{{ poli.raw_material.product_name }}</td>
-				<td>{{ poli.quantity|floatformat:"-3" }} x {{ poli.package_size|floatformat:"-3" }} = {{ poli.total|floatformat:"-3" }}</td>
+				<td>{{ poli.quantity|floatformat:"-3" }} x {{ poli.package_size|floatformat:"-3" }} lbs = {{ poli.total|floatformat:"-3" }} lbs</td>
+				<td>{{ poli.raw_material.kosher_code }}</td>
+				<td>{{ poli.raw_material.allergen }}</td>
+				<td>{{ poli.raw_material.microsensitive }}</td>
 			</tr>
 			{% endfor %}
 		</tbody>

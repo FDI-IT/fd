@@ -656,23 +656,10 @@ def gzl(request, flavor):
                               context_instance=RequestContext(request))
 
 
-@ingredient_by_rmc_info_wrapper
-def ingredient_gzl(request, ingredient):
-    page_title = "Ingredient Gazitna List (GZL)"
-    context_dict = {
-                   'window_title': ingredient.__unicode__(),
-                   'product': ingredient,
-                   'page_title': page_title,
-                   }   
-    return render_to_response('access/ingredient/gzl.html',
-                              context_dict,
-                              context_instance=RequestContext(request))
-
-
 @ingredients_by_pin_info_wrapper
 def ingredient_gzl_review(request, ingredients):
     page_title = "Ingredient Gazitna List (GZL)"
-    ingredient = ingredients[0]
+    ingredient = Ingredient.get_obj_from_softkey(ingredients[0].id)
     context_dict = {
                    'window_title': ingredient.__unicode__(),
                    'product': ingredient,

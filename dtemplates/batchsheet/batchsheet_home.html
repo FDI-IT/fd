@@ -9,11 +9,11 @@
 	<link href="/djangomedia/css/batchsheet_base.css?v=25" type="text/css" rel="stylesheet">
 	<link href="/djangomedia/css/batchsheet_print.css?v=25" type="text/css" rel="stylesheet" media="print">
 	<link href="/djangomedia/css/jquery-ui-1.8.2.custom.css" type="text/css" rel="stylesheet">
-	<script type="text/javascript" src="/djangomedia/js/jquery-1.4.2.min.js?v=25"></script>
+	<script type="text/javascript" src="/djangomedia/js/jquery-1.7.1.min.js?v=25"></script>
 	<script type="text/javascript" src="/djangomedia/js/jquery-ui-1.8.18.custom.min.js?v=25"></script>
 	<script type="text/javascript" src="/djangomedia/js/jquery.tablesorter.min.js?v=25"></script>
 	<script type="text/javascript" src="/djangomedia/js/batchsheet.js"></script>
-
+<script type="text/javascript" src="/djangomedia/js/jquery.waitforimages.min.js"></script>
     <title>
     	Batch Sheets
     </title>
@@ -25,10 +25,10 @@
 		<ul>
 		{{ batch_sheet_form.as_ul }}
 		<li>
-			<a href="#" id="next_lot_link"><img src="/djangomedia/images/Icons/16x16/add.png" title="Insert Next Available Lot Number"></a>
+			<a href="#" id="next_lot_link"><img src="/djangomedia/images/Icons/16x16/add.png" title="Print With Available Lot Number"></a>
 		</li>
 		<li>
-			<a href="#" id="print_link"><img src="/djangomedia/images/Icons/16x16/print.png" title="Print Batchsheet"></a>
+			<a href="#" id="print_link"><img src="/djangomedia/images/Icons/16x16/print.png" title="Print With No Lot Number"></a>
 		</li>
 		<li>
 			<a href="#" id="refresh_link"><img src="/djangomedia/images/Icons/16x16/refresh.png" title="Reset Batchsheet"></a>
