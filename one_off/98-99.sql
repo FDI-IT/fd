@@ -1,0 +1,72 @@
+
+BEGIN TRANSACTION;
+DROP VIEW "Products";
+ALTER TABLE access_integratedproduct ALTER COLUMN TYPE type varchar(50);
+CREATE VIEW "Products" as SELECT
+    ip.id as "ProductID",
+    ip.number as "FlavorNumber",
+    ip.solvent as "Solvent",
+    ip.name as "ProductName",
+    ip.prefix as "ProductPrefix",
+    ip.code as "FlavorCode",
+    ip.natart as "FlavorNatArt",
+    ip.type as "FlavorType",
+    ip.categoryid as "CategoryID",
+    ip.unitprice as "UnitPrice",
+    ip.quantityperunit as "QuantityPerUnit",
+    ip.supplierid as "SupplierID",
+    ip.unitsinstock as "UnitsInStock",
+    ip.unitsonorder as "UnitsOnOrder",
+    ip.reorderlevel as "ReorderLevel",
+    ip.discontinued as "Discontinued",
+    ip.approved as "Approved",
+    ip.productmemo as "ProductMemo",
+    ip.sold as "Sold",
+    ip.spraydried as "SprayDried",
+    ip.lastprice as "LastPrice",
+    ip.experimental as "Experimental",
+    ip.lastspdate as "LastSPDate"
+FROM
+    access_integratedproduct as ip;
+CREATE VIEW psi_test as SELECT
+    ip.number as "FlavorNumber",
+    ip.id as "ProductID",
+    ip.flashpoint as "FlashPoint",
+    ip.kosher as "Kosher",
+    ip.solubility as "Solubility",
+    ip.stability as "Stability",
+    ip.nutri_on_file as "Nutri On File",
+    ip.flammability as "Flammability",
+    ip.allergen as "Allergen",
+    ip.yield_field as "Yield",
+    ip.pinnumber as "PINNumber",
+    ip.kosher_id as "Kosher_ID",
+    ip.label_check as "Label_Check",
+    ip.vaporpressure as "VaporPressure",
+    ip.reactionextraction as "ReactionExtraction",
+    ip.prop_65 as "PROP 65",
+    ip.gmo as "GMO",
+    ip.ccp1 as "CCP1",
+    ip.ccp2 as "CCP2",
+    ip.ccp3 as "CCP3",
+    ip.ccp4 as "CCP4",
+    ip.ccp5 as "CCP5",
+    ip.ccp6 as "CCP6",
+    ip.haccp as "HACCP",
+    ip.batfno as "BATFNo",
+    ip.microtest as "MicroTest",
+    ip.crustacean as "Crustacean",
+    ip.eggs as "Eggs",
+    ip.fish as "Fish",
+    ip.milk as "Milk",
+    ip.peanuts as "Peanuts",
+    ip.soybeans as "Soybeans",
+    ip.treenuts as "TreeNuts",
+    ip.wheat as "Wheat",
+    ip.sulfites as "Sulfites",
+    ip.organic as "Organic",
+    ip.diacetyl as "Diacetyl",
+    ip.entered as "Entered"
+FROM
+ access_integratedproduct as ip;
+END TRANSACTION;
