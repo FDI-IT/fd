@@ -20,7 +20,7 @@ from django.views.generic.create_update import create_object
 
 from reversion import revision
 
-from access.controller import discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors
+from access.controller import discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors, experimental_approve_from_form
 
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
@@ -133,16 +133,16 @@ def experimental_edit(request, experimental):
                               context_dict,
                               context_instance=RequestContext(request))
 
-
+@revision.create_on_success
 @experimental_wrapper
 @permission_required('access.add_flavor')
 def approve_experimental(request,experimental):
     if request.method == 'POST':
         form = forms.ApproveForm(request.POST, instance=experimental.flavor)
         if form.is_valid():
-            form.save()
-            experimental.product_number = form.instance.number
-            experimental.save()
+            old_ex_number = experimental.product_number
+            experimental_approve_from_form(form, experimental)
+            revision.comment = "Approved. Old ex number: %s." % old_ex_number
             return redirect(experimental.flavor.get_absolute_url())
         else:
             return render_to_response('access/experimental/approve.html',
@@ -437,7 +437,7 @@ def ft_review(request, flavor):
                    'page_title': page_title,
                    'weight_factor': weight_factor,
                    'formula_weight': formula_weight,
-                   'print_link':'javascript:print_review(%s)' % flavor.number,
+                   'print_link':'FLAVOR_REVIEW_PRINT_MENU',
                    'recalculate_link':'/django/access/%s/recalculate/' % flavor.number,
                    }   
     return render_to_response('access/flavor/ft_review.html',
@@ -499,6 +499,8 @@ def recalculate_experimental(request,experimental):
     my_pg = False
     my_solvents = {}
     sorted_solvent_string_list = []
+    
+    solvent_list = Solvent.get_id_list()
     
     for lw in my_leaf_weights:
         
@@ -660,12 +662,20 @@ def gzl(request, flavor):
 def ingredient_gzl_review(request, ingredients):
     page_title = "Ingredient Gazitna List (GZL)"
     ingredient = Ingredient.get_obj_from_softkey(ingredients[0].id)
-    context_dict = {
-                   'window_title': ingredient.__unicode__(),
-                   'product': ingredient,
-                   'leafweights': LeafWeight.objects.filter(ingredient__in=ingredients).order_by('-weight'),
-                   'page_title': page_title,
-                   }   
+    if ingredient.sub_flavor == None:
+        context_dict = {
+                       'window_title': ingredient.__unicode__(),
+                       'product': ingredient,
+                       'leafweights': LeafWeight.objects.filter(ingredient__in=ingredients).order_by('-weight'),
+                       'page_title': page_title,
+                       }   
+    else:
+        context_dict = {
+                       'window_title': ingredient.__unicode__(),
+                       'product': ingredient,
+                       'leafweights': FormulaTree.objects.filter(node_ingredient__in=ingredients).order_by('-weight'),
+                       'page_title': page_title,
+                       } 
     return render_to_response('access/ingredient/gzl.html',
                               context_dict,
                               context_instance=RequestContext(request))
@@ -1514,6 +1524,7 @@ SOLVENT_NAMES = {
     473:'Lactic Acid',
     25:'Iso Amyl Alcohol',
     758:'Soybean Oil',
+    6403:'Safflower Oil',
 }
 
 @login_required
@@ -1523,7 +1534,7 @@ def new_solution_wizard(request):
     form = forms.NewSolutionForm(request.GET)
     if form.is_valid():
         base_ingredient = Ingredient.get_obj_from_softkey(form.cleaned_data['PIN'])
-        solvent = Ingredient.get_obj_from_softkey(form.cleaned_data['solvent'])
+        solvent =form.cleaned_data['solvent'].ingredient
         concentration = form.cleaned_data['concentration'][:-1]
         try:
             solutions = Solution.objects.filter(my_base=base_ingredient).filter(my_solvent=solvent).filter(percentage=concentration)

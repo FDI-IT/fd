@@ -139,6 +139,13 @@ def get_barcode(request, barcode_contents):
     x.save(response, "PNG")
     return response
                      
+def batchsheet_single(request, lot_pk):
+    return render_to_response('batchsheet/batchsheet_batch_print.html', 
+                      {
+                       'lot_pks':[lot_pk,],
+                       },
+                      context_instance=RequestContext(request))
+                     
 @flavor_info_wrapper
 def batchsheet_print(request, flavor):
     json_dict = {}

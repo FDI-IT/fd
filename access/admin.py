@@ -144,7 +144,20 @@ class IngredientAllergenFixer(VersionAdmin):
         return self.model.objects.exclude(allergen__iexact="None").exclude(suppliercode__iexact="FDI").order_by('allergen')
 admin.site.register(models.AllerIngredients, IngredientAllergenFixer)
 
+class PendingFlavorRiskAssessment(VersionAdmin):
+    list_display = ['number','name','risk_assessment_group','risk_assessment_memo']
+    list_editable = ['risk_assessment_group','risk_assessment_memo']
+    radio_fields = {'risk_assessment_group':admin.VERTICAL}
+    #exclude = ()
+    def queryset(self,request):
+        return self.model.objects.filter(valid=True).filter(approved=True).filter(risk_assessment_group=7).order_by('number')
+admin.site.register(models.FlavorRiskAssessment, PendingFlavorRiskAssessment)
+
 class TSRAdmin(VersionAdmin):
     search_fields = ['number', 'customer__companyname', 'contact']
 admin.site.register(models.TSR, TSRAdmin)
+
+class SolventAdmin(VersionAdmin):
+    search_fields = ['ingredient__id']
+admin.site.register(models.Solvent, SolventAdmin)
 

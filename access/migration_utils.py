@@ -3,9 +3,11 @@ from decimal import Decimal
 from collections import defaultdict
 from itertools import chain
 
+from django.db import transaction
 from django.db.models import Q, F
 
 from access.models import *
+from newqc.models import *
 
 flavor_fields_to_migrate = [
         'id',
@@ -252,22 +254,19 @@ def dictify_my_flavor(f):
     the zeroth element as as key and first as value.
     """
     d = {}
-    for element in f.leaf_weights.all().values_list('ingredient__id','quant_weight'):
+    for element in f.leaf_weights.all().values_list('ingredient__id','weight'):
         d[element[0]] = element[1] 
     return d
 
 def dictify_flavors_by_number():
-    flavor_qs = Flavor.objects.all()
     flavor_dict = {}
-    for fn in flavor_numbers:
-        print fn
-        f = flavor_qs.get(number=fn)
-        flavor_dict[fn] = dictify_my_flavor(f)
+    for f in Flavor.objects.all():
+        flavor_dict[f.number] = dictify_my_flavor(f)
     return flavor_dict
         
 def jaccard_index(a,b):
-    intersection_cardinality = 0
-    union_cardinality = 0
+    intersection_cardinality = Decimal('0')
+    union_cardinality = Decimal('0')
     for k in a:
         if k not in b:
             union_cardinality += a[k]
@@ -286,7 +285,8 @@ def jaccard_index(a,b):
     for k in b:
         if k not in a:
             union_cardinality += b[k]
-    return float(intersection_cardinality)/union_cardinality
+    print intersection_cardinality
+    return intersection_cardinality/union_cardinality
 
 def test_ji_batch(flavor_dict, batch_size=100000,threshold=0.9, ji_func=jaccard_index):
     count=0    
@@ -302,11 +302,15 @@ def test_ji_batch(flavor_dict, batch_size=100000,threshold=0.9, ji_func=jaccard_
                 print "%s, %s" % (flavor_numbers[x],flavor_numbers[y])
 
 
-def test_ji_all(flavor_dict,threshold=0.9):
+def test_ji_all(flavor_dict,threshold=Decimal('0.9')):
     JIList.objects.all().delete()
     for x in range(0,len(flavor_numbers)):
-        print x
         for y in range(x+1,len(flavor_numbers)):
+            print "ji = jaccard_index(flavor_dict[flavor_numbers[x]],flavor_dict[flavor_numbers[y]])"
+            print flavor_dict[flavor_numbers[x]]
+            print flavor_numbers[y]
+            print flavor_dict[flavor_numbers[y]]
+            print
             ji = jaccard_index(flavor_dict[flavor_numbers[x]],flavor_dict[flavor_numbers[y]])
             if ji > threshold:
                 print "%s, %s" % (flavor_numbers[x],flavor_numbers[y])
@@ -400,3 +404,227 @@ def populate_renumbers(jils=jil_setify()):
             b = Flavor.objects.get(number=num)
             r = Renumber(a=a,b=b)
             r.save()
+    for r in Renumber.objects.all():
+        if r.a == r.b:
+            r.delete()
+            
+def lotted_flavors():
+    return set(Lot.objects.all().order_by('pk').values_list('flavor',flat=True))
+            
+def sold_gazintas(lotted_flavors):
+    return set(FormulaTree.objects.filter(
+                root_flavor__in=lotted_flavors).exclude(
+                node_flavor=None).values_list(
+                'node_flavor',flat=True))
+
+@transaction.commit_manually
+def unapprove_unsell_flavors():
+    for f in Flavor.objects.filter(approved=True):
+        print f
+        f.approved = False
+        f.sold = False
+        f.save()
+    for f in Flavor.objects.filter(sold=True):
+        print f
+        f.approved=False
+        f.sold=False
+        f.save()
+    transaction.commit()
+
+def expand_search_area():
+    sgs = sold_gazintas(lotted_flavors())
+    sold_plus_renumbers = set()
+    for sg in sgs:
+        f= Flavor.objects.get(pk=sg)
+        sold_plus_renumbers = sold_plus_renumbers.union(set(f.loaded_renumber_list))
+    sold_plus_renumbers = sold_plus_renumbers.union(lotted_flavors())
+    return sold_plus_renumbers    
+
+@transaction.commit_manually
+def approve_sold_flavors(sold_plus_renumbers):
+    for fpk in sold_plus_renumbers:
+        f = Flavor.objects.get(pk=fpk)
+        f.approved=True
+        f.sold = True
+        f.save()
+    transaction.commit()
+    
+def reset_approved_flavors():
+    unapprove_unsell_flavors()
+    sold_plus_renumbers = expand_search_area()
+    approve_sold_flavors(sold_plus_renumbers)
+    
+@transaction.commit_manually
+def fix_microsensitive():
+    sensitive_set = set([
+         u'Senstive',
+         u'Sensitive',
+         u'True',
+         u'Yes',])
+    for i in Ingredient.objects.all():
+        if i.microsensitive in sensitive_set:
+            i.microsensitive = "MICROSENSITIVE"
+            i.save()
+        else:
+            i.microsensitive = "Not sensitive"
+            i.save()
+    transaction.commit()
+
+@transaction.commit_manually
+def set_rag_pending():
+    for f in Flavor.objects.all():
+        print f
+        f.risk_assessment_group = 7
+        f.risk_assessment_memo = "Reset for audit"
+        f.save()
+    transaction.commit()
+    
+@transaction.commit_manually
+def set_antimicrobial():
+    #vanilla
+    for lw in LeafWeight.objects.filter(ingredient__id__in=[852,853]).filter(weight__gte=357).select_related():
+        f = lw.root_flavor
+        print f
+        f.risk_assessment_group=0
+        f.risk_assessment_memo = "Contains 35.7% Vanilla Extract (12.5% ETOH)"
+        f.save()
+    
+    print 'pg'
+    # PG
+    for lw in LeafWeight.objects.filter(ingredient__id=703).filter(weight__gte=200).select_related():
+        f = lw.root_flavor
+        print f
+        f.risk_assessment_group=0
+        f.risk_assessment_memo = "Contains 20% PG"
+        f.save()
+        
+    print 'ethyl'
+    #ethyl
+    for lw in LeafWeight.objects.filter(ingredient__id=321).filter(weight__gte=125).select_related():
+        f = lw.root_flavor
+        print f
+        f.risk_assessment_group=0
+        f.risk_assessment_memo = "Contains 12.5% ETOH"
+        f.save()
+        
+    print 'denatured'
+    #denatured
+    for lw in LeafWeight.objects.filter(ingredient__id=5121).filter(weight__gte='131.25').select_related():
+        f = lw.root_flavor
+        print f
+        f.risk_assessment_group=0
+        f.risk_assessment_memo = "Contains 12.5% ETOH"
+        f.save()
+    
+    print 'triacetin'
+    #triacetin
+    for lw in LeafWeight.objects.filter(ingredient__id=829).filter(weight__gte=750).select_related():
+        f = lw.root_flavor
+        print f
+        f.risk_assessment_group=0
+        f.risk_assessment_memo = "Contains 75% Triacetin"
+        f.save()
+        
+    transaction.commit()
+    
+@transaction.commit_manually
+def set_coa_monitored():
+    for lw in LeafWeight.objects.filter(ingredient__microsensitive='MICROSENSITIVE').select_related():
+        f = lw.root_flavor
+        print f
+        f.risk_assessment_group = 5
+        f.risk_assessment_memo = "Contains microsensitive ingredients."
+        f.save()
+    transaction.commit()
+    
+@transaction.commit_manually
+def set_bacteriostatic():
+    
+    for lw in LeafWeight.objects.filter(ingredient__id=750).filter(weight__gte=1).select_related():
+        f= lw.root_flavor
+        print f
+        f.risk_assessment_group = 2
+        f.risk_assessment_memo = "Contains 0.1% Sodium Benzoate."
+        f.save()
+        
+    for lw in LeafWeight.objects.filter(ingredient__id=898).filter(weight__gte=4).select_related():
+        f= lw.root_flavor
+        print f
+        f.risk_assessment_group = 2
+        f.risk_assessment_memo = "Contains 0.1% Sodium Benzoate."
+        f.save()
+        
+    for lw in LeafWeight.objects.filter(ingredient__id=1003).filter(weight__gte=10).select_related():
+        f= lw.root_flavor
+        print f
+        f.risk_assessment_group = 2
+        f.risk_assessment_memo = "Contains 0.1% Sodium Benzoate."
+        f.save()
+    
+    low_water_activity_list = [
+        758,6403,5928,1983,829,743,639,134,25,315,316,325,326,23,24,643,1031,
+        353,352,1937,82,83,582,1835,214,641,90
+    ]    
+    for lw in LeafWeight.objects.filter(ingredient__id__in=low_water_activity_list).filter(weight__gte=160).select_related():
+        f = lw.root_flavor
+        print f
+        f.risk_assessment_group = 2
+        f.risk_assessment_memo = "Contains Oil Soluble chemicals--low water activity."
+        f.save()
+        
+    sugar_list = [
+        1432,1478,782              
+    ]
+    for lw in LeafWeight.objects.filter(ingredient__id__in=sugar_list).filter(weight__gte=667).select_related():
+        f = lw.root_flavor
+        print f
+        f.risk_assessment_group = 2
+        f.risk_assessment_memo = "Contains concentrated dissolved solids--low water activity."
+        f.save()
+    transaction.commit()
+    
+@transaction.commit_manually
+def set_hot_packed():
+    for f in Flavor.objects.filter(number__in=[111232,]):
+        print f
+        f.risk_assessment_group = 3
+        f.risk_assessment_memo = "Heated to 212F for extended period."
+        f.save()
+    transaction.commit()
+    
+@transaction.commit_manually
+def set_spray_dried():
+    for f in Flavor.objects.filter(spraydried=True):
+        print f
+        f.risk_assessment_group = 6
+        f.risk_assessment_memo = "Spray dried."
+        f.save()
+    transaction.commit()
+    
+@transaction.commit_manually
+def set_regularly_monitored_list():
+    for f in Flavor.objects.filter(number__in=[2739,80983,7574,90273,1732,7650,2826,170606,60749]):
+        print f
+        f.risk_assessment_group = 1
+        f.risk_assessment_memo = "On the list of regularly monitored flavors, per customer request."
+        f.save()
+    transaction.commit()
+    
+@transaction.commit_manually
+def set_intermediate_only():
+    lf = lotted_flavors()
+    for f in Flavor.objects.filter(risk_assessment_group=7).filter(approved=True):
+        if f.pk not in lf:
+            f.risk_assessment_group=8
+            f.save()
+    transaction.commit()
+
+def reset_risk_assessment_group():
+    set_rag_pending()
+    set_coa_monitored()
+    set_bacteriostatic()
+    set_antimicrobial()
+    set_hot_packed()
+    set_spray_dried()
+    set_regularly_monitored_list()
+    set_intermediate_only()

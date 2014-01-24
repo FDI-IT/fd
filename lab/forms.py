@@ -25,38 +25,6 @@ class FinishedProductLabelForm(forms.Form):
 class RMLabelForm(forms.Form):
     pin = forms.CharField("PIN")
 
-class SolutionForm(forms.Form):
-    ingredient_picker = forms.CharField()
-    pin = forms.CharField()
-    nat_art = forms.CharField()
-    pf = forms.CharField()
-    product_name = forms.CharField()
-    product_name_two = forms.CharField()
-    concentration = forms.ChoiceField(
-                        choices=(
-                                 ('',''),
-                                 ('0.01%','0.01%'),
-                                 ('0.05%','0.05%'),
-                                 ('0.1%','0.1%'),
-                                 ('0.2%','0.2%'),
-                                 ('0.5%','0.5%'),
-                                 ('1%','1%'),
-                                 ('2%','2%'),
-                                 ('5%','5%'),
-                                 ('10%','10%'),
-                                 ('25%','25%'),
-                                 ))
-    solvent = forms.ChoiceField(
-                    choices=(
-                             ('',''),
-                             ('PG','Propylene Glycol'),
-                             ('EtOH','Ethyl Alcohol'),
-                             ('Triacetin','Triacetin'),
-                             ('Neobee','Neobee'),
-                             ('Water','Water'),
-                             ('Soybean Oil','Soybean Oil'),
-                             ('N/A - Powder','N/A - Powder'),
-                             ),)
 
 class ExperimentalForm(forms.Form):
     experimental_number = forms.CharField()

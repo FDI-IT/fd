@@ -10,7 +10,7 @@ jQuery(document).ready(function(){
 	
 	$( "#flavor-tabs" ).tabs({ 
 		cache: true,
-		active: 1,
+		active: 0,
 		spinner: '',
 		ajaxOptions: {
 			error: function(xhr, status, index, anchor) {
@@ -20,19 +20,7 @@ jQuery(document).ready(function(){
 			}
 		}
 	});
-	$( "#flavor-tabs" ).bind("tabsshow",function(event,ui) {
-		window.location.hash = ui.tab.hash;
-	});
-	
-	window.onhashchange = function() {
-		if (location.hash !== '') {
-			var tabNum = $('a[href=' + location.hash + ']').parent().index();
-			$( "#flavor-tabs" ).tabs('select',tabNum);
-		} else {
-			$( "#flavor-tabs" ).tabs('select', 0);
-		}
-		document.body.scrollTop=0;
-	};
+
 	$( "#flat-table" ).tablesorter({
 			headers: {
 			0: {
@@ -65,6 +53,10 @@ jQuery(document).ready(function(){
 
 <div id="content-right">
 	{% blades flavor %}
+	<ul id="flavor_review_print_menu">
+		<li><a href="javascript:print_review({{flavor.number}})">Flavor Review</a></li>
+		<li><a href="javascript:print_qc({{flavor.number}})">QC Sheet</a></li>
+	</ul>
 </div>
 
 <div id="content-main">

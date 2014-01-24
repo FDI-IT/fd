@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 
 from formfieldset.forms import FieldsetMixin
 
-from access.models import Flavor, Formula, ExperimentalLog, TSR, TSRLineItem, PurchaseOrderLineItem, PurchaseOrder, NATART_CHOICES, Ingredient, get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES
+from access.models import Flavor, Formula, ExperimentalLog, TSR, TSRLineItem, PurchaseOrderLineItem, Solvent, PurchaseOrder, NATART_CHOICES, Ingredient, get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES
 from solutionfixer.models import SolutionStatus, Solution
 
 def validate_ingredient_number(number):
@@ -118,69 +118,6 @@ class FlavorReviewForm(ModelForm):
 #                   'lupines','yellow_5'       
 #                   )
 
-class FlavorForm(ModelForm):
-    solvent = forms.ChoiceField(
-                    choices=(
-                             ('',''),
-                             ('PG','Propylene Glycol'),
-                             ('Ethyl Alcohol','Ethyl Alcohol'),
-                             ('Triacetin','Triacetin'),
-                             ('Neobee','Neobee'),
-                             ('Water','Water'),
-                             ('Soybean Oil','Soybean Oil'),
-                             ('N/A - Powder','N/A - Powder'),
-                             ),)
-    natart = forms.ChoiceField(
-                    choices=(
-                             ('',''),
-                             ('Nat','Natural'),
-                             ('Art','Artificial'),
-                             ('N/A','Natural / Artificial'),
-                             ('NI','Nature Identical'),
-                             ('NFI','Non-Flavor Ingredient'),
-                             ),)
-    label_type = forms.ChoiceField(
-                    choices=(
-                             ('',''),
-                             ('Flavor','Flavor'),
-                             ('Type Flavor','Type Flavor'),
-                             ('Flavor WONF','Flavor WONF'),
-                             ('Concentrate','Concentrate'),
-                             ('Type Concentrate','Type Concentrate'),
-                             ('Concentrate WONF','Concentrate WONF'),
-                             ('OC Flavor','OC Flavor'),
-                             ('OC Type Flavor','OC Type Flavor'),
-                             ('OC Flavor WONF','OC Flavor WONF'),
-                             ('OC Concentrate','OC Concentrate'),
-                             ('OC Type Concentrate','OC Type Concentrate'),
-                             ('OC Concentrate WONF','OC Concentrate WONF'),
-                             ),)
-
-    class Meta:
-        model = Flavor
-        exclude = ('id','ingredients','categoryid',
-                   'supplierid','unitsinstock','unitsonorder',
-                   'reorderlevel','discontinued','approved',
-                   'sold','lastprice','lastspdate',
-                   'rawmaterialcost','productmemo','valid',
-                   'quantityperunit','code', 'name',
-                   'experimental','unitprice','spraydried',
-                   'prefix'
-                   )
-        
-class ExperimentalFlavorForm(FlavorForm):
-    class Meta:
-        model = Flavor
-        exclude = ('id','ingredients','categoryid',
-                   'supplierid','unitsinstock','unitsonorder',
-                   'reorderlevel','discontinued','approved',
-                   'sold','lastprice','lastspdate',
-                   'rawmaterialcost','productmemo','valid',
-                   'quantityperunit','code', 'name',
-                   'experimental','unitprice','spraydried',
-                   'prefix','number',
-                   )
-        
 class ExperimentalForm(ModelForm, FieldsetMixin):
     #product_name = forms.CharField(label="Experimental Name")
     fieldsets = (
@@ -894,6 +831,7 @@ class NewExFormWizard(FormWizard):
 class ExperimentalNameForm(NewExForm1):
     pass    
 
+
 class NewSolutionForm(forms.Form):
     PIN = forms.CharField()
     concentration = forms.ChoiceField(
@@ -911,17 +849,5 @@ class NewSolutionForm(forms.Form):
                                  ('25%','25%'),
                                  ('50%','50%'),
                                  ))
-    solvent = forms.ChoiceField(
-                    choices=(
-                             ('',''),
-                             ('703','Propylene Glycol'),
-                             ('321','Ethyl Alcohol'),
-                             ('829','Triacetin'),
-                             ('1983','Neobee'),
-                             ('100','Water'),
-                             ('86','Benzyl Alcohol'),
-                             ('473','Lactic Acid'),
-                             ('25','Iso Amyl Alcohol'),
-                             ('S758','Soybean Oil'),
-                             ),)
+    solvent = forms.ModelChoiceField(queryset=Solvent.objects.all())
    

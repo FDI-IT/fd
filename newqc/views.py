@@ -17,11 +17,14 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.forms.formsets import formset_factory
 from django.contrib.auth.decorators import login_required
 from django.db import connection
+from django.db.models import Count
 
 from sorl.thumbnail import get_thumbnail
+from reversion import revision
 
 from elaphe import barcode
 
+from newqc import controller
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import Flavor, Ingredient
 from access.views import flavor_info_wrapper
@@ -400,6 +403,13 @@ def add_objects(request, page_title, ObjectClass, NewObjectForm):
         if formset.is_valid():
             for form in formset.forms:
                 obj = form.create_from_cleaned_data()
+                l = obj.lot
+                try:
+                    if l.status in ('Batchsheet Printed', 'Created'):
+                        l.status = 'Pending QC'
+                        l.save()
+                except:
+                    pass
                 obj.save()
             return HttpResponseRedirect(ObjectClass.browse_url)
         else:            
@@ -551,18 +561,16 @@ def get_rm_barcode(request, retain_pk):
 @flavor_info_wrapper
 def flavor_history_print(request, flavor):
     page_title = "Flavor Retain History"
-    lots = flavor.lot_set.all()[:20]
-    context_dict = {
-                   'flavor': flavor,
-                   #'help_link': help_link,
-                   'page_title': page_title,
-                   #'weight_factor': weight_factor,
-                   #'formula_weight': formula_weight,
-                   'lots': lots,
-                   }
-    return render_to_response('qc/flavors/flavor_history_print.html',
-                              context_dict,
-                              context_instance=RequestContext(request))
+    try:
+        retain_pks = [flavor.combed_sorted_retain_superset()[0].pk,]
+    except: 
+        retain_pks = []
+    return render_to_response('qc/flavors/batch_print.html', 
+                              {
+                               'retain_pks':retain_pks,
+                               'retain_checklist':[],
+                               'print_checklist_min': 2
+                               }, context_instance=RequestContext(request))
 
 #@login_required
 #def resolve_retains_any(request):
@@ -604,6 +612,7 @@ def lot_detail(request, lot_pk):
     lot = get_object_or_404(Lot, pk=lot_pk)
     return render_to_response('qc/lots/detail.html',
                               {'lot':lot,
+                              'print_link': '/django/batchsheet/%s/' % lot_pk,
                                'page_title':"Lot %s  --  %s-%s %s lbs  --  Status: %s"% (lot.number, lot.flavor.prefix, lot.flavor.number, lot.amount, lot.status)},
                               context_instance=RequestContext(request))
 
@@ -709,7 +718,7 @@ def resolve_testcards_ajax_post(request):
 @login_required
 def resolve_testcards_any(request):
     try:
-        tcs = TestCard.objects.exclude(retain=None).filter(status='Not Passed...')
+        tcs = TestCard.objects.exclude(retain=None).filter(status='Not Passed...').annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1)
         testcard = tcs[0]
         testcard_ondeck = tcs[1]
     except:
@@ -740,6 +749,7 @@ def resolve_testcards_specific(request, testcard_pk):
                                },
                               context_instance=RequestContext(request))
 
+@revision.create_on_success
 def passed_finder(request):
     if request.method == "POST":
         all_testcard_pks = []
@@ -751,14 +761,12 @@ def passed_finder(request):
   
         for tc in TestCard.objects.filter(pk__in=all_testcard_pks):
             if tc.pk in checked_pks:
-                tc.status = "Passed"
-                tc.save()
+                controller.testcard_simple_status_to_pass(tc)
             else:
-                tc.status = "Not Passed..."
-                tc.save()
+                controller.testcard_simple_status_to_under_review(tc)
 
     
-    testcards = TestCard.objects.filter(status="Pending")[0:10]
+    testcards = TestCard.objects.filter(status="Pending").annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1)[0:10]
     return render_to_response('qc/testcards/passed_finder.html',
                               {'testcards':testcards},
                               context_instance=RequestContext(request))

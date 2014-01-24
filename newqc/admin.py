@@ -1,4 +1,4 @@
-from newqc.models import Retain, TestCard, ProductInfo, Lot, ImportRetain, RMImportRetain, RMInfo, RMRetain, ExperimentalRetain, RMTestCard, BatchSheet, ReceivingLog
+from newqc.models import Retain, TestCard, ProductInfo, Lot, ImportRetain, RMImportRetain, RMInfo, RMRetain, ExperimentalRetain, RMTestCard, BatchSheet, ReceivingLog, LotWeightAdjustment
 from django.contrib import admin
 from reversion.admin import VersionAdmin
 
@@ -60,6 +60,12 @@ class LotAdmin(VersionAdmin):
     list_display_links=("number", "flavor",)
     list_editable = ("status", "amount",)
 admin.site.register(Lot, LotAdmin)
+
+class LotWeightAdjustmentAdmin(VersionAdmin):
+    search_fields = ['number', 'flavor__number']
+    list_display = ['number','amount', 'flavor',]
+    exclude = ('date','sub_lot','status','flavor',)
+admin.site.register(LotWeightAdjustment, LotWeightAdjustmentAdmin)
 
 class RMImportRetainAdmin(VersionAdmin):
     search_fields = ['number']

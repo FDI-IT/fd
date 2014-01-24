@@ -59,12 +59,13 @@ KOSHER_CHOICES = (
 RISK_ASSESSMENT_CHOICES = (  #NEW
     (0, "Antimicrobial"),
     (1, "Regularly Monitored"),
-    (2, "Bacteriostatic"),
-    (3, "Hot packed/heat treated"),
+    (2, "Bacteriostatic/Non-Supportive"),
+    (3, "Hot Packed/Heat Treated"),
     (4, "Low pH, <3.9"),
     (5, "COA Salmonella"),
     (6, "Spray Dried"),
     (7, "Pending"),
+    (8, "Intermediate Only"),
 )
 
 DIACETYL_PKS = [262,]
@@ -425,6 +426,7 @@ class Ingredient(models.Model):
         'celery',
         'lupines',
         'yellow_5',
+        'sulfites',
     ]
     
     ACUTE_TOXICITY_CHOICES = (
@@ -1491,6 +1493,7 @@ class Flavor(FormulaInfo):
                 'celery',
                 'lupines',
                 'yellow_5',
+                'sulfites',
             ]
         for aller in aller_attrs:
             val = getattr(self,aller)
@@ -1992,7 +1995,7 @@ class ExperimentalLog(models.Model):
     liquid = models.BooleanField(db_column='Liquid')
     dry = models.BooleanField(db_column='Dry')
     spray_dried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
-    flavorcoat = models.BooleanField(u"Flavorcoat®", default=False)
+    flavorcoat = models.BooleanField(u"Flavorcoat®", db_column="Flavor Coat", default=False)
     concentrate = models.BooleanField(db_column='Concentrate', default=False)
     oilsoluble = models.BooleanField("Oil soluble", db_column='OilSoluble')
         
@@ -3151,6 +3154,10 @@ class AllerIngredients(Ingredient):
     class Meta:
         proxy=True
         
+class FlavorRiskAssessment(Flavor):
+    class Meta:
+        proxy=True
+        
 class IngredientDescription(Ingredient):
     class Meta:
         proxy=True
@@ -3158,7 +3165,20 @@ class IngredientDescription(Ingredient):
 class Renumber(models.Model):
     a = models.ForeignKey('Flavor', related_name="renum_a_set")
     b = models.ForeignKey('Flavor', related_name="renum_b_set")
-        
+    
+class Solvent(models.Model):
+    ingredient = models.OneToOneField('Ingredient', primary_key=True, related_name="solvent_listing")
+    def __unicode__(self):
+        return unicode(self.ingredient)
+    
+    @staticmethod
+    def get_name_from_name(solvent_number):
+        return Ingredient.get_obj_from_softkey(solvent_number).product_name
+    
+    @staticmethod
+    def get_id_list():
+        return Solvent.objects.all().values_list('ingredient__id',flat=True)
+    
 class FormulaException(Exception):
     def __init__(self,value):
         self.value = value

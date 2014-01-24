@@ -753,3 +753,9 @@ color:red;
     position: absolute;
     width: 150px;
 }
+
+#flavor_review_print_menu {
+	display: none;
+    position: absolute;
+    width: 150px;
+}

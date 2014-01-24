@@ -80,10 +80,11 @@ class NewFlavorRetainForm(forms.Form):
         lot_number = cd['lot_number']
         f = Flavor.objects.get(number=cd['flavor_number'])
         l = Lot.objects.get(number=lot_number, flavor=f)
+
         return Retain(
                 retain=cd['object_number'],
                 lot=l,
-                date=cd['date'],
+                date=date.today(),
                 status="Pending",
             )
     
@@ -150,7 +151,7 @@ class NewRMRetainForm(forms.Form):
         temp = num.search(cd['object_number'])
   
         return RMRetain(
-                date=cd['date'],
+                date=date.today(),
                 pin=cd['pin'],
                 supplier=cd['supplier'],
                 lot=cd['lot'],

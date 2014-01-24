@@ -10,5 +10,5 @@ from solutionfixer import models
 #    inlines = [FormulaInline]
 
 class SolutionAdmin(VersionAdmin):
-    search_fields = ['ingredient']
+    search_fields = ['ingredient__id']
 admin.site.register(models.Solution, SolutionAdmin)

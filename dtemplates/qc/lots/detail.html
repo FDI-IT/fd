@@ -3,6 +3,11 @@
 {% block htmlhead %}
 {{ block.super }}
 <script type="text/javascript" src="/djangomedia/js/resolve_testcards.js?v=25"></script>
+<script type="text/javascript">
+function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 100 + 'px';
+  }
+</script>
 {% endblock  %}
 
 {% block content %}
@@ -30,6 +35,7 @@
 		<input type="hidden" name="productinfo_pk" value="{{ lot.flavor.productinfo.pk }}">
 	</div>
 	-->
+	<iframe width="1100px" height="600px" src="/django/batchsheet/{{ lot.pk }}/" style="transform:translate(-150px,-70px) scale(0.7);" onload='javascript:resizeIframe(this);'></iframe>
 	<div class="float-container">
 		{% for retain in lot.retain_set.all %}
 		<div id="retain__{{retain.pk}}" class="parent_object_detail float-container">

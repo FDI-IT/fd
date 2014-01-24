@@ -299,13 +299,13 @@ FORMULA_EDIT.delete_row = function(i){
 FORMULA_EDIT.recalculate_total_cost= function() {
 	var total_cost = 0;
 	var total_weight = 0;
-	jQuery('.cost-cell:gt(0)').each(function() {
+	jQuery('.cost-cell').each(function() {
 		total_cost += Number($(this).html());
 	});
 	total_cost = Math.round(total_cost*1000)/1000;
 	jQuery("#RawMaterialCost").html(total_cost);
 	
-	jQuery('.amount-cell:gt(0)').each(function() {
+	jQuery('.amount-cell').each(function() {
 		total_weight += Number($(this).find('input').val());
 	});
 	total_weight = Math.round(total_weight*1000)/1000;

@@ -10,7 +10,7 @@ from django.db.models import Q, F, Sum
 from django.conf import settings
 from django.db import connection
 import operator
-from access.models import Flavor, Ingredient, Formula, FormulaTree, LeafWeight, IndivisibleLeafWeight, FormulaException, DIACETYL_PKS, PG_PKS, SOLVENT_NAMES
+from access.models import Flavor, Ingredient, Formula, FormulaTree, LeafWeight, Solvent, IndivisibleLeafWeight, FormulaException, DIACETYL_PKS, PG_PKS, SOLVENT_NAMES
 ones = Decimal('1')
 tenths = Decimal('0.0')
 hundredths = Decimal('0.00')
@@ -32,6 +32,8 @@ ONE_HUNDRED = Decimal('100')
 ONE_THOUSAND = Decimal('1000')
 ZERO = Decimal('0')
 SD_COST = Decimal('2.60')
+
+all_solvent_list = Solvent.get_id_list()
 
 
 def find_usage(ingredient_pk, gazinta_lists, flavor_valid):
@@ -967,7 +969,7 @@ def recalculate_guts(flavor):
         if lw.ingredient.pk in PG_PKS:
             my_pg = True
             
-        if lw.ingredient.id in SOLVENT_NAMES:
+        if lw.ingredient.id in all_solvent_list:
             my_solvents[lw.ingredient.id] = lw.weight
         
     flavor.sulfites_ppm = sulfites.quantize(tenths)
@@ -995,7 +997,7 @@ def recalculate_guts(flavor):
     for solvent_number, solvent_amount in solvents_by_weight:
         if solvent_amount > 0:
             relative_solvent_amount = (solvent_amount / 10).quantize(ones)
-            sorted_solvent_string_list.append("%s %s%%" % (SOLVENT_NAMES[solvent_number], relative_solvent_amount))
+            sorted_solvent_string_list.append("%s %s%%" % (Solvent.get_name_from_name(solvent_number), relative_solvent_amount))
     solvent_string = "; ".join(sorted_solvent_string_list)
     flavor.solvent = solvent_string[:50]
         

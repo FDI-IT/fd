@@ -244,6 +244,10 @@ class Lot(models.Model):
             ('testcards_present','QC Tests',''),
             ('batchsheets_present','Batchsheet',''),
         )
+    
+class LotWeightAdjustment(Lot):
+    class Meta:
+        proxy=True
 
     
 class LotSOLIStamp(models.Model):

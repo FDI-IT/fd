@@ -10,7 +10,7 @@ from django.db.models import Count
 from access.models import Ingredient, Flavor, ExperimentalLog, LocationCode
 from access.views import ingredient_autocomplete
 
-from lab.forms import SolutionForm, FinishedProductLabelForm, RMLabelForm, ExperimentalForm
+from lab.forms import FinishedProductLabelForm, RMLabelForm, ExperimentalForm
 from newqc.models import ReceivingLog
 from lab.glabels_scripts import rm_label, solution_label, experimental_label, solution_print, finished_product_label, rm_sample_label
 

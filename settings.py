@@ -38,7 +38,7 @@ DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'post
 DATABASE_NAME = 'fd_test'#os.environ['DJANGO_DATABASE_NAME']             # Or path to database file if using sqlite3.
 DATABASE_USER = 'www-data'#os.environ['DJANGO_DATABASE_USER']             # Not used with sqlite3.
 DATABASE_PASSWORD = 'fdi'#os.environ['DJANGO_DATABASE_PASSWORD']         # Not used with sqlite3.
-DATABASE_HOST = '10.1.10.182'#os.environ['DJANGO_DATABASE_HOST']             # Set to empty string for localhost. Not used with sqlite3.
+DATABASE_HOST = '10.1.10.182'#'192.168.1.129'#'10.1.10.182'#os.environ['DJANGO_DATABASE_HOST']             # Set to empty string for localhost. Not used with sqlite3.
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
 '''
@@ -70,12 +70,12 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/usr/local/django/media/'
+MEDIA_ROOT = '/media/djangomedia/media/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = 'http://www.flavordynamics.lan/djangomedia/'
+MEDIA_URL = '/djangomedia/'
 #MEDIA_URL = 'http://localhost:8000/djangomedia/'
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.

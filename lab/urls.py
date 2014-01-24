@@ -10,7 +10,6 @@ urlpatterns = patterns('lab.views',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    (r'^solution$', 'solution'),
     (r'^inventory', 'inventory'),
     (r'^finished_product_labels/', 'finished_product_labels'),
     (r'^rm_labels/', 'rm_labels'),

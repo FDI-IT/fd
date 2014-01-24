@@ -1,6 +1,7 @@
 import os
 import subprocess
 import hashlib
+import shutil
 import fnmatch
 import cStringIO
 from PIL import Image
@@ -24,17 +25,25 @@ type_map = {
     'BATCHSHEET_LOT':(Lot, BatchSheet),
 }
 
+exc_directory = '/srv/samba/tank/scans/exc/'
+
+def move_exc_image(full_file_path):
+    shutil.move(full_file_path, exc_directory)
+
 @task()
 def walk_scans_qccards(walk_paths=['/srv/samba/tank/scans/qccards',]):
-    counter = 0
     returns = []
+    if not os.path.exists(exc_directory):
+        os.makedirs(exc_directory)
     for wp in walk_paths:
         for root, dirnames, filenames in os.walk(wp):
             for filename in fnmatch.filter(filenames, '*.jpg'):
-                print counter
-                counter += 1
-                f = os.path.join(root,filename)
-                returns.append(ImportBCDoc(f))
+                full_file_path = os.path.join(root,filename)
+                print full_file_path
+                try:
+                    returns.append(ImportBCDoc(full_file_path))
+                except:
+                    move_exc_image(full_file_path)
     return returns
 
 class ImportBCDoc():

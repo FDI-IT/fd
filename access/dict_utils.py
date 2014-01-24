@@ -470,24 +470,11 @@ class IntegrityCheck:
     
 class SolventUpdater():
     # the list definition of which raw material numbers represent solvents
-    OIL_SOLVENTS = (1983, 829, 86)
-    WATER_SOLVENTS = (703, 321, 100, 473, 25)
-    ALL_SOLVENTS = OIL_SOLVENTS + WATER_SOLVENTS
-    SOLVENT_NAMES = {
-        1983:'Neobee',
-        829:'Triacetin',
-        86:'Benzyl Alcohol',
-        703:'PG',
-        321:'ETOH',
-        100:'Water',
-        473:'Lactic Acid',
-        25:'Iso Amyl Alcohol',
-    }
 
     def re_init(self):
         self.visited_flavors = {}
     
-    
+    solvent_list = models.Solvent.get_id_list()
     def update_all_flavor_solvents(self):
         """
         """
@@ -502,10 +489,12 @@ class SolventUpdater():
     
     def update_flavor_solvent(self, flavor):
         my_solvents = {}
-        for leaf_weight in flavor.leaf_weights.filter(ingredient__id__in=self.ALL_SOLVENTS).order_by('-weight'):
-            ingredient = leaf_weight.ingredient
-            ingredient_number = ingredient.id
-            my_solvents[ingredient_number] = leaf_weight.weight
+        
+        for s_id in self.solvent_list:
+            for leaf_weight in flavor.leaf_weights.filter(ingredient__id=s_id).order_by('-weight'):
+                ingredient = leaf_weight.ingredient
+                ingredient_number = ingredient.id
+                my_solvents[ingredient_number] = leaf_weight.weight
                 
         ones = Decimal('1')
         sorted_solvent_string_list = []

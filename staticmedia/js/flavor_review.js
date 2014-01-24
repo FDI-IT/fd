@@ -36,7 +36,7 @@ function print_experimental_review(experimental_number) {
 			new_table.appendTo(jQuery(div_flavor_tabs));
 		}
 		newwindow.print();
-	}
+	};
 }
 
 function print_review(flavor_number) {
@@ -61,7 +61,14 @@ function print_review(flavor_number) {
 			new_table.appendTo(jQuery(div_flavor_tabs));
 		}
 		newwindow.print();
-	}
+	};
+}
+
+function print_qc(flavor_number) {
+	newwindow = popup_window('/django/qc/flavors/' + flavor_number +'/print/');
+	newwindow.onload = function (e) {
+		newwindow.print();		
+	};
 }
 
 // This will parse a delimited string into an array of
@@ -723,4 +730,19 @@ jQuery.fn.table2CSV = function(options) {
 jQuery(document).ready(function(){
 	consolidate();	
 	$("#exploded").treeTable();
+	var menu_flavor_review = jQuery('#flavor_review_print_menu');
+	menu_flavor_review.menu();
+	jQuery('a[href$="FLAVOR_REVIEW_PRINT_MENU"]').click(function(event) {
+		jQuery('#flavor_review_print_menu').show().position({
+			my:'left top',
+			at:'left bottom',
+			of:event,
+		});
+		jQuery(document).one("click", function() {
+			menu_flavor_review.hide();
+		});
+		return false;
+	});
+
+	
 });
