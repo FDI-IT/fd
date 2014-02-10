@@ -58,10 +58,16 @@ def explosion(flavor, weight_factor=1):
                 break
         
         if ft.rgt > ft.lft+1:
+            
             link_token = '<a href="#" onclick="return hideftrow(this)">[+]</a> '
-            row_class = 'ft-expander-row'
             label_type = 'Flavor'
             my_pin = ""
+            if ft.node_flavor.unitsinstock == 1:
+                row_class = 'ft-expander-row-stock'
+                
+            else:
+                row_class = 'ft-expander-row'
+            # if a stock item, output the same but toggled
         else:
             link_token = ''
             row_class = 'ft-simple-row'
@@ -70,12 +76,13 @@ def explosion(flavor, weight_factor=1):
         
         
         hypertext_tokens.append(
-            """<div class="%s" data-ingredient_id="%s" data-nat_art="%s" data-ingredient_pin="%s" data-ingredient_name="%s"><span class="ingredient_name recur_depth_%s">%s%s</span> <span class="ingredient-details">
+            """<div  data-ftpk="%s" class="%s" data-ingredient_id="%s" data-nat_art="%s" data-ingredient_pin="%s" data-ingredient_name="%s"><span class="ingredient_name recur_depth_%s">%s%s</span> <span class="ingredient-details">
                                                                         <span class="ftamount" data-ogw="%s">%s</span> 
                                                                         <span class="ftunitcost">%s</span>                                                            
                                                                         <span class="ftrelcost">%s</span>
                                                                         <span class="ftupdate">%s</span> 
-                                        </span></div>\n""" % (row_class,
+                                        </span></div>\n""" % (ft.pk,
+                                                              row_class,
                                                               ft.node_ingredient.id,
                                                               ft.node_ingredient.art_nati,
                                                               my_pin,
@@ -92,7 +99,10 @@ def explosion(flavor, weight_factor=1):
         
         if ft.rgt > ft.lft+1:
             close_div_stack.append(ft.rgt)
-            hypertext_tokens.append('<div class="ft-spacer">\n')
+            if ft.node_flavor.unitsinstock == 1:
+                hypertext_tokens.append('<div class="ft-spacer ft-spacer-stock" data-ftpk="%s">\n' % ft.pk)
+            else:
+                hypertext_tokens.append('<div class="ft-spacer" data-ftpk="%s">\n')
             depth=depth+1
     for close_div in close_div_stack:
         hypertext_tokens.append("</div>\n")

@@ -1,10 +1,10 @@
 {% load humanize %}
-
 <table class="outer">
 	<thead>
 		<tr>
 			<th>
 				<span class="section_span" id="titleleft">
+					COMPONENT OF {{ lot }} -- {{lot.flavor.prefix}}-{{lot.flavor.number}}<br>
 					{{ flavor }}<br>
 					<span class="sub_heading">
 					<span class="section_title">Amount:</span> {{ batch_amount|floatformat:3 }} lbs, <span class="section_title">No. of ingredients:</span> {{ flavor.formula_set.all.count }}<br>
@@ -20,7 +20,7 @@
 					</span>
 				</span>
 				{% endif %}
-				<span class="section_span" id="titlecenter">{% now "D d-M-y" %}</span>
+				<span class="section_span" id="titlecenter">{{ lot.date|date:"D d-M-y" }}</span>
 			</th>
 		</tr>
 	</thead>
@@ -83,7 +83,7 @@
 					<tfoot>
 						<tr>
 							<td colspan="3"></td>
-							<td colspan="2"><span class="section_title">Batch Weight:<br>{{batch_amount|floatformat:3}} lbs.</span> </td>
+							<td colspan="2"><span class="section_title">Yield Adjusted Weight:<br>{{yield_adjusted_amount|floatformat:3}} lbs.</span> </td>
 							<td colspan="5"></td>
 						</tr>
 					</tfoot>
@@ -101,13 +101,6 @@
 										<div id="memorow">
 											<div class="container">
 												<div class="content">
-													<div class="left">
-														<span class="section_title">Compounder(s)</span><br>
-														__________________<br>
-														__________________<br>
-														__________________
-													</div>
-													
 													<div class="main">
 														<span class="section_title">Memo:</span><br>
 														{{ flavor.productmemo }}
@@ -178,38 +171,10 @@
 										</div>
 									</td>
 								</tr>
-								<tr>
-									<td id="last_section">
-										Before the batch is begun, all utensils and equipment are checked by<br>
-										visual inspection. Utensils and equipment should be checked for physical<br>
-										condition and potential contamination by any hazards including allergens.<br>
-										Non-conforming utensils and equipment should be replaced, or cleaned and<br>
-										sanitized as necessary.<br>
-										All product has been transferred from wooden to plastic pallets, and all<br>
-										labels and boxes have been counted.<br><br>
-										<span class="section_title">Signed:</span> _______________________________________ <span class="section_title">Date:</span> ____________________
-									</td>
-								</tr>
 							</table>	
 						</td>
 						<td>
 							<div class="sidebar">
-								{% if flavor.ccp1 %}
-									Sieve CCP 1 Recorded: [ ]<br>
-									Sieve is inspected PRE and POST OP<br>
-								{% else %}
-								{% endif %}
-								{% if flavor.ccp2 %}
-									Allergen Cleaning CCP 2 Recorded: [ ]<br>
-								{% else %}
-								{% endif %}
-								{% if flavor.ccp4 %}
-									Label Application CCP 4 Recorded: [ ]<br>
-									Labels expected: _______<br><br>
-									Labels received: _______<br><br>
-									Labels applied: ________<br><br>
-								{% else %}
-								{% endif %}
 								{% if flavor.ccp6 %}
 									Thermal Kill Step CCP 6 Recorded: [ ]<br>
 								{% else %}
@@ -220,19 +185,5 @@
 				</table>
 			</td>
 		</tr>
-	</tbody>
-</table>
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-			</td>
-		</tr>	
 	</tbody>
 </table>

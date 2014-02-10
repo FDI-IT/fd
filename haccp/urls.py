@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
-from django import forms
+from django.views.generic import list_detail
 
+from haccp.views import cipm_list_info
 urlpatterns = patterns('haccp.views',
     # Example:
     # (r'^fd/', include('fd.foo.urls')),
@@ -11,4 +12,6 @@ urlpatterns = patterns('haccp.views',
 
     # Uncomment the next line to enable the admin:
     (r'^$', 'index'),
+    (r'^cipm/$', list_detail.object_list, cipm_list_info),
+    (r'^cipm/(?P<cipm_pk>\d+)/$', 'cipm_detail'),
 )

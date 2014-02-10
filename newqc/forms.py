@@ -163,7 +163,7 @@ class NewRMRetainForm(forms.Form):
 class ResolveRetainForm(forms.ModelForm):
     class Meta:
         model = Retain
-        exclude = ('retain', 'lot', 'sub_lot', 'amount', 'content_type', 'object_id', 'product')
+        exclude = ('date', 'retain', 'lot', 'sub_lot', 'amount', 'content_type', 'object_id', 'product')
 
 class ResolveLotForm(forms.ModelForm):
     class Meta:

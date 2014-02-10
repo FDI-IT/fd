@@ -20,6 +20,7 @@ from pluggable.sets import AncestorSet
 one_hundred = Decimal('100')
 hundredths = Decimal('0.00')
 zero = Decimal('0')
+one_thousand = Decimal('1000')
 NATART_CHOICES = (
     ('N/A','N/A'),
     ('Nat','Nat'),
@@ -112,11 +113,21 @@ class FormulaTree(models.Model):
         elif self.node_flavor.yield_field != 100:
             return True
         else:
-            return False  
+            return False
+
+    @property
+    def node_label(self):
+        if self.lft == 0:
+            return self.root_flavor.name
+        else:
+            return "%s -- %slbs<br>%s" % (self.node_ingredient.id, self.weight, self.node_ingredient.short_prefixed_name(trim_length=25), )
         
     @property
     def relative_cost(self):
         return self.get_exploded_cost()
+    
+    def batch_adjusted_weight(self, batch_weight):
+        return self.weight * batch_weight / one_thousand
 
     def __unicode__(self):
         return "%s: l%s r%s parent%s" % (self.root_flavor.__unicode__(), self.lft, self.rgt, self.parent_id)
@@ -426,7 +437,6 @@ class Ingredient(models.Model):
         'celery',
         'lupines',
         'yellow_5',
-        'sulfites',
     ]
     
     ACUTE_TOXICITY_CHOICES = (
@@ -671,6 +681,14 @@ class Ingredient(models.Model):
     def url(self):
         return "/django/access/ingredient/pin_review/%s/" % self.id
     
+    @property
+    def info_slice(self):
+        return {
+            'unit_price':str(self.unitprice).rstrip('0').rstrip('.'),
+            'allergen':self.allergen,
+            'sulfites_ppm':self.sulfites_ppm,
+        }
+    
     def get_absolute_url(self):
         if self.discontinued == False:
             return "/django/access/ingredient/pin_review/%s/" % self.id
@@ -776,14 +794,13 @@ class Ingredient(models.Model):
         else:
             return self.product_name
         
-    @property
-    def short_prefixed_name(self):
-        if len(self.prefixed_name) > 18:
+    def short_prefixed_name(self, trim_length=18):
+        if len(self.prefixed_name) > trim_length:
             if self.prefix != "":
                 s = u"%s %s" % (self.prefix, self.product_name)
-                return u"%s..." % s[:18]
+                return u"%s..." % s[:trim_length]
             else:
-                return "%s..." % self.product_name[:18]
+                return "%s..." % self.product_name[:trim_length]
         else:
             return self.prefixed_name
         
@@ -1233,7 +1250,7 @@ class Flavor(FormulaInfo):
     haccp = models.PositiveSmallIntegerField("HACCP", blank=True, null=True)
     batfno = models.CharField("BATFNO", max_length=50,blank=True, default="")
     microtest = models.CharField("Micro Test", max_length=4,default="", blank=True)
-
+    stock_item = models.BooleanField(default=False)
 
     
     quantityperunit = models.PositiveIntegerField(

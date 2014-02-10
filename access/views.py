@@ -21,7 +21,7 @@ from django.views.generic.create_update import create_object
 from reversion import revision
 
 from access.controller import discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors, experimental_approve_from_form
-
+from access.formatter import formulatree_to_jsinfovis
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
 from access.my_profile import profile
@@ -1711,3 +1711,27 @@ def new_rm_wizard_rm(request, ingredient_pk):
                 },
     }
     return forms.NewRMWizard([forms.NewRMForm1, forms.NewRMForm2, forms.NewRMForm3, forms.NewRMForm4, forms.NewRMForm5], initial=initial)(request)
+
+@flavor_info_wrapper
+def formula_visualization(request, flavor):
+    formatted_ft = formulatree_to_jsinfovis(FormulaTree.objects.filter(root_flavor=flavor))
+
+    st_layout_parameters = {}
+    if request.method == 'GET' and 'levels_to_show' in request.GET:
+        st_layout_form = forms.STLayoutForm(request.GET)
+        if st_layout_form.is_valid():
+            for k,v in st_layout_form.cleaned_data.iteritems():
+                st_layout_parameters[k] = v
+    else:
+        st_layout_form = forms.STLayoutForm()
+        for k,v in st_layout_form.fields.iteritems():
+            st_layout_parameters[k] = v.initial      
+    
+    context_dict = {
+         'flavor':flavor,
+         'st_layout_form':st_layout_form,
+         'st_layout_parameters':  simplejson.dumps(st_layout_parameters),
+        }
+    context_dict.update(formatted_ft)
+    return render_to_response('access/flavor/formula_visualization.html', context_dict)
+    

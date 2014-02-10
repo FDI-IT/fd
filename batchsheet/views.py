@@ -415,18 +415,15 @@ def lot_update_confirmation(request, lot_list=None): #go straight here if clicki
                                      'confirm': confirm},
                                     context_instance = RequestContext(request))
             
-                
+@revision.create_on_success
 def batchsheet_batch_print(request):
     if request.method == 'POST':
         lot_pks = request.POST.getlist('lot_pks')
-        
-        test = []
         
         for lot_pk in lot_pks:
             lot = Lot.objects.get(pk = lot_pk)
             lot.status = 'Batchsheet Printed'
             lot.save()
-            test.append((lot_pk, lot.status))
                 
         return render_to_response('batchsheet/batchsheet_batch_print.html', 
                       {
@@ -434,7 +431,22 @@ def batchsheet_batch_print(request):
                        },
                       context_instance=RequestContext(request))
         
-
+        
+@revision.create_on_success
+@flavor_info_wrapper
+def explosion_print(request, flavor):
+    ftpks = request.GET.getlist('ftpk_to_expand[]')
+    batch_amount = Decimal(request.GET.get('batch_amount'))
+    lot = Lot.objects.get(id=45700)
+    lot.amount = batch_amount
+    return render_to_response('batchsheet/explosion_print_main.html',
+                              {
+                               'lot':lot,
+                               'flavor':lot.flavor,
+                               'batch_amount':batch_amount,
+                               'ftpks':ftpks,
+                               }
+                              )
 def lot_notebook(request):
     pass
 

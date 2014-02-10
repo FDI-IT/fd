@@ -52,6 +52,7 @@ urlpatterns = patterns('',
     (r'^unified_adapter/', include ('unified_adapter.urls')),
     (r'^history_audit/', include ('history_audit.urls')),
     (r'^export/', include ('export.urls')),
+    (r'^reports/', include ('reports.urls')),
 )
 
 from access.models import Flavor, Ingredient, ExperimentalLog, Formula

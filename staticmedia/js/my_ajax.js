@@ -40,15 +40,19 @@ function adjust_weight_explosion(f) {
 
 
 function hideftrow(elem) {
-	jQuery(elem).parent().parent().next().toggle();
+	jQuery(elem).parent().parent().next().toggleClass('hidden');
 }
 
 function ft_collapse_all() {
-	jQuery('div.ft-spacer').hide();
+	jQuery('div.ft-spacer').addClass('hidden');
+}
+
+function ft_collapse_stock_items() {
+	jQuery('div.ft-spacer-stock').addClass('hidden');
 }
 
 function ft_expand_all() {
-	jQuery('div.ft-spacer').show();
+	jQuery('div.ft-spacer').removeClass('hidden');
 }
 
 

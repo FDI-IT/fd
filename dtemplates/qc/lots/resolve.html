@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load resolve_testcards %}
+{% block htmlhead %}
+{{ block.super }}
+
+<link href="/djangomedia/css/resolve_testcards.css?v=25" type="text/css" rel="stylesheet" >
+<script type="text/javascript">
+jQuery(document).ready(function() {
+	jQuery("#resolve_retains_forms").delegate('.testcard_resolve_image', "click", function() {
+		$('.hidden_image').removeClass('click_to_zoom');
+		$(this).siblings('.hidden_image').addClass('click_to_zoom');
+	});
+	jQuery('#resolve_retains_forms').delegate('.hidden_image', "click", function() {
+		$(this).removeClass('click_to_zoom');
+	});
+});
+</script>
+{% endblock  %}
+
+{% block content %}
+<div>
+	{{formatted_retainsets}}
+	<div id="resolve_lot_form">
+		{{ lot_form.as_p }}
+	</div>
+	<div id="resolve_retains_forms">
+		
+		{% for formatted_retainset in formatted_retainsets %}
+			<fieldset>
+				<legend>{{formatted_retainset.retain}}</legend>
+				{% retain_form formatted_retainset.retain %}
+				{% for testcard_form in formatted_retainset.testcard_formset %}
+					{{ testcard_form.as_p }}
+				{% endfor %}
+			</fieldset>
+		{% endfor %}
+	</div>
+	<div id="product_info_form">
+		<fieldset>
+		<legend>Product Info Fields</legend>
+		{{productinfo_form.non_field_errors}}
+		{{productinfo_form.errors}}
+		{{ productinfo_form.as_p }}
+		</fieldset>
+	</div>
+	
+</div>
+
+{% endblock %}

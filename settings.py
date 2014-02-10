@@ -161,6 +161,7 @@ INSTALLED_APPS = (
     'batchsheet',
     'docvault',
     'unified_adapter',
+    'reports',
     #'history_audit',
     #'haystack',
 )

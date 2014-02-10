@@ -61,15 +61,14 @@ urlpatterns = patterns('newqc.views',
     
 
     (r'^flavors/(?P<flavor_number>\d+)/print/$', 'flavor_history_print'),
-    
     (r'^resolve_retains/$', 'resolve_retains_any'),
-    (r'^resolve_retains/(?P<retain_pk>\d+)/$', 'resolve_retains_specific'),
-    
+    (r'^resolve_lot/(?P<lot_pk>\d+)/$', 'resolve_lot'),
     (r'^resolve_testcards/$', 'resolve_testcards_any'),
     (r'^resolve_testcards_ajax_post/$', 'resolve_testcards_ajax_post'),
     (r'^resolve_testcards/(?P<testcard_pk>\d+)/$', 'resolve_testcards_specific'),
     (r'^testcard_list/$', 'testcard_list'),
     (r'^passed_finder/$', 'passed_finder'),
+    (r'^rm_passed_finder/$', 'rm_passed_finder'),
     (r'^no_testcards_left/$', direct_to_template, {'template':'qc/no_testcards_left.html'}),
     
     

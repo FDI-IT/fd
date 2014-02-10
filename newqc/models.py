@@ -28,6 +28,7 @@ STATUS_CHOICES = (
     ('Rejected','Rejected'),
     ('Expired','Expired'),
     ('RM','RM'),
+    ('Duplicate','Duplicate'),
 )
 
 RM_STATUS_CHOICES = (

@@ -14,7 +14,7 @@
 </div>-->
 
 <div>
-	<form method="post" action="/django/qc/passed_finder/">
+	<form method="post" action="{{ form_action_url }}">
 	<div id="testcard_gallery">
 		{% for tc in testcards %}
 		<div id="testcard{{ forloop.counter}}" class="image_select">

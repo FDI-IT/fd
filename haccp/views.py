@@ -1,16 +1,21 @@
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import Http404
-from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from django.utils.datastructures import MultiValueDictKeyError
-from django.template import RequestContext
-from django.db.models import Q
-from decimal import Decimal, ROUND_HALF_UP
-from django.http import HttpResponseRedirect
-from reversion import revision
-from django.contrib.auth.decorators import login_required
+
+from haccp import models
 
 def index(request):
     return render_to_response('haccp/index.html')
 
-#def water_test(request, status_message=None):
-    
+
+
+cipm_list_info =  {
+    'queryset': models.CIPM.objects.all(),
+    'paginate_by': 100,
+    'extra_context': dict({
+        'page_title': 'Continuous Improvement and Preventative Maintenance',
+
+    }),
+}
+
+def cipm_detail(request, cipm_pk):
+    cipm = get_object_or_404(models.CIPM, pk=cipm_pk)
+    return render_to_response('haccp/cipm_detail.html',{'cipm':cipm})

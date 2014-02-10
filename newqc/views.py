@@ -15,6 +15,7 @@ from django.views.generic.date_based import archive_index
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.forms.formsets import formset_factory
+from django.forms.models import inlineformset_factory
 from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.db.models import Count
@@ -29,7 +30,7 @@ from access.barcode import barcodeImg, codeBCFromString
 from access.models import Flavor, Ingredient
 from access.views import flavor_info_wrapper
 from newqc.forms import NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
-from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog
+from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard
 from newqc.utils import process_jbg, get_card_file, scan_card
 from newqc.tasks import walk_scans_qccards
 from salesorders.models import SalesOrderNumber, LineItem
@@ -659,24 +660,45 @@ def old_lot_detail(request, lot_pk):
                                },
                               context_instance=RequestContext(request))
 
+
+
 @login_required
-def resolve_retains_specific(request, retain_pk):
+@revision.create_on_success
+def resolve_lot(request, lot_pk):
+    lot = get_object_or_404(Lot, pk=lot_pk)
+    lot_form = ResolveLotForm(instance=lot)
+    formatted_retainsets = []
+    TestCardFormSet = inlineformset_factory(Retain, TestCard, form=ResolveTestCardForm)
+    for retain in lot.retain_set.all():
+        formatted_retainsets.append({
+            'retain':retain, 
+            'testcard_formset':TestCardFormSet(instance=retain)
+        })
+        
     
-    retain = get_object_or_404(Retain, pk=retain_pk)
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    productinfo,created = ProductInfo.objects.get_or_create(flavor=lot.flavor)
+    productinfo_form = ProductInfoForm(prefix="product_info",instance=productinfo)
     if request.method == 'POST':
-        f = ResolveRetainForm(request.POST, instance=retain)
-        if f.is_valid():
-            f.save()
+        pass
     
-    request.session['retainpk'] = retain.pk
-    f = ResolveRetainForm(instance=retain)
-    # preview_image = get_thumbnail(test_card.large.file, '800')
-    return render_to_response('qc/retains/resolve.html', 
+
+    return render_to_response('qc/lots/resolve.html', 
                               {
-                               # 'preview_image': preview_image,
-                               'form':f,
-                               'page_title': 'Resolve Retain',
+                               'lot':lot,
+                               'formatted_retainsets':formatted_retainsets,
+                               'lot_form':lot_form,
+                               'productinfo_form':productinfo_form,
+                               'page_title': 'Resolve Lot',
                                },
                               context_instance=RequestContext(request))
 
@@ -750,6 +772,30 @@ def resolve_testcards_specific(request, testcard_pk):
                               context_instance=RequestContext(request))
 
 @revision.create_on_success
+def rm_passed_finder(request):
+    if request.method == "POST":
+        all_testcard_pks = []
+        checked_pks = []
+        for s in request.POST.getlist('all_testcards'):
+            all_testcard_pks.append(int(s))
+        for s in request.POST.getlist('testcards'):
+            checked_pks.append(int(s))
+  
+        for tc in RMTestCard.objects.filter(pk__in=all_testcard_pks):
+            if tc.pk in checked_pks:
+                controller.rm_testcard_simple_status_to_pass(tc)
+            else:
+                controller.rm_testcard_simple_status_to_under_review(tc)
+
+    
+    testcards = RMTestCard.objects.filter(status="Pending").annotate(num_tcs=Count('retain__rmtestcard')).filter(num_tcs=1)[0:10]
+    return render_to_response('qc/testcards/passed_finder.html',
+                              {
+                               'form_action_url':'/django/qc/rm_passed_finder/',
+                               'testcards':testcards},
+                              context_instance=RequestContext(request))
+
+@revision.create_on_success
 def passed_finder(request):
     if request.method == "POST":
         all_testcard_pks = []
@@ -768,7 +814,9 @@ def passed_finder(request):
     
     testcards = TestCard.objects.filter(status="Pending").annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1)[0:10]
     return render_to_response('qc/testcards/passed_finder.html',
-                              {'testcards':testcards},
+                              {
+                               'form_action_url':'/django/qc/passed_finder/',
+                               'testcards':testcards},
                               context_instance=RequestContext(request))
     
 def test():

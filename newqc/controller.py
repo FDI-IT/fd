@@ -8,8 +8,8 @@ class SimpleTestCardException(Exception):
 
 def testcard_simple_status_to_pass(tc):
     r = tc.retain
-    if r.testcard_test.all().count() >  1:
-        raise SimpleTestCardException(tv)
+    if r.testcard_set.all().count() >  1:
+        raise SimpleTestCardException(tc)
     
     tc.status="Passed"
     tc.save()
@@ -20,8 +20,8 @@ def testcard_simple_status_to_pass(tc):
     
 def testcard_simple_status_to_under_review(tc):
     r = tc.retain
-    if r.testcard_test.all().count() >  1:
-        raise SimpleTestCardException(tv)
+    if r.testcard_set.all().count() >  1:
+        raise SimpleTestCardException(tc)
     
     tc.status="Under Review"
     tc.save()
@@ -29,3 +29,24 @@ def testcard_simple_status_to_under_review(tc):
     r.save()
     r.lot.status="Under Review"
     r.lot.save()
+    
+def rm_testcard_simple_status_to_pass(tc):
+    rmr = tc.retain
+    if rmr.rmtestcard_set.all().count() >  1:
+        raise SimpleTestCardException(tc)
+    
+    tc.status="Passed"
+    tc.save()
+    rmr.status="Passed"
+    rmr.save()
+    
+def rm_testcard_simple_status_to_under_review(tc):
+    rmr = tc.retain
+    if rmr.rmtestcard_set.all().count() >  1:
+        raise SimpleTestCardException(tc)
+    
+    tc.status="Under Review"
+    tc.save()
+    rmr.status="Under Review"
+    rmr.save()
+    

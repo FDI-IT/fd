@@ -53,6 +53,9 @@ class CIPM(models.Model):
         
     def __unicode__(self):
         return "%s -- %s" % (self.date.date(), self.description[:50])
+    
+    def url(self):
+        return '/django/haccp/cipm/%s/' % self.pk
 
 class WaterTest(models.Model):
     test_date = models.DateField()

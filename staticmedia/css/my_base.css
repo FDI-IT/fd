@@ -633,7 +633,7 @@ img.hidden_image {
 
 .hidden_image.click_to_zoom {
     display:block;
-	position:absolute;
+	position:fixed;
 	top:10px;
 	right:10px;
 	height:950px;
