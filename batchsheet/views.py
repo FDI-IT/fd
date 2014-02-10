@@ -435,10 +435,15 @@ def batchsheet_batch_print(request):
 @revision.create_on_success
 @flavor_info_wrapper
 def explosion_print(request, flavor):
+    ## POST instead of GET
     ftpks = request.GET.getlist('ftpk_to_expand[]')
     batch_amount = Decimal(request.GET.get('batch_amount'))
+    
+    ## create a lot instead of just selecting one
     lot = Lot.objects.get(id=45700)
     lot.amount = batch_amount
+    
+    ##REDIRECT on success
     return render_to_response('batchsheet/explosion_print_main.html',
                               {
                                'lot':lot,

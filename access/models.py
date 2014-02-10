@@ -1250,7 +1250,6 @@ class Flavor(FormulaInfo):
     haccp = models.PositiveSmallIntegerField("HACCP", blank=True, null=True)
     batfno = models.CharField("BATFNO", max_length=50,blank=True, default="")
     microtest = models.CharField("Micro Test", max_length=4,default="", blank=True)
-    stock_item = models.BooleanField(default=False)
 
     
     quantityperunit = models.PositiveIntegerField(

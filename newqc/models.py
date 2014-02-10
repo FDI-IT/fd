@@ -165,6 +165,7 @@ class Lot(models.Model):
     status = models.CharField(max_length=25, choices=STATUS_CHOICES, default="Created")
     amount = models.DecimalField(max_digits=6, decimal_places=1, blank=True, null=True) 
     flavor = models.ForeignKey(Flavor)
+    ftpks = models.TextField(blank=True)
     
     @staticmethod
     def get_object_from_softkey(softkey):
