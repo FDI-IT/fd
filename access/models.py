@@ -1368,6 +1368,9 @@ class Flavor(FormulaInfo):
     def get_absolute_url(self):
         return "/django/access/%s/" % self.number
     
+    def get_specs_url(self):
+        return "/django/access/%s/spec_list" % self.number
+    
     @staticmethod
     def get_absolute_url_from_softkey(softkey):
         try:

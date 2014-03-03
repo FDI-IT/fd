@@ -20,6 +20,8 @@ urlpatterns = patterns('newqc.views',
     (r'^$', redirect_to, {'url': '/django/qc/retains/'}),
     (r'^review/$', 'review'),
     
+    (r'^new_coa/(?P<lss_pk>\d+)/$', 'new_coa'),
+    (r'^edit_coa/(?P<lss_pk>\d+)/$', 'edit_coa'),
     (r'^coa/(?P<coa_pk>\d+)/$', 'coa'),
     (r'^add_retains/$', 'add_retains'),
     (r'^batch_print/$', 'batch_print'),

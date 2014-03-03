@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 
 from formfieldset.forms import FieldsetMixin
 
-from access.models import Flavor, Formula, ExperimentalLog, TSR, TSRLineItem, PurchaseOrderLineItem, Solvent, PurchaseOrder, NATART_CHOICES, Ingredient, get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES
+from access.models import Flavor, FlavorSpecification, Formula, ExperimentalLog, TSR, TSRLineItem, PurchaseOrderLineItem, Solvent, PurchaseOrder, NATART_CHOICES, Ingredient, get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES
 from solutionfixer.models import SolutionStatus, Solution
 
 def validate_ingredient_number(number):
@@ -858,4 +858,9 @@ class NewSolutionForm(forms.Form):
                                  ('50%','50%'),
                                  ))
     solvent = forms.ModelChoiceField(queryset=Solvent.objects.all())
-   
+    
+class FlavorSpecificationForm(forms.Form):
+    pk = forms.IntegerField(initial=0)
+    name = forms.CharField(max_length=48)
+    specification = forms.CharField(max_length=48)
+    result = forms.CharField(max_length=48)

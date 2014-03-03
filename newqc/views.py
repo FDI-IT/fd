@@ -28,8 +28,8 @@ from newqc import controller
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import Flavor, Ingredient
 from access.views import flavor_info_wrapper
-from newqc.forms import NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
-from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, COA
+from newqc.forms import COAResultForm, NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
+from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, COA, COAResult, LotSOLIStamp
 from newqc.utils import process_jbg, get_card_file, scan_card
 from newqc.tasks import walk_scans_qccards
 from salesorders.models import SalesOrderNumber, LineItem
@@ -610,9 +610,20 @@ def batchsheet_detail(request, lot_pk):
 @permission_required('access.view_flavor')
 def lot_detail(request, lot_pk):
     lot = get_object_or_404(Lot, pk=lot_pk)
+    
+    lss_list = []
+    for lss in lot.lotsolistamp_set.all():
+        if lss.coa_set.exists() == False: #if the lss has no coa, append the url to create a new coa
+            lss_list.append((True, lss.salesordernumber, '/django/qc/new_coa/%s' % lss.pk))
+        else:
+            lss_list.append((False, lss.salesordernumber, '/django/qc/coa/%s' % lss.coa.pk))
+    
+            
+    
     return render_to_response('qc/lots/detail.html',
                               {'lot':lot,
                               'print_link': '/django/batchsheet/%s/' % lot_pk,
+                              'lss_list': lss_list,
                                'page_title':"Lot %s  --  %s-%s %s lbs  --  Status: %s"% (lot.number, lot.flavor.prefix, lot.flavor.number, lot.amount, lot.status)},
                               context_instance=RequestContext(request))
 
@@ -843,6 +854,95 @@ def coa(request, coa_pk):
     return render_to_response('qc/flavors/coa.html',
                               {'coa':coa,})
     
+
+def edit_coa(request, ssl_pk): #TODO TODO TODO DOTODOTDOTO TODOT TODTODO OTODOTDOTO TODO!!!!!!!!!!!!!!!
+    lss = LotSOLIStamp.objects.get(pk = ssl_pk)
+        
+    page_title = "Sales Order %s, Lot %s - COA Results" % (lss.salesordernumber, lss.lot.number)
+    
+    COARFormSet = formset_factory(COAResultForm, extra=0, can_delete=False)
+    
+    if request.method == 'POST':
+        formset = COARFormSet(request.POST)
+        if formset.is_valid():
+            
+            for form in formset.forms: 
+                try:
+                    if 'pk' in form.cleaned_data:
+                        if form.cleaned_data['pk'] != 0: #there was already an existing result, overwrite result DOESNT MAKE SENSE DO THIS ON WEDNESDAY
+                            try:
+                                coar = COAResult.objects.get(pk=form.cleaned_data['pk'])
+                                coar.result = form.cleaned_data['result']
+                            except:
+                                pass
+                        else:
+                            try:
+                                
+            
+
+            
+            return HttpResponseRedirect("/django/access/%s/spec_list/" % flavor.number)
+        else:
+            return render_to_response('access/flavor/spec_list.html', 
+                                  {'flavor': flavor,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'spec_rows': zip(formset.forms,),
+                                   'flavor_edit_link': '#',
+                                   'management_form': formset.management_form,
+                                   },
+                                   context_instance=RequestContext(request))
+            
+            
+    initial_data = []        
+    for coar in lss.coa.flavorspecification_set.all():
+        initial_data.append({'pk':flavorspec.pk, 'name':flavorspec.name, 'specification':flavorspec.specification})
+        
+    #if no previous results, make pk 0?  then checked cleaned data for pk 0
+        
+    formset = SpecFormSet(initial=initial_data)
+            
+    spec_rows = zip(formset.forms)
+    return render_to_response('access/flavor/spec_list.html', 
+                                  {'flavor': flavor,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'spec_rows': spec_rows,
+                                   'flavor_edit_link': '#',
+                                   'management_form': formset.management_form,
+                                   'extra':spec_rows[-1],
+                                   },
+                                   context_instance=RequestContext(request))    
+    
+        
+    # if request is post
+    #  if form is valid
+    #   c = COA()
+    #   c.save()
+    #   for coar in coa_results_set:
+    #      coar.instance.coa=c
+    #      coar.save()
+    
+    
+    
+    # pull in the  lot/sales order
+    # fill in form initial data
+    # if requst is post
+    #  if form is valid
+    #   save the form
+    
+    # OR
+    
+    # pull in lot/sales order
+    # if request is post
+    #  if form is valid
+    #   fill in related data from spces
+    #   save the form
+
+
+
+
+
 
 
 

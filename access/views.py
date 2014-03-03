@@ -30,7 +30,7 @@ from access.templatetags.ft_review_table import consolidated, consolidated_indiv
 from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_guts
 from access.tasks import ingredient_replacer_guts
-from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_tsr_form
+from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_tsr_form, FlavorSpecificationForm
 from access.formula_filters import ArtNatiFilter, AllergenExcludeFilter, MiscFilter
 
 from solutionfixer.models import Solution, SolutionStatus
@@ -1735,4 +1735,70 @@ def spec_sheet(request, flavor):
     
     return render_to_response('access/flavor/spec_sheet.html',
                               {'flavor':flavor})
+
+@flavor_info_wrapper    
+def spec_list(request, flavor):
+    page_title = "%s - Spec List" % flavor.name
+    
+    SpecFormSet = formset_factory(FlavorSpecificationForm, extra=1, can_delete=True)
+    
+    if request.method == 'POST':
+        formset = SpecFormSet(request.POST)
+        if formset.is_valid():
+            
+            for form in formset.forms:
+                try: #need this try/except in case they click 'delete' on an empty row and save
+                    if 'DELETE' in form.cleaned_data:
+                        if form.cleaned_data[u'DELETE']==True:
+                            try: 
+                                flavorspec = FlavorSpecification.objects.get(pk=form.cleaned_data['pk'])
+                                flavorspec.delete()
+                            except:
+                                pass
+                        else:
+                            try: 
+                                flavorspec = FlavorSpecification.objects.get(pk=form.cleaned_data['pk'])
+                                flavorspec.name = form.cleaned_data['name']
+                                flavorspec.specification = form.cleaned_data['specification']
+                            except:
+                                flavorspec = FlavorSpecification(
+                                    flavor = flavor,
+                                    name = form.cleaned_data['name'],
+                                    specification = form.cleaned_data['specification']
+                                )
+                            flavorspec.save()
+                except:
+                    pass
+
+            
+            return HttpResponseRedirect("/django/access/%s/spec_list/" % flavor.number)
+        else:
+            return render_to_response('access/flavor/spec_list.html', 
+                                  {'flavor': flavor,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'spec_rows': zip(formset.forms,),
+                                   'flavor_edit_link': '#',
+                                   'management_form': formset.management_form,
+                                   },
+                                   context_instance=RequestContext(request))
+            
+            
+    initial_data = []        
+    for flavorspec in flavor.flavorspecification_set.all():
+        initial_data.append({'pk':flavorspec.pk, 'name':flavorspec.name, 'specification':flavorspec.specification})
+        
+    formset = SpecFormSet(initial=initial_data)
+            
+    spec_rows = zip(formset.forms)
+    return render_to_response('access/flavor/spec_list.html', 
+                                  {'flavor': flavor,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'spec_rows': spec_rows,
+                                   'flavor_edit_link': '#',
+                                   'management_form': formset.management_form,
+                                   'extra':spec_rows[-1],
+                                   },
+                                   context_instance=RequestContext(request))   
     

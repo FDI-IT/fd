@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<head>
+	<link rel="stylesheet" type="text/css" href="/djangomedia/css/spec_sheet.css" />
+</head>
+    
+<div id="content-main">
+	
+
+	<form action="" method="POST">
+	{{ management_form }}
+	{% csrf_token %}
+
+	<h2 class="fdi_print_subtitle">Specifications</h2>
+	<table class="fdi_specifications_table">
+		<thead>
+			<tr>
+				<th>
+					Name
+				</th>
+				<th>
+					Specification
+				</th>
+				<th>
+					Delete
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for form, label in spec_rows %}
+			{{ form.id }}
+			{% if form.errors %}
+				<tr>
+					<td class="highlight" colspan="5"><b>	 Please correct the error(s) in the following row. {{form.non_field_errors}}</b></td>
+				</tr>
+			{% endif %}
+			<tr>
+				<td class="pk_row" style="display:none;"> {{ form.pk }} </td>
+				<td class="spec_name" width ="25%"> {{ form.name }} {{form.name.errors}}</td>
+				<td class="spec" width ="25%"> {{ form.specification }} {{form.specification.errors}}</td>
+				<td class="del-row">{{ form.DELETE }}</td>
+
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+	<input id="spec-submit-button" type="submit" value="Save" />		
+	</form>
+</div>
+
+{% endblock %}
