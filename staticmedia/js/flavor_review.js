@@ -1,3 +1,5 @@
+var FLAVOR_REVIEW = {}
+
 var PIN_CELL = 0;
 var NA_CELL = 1;
 var PREFIX_CELL =2
@@ -379,29 +381,97 @@ function consolidated_review_popup(flavor_number) {
 	};
 }
 
-function explosion_review_popup(flavor_number) {
-	var get_request_data = {};
-	get_request_data.batch_amount = jQuery('#ft_review_table').find("#adjusted_weight").val();
-	get_request_data.ftpk_to_expand = [];
+function print_explosion_batchsheet(new_lot) {
+	
+	var post_dict = {};
+	
+	if(new_lot == true) {
+		post_dict.create_lot = true;
+	}
+	else {
+		post_dict.create_lot = false;
+	}
+	
+	post_dict.flavor_number = FLAVOR_REVIEW.flavor_number;
+	post_dict.batch_amount = jQuery('#ft_review_table').find("#adjusted_weight").val();
+	post_dict.ftpk_to_expand = [];
 	
 	jQuery(".ft-spacer:not(.hidden)").each(function() {
-		get_request_data.ftpk_to_expand.push(jQuery(this).data('ftpk'));
+		post_dict.ftpk_to_expand.push(jQuery(this).data('ftpk'));
 	});
 	
+	console.log(post_dict);
+	
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    post_dict.csrfmiddlewaretoken = getCookie('csrftoken');
 	// POST instead of GET
-	jQuery.get("/django/batchsheet/explosion_print/" + flavor_number + "/",
-		get_request_data,
+	jQuery.post("/django/batchsheet/explosion_print/" + FLAVOR_REVIEW.flavor_number + "/", 
+		post_dict,
 		function(data) {
 			var win = window.open('about:blank');
 			with (win.document) {
 				open();
 				write(data);
-				close();
-			}
-	});
+				close();				
+			};
+		});
 	
-	
+
 	return;
+}
+
+var dialog_cancel = function() {
+	jQuery(this).dialog("close");
+};
+
+var explosion_print_new_lot = function() {
+	print_explosion_batchsheet(true);
+	jQuery(this).dialog("close");
+};
+
+var explosion_print_without_lot = function() {
+	print_explosion_batchsheet(false);
+	jQuery(this).dialog("close");
+};
+
+function explosion_review_popup(flavor_number) {
+	
+	FLAVOR_REVIEW.flavor_number = flavor_number;
+	
+	$("#explosion_print_dialog").dialog({
+		resizable: false,
+		width: 350,
+		height: 120,
+		modal: true,
+		autoOpen: false,
+		buttons: {
+			"Cancel": dialog_cancel,
+			"Create New Lot": explosion_print_new_lot,
+			"Print without Lot": explosion_print_without_lot,
+		}
+	}); 
+
+	console.log(flavor_number);
+	
+	var title = "Print Batchsheet";
+	jQuery("#explosion_print_dialog").html("Select an option");
+	jQuery("#explosion_print_dialog").dialog("option","title",title).dialog("open").css("text-align","center");
+	
+
 }
 
 function flavor_review_popup(flavor_number) {
@@ -661,7 +731,11 @@ jQuery.fn.table2CSV = function(options) {
 	}
 }
 
+
+
 jQuery(document).ready(function(){
+
+
 	consolidate();	
 	$("#exploded").treeTable();
 	var menu_flavor_review = jQuery('#flavor_review_print_menu');

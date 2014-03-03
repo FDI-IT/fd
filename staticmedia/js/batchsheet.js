@@ -207,7 +207,12 @@ var populate_form_from_qstring = function() {
 	refresh_batchsheet();
 };
 
+
+
 jQuery(document).ready(function(){
+
+	
+	
 	populate_form_from_qstring();
 	
 	$('#id_flavor_number, #id_batch_amount').keyup( delay_refresh_batchsheet );

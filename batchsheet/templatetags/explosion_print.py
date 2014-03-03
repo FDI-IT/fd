@@ -10,7 +10,7 @@ from access.models import FormulaTree
 register = template.Library()
 
 @register.inclusion_tag('batchsheet/explosion_print_component.html')
-def explosion_print_component(lot, ftpk):
+def explosion_print_component(lot, component, weight):
     weight_factor = lot.amount / Decimal("1000")
 
     flavor = lot.flavor
@@ -31,11 +31,18 @@ def explosion_print_component(lot, ftpk):
         #c = Context({'flavor':u"%s -- NOT APPROVED" % flavor.__unicode__()})
         #json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)
     else:
-        formula_tree_node = FormulaTree.objects.get(pk=ftpk)
-        batch_amount = formula_tree_node.batch_adjusted_weight(lot.amount)
-        flavor = formula_tree_node.node_flavor
-
-        component_formula_amount = formula_tree_node.weight
+#         formula_tree_node = FormulaTree.objects.get(pk=ftpk)
+#         batch_amount = formula_tree_node.batch_adjusted_weight(lot.amount)
+#         flavor = formula_tree_node.node_flavor
+# 
+# 
+#         component_formula_amount = formula_tree_node.weight
+        
+                
+        batch_amount = weight*lot.amount/1000
+        flavor = component
+        
+        component_formula_amount = weight
 
         if flavor.yield_field and flavor.yield_field != 100:
             yield_adjusted_amount = component_formula_amount/(flavor.yield_field/Decimal("100"))
@@ -46,7 +53,7 @@ def explosion_print_component(lot, ftpk):
         weight_factor = yield_adjusted_amount * weight_factor / Decimal("1000")
                 
     return {
-            'formula_tree_node':formula_tree_node,
+            #'formula_tree_node':formula_tree_node,
             'lot':lot,
             'flavor': flavor,
             'weighted_formula_set': weighted_formula_set(flavor, weight_factor),

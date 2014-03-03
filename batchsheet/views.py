@@ -7,8 +7,10 @@ import logging
 import hashlib
 import os 
 import json
+import ast
 from decimal import Decimal, ROUND_HALF_UP
 from operator import itemgetter
+
 
 from django.template import Context, loader
 from django.shortcuts import render_to_response, get_object_or_404
@@ -35,14 +37,14 @@ from reversion import revision
 
 from elaphe import barcode
 
-from access.models import Flavor
+from access.models import Flavor, FormulaTree
 from newqc.models import Lot, get_next_lot_number, LotSOLIStamp
 from salesorders.models import SalesOrderNumber, LineItem
 
 from access.views import flavor_info_wrapper
 from batchsheet import forms
 from batchsheet.forms import BatchSheetForm, NewLotForm, UpdateLotForm, build_confirmation_rows
-from batchsheet.controller import BatchAddLots
+from batchsheet.controller import BatchAddLots, initialize_lot
 from batchsheet.exceptions import BatchLotAddException
 
 def batchsheet_home(request):
@@ -431,27 +433,99 @@ def batchsheet_batch_print(request):
                        },
                       context_instance=RequestContext(request))
         
-        
-@revision.create_on_success
-@flavor_info_wrapper
-def explosion_print(request, flavor):
-    ## POST instead of GET
-    ftpks = request.GET.getlist('ftpk_to_expand[]')
-    batch_amount = Decimal(request.GET.get('batch_amount'))
+
+
+def explosion_print_single(request, lot_pk):
     
-    ## create a lot instead of just selecting one
-    lot = Lot.objects.get(id=45700)
-    lot.amount = batch_amount
+    lot = Lot.objects.get(pk = lot_pk)
+    if lot.ftpks == None:
+        ftpks = []
+    else:
+        ftpks = ast.literal_eval(lot.ftpks) #turns string into python list 
     
-    ##REDIRECT on success
+    component_dict = {}
+
+    #if there are duplicate components, consolidate them in the batch sheet
+    #add up their weights and put the total in component_dict[component_flavor]    
+    for ftpk in ftpks:
+        ft_node = FormulaTree.objects.get(pk=ftpk)
+        if ft_node.node_flavor not in component_dict:
+            component_dict[ft_node.node_flavor] = ft_node.weight
+        else:
+            component_dict[ft_node.node_flavor] = component_dict[ft_node.node_flavor] + ft_node.weight
+    
     return render_to_response('batchsheet/explosion_print_main.html',
                               {
                                'lot':lot,
                                'flavor':lot.flavor,
+                               'batch_amount':lot.amount,
+                               #'ftpks':ftpks,
+                               'component_dict':component_dict,
+                               },
+                              context_instance=RequestContext(request))
+    
+#     return render_to_response('batchsheet/batchsheet_batch_print.html', 
+#                       {
+#                        'lot_pks':[lot_pk,],
+#                        },
+#                       context_instance=RequestContext(request))
+
+@revision.create_on_success
+@flavor_info_wrapper
+def explosion_print(request, flavor):
+            
+    ## POST instead of GET
+    
+    postdata = request.POST
+    
+    ftpks = postdata.getlist('ftpk_to_expand[]')
+    batch_amount = Decimal(postdata.get('batch_amount'))
+    create_lot = postdata.get('create_lot')
+    flavor_number = postdata.get('flavor_number')
+    
+    lot_flavor = Flavor.objects.get(number = flavor_number)
+    
+    if create_lot == 'true':
+        new_lot = initialize_lot(get_next_lot_number(), lot_flavor, batch_amount, 'Batchsheet Printed', ftpks)
+        new_lot.save()
+    else:
+        if request.user.is_authenticated():
+            user_initials = request.user.userprofile.initials
+        else:
+            user_initials = "Foobar"
+            
+        
+        current_time = datetime.datetime.now().strftime('%y%m%d%H%M')
+        
+        new_lot = initialize_lot('%s-%s' % (user_initials, current_time), lot_flavor, batch_amount, 'Temporary Lot', ftpks)
+    
+    component_dict = {}
+    
+    
+    #if there are duplicate components, consolidate them in the batch sheet
+    #add up their weights and put the total in component_dict[component_flavor]
+    for ftpk in ftpks:
+        ft_node = FormulaTree.objects.get(pk=ftpk)
+        if ft_node.node_flavor not in component_dict:
+            component_dict[ft_node.node_flavor] = ft_node.weight
+        else:
+            component_dict[ft_node.node_flavor] = component_dict[ft_node.node_flavor] + ft_node.weight
+    
+                
+                    
+        
+    
+    return render_to_response('batchsheet/explosion_print_main.html',
+                              {
+                               'lot':new_lot,
+                               'flavor':new_lot.flavor,
                                'batch_amount':batch_amount,
-                               'ftpks':ftpks,
-                               }
-                              )
+                               #'ftpks':ftpks,
+                               'component_dict':component_dict,
+                                },
+                              context_instance=RequestContext(request))
+    
+
 def lot_notebook(request):
     pass
 

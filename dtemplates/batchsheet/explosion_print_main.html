@@ -1,5 +1,7 @@
 {% load qstring %}
 {% load explosion_print %}
+{% csrf_token %}
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 
@@ -14,7 +16,10 @@
 	<script type="text/javascript" src="/djangomedia/js/jquery.tablesorter.min.js?v=25"></script>
 	<script type="text/javascript" src="/djangomedia/js/batchsheet.js"></script>
 	
-    <title>{{ page_title }}</title>
+    <title>{{ page_title }}
+
+    	
+    </title>
 
 </head>
 
@@ -27,6 +32,7 @@
 						<th colspan="2">
 							<span class="section_span" id="titleleft">
 								{{ lot.flavor }}<br>
+
 								<span class="sub_heading">
 								<span class="section_title">Amount:</span> {{ batch_amount|floatformat:3 }} lbs, <span class="section_title">Yield:</span> {{ flavor.yield_field }}%<br>
 								<span class="section_title">No. of ingredients:</span> {{ flavor.formula_set.all.count }}
@@ -160,9 +166,9 @@
 		<div class="newpage batchsheet">
 			{% explosion_print_lot lot %}
 		</div>
-		{% for ftpk in ftpks %}
+		{% for component, weight in component_dict.items %}
 		<div class="newpage batchsheet">
-			{% explosion_print_component lot ftpk %}
+			{% explosion_print_component lot component weight %}
 		</div>
 		{% endfor %}
 	</div>

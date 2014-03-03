@@ -8,6 +8,14 @@ from salesorders.models import LineItem, SalesOrderNumber
 
 from batchsheet.exceptions import BatchLotAddException
 
+def initialize_lot(lot_number, flavor, amount, status, ftpks):
+    new_lot = Lot(number = lot_number,
+                  flavor = flavor,
+                  amount = amount,
+                  status = status,
+                  ftpks = ftpks)
+    return new_lot
+
 class BatchAddLots():    
     
     @staticmethod
