@@ -9,7 +9,7 @@ from django.template import RequestContext
 from django.utils import simplejson
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, redirect
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.db.models import Q
 
 from access.models import Ingredient
@@ -28,7 +28,7 @@ def build_filter_kwargs(qdict, default):
             string_kwargs[keyword] = arg_list
     return string_kwargs
 
-@login_required
+@permission_required('access.view_flavor')
 def process_baserm_update(request):
     solution_id = request.POST['solution_id']
     baserm_id = request.POST['baserm_id']
@@ -83,7 +83,7 @@ def ingredient_autocomplete(request):
     return HttpResponse(simplejson.dumps(ret_array), content_type='application/json; charset=utf-8')
 
 
-@login_required
+@permission_required('access.view_flavor')
 def process_baserm_bypk_update(request):
     solution_id = request.POST['solution_id']
     baserm_id = request.POST['baserm_id']
@@ -94,7 +94,7 @@ def process_baserm_bypk_update(request):
     response_dict = {}
     return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')
 
-@login_required
+@permission_required('access.view_flavor')
 def process_solvent_update(request):
     solution_id = request.POST['solution_id']
     solution = Solution.objects.get(id=solution_id)
@@ -109,7 +109,7 @@ def process_solvent_update(request):
     response_dict = {}
     return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')
 
-@login_required
+@permission_required('access.view_flavor')
 def process_percentage_update(request):
     solution_id = request.POST['solution_id']
     percentage = request.POST['percentage']
@@ -128,7 +128,7 @@ def process_percentage_update(request):
         response_dict = {'validation_message': "Percentage must be a valid number"}
         return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')
 
-@login_required
+@permission_required('access.view_flavor')
 def process_status_update(request):
     solution_id = request.POST['solution_id']
     status_id = request.POST['status_id']
@@ -154,7 +154,6 @@ def process_status_update(request):
                      'counts':counts}
     return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')
 
-@login_required
 @permission_required('solution.can_change')
 def solution_review(request):
     page_title = "Solution Review"
@@ -217,7 +216,6 @@ def solution_review(request):
                                },
                                context_instance=RequestContext(request))
     
-@login_required
 @permission_required('solution.can_change')
 def flagged_review(request):
     page_title = "Solution Review"
@@ -280,7 +278,7 @@ def flagged_review(request):
                                },
                                context_instance=RequestContext(request))
     
-@login_required
+@permission_required('access.view_flavor')
 def solution_summary(request, status=None):
     SolutionModelFormFormsetFactory = modelformset_factory(Solution,form=forms.SolutionModelForm, extra=0)
     if status == "unverified":
@@ -316,7 +314,7 @@ def solution_summary(request, status=None):
     return render_to_response('solutionfixer/solution_summary.html',
                               context_dict)
     
-@login_required
+@permission_required('access.view_flavor')
 def flagged_summary(request):
     SolutionModelFormFormsetFactory = modelformset_factory(Solution,form=forms.SolutionModelForm, extra=0)
 

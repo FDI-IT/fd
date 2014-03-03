@@ -38,7 +38,7 @@ DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'post
 DATABASE_NAME = 'fd_test'#os.environ['DJANGO_DATABASE_NAME']             # Or path to database file if using sqlite3.
 DATABASE_USER = 'www-data'#os.environ['DJANGO_DATABASE_USER']             # Not used with sqlite3.
 DATABASE_PASSWORD = 'fdi'#os.environ['DJANGO_DATABASE_PASSWORD']         # Not used with sqlite3.
-DATABASE_HOST = '10.1.10.182'#'192.168.1.129'#'10.1.10.182'#os.environ['DJANGO_DATABASE_HOST']             # Set to empty string for localhost. Not used with sqlite3.
+DATABASE_HOST = '192.168.10.3'#'192.168.1.129'#'10.1.10.182'#os.environ['DJANGO_DATABASE_HOST']             # Set to empty string for localhost. Not used with sqlite3.
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
 '''
@@ -153,8 +153,6 @@ INSTALLED_APPS = (
     'mysearch',
     'flavor_usage',
     'performance_appraisal',
-    'sorl.thumbnail',
-    'south',
     'formfieldset',
     'reversion',
     #'fdileague',

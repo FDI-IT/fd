@@ -1002,6 +1002,7 @@ class Ingredient(models.Model):
         ordering = ['id']
         permissions = (
                 ("changeprice_ingredient","Can change the price of raw materials"),
+                ('view_ingredient',"Can view ingredients")
         )
         db_table = u'Raw Materials'
         
@@ -1290,7 +1291,9 @@ class Flavor(FormulaInfo):
     class Meta:
         db_table = u'access_integratedproduct'
         ordering = ['-valid','number']
-    
+        permissions = (
+                ('view_flavor',"Can view flavors"),
+        )
     import_order = 0
 
     
@@ -1354,6 +1357,10 @@ class Flavor(FormulaInfo):
     @property
     def table_name(self):
         return "%s %s" % (self.name, self.label_type)
+    
+    @property
+    def natart_name_with_type(self):
+        return "%s %s %s" % (self.natart, self.name, self.label_type)
     
     def get_admin_url(self):
         return "/django/admin/access/flavor/%s" % self.id
@@ -2852,17 +2859,17 @@ class TSR(models.Model):
     
     #approvals needed
     kosher_parve = models.BooleanField(default=False)
-    kosher_dairy = models.BooleanField(default=False)
-    usda = models.BooleanField(default=False, verbose_name="USDA")
-    msds = models.BooleanField(default=False, verbose_name="MSDS")
-    specs = models.BooleanField(default=False)
-    cont_guar = models.BooleanField(default=False)
-    finished_product = models.BooleanField(default=False)
+    kosher_dairy = models.BooleanField(default=False) # not necessary
+    usda = models.BooleanField(default=False, verbose_name="USDA") ##
+    msds = models.BooleanField(default=False, verbose_name="MSDS") ## paperwork group of fields
+    specs = models.BooleanField(default=False)                     ## add nutri, pricing
+    cont_guar = models.BooleanField(default=False) # continuing guarantee
+    finished_product = models.BooleanField(default=False) # showing finished system
     
     #flavor form
     liquid = models.BooleanField(default=False)
     dry = models.BooleanField(default=False)
-    emulsion = models.BooleanField(default=False)
+    emulsion = models.BooleanField(default=False) # not necessary
     natural = models.BooleanField(default=False)
     wonf = models.BooleanField(default=False)
     NA = models.BooleanField(default=False)
@@ -2873,14 +2880,15 @@ class TSR(models.Model):
     oil = models.BooleanField(default=False)
     water = models.BooleanField(default=False)
     coffee = models.BooleanField(default=False)
-    tea = models.BooleanField(default=False)
+    tea = models.BooleanField(default=False) # black, green, herbal
     nopg = models.BooleanField(default=False)
     prop65 = models.BooleanField(default=False)
     nodiacetyl = models.BooleanField(default=False)
     overseas = models.BooleanField(default=False)
     
+    #flash point targets "advise flash point"
     
-    max_price = models.DecimalField(max_digits=7, decimal_places=2)
+    max_price = models.DecimalField(max_digits=7, decimal_places=2) ## max COST field
     lbs_per_year = models.PositiveIntegerField()
     exposed_to_heat = models.BooleanField(default=False)
     temperature = models.DecimalField(null=True, max_digits=5, decimal_places=3, blank=True)
@@ -3312,7 +3320,8 @@ class MagentoFlavor(models.Model):
     
         
         
-        
-        
-        
-        
+
+class FlavorSpecification(models.Model):
+    flavor=models.ForeignKey('Flavor')
+    name = models.CharField(max_length=48)
+    specification = models.CharField(max_length=48)

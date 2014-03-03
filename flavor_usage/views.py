@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.template import RequestContext
 
 from reversion import revision
@@ -10,7 +10,7 @@ from access.views import flavor_info_wrapper
 from flavor_usage import models
 from flavor_usage import forms
 
-@login_required
+@permission_required('access.view_flavor')
 @revision.create_on_success
 @flavor_info_wrapper
 def new_usage(request, flavor):

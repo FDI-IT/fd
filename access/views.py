@@ -14,7 +14,7 @@ from django.utils.functional import wraps
 from django.template import RequestContext
 from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory, inlineformset_factory
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.db import transaction
 from django.views.generic.create_update import create_object
 
@@ -109,7 +109,7 @@ def experimental_wrapper(view):
     return inner     
 
 @experimental_wrapper
-@login_required
+@permission_required('access.view_flavor')
 def experimental_edit(request, experimental):
     if request.method == 'POST':
         form = forms.ExperimentalForm(request.POST, instance=experimental)
@@ -216,7 +216,7 @@ def experimental_review(request, experimental):
         context_dict['approve_link'] = experimental.get_approve_link()
         context_dict['status_message'] = status_message
         context_dict['recalculate_link'] = '/django/access/experimental/%s/recalculate/' % experimental.experimentalnum
-        context_dict['edit_link'] = '#'
+        context_dict['experimental_edit_link'] = '#'
         return render_to_response('access/experimental/experimental_review.html',
                                   context_dict,
                                   context_instance=RequestContext(request))
@@ -262,12 +262,13 @@ def flavor_review(request, flavor):
                    'page_title': page_title,
                    'weight_factor': weight_factor,
                    'formula_weight': formula_weight,
+                   'flavor_edit_link': '#',
                    }   
     return render_to_response('access/flavor/flavor_review.html',
                               context_dict,
                               context_instance=RequestContext(request))
 
-@login_required
+@permission_required('access.view_flavor')
 def tsr_review(request, tsr_number):
     tsr = TSR.objects.get(number=tsr_number)
     page_title = "TSR Review"
@@ -283,7 +284,7 @@ def tsr_review(request, tsr_number):
                               context_dict,
                               context_instance=RequestContext(request))
 
-@login_required
+@permission_required('access.view_flavor')
 @po_info_wrapper
 def po_review(request, po):
     page_title = "Purchase Order Review"
@@ -299,7 +300,7 @@ def po_review(request, po):
                               context_dict,
                               context_instance=RequestContext(request))
     
-@login_required
+@permission_required('access.view_flavor')
 @po_info_wrapper
 def po_review_print(request, po):
     polis = []
@@ -397,7 +398,7 @@ def ingredient_replacer_preview(request, old_ingredient_id, new_ingredient_id):
                                'old_ingredient_gzl':old_ingredient_gzl,},
                               context_instance=RequestContext(request))
 
-@login_required
+@permission_required('access.view_flavor')
 def ingredient_replacer(request):
     if request.user.is_superuser:
         if request.method=='POST':
@@ -439,6 +440,7 @@ def ft_review(request, flavor):
                    'formula_weight': formula_weight,
                    'print_link':'FLAVOR_REVIEW_PRINT_MENU',
                    'recalculate_link':'/django/access/%s/recalculate/' % flavor.number,
+                   'flavor_edit_link':'#',
                    }   
     return render_to_response('access/flavor/ft_review.html',
                               context_dict,
@@ -446,7 +448,7 @@ def ft_review(request, flavor):
 
 
 @flavor_info_wrapper
-@login_required
+@permission_required('access.view_flavor')
 @transaction.commit_on_success
 def recalculate_flavor(request,flavor):
     old_new_attrs, flavor = recalculate_guts(flavor)
@@ -465,7 +467,7 @@ def recalculate_flavor(request,flavor):
     
     
 @experimental_wrapper
-@login_required
+@permission_required('access.view_flavor')
 @transaction.commit_on_success
 def recalculate_experimental(request,experimental):
     flavor=experimental.flavor
@@ -592,7 +594,7 @@ def print_review(request,flavor):
                               context_instance=RequestContext(request))
 
 @experimental_wrapper
-@login_required
+@permission_required('access.view_flavor')
 def experimental_name_edit(request, experimental):
     """
     This view uses a lot of logic in javascript.
@@ -1038,7 +1040,6 @@ def sanity_check(resultant_objects):
     else:
         return None
 
-@login_required
 @permission_required('access.change_formula')
 @flavor_info_wrapper
 @revision.create_on_success
@@ -1121,7 +1122,7 @@ def formula_entry(request, flavor, status_message=None):
                                    },
                                    context_instance=RequestContext(request))
     
-@login_required
+@permission_required('access.view_flavor')
 @experimental_wrapper
 @revision.create_on_success
 @transaction.commit_on_success
@@ -1219,10 +1220,7 @@ def experimental_formula_entry(request, experimental, status_message=None):
                                    },
                                    context_instance=RequestContext(request))
     
-    
-    
-
-@login_required
+@permission_required('access.view_flavor')
 #@revision.create_on_success
 #@transaction.commit_on_success
 def tsr_entry(request, tsr_number):
@@ -1285,9 +1283,8 @@ def tsr_entry(request, tsr_number):
                                    context_instance=RequestContext(request))    
     
     
-    
 
-@login_required
+@permission_required('access.view_flavor')
 @po_info_wrapper
 #@revision.create_on_success
 #@transaction.commit_on_success
@@ -1387,7 +1384,7 @@ def get_barcode(request, flavor_number):
 
 
 # TODO : fix these; just placeholder
-@login_required
+@permission_required('access.view_flavor')
 @revision.create_on_success
 def db_ops(request):
     return render_to_response('access/flavor/db_ops.html', {})
@@ -1399,13 +1396,13 @@ def process_digitized_paste(request):
     return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')
 
 
-@login_required
+@permission_required('access.view_flavor')
 @revision.create_on_success
 def digitized_entry(request):
     form = forms.DigitizedFormulaPasteForm()
     return render_to_response('access/flavor/digitized_entry.html', {'form': form})
 
-@login_required
+@permission_required('access.view_flavor')
 @revision.create_on_success
 def new_tsr(request):
     
@@ -1416,7 +1413,7 @@ def new_tsr(request):
                          template_name="access/tsr/new.html",
                          post_save_redirect="/django/access/tsr/%(number)s/tsr_entry",)
 
-@login_required
+@permission_required('access.view_flavor')
 @revision.create_on_success
 def new_po(request):
     return create_object(request, 
@@ -1436,12 +1433,11 @@ def jil_object_list(request):
                 },
         )
 
-@login_required
+@permission_required('access.view_flavor')
 def new_rm_wizard(request):
     return forms.NewRMWizard([forms.NewRMForm1, forms.NewRMForm11, forms.NewRMForm2, forms.NewRMForm3, forms.NewRMForm4, forms.NewRMForm5])(request)
 
 
-@login_required
 @permission_required('access.change_formula')  
 @flavor_info_wrapper
 def formula_info_merge(request, flavor):
@@ -1451,7 +1447,7 @@ def formula_info_merge(request, flavor):
     
     
 
-@login_required
+@permission_required('access.view_flavor')
 @flavor_info_wrapper
 def new_rm_wizard_flavor(request, flavor):
     ingredients = Ingredient.objects.filter(sub_flavor=flavor)
@@ -1527,7 +1523,7 @@ SOLVENT_NAMES = {
     6403:'Safflower Oil',
 }
 
-@login_required
+@permission_required('access.view_flavor')
 def new_solution_wizard(request):
     if request.method == "POST":
         return forms.NewRMWizard([forms.NewRMForm1, forms.NewRMForm2, forms.NewRMForm3, forms.NewRMForm4, forms.NewRMForm5], initial=request.session['new_solution_wizard_initial'])(request)
@@ -1661,17 +1657,16 @@ def rm_allergen_list(request):
                               {'rms':Ingredient.objects.exclude(allergen__iexact="None")}
                               )
 
-@login_required
+@permission_required('access.view_flavor')
 def new_rm_wizard_launcher(request):
     return render_to_response('access/new_rm_wizard_launcher.html')
 
 
-@login_required
 @permission_required('access.add_experimentallog')
 def new_ex_wizard(request):
     return forms.NewExFormWizard([forms.NewExForm1,forms.NewExForm2,forms.NewExForm3])(request)
 
-@login_required
+@permission_required('access.view_flavor')
 def new_rm_wizard_rm(request, ingredient_pk):
     i = Ingredient.objects.get(pk=ingredient_pk)
     allers = []
@@ -1734,4 +1729,10 @@ def formula_visualization(request, flavor):
         }
     context_dict.update(formatted_ft)
     return render_to_response('access/flavor/formula_visualization.html', context_dict)
+
+@flavor_info_wrapper
+def spec_sheet(request, flavor):
+    
+    return render_to_response('access/flavor/spec_sheet.html',
+                              {'flavor':flavor})
     

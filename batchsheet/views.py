@@ -22,13 +22,10 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory
 from django.template.loader import get_template
-from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.db.models import Sum
 from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
-
-from sorl.thumbnail import get_thumbnail
 
 from reversion import revision
 

@@ -16,11 +16,10 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.forms.formsets import formset_factory
 from django.forms.models import inlineformset_factory
-from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.db.models import Count
+from django.contrib.auth.decorators import permission_required
 
-from sorl.thumbnail import get_thumbnail
 from reversion import revision
 
 from elaphe import barcode
@@ -30,7 +29,7 @@ from access.barcode import barcodeImg, codeBCFromString
 from access.models import Flavor, Ingredient
 from access.views import flavor_info_wrapper
 from newqc.forms import NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
-from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard
+from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, COA
 from newqc.utils import process_jbg, get_card_file, scan_card
 from newqc.tasks import walk_scans_qccards
 from salesorders.models import SalesOrderNumber, LineItem
@@ -120,7 +119,7 @@ lls = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
 #Lot.objects.extra(select={'lotyear':'YEAR(date)','lotmonth':'MONTH(date)'}, order_by=['lotyear','lotmonth',],),
 
 
-@login_required
+@permission_required('access.view_flavor')
 def lot_list(request, paginate_by = 'default', queryset = 'default'):
     
     
@@ -161,7 +160,7 @@ def lot_list(request, paginate_by = 'default', queryset = 'default'):
         }),
     )
 
-@login_required
+@permission_required('access.view_flavor')
 def lots_by_day(request, year, month, day):
     queryset = Lot.objects.filter(date__year=year, date__month=month, date__day=day)
 
@@ -218,7 +217,7 @@ def build_filter_kwargs(qdict, default):
 
     return string_kwargs
 
-@login_required
+@permission_required('access.view_flavor')
 def lots_by_month(request, year, month):
     queryset = Lot.objects.filter(date__year=year, date__month=month)
     date_field = 'date'
@@ -237,7 +236,7 @@ def lots_by_month(request, year, month):
         }, **STATUS_BUTTONS),
     )
     
-@login_required
+@permission_required('access.view_flavor')
 def retains_by_month(request, year, month):
     queryset = Retain.objects.filter(date__year=year, date__month=month)
     date_field = 'date'
@@ -253,7 +252,7 @@ def retains_by_month(request, year, month):
         }, **STATUS_BUTTONS),
     )
     
-@login_required
+@permission_required('access.view_flavor')
 def retains_by_day(request, year, month, day):
     queryset = Retain.objects.filter(date__year=year, date__month=month, date__day=day)
     date_field = 'date'
@@ -269,7 +268,7 @@ def retains_by_day(request, year, month, day):
         }, **STATUS_BUTTONS),
     )
     
-@login_required
+@permission_required('access.view_flavor')
 def retains_by_status(request, status):
     queryset = Retain.objects.filter(status=status)
     date_field = 'date'
@@ -285,7 +284,7 @@ def retains_by_status(request, status):
         }, **STATUS_BUTTONS),
     )
     
-@login_required
+@permission_required('access.view_flavor')
 def rm_retains_by_month(request, year, month):
     queryset = RMRetain.objects.filter(date__year=year, date__month=month)
     date_field = 'date'
@@ -301,7 +300,7 @@ def rm_retains_by_month(request, year, month):
         }, **STATUS_BUTTONS),
     )
     
-@login_required
+@permission_required('access.view_flavor')
 def rm_retains_by_day(request, year, month, day):
     queryset = RMRetain.objects.filter(date__year=year, date__month=month, date__day=day)
     date_field = 'date'
@@ -317,7 +316,7 @@ def rm_retains_by_day(request, year, month, day):
         }, **STATUS_BUTTONS),
     )
     
-@login_required
+@permission_required('access.view_flavor')
 def rm_retains_by_supplier(request,supplier):
     queryset = RMRetain.objects.filter(supplier=supplier)
     date_field = 'date'
@@ -333,7 +332,7 @@ def rm_retains_by_supplier(request,supplier):
         }, **STATUS_BUTTONS),
     )
     
-@login_required
+@permission_required('access.view_flavor')
 def rm_retains_by_status(request, status):
     queryset = RMRetain.objects.filter(status=status)
     date_field = 'date'
@@ -349,7 +348,7 @@ def rm_retains_by_status(request, status):
         }, **STATUS_BUTTONS),
     )
     
-@login_required
+@permission_required('access.view_flavor')
 def lots_by_status(request, status):
     queryset = Lot.objects.filter(status=status)
     return list_detail.object_list(
@@ -420,16 +419,16 @@ def add_objects(request, page_title, ObjectClass, NewObjectForm):
                                       context_instance=RequestContext(request))
 
 
-@login_required
+@permission_required('access.view_flavor')
 def add_retains(request):
     #def add_objects(request, page_title, ObjectClass, NewObjectForm):
     return add_objects(request, page_title="Add Retains", ObjectClass=Retain, NewObjectForm=NewFlavorRetainForm)
 
-@login_required
+@permission_required('access.view_flavor')
 def add_rm_retains(request):
     return add_objects(request, page_title="Add RM Retains", ObjectClass=RMRetain, NewObjectForm=NewRMRetainForm)
 
-@login_required
+@permission_required('access.view_flavor')
 def add_receiving_log(request):
     return add_objects(request, page_title="Add To Receiving Log", ObjectClass=ReceivingLog, NewObjectForm=NewReceivingLogForm)
 
@@ -456,7 +455,7 @@ def target_sorter(checklist_row):
     except IndexError:
         return None
 
-@login_required
+@permission_required('access.view_flavor')
 def batch_print(request):
     if request.method == 'POST':
         referer_re = re.compile('rm_retains')
@@ -500,7 +499,7 @@ def build_checklist_row(flavor):
 
 def build_rm_checklist_row(pin):
     return (pin, RMRetain.objects.filter(pin=pin).order_by('-date').filter(status="Passed").values_list('date', 'r_number', 'notes',)[:2])
-#@login_required
+#@permission_required('access.view_flavor')
 #def analyze_scanned_cards(request):
 #    if request.method == 'POST':
 #        tc = scan_card()
@@ -525,7 +524,7 @@ def build_rm_checklist_row(pin):
 #                              {},
 #                              context_instance=RequestContext(request))
     
-@login_required
+@permission_required('access.view_flavor')
 def scrape_testcards(request):
     walk_scans_qccards.delay(walk_paths=['/srv/samba/tank/scans/qccards','/srv/samba/tank/scans/batchsheets'])
     return render_to_response('qc/scrape_testcards.html',
@@ -533,7 +532,7 @@ def scrape_testcards(request):
                               context_instance=RequestContext(request))
     
     
-@login_required
+@permission_required('access.view_flavor')
 def analyze_scanned_cards(request):
     if request.method == 'POST':
         pass
@@ -558,7 +557,7 @@ def get_rm_barcode(request, retain_pk):
     x.save(response, "PNG")
     return response
 
-@login_required
+@permission_required('access.view_flavor')
 @flavor_info_wrapper
 def flavor_history_print(request, flavor):
     page_title = "Flavor Retain History"
@@ -573,7 +572,7 @@ def flavor_history_print(request, flavor):
                                'print_checklist_min': 2
                                }, context_instance=RequestContext(request))
 
-#@login_required
+#@permission_required('access.view_flavor')
 #def resolve_retains_any(request):
 #    if request.method == 'POST':
 #        f = ResolveRetainForm(request.POST, instance=Retain.objects.get(pk=request.session['retainpk']))
@@ -602,13 +601,13 @@ def resolve_retains_any(request):
     except:
         return HttpResponseRedirect('/django/qc/')
     
-@login_required
+@permission_required('access.view_flavor')
 def batchsheet_detail(request, lot_pk):
     lot = get_object_or_404(Lot, pk=lot_pk)
     return render_to_response('qc/batchsheets/detail.html',
                               {'lot':lot})
 
-@login_required
+@permission_required('access.view_flavor')
 def lot_detail(request, lot_pk):
     lot = get_object_or_404(Lot, pk=lot_pk)
     return render_to_response('qc/lots/detail.html',
@@ -618,7 +617,7 @@ def lot_detail(request, lot_pk):
                               context_instance=RequestContext(request))
 
 
-@login_required
+@permission_required('access.view_flavor')
 def old_lot_detail(request, lot_pk):
     lot = get_object_or_404(Lot, pk=lot_pk)
     if request.method == 'POST':
@@ -662,7 +661,7 @@ def old_lot_detail(request, lot_pk):
 
 
 
-@login_required
+@permission_required('access.view_flavor')
 @revision.create_on_success
 def resolve_lot(request, lot_pk):
     lot = get_object_or_404(Lot, pk=lot_pk)
@@ -737,7 +736,7 @@ def resolve_testcards_ajax_post(request):
     
     
 
-@login_required
+@permission_required('access.view_flavor')
 def resolve_testcards_any(request):
     try:
         tcs = TestCard.objects.exclude(retain=None).filter(status='Not Passed...').annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1)
@@ -753,7 +752,7 @@ def resolve_testcards_any(request):
                                },
                               context_instance=RequestContext(request))
     
-@login_required
+@permission_required('access.view_flavor')
 def resolve_testcards_specific(request, testcard_pk):
     
     testcard = get_object_or_404(TestCard, pk=testcard_pk)
@@ -837,6 +836,15 @@ def review(request):
 def receiving_log_print(request):
     # TODO
     return
+
+
+def coa(request, coa_pk):
+    coa = get_object_or_404(COA, pk=coa_pk)
+    return render_to_response('qc/flavors/coa.html',
+                              {'coa':coa,})
+    
+
+
 
 
 #to generate pngs from a pdf file

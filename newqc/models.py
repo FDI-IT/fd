@@ -165,7 +165,7 @@ class Lot(models.Model):
     status = models.CharField(max_length=25, choices=STATUS_CHOICES, default="Created")
     amount = models.DecimalField(max_digits=6, decimal_places=1, blank=True, null=True) 
     flavor = models.ForeignKey(Flavor)
-    ftpks = models.TextField(blank=True)
+   # ftpks = models.TextField(blank=True)
     
     @staticmethod
     def get_object_from_softkey(softkey):
@@ -257,7 +257,16 @@ class LotSOLIStamp(models.Model):
     salesordernumber = models.PositiveIntegerField()
     quantity = models.DecimalField(max_digits=9,decimal_places=2)
     
+
+class COA(models.Model):
+    lss = models.ForeignKey('LotSOLIStamp')
     
+class COAResult(models.Model):
+    coa = models.ForeignKey('COA')
+    name = models.CharField(max_length=48)
+    specification = models.CharField(max_length=48)
+    result = models.CharField(max_length=48)
+     
 class Retain(models.Model):
     """
     Data related to the retained sample of a production lot.

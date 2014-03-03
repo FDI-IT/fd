@@ -1,4 +1,4 @@
-from newqc.models import Retain, TestCard, ProductInfo, Lot, ImportRetain, RMImportRetain, RMInfo, RMRetain, ExperimentalRetain, RMTestCard, BatchSheet, ReceivingLog, LotWeightAdjustment
+from newqc.models import Retain, TestCard, ProductInfo, Lot, ImportRetain, RMImportRetain, RMInfo, RMRetain, ExperimentalRetain, RMTestCard, BatchSheet, ReceivingLog, LotWeightAdjustment, LotSOLIStamp, COA, COAResult
 from django.contrib import admin
 from reversion.admin import VersionAdmin
 
@@ -90,3 +90,15 @@ admin.site.register(RMRetain, RMRetainAdmin)
 class ExperimentalRetainAdmin(VersionAdmin):
     search_fields = ['retain', 'experimental_number']
 admin.site.register(ExperimentalRetain, ExperimentalRetainAdmin)
+
+class LotSOLIStampAdmin(VersionAdmin):
+    search_fields = ['salesordernumber','lot__number',]
+admin.site.register(LotSOLIStamp, LotSOLIStampAdmin)    
+
+class COAAdmin(VersionAdmin):
+    search_fields = ['lss__lot__number','lss_salesordernumber',]
+admin.site.register(COA, COAAdmin)    
+
+class COAResultAdmin(VersionAdmin):
+    search_fields = ['coa_lss__lot__number','coa_lss_salesordernumber']
+admin.site.register(COAResult, COAResultAdmin)    

@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import simplejson
 from django.utils.functional import wraps
 from django.template import RequestContext
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 
 from django.views.generic import list_detail
 
@@ -33,7 +33,7 @@ STATUS_BUTTONS =  {
 }
 
 
-@login_required
+@permission_required('access.view_flavor')
 def upload_report(request):
     if request.method =='POST':
         form = SalesOrderReportFileForm(request.POST, request.FILES)
@@ -54,7 +54,7 @@ def sales_order_info_wrapper(view):
         return view(request, sales_order, *args, **kwargs)
     return inner
 
-@login_required
+@permission_required('access.view_flavor')
 def sales_order_report(request):
     sales_orders = []
     so_by_due_date = {}
@@ -78,7 +78,7 @@ def sales_order_report(request):
                                },
                               context_instance=RequestContext(request))
 
-@login_required
+@permission_required('access.view_flavor')
 def customer_report(request, customer_pk):
     customer = get_object_or_404(Customer, pk=customer_pk)
     sales_orders = SalesOrderNumber.objects.filter(customer=customer)
@@ -91,7 +91,7 @@ def customer_report(request, customer_pk):
                               context_instance=RequestContext(request))
 
 
-@login_required
+@permission_required('access.view_flavor')
 @sales_order_info_wrapper
 def sales_order_review(request, sales_order):
     hundredths = Decimal('0.00')
@@ -125,7 +125,7 @@ def sales_order_review(request, sales_order):
                                },
                               context_instance=RequestContext(request))
 
-@login_required
+@permission_required('access.view_flavor')
 def sales_order_by_product(request, status_message=None):
     page_title="Sales Orders by Product"
     help_link = "/wiki/index.php/Sales_orders"
@@ -166,7 +166,7 @@ def sales_order_by_product(request, status_message=None):
                                'get': request.GET,},
                                context_instance=RequestContext(request))
 
-@login_required
+@permission_required('access.view_flavor')
 def sales_order_by_lineitem(request):
     queryset = LineItem.objects.all().extra(select={'total_sale_price':"quantity*unit_price"})
     return list_detail.object_list(
@@ -179,7 +179,7 @@ def sales_order_by_lineitem(request):
         },),
     )
 
-#@login_required
+#@permission_required('access.view_flavor')
 #def sales_order_by_lineitem(request, status_message=None):
 #    hundredths = Decimal('0.00')
 #    page_title="Sales Orders by Line Item"
@@ -213,7 +213,7 @@ def sales_order_by_lineitem(request):
 #                               'get': request.GET,},
 #                               context_instance=RequestContext(request))
 
-@login_required
+@permission_required('access.view_flavor')
 def sales_order_search(request, status_message=None):
     page_title = "Sales Orders By Number"
     help_link = "/wiki/index.php/Sales_orders"
