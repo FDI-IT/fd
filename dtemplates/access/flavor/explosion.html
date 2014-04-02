@@ -5,7 +5,7 @@
 			<input type="text" name="wf" id="adjusted_weight" value="1000"  />
 			<input type="submit" value="Get adjusted formula" style="display:none;"/>
 		</form> </span>
-	<span class="table_action_links"><A HREF="javascript:ft_collapse_all()">collapse</A> | <A HREF="javascript:ft_collapse_stock_items()">collapse stock items</A> | <A HREF="javascript:ft_expand_all()">expand</A> | <A HREF="/django/access/{{ flavor.number }}/formula_entry/">edit</A> | <A HREF="javascript:consolidate(); $('#consolidated').divs2CSV()">spreadsheet</A> | <A href="javascript:explosion_review_popup({{ flavor.number }})">batch sheet</A></span>
+	<span class="table_action_links"><A HREF="javascript:ft_collapse_all()">collapse</A> | <A HREF="javascript:ft_expand_all()">expand</A> | <A HREF="/django/access/{{ flavor.number }}/formula_entry/">edit</A> | <A HREF="javascript:consolidate(); $('#consolidated').divs2CSV()">spreadsheet</A> | <A href="javascript:explosion_review_popup({{ flavor.number }})">batch sheet</A></span>
 	<div class="ft-formula tab_data">
 		{% autoescape off %}
 		{{ ft }}

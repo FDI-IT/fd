@@ -4,6 +4,7 @@ from django.conf.urls.defaults import *
 from django.views.generic import list_detail
 from django.views.generic.simple import redirect_to
 from django.views.generic.date_based import archive_index
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q, F
 
 urlpatterns = patterns('batchsheet.views',
@@ -29,7 +30,6 @@ urlpatterns = patterns('batchsheet.views',
     (r'^batchsheet_batch_print/$', 'batchsheet_batch_print'),
     (r'^check_lot_number/$', 'check_lot_number'),
     (r'^get_discontinued_orders/$', 'get_discontinued_orders'),
-    (r'^explosion_print/(?P<flavor_number>\d+)/$', 'explosion_print'),
     (r'^(?P<lot_pk>\d+)/$', 'batchsheet_single'),
 
 )

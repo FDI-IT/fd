@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="content-solo">
+<div id="pagination-bar">
+	{% include "pagination_bar.html" %}
+</div>
+	<div id="flavor-list">
+		{% if rows %}
+		<table width="100%" class="sorttable">
+			<thead><tr>
+				{% autoescape off %}
+				{% for header in headers %}
+				<th {{header.2}}>{{header.1}}</th>
+				{% endfor %}
+				{% endautoescape %}
+			</tr></thead>
+			<tbody>
+		    {% for object, fields in rows %}
+		    <tr id="{{ object.pk }}">
+		    	{% for field in fields %}
+				<td><a href="{{ object.get_absolute_url }}">{{ field }}</a></td>
+				{% endfor %}
+		    </tr>
+		    {% endfor %}
+		    </tbody>
+		</table>
+		{% else %}
+		<p>No rows available</p>
+		{% endif %}
+		{% include "pagination_bar.html" %}
+	</div>
+</div>
+{% endblock %}

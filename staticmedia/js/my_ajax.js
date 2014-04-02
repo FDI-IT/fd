@@ -40,19 +40,15 @@ function adjust_weight_explosion(f) {
 
 
 function hideftrow(elem) {
-	jQuery(elem).parent().parent().next().toggleClass('hidden');
+	jQuery(elem).parent().parent().next().toggle();
 }
 
 function ft_collapse_all() {
-	jQuery('div.ft-spacer').addClass('hidden');
-}
-
-function ft_collapse_stock_items() {
-	jQuery('div.ft-spacer-stock').addClass('hidden');
+	jQuery('div.ft-spacer').hide();
 }
 
 function ft_expand_all() {
-	jQuery('div.ft-spacer').removeClass('hidden');
+	jQuery('div.ft-spacer').show();
 }
 
 
@@ -406,7 +402,7 @@ jQuery(document).ready(function(){
 	});
 	var menu = jQuery('#edit_menu');
 	menu.menu();
-	jQuery('#edit_link').click(function(event) {
+	jQuery('#experimental_edit_link').click(function(event) {
 		jQuery('#edit_menu').show().position({
 			my:'left top',
 			at:'left bottom',

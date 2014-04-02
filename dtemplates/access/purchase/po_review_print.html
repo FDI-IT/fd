@@ -75,7 +75,7 @@
 			{% for poli in polis reversed %}
 			<tr>
 				<td>{{ poli.raw_material.id }}</td>
-				<td>{{ poli.raw_material.product_name }}</td>
+				<td>{{ poli.raw_material.long_name }}</td>
 				<td>{{ poli.quantity|floatformat:"-3" }} x {{ poli.package_size|floatformat:"-3" }} lbs = {{ poli.total|floatformat:"-3" }} lbs</td>
 				<td>{{ poli.raw_material.kosher_code }}</td>
 				<td>{{ poli.raw_material.allergen }}</td>

@@ -1,0 +1,20 @@
+{% autoescape off %}
+<div id="blades">
+	<div id="critical">
+		<ul>
+		{% for label, datum, update_link in crit_list %}
+			
+			{{ update_link }}
+			<li>
+			<span class="label">{{ label }}</span>
+			<span class="datum" id="{{label|cut:" "}}">{{ datum }}</span>
+			</li>
+			{% if update_link %}
+			</a>
+			{% endif %}
+			
+		{% endfor %}
+		</ul>
+	</div>
+</div>
+	{% endautoescape %}

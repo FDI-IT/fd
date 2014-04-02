@@ -622,8 +622,8 @@ def lot_detail(request, lot_pk):
     
     return render_to_response('qc/lots/detail.html',
                               {'lot':lot,
-                              'print_link': '/django/batchsheet/%s/' % lot_pk,
                               'lss_list': lss_list,
+                              'print_link': '/django/batchsheet/explosion_print_single/%s/' % lot_pk,
                                'page_title':"Lot %s  --  %s-%s %s lbs  --  Status: %s"% (lot.number, lot.flavor.prefix, lot.flavor.number, lot.amount, lot.status)},
                               context_instance=RequestContext(request))
 

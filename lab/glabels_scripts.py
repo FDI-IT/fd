@@ -155,7 +155,8 @@ def finished_product_label(number):
                                                      "/usr/local/django/dump/labels/label.csv",
                                                      template_path)
     args = shlex.split(command_line)
-    p = subprocess.Popen(args).wait()
+    p = subprocess.Popen(args)
+    p.wait()
     solution_preview(output_file)
     return output_file
 

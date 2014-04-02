@@ -17,13 +17,8 @@ function resizeIframe(obj) {
 <div id="content-right">
 	<h3>Sales orders:</h3>
 	<ul>
-	
-		{% for create, so_number, url in lss_list %}
-			{% if create %}
-				<li><a href="/django/salesorders/{{ so_number }}/">{{ so_number }}</a> - <a href="{{ url }}"> Create COA </a></li>
-			{% else %}
-				<li><a href="/django/salesorders/{{ so_number }}/">{{ so_number }}</a> - <a href="{{ url }}"> View COA </a></li>
-			{% endif %}
+		{% for lss in lot.lotsolistamp_set.all %}
+		<li><a href="/django/salesorders/{{lss.salesordernumber}}/">{{lss.salesordernumber}}</a></li>
 		{% endfor %}
 	</ul>
 </div>

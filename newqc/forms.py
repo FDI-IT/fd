@@ -11,7 +11,7 @@ from access.models import Flavor
 import re
 
 from access.models import Flavor
-from newqc.models import Retain, RMRetain, TestCard, Lot, ReceivingLog, ProductInfo, STATUS_CHOICES, UNITS_CHOICES, COA, COAResult
+from newqc.models import Retain, RMRetain, TestCard, Lot, ReceivingLog, ProductInfo, STATUS_CHOICES, UNITS_CHOICES
 
 class AddObjectsBatch(forms.Form):
     number_of_objects = forms.IntegerField(label="Number of objects", min_value=1)
@@ -163,7 +163,7 @@ class NewRMRetainForm(forms.Form):
 class ResolveRetainForm(forms.ModelForm):
     class Meta:
         model = Retain
-        exclude = ('date', 'retain', 'lot', 'sub_lot', 'amount', 'content_type', 'object_id', 'product')
+        exclude = ('retain', 'lot', 'sub_lot', 'amount', 'content_type', 'object_id', 'product')
 
 class ResolveLotForm(forms.ModelForm):
     class Meta:
@@ -208,11 +208,3 @@ class LotFilterSelectForm(forms.Form):
             required=False,
             choices=status_choices
         )
-    
-    
-class COAResultForm(forms.Form):
-    pk = forms.IntegerField(initial=0)
-    name = forms.CharField(max_length=48)
-    specification = forms.CharField(max_length=48)
-    result = forms.CharField(max_length=48)
-    

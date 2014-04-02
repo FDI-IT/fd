@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="title">
+	<div id="title-left">
+		<span id="name">Sales Order Summary</span>
+		<span id="number"></span>
+	</div>
+	<div id="title-right">
+	</div>
+	<div id="related-links">
+	<ul>
+		
+	</ul>
+	</div>
+</div>
+
+<div id="content-main">
+<ul>
+{% for order in bad_orders %}
+	<li>{{ order }}</li>
+{% endfor %}
+</ul>
+<table>
+	<caption>Orders by flaver number</caption
+	<thead>
+		<tr>
+			<th>Flavor number</th>
+			<th>Amount</th>
+			<th>Raw Material Cost</th>
+			<th>Details</th>
+		</tr>
+	</thead><tbody>
+	{% for order in good_orders %}
+	<tr>
+	{% for sub in order %}
+		{% if forloop.last %}
+			<td>
+			{% for subsub in sub %}
+				<a href="/django/access/{{ subsub.flavor.number }}/">{{ subsub }}</a>;
+			{% endfor %}
+			</td>
+		{% else %}
+			<td>{{ sub }}</td>
+		{% endif %}
+	{% endfor %}
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+</div>
+
+
+
+<div id="content-right">
+	
+</div>
+
+</form>
+{% endblock %}
+

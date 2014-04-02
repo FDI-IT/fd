@@ -13,7 +13,7 @@ class UserProfile(models.Model):
     sort_user_columns = models.CharField(max_length=256,blank=True)
     user_columns = models.CharField(max_length=256,blank=True)
     force_password_change = models.BooleanField(blank=True)
-    lot_paginate_by = models.IntegerField(blank=True,default=25)
+    lot_paginate_by = models.IntegerField(blank=True)
     
     def __unicode__(self):
         return self.user.__unicode__()

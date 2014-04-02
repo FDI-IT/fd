@@ -26,9 +26,13 @@ type_map = {
 }
 
 exc_directory = '/srv/samba/tank/scans/exc/'
+hash_exists_directory = '/srv/samba/tank/scans/old/'
 
 def move_exc_image(full_file_path):
     shutil.move(full_file_path, exc_directory)
+
+def move_old_image(full_file_path):
+    shutil.move(full_file_path, hash_exists_directory)
 
 @task()
 def walk_scans_qccards(walk_paths=['/srv/samba/tank/scans/qccards',]):
@@ -42,7 +46,8 @@ def walk_scans_qccards(walk_paths=['/srv/samba/tank/scans/qccards',]):
                 print full_file_path
                 try:
                     returns.append(ImportBCDoc(full_file_path))
-                except:
+                except Exception as e:
+                    print e
                     move_exc_image(full_file_path)
     return returns
 
@@ -67,6 +72,8 @@ class ImportBCDoc():
         self.hash = sha.hexdigest()
         
         if self.exists_hash():
+            f.close()
+            move_old_image(self.path)
             return
         
         thumbnail = self.generate_thumbnail()

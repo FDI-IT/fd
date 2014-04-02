@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 
 from formfieldset.forms import FieldsetMixin
 
-from access.models import Flavor, FlavorSpecification, Formula, ExperimentalLog, TSR, TSRLineItem, PurchaseOrderLineItem, Solvent, PurchaseOrder, NATART_CHOICES, Ingredient, get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES
+from access.models import Flavor, Formula, ExperimentalLog, TSR, TSRLineItem, PurchaseOrderLineItem, Solvent, PurchaseOrder, NATART_CHOICES, Ingredient, get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES
 from solutionfixer.models import SolutionStatus, Solution
 
 def validate_ingredient_number(number):
@@ -39,14 +39,6 @@ class DigitizedFormulaPasteForm(forms.Form):
 class IngredientCostUpdate(forms.Form):
     new_cost = forms.FloatField()
 
-class STLayoutForm(forms.Form):
-    constrained = forms.BooleanField(required=False, initial=False)
-    levels_to_show = forms.IntegerField(required=False, initial=10, max_value=9999, min_value=2)
-    level_distance = forms.IntegerField(required=False, initial=30, max_value=1000,min_value=10)
-    node_height = forms.IntegerField(required=False, initial=30, max_value=200,min_value=10)
-    node_width = forms.IntegerField(required=False, initial=180, max_value=600,min_value=30)
-    orientation = forms.ChoiceField(required=True, initial='left', choices=(('left','left'),('top','top')))
-    
 class TSRLIForm(ModelForm):
     def __init__(self, *args, **kwargs):
         try:
@@ -858,9 +850,4 @@ class NewSolutionForm(forms.Form):
                                  ('50%','50%'),
                                  ))
     solvent = forms.ModelChoiceField(queryset=Solvent.objects.all())
-    
-class FlavorSpecificationForm(forms.Form):
-    pk = forms.IntegerField(initial=0)
-    name = forms.CharField(max_length=48)
-    specification = forms.CharField(max_length=48)
-    result = forms.CharField(max_length=48)
+   

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="title">
+	<div id="title-left">
+		<span id="name">Upload Sales Order Report</span>
+		<span id="number"></span>
+	</div>
+	<div id="title-right">
+	</div>
+	<div id="related-links">
+	<ul>
+		
+	</ul>
+	</div>
+</div>
+
+<div id="content-main">
+<form action="/django/salesorders/dev_test/clear/" method="post">
+	<input type="submit" value="Clear" />
+</form>
+</div>
+
+
+
+<div id="content-right">
+	
+</div>
+
+</form>
+{% endblock %}
+

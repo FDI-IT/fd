@@ -95,143 +95,117 @@
 				<table id="batch_sheet_memo" width=100%>
 					<tr>
 						<td>
-							<table>
-								<tr>
-									<td>
-										<div id="memorow">
-											<div class="container">
-												<div class="content">
-													<div class="left">
-														<span class="section_title">Compounder(s)</span><br>
-														__________________<br>
-														__________________<br>
-														__________________
-													</div>
-													
-													<div class="main">
-														<span class="section_title">Memo:</span><br>
-														{{ flavor.productmemo }}
-													</div>
-												</div>
-											</div>
-											<div class="sidebar">
-												<span class="section_title">Flash point:</span>
-												{% if flavor.flashpoint %}
-													{{ flavor.flashpoint }}
-												{% else %}
-													UNAVAILABLE
-												{% endif %}
-											</div>
+							<div id="memorow">
+								<div class="container">
+									<div class="content">
+										<div class="left">
+											<span class="section_title">Compounder(s)</span><br>
+											__________________<br>
+											__________________<br>
+											__________________
 										</div>
-									</td>	
-								</tr>
-								<tr>
-									<td>
-										<div id="checklistrow">
-											<div class="container">
-												<div class="content">
-													<div class="left">
-														<span class="section_title">Allergens:</span> {{ flavor.allergen }}
-														{% if flavor.crustacean %}
-															CRUSTACEANS
-														{% else %}
-														{% endif %}
-														{% if flavor.eggs %}
-															EGGS
-														{% else %}
-														{% endif %}
-														{% if flavor.fish %}
-															FISH
-														{% else %}
-														{% endif %}
-														{% if flavor.milk %}
-															DAIRY
-														{% else %}
-														{% endif %}
-														{% if flavor.peanuts %}
-															PEANUTS
-														{% else %}
-														{% endif %}
-														{% if flavor.soybeans %}
-															SOYBEANS
-														{% else %}
-														{% endif %}
-														{% if flavor.treenuts %}
-															TREENUTS
-														{% else %}
-														{% endif %}
-														{% if flavor.wheat %}
-															WHEAT
-														{% else %}
-														{% endif %}
-														{% if flavor.sulfites %}
-															SULFITES
-														{% else %}
-														{% endif %}
-													</div>
-													<div class="main">
-														<span class="section_title">Micro test:</span> {{ flavor.microtest }}
-													</div>
-												</div>
-											</div>
-											
+										
+										<div class="main">
+											<span class="section_title">Memo:</span><br>
+											{{ flavor.productmemo }}
 										</div>
-									</td>
-								</tr>
-								<tr>
-									<td id="last_section">
-										Before the batch is begun, all utensils and equipment are checked by<br>
-										visual inspection. Utensils and equipment should be checked for physical<br>
-										condition and potential contamination by any hazards including allergens.<br>
-										Non-conforming utensils and equipment should be replaced, or cleaned and<br>
-										sanitized as necessary.<br>
-										All product has been transferred from wooden to plastic pallets, and all<br>
-										labels and boxes have been counted.<br><br>
-										<span class="section_title">Signed:</span> _______________________________________ <span class="section_title">Date:</span> ____________________
-									</td>
-								</tr>
-							</table>	
-						</td>
+									</div>
+								</div>
+								<div class="sidebar">
+									<span class="section_title">Flash point:</span>
+									{% if flavor.flashpoint %}
+										{{ flavor.flashpoint }}
+									{% else %}
+										UNAVAILABLE
+									{% endif %}
+								</div>
+							</div>
+						</td>	
+					</tr>
+					<tr>
 						<td>
-							<div class="sidebar">
-								{% if flavor.ccp1 %}
-									Sieve CCP 1 Recorded: [ ]<br>
-									Sieve is inspected PRE and POST OP<br>
-								{% else %}
-								{% endif %}
-								{% if flavor.ccp2 %}
-									Allergen Cleaning CCP 2 Recorded: [ ]<br>
-								{% else %}
-								{% endif %}
-								{% if flavor.ccp4 %}
-									Label Application CCP 4 Recorded: [ ]<br>
-									Labels expected: _______<br><br>
-									Labels received: _______<br><br>
-									Labels applied: ________<br><br>
-								{% else %}
-								{% endif %}
-								{% if flavor.ccp6 %}
-									Thermal Kill Step CCP 6 Recorded: [ ]<br>
-								{% else %}
-								{% endif %}
+							<div id="checklistrow">
+								<div class="container">
+									<div class="content">
+										<div class="left">
+											<span class="section_title">Allergens:</span> {{ flavor.allergen }}
+											{% if flavor.crustacean %}
+												CRUSTACEANS
+											{% else %}
+											{% endif %}
+											{% if flavor.eggs %}
+												EGGS
+											{% else %}
+											{% endif %}
+											{% if flavor.fish %}
+												FISH
+											{% else %}
+											{% endif %}
+											{% if flavor.milk %}
+												DAIRY
+											{% else %}
+											{% endif %}
+											{% if flavor.peanuts %}
+												PEANUTS
+											{% else %}
+											{% endif %}
+											{% if flavor.soybeans %}
+												SOYBEANS
+											{% else %}
+											{% endif %}
+											{% if flavor.treenuts %}
+												TREENUTS
+											{% else %}
+											{% endif %}
+											{% if flavor.wheat %}
+												WHEAT
+											{% else %}
+											{% endif %}
+											{% if flavor.sulfites %}
+												SULFITES
+											{% else %}
+											{% endif %}
+										</div>
+										<div class="main">
+											<span class="section_title">Micro test:</span> {{ flavor.microtest }}
+										</div>
+									</div>
+								</div>
+								<div class="sidebar">
+									{% if flavor.ccp1 %}
+										Sieve CCP 1 Recorded: [ ]<br>
+									{% else %}
+									{% endif %}
+									{% if flavor.ccp2 %}
+										Allergen Cleaning CCP 2 Recorded: [ ]<br>
+									{% else %}
+									{% endif %}
+									{% if flavor.ccp4 %}
+										Label Application CCP 4 Recorded: [ ]<br>
+									{% else %}
+									{% endif %}
+									{% if flavor.ccp5 %}
+										Non Detect GMO CP 5 Recorded: [ ]<br>
+									{% else %}
+									{% endif %}
+									{% if flavor.ccp6 %}
+										Thermal Kill Step CCP 6 Recorded: [ ]<br>
+									{% else %}
+									{% endif %}
+								</div>
 							</div>
 						</td>
 					</tr>
-				</table>
-			</td>
-		</tr>
-	</tbody>
-</table>
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
+					<tr>
+						<td id="last_section">
+							Before the batch is begun, all utensils and equipment have been<br>
+							inspected for potential contamination by allergens by visual inspection.<br>
+							All product has been transferred from wooden to plastic pallets, and all<br>
+							labels and boxes have been counted.<br><br>
+							<span class="section_title">Signed:</span> _______________________________________ <span class="section_title">Date:</span> ____________________
+						</td>
+					</tr>
+				</table>	
 			</td>
 		</tr>	
 	</tbody>

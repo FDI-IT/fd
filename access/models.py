@@ -20,7 +20,6 @@ from pluggable.sets import AncestorSet
 one_hundred = Decimal('100')
 hundredths = Decimal('0.00')
 zero = Decimal('0')
-one_thousand = Decimal('1000')
 NATART_CHOICES = (
     ('N/A','N/A'),
     ('Nat','Nat'),
@@ -113,21 +112,11 @@ class FormulaTree(models.Model):
         elif self.node_flavor.yield_field != 100:
             return True
         else:
-            return False
-
-    @property
-    def node_label(self):
-        if self.lft == 0:
-            return self.root_flavor.name
-        else:
-            return "%s -- %slbs<br>%s" % (self.node_ingredient.id, self.weight, self.node_ingredient.short_prefixed_name(trim_length=25), )
+            return False  
         
     @property
     def relative_cost(self):
         return self.get_exploded_cost()
-    
-    def batch_adjusted_weight(self, batch_weight):
-        return self.weight * batch_weight / one_thousand
 
     def __unicode__(self):
         return "%s: l%s r%s parent%s" % (self.root_flavor.__unicode__(), self.lft, self.rgt, self.parent_id)
@@ -681,14 +670,6 @@ class Ingredient(models.Model):
     def url(self):
         return "/django/access/ingredient/pin_review/%s/" % self.id
     
-    @property
-    def info_slice(self):
-        return {
-            'unit_price':str(self.unitprice).rstrip('0').rstrip('.'),
-            'allergen':self.allergen,
-            'sulfites_ppm':self.sulfites_ppm,
-        }
-    
     def get_absolute_url(self):
         if self.discontinued == False:
             return "/django/access/ingredient/pin_review/%s/" % self.id
@@ -794,13 +775,14 @@ class Ingredient(models.Model):
         else:
             return self.product_name
         
-    def short_prefixed_name(self, trim_length=18):
-        if len(self.prefixed_name) > trim_length:
+    @property
+    def short_prefixed_name(self):
+        if len(self.prefixed_name) > 18:
             if self.prefix != "":
                 s = u"%s %s" % (self.prefix, self.product_name)
-                return u"%s..." % s[:trim_length]
+                return u"%s..." % s[:18]
             else:
-                return "%s..." % self.product_name[:trim_length]
+                return "%s..." % self.product_name[:18]
         else:
             return self.prefixed_name
         
@@ -820,10 +802,12 @@ class Ingredient(models.Model):
     def long_name(self):
         if self.sub_flavor:
             my_name = "%s %s %s" % (self.art_nati, self.sub_flavor.table_name, self.sub_flavor.label_type)
-        elif self.discontinued:
-            my_name = "DISCONTINUED: %s %s %s" % (self.art_nati, self.product_name, self.part_name2)
         else:
-            my_name = "%s %s %s" % (self.art_nati, self.product_name, self.part_name2)
+            my_name = " ".join((self.art_nati, self.prefix, self.product_name, self.part_name2))
+
+        if self.discontinued:
+            my_name = "DISCONTINUED: %s" % my_name
+
         return my_name.strip()
     
     @property
@@ -1002,7 +986,6 @@ class Ingredient(models.Model):
         ordering = ['id']
         permissions = (
                 ("changeprice_ingredient","Can change the price of raw materials"),
-                ('view_ingredient',"Can view ingredients")
         )
         db_table = u'Raw Materials'
         
@@ -1252,6 +1235,7 @@ class Flavor(FormulaInfo):
     batfno = models.CharField("BATFNO", max_length=50,blank=True, default="")
     microtest = models.CharField("Micro Test", max_length=4,default="", blank=True)
 
+
     
     quantityperunit = models.PositiveIntegerField(
             blank=True,
@@ -1291,9 +1275,7 @@ class Flavor(FormulaInfo):
     class Meta:
         db_table = u'access_integratedproduct'
         ordering = ['-valid','number']
-        permissions = (
-                ('view_flavor',"Can view flavors"),
-        )
+    
     import_order = 0
 
     
@@ -1358,18 +1340,11 @@ class Flavor(FormulaInfo):
     def table_name(self):
         return "%s %s" % (self.name, self.label_type)
     
-    @property
-    def natart_name_with_type(self):
-        return "%s %s %s" % (self.natart, self.name, self.label_type)
-    
     def get_admin_url(self):
         return "/django/admin/access/flavor/%s" % self.id
         
     def get_absolute_url(self):
         return "/django/access/%s/" % self.number
-    
-    def get_specs_url(self):
-        return "/django/access/%s/spec_list" % self.number
     
     @staticmethod
     def get_absolute_url_from_softkey(softkey):
@@ -2862,17 +2837,17 @@ class TSR(models.Model):
     
     #approvals needed
     kosher_parve = models.BooleanField(default=False)
-    kosher_dairy = models.BooleanField(default=False) # not necessary
-    usda = models.BooleanField(default=False, verbose_name="USDA") ##
-    msds = models.BooleanField(default=False, verbose_name="MSDS") ## paperwork group of fields
-    specs = models.BooleanField(default=False)                     ## add nutri, pricing
-    cont_guar = models.BooleanField(default=False) # continuing guarantee
-    finished_product = models.BooleanField(default=False) # showing finished system
+    kosher_dairy = models.BooleanField(default=False)
+    usda = models.BooleanField(default=False, verbose_name="USDA")
+    msds = models.BooleanField(default=False, verbose_name="MSDS")
+    specs = models.BooleanField(default=False)
+    cont_guar = models.BooleanField(default=False)
+    finished_product = models.BooleanField(default=False)
     
     #flavor form
     liquid = models.BooleanField(default=False)
     dry = models.BooleanField(default=False)
-    emulsion = models.BooleanField(default=False) # not necessary
+    emulsion = models.BooleanField(default=False)
     natural = models.BooleanField(default=False)
     wonf = models.BooleanField(default=False)
     NA = models.BooleanField(default=False)
@@ -2883,15 +2858,14 @@ class TSR(models.Model):
     oil = models.BooleanField(default=False)
     water = models.BooleanField(default=False)
     coffee = models.BooleanField(default=False)
-    tea = models.BooleanField(default=False) # black, green, herbal
+    tea = models.BooleanField(default=False)
     nopg = models.BooleanField(default=False)
     prop65 = models.BooleanField(default=False)
     nodiacetyl = models.BooleanField(default=False)
     overseas = models.BooleanField(default=False)
     
-    #flash point targets "advise flash point"
     
-    max_price = models.DecimalField(max_digits=7, decimal_places=2) ## max COST field
+    max_price = models.DecimalField(max_digits=7, decimal_places=2)
     lbs_per_year = models.PositiveIntegerField()
     exposed_to_heat = models.BooleanField(default=False)
     temperature = models.DecimalField(null=True, max_digits=5, decimal_places=3, blank=True)
@@ -3323,8 +3297,7 @@ class MagentoFlavor(models.Model):
     
         
         
-
-class FlavorSpecification(models.Model):
-    flavor=models.ForeignKey('Flavor')
-    name = models.CharField(max_length=48)
-    specification = models.CharField(max_length=48)
+        
+        
+        
+        

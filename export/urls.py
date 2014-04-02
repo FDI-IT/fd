@@ -3,6 +3,7 @@ import datetime
 from django.conf.urls.defaults import *
 from django.views.generic import list_detail
 from django.views.generic.simple import redirect_to, direct_to_template
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q, F
 
 urlpatterns = patterns('export.views',

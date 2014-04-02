@@ -1,0 +1,26 @@
+<span id="recipe_tables_menu"><A HREF="javascript:collapse_all()">collapse</A> |  <A HREF="javascript:expand_all()">expand</A> |  <A HREF="javascript:consolidate()">consolidate</A></span>
+<table id="exploded" width=100%>
+	<caption>Interactive Explosion<br></caption>
+    <thead>
+        <tr>
+        {% autoescape off %}
+        {% for header, headername, tag_properties in headers %}
+            <th {{ tag_properties }}>{{ headername }}</th>
+        {% endfor %}
+        {% endautoescape %}
+        </tr>
+    </thead>
+{% for row in rows %}
+    {% if row.parent_id %}
+    <tr id="{{ row.row_id }}" class="child-of-{{ row.parent_id }} {{ row.ing_type }} {{ row.ing_type }}-{{ row.obj_id }}">
+    {% else %}
+    <tr id="{{ row.row_id }}" class="{{ row.ing_type }} {{ row.ing_type }}-{{ row.obj_id }}">
+    {% endif %}
+    {% autoescape off %}
+    {% for cell in row.cells %}
+        <td>{{ cell }}</td>
+    {% endfor %}
+    {% endautoescape %}
+    </tr>
+{% endfor %}
+</table>
