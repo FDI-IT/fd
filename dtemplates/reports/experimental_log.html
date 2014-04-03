@@ -32,8 +32,6 @@
 				<th>Converted</th>
 				<th>Lots</th>
 				<th>Total Weight</th>
-				<th>Deep Count</th>
-				<th>Deep Weight</th>
 				<th>Avg Weight</th>
 				<th>RMC</th>
 				<th>Unit Price</th>
@@ -59,8 +57,6 @@
 				<td>{% if not experimental_log.flavor == None %}<a href="{{experimental_log.flavor.get_absolute_url}}">{{experimental_log.flavor}}</a>{% endif %}</td>
 				<td>{% if experimental_log.count_lots %}{{experimental_log.count_lots}}{% endif %}</td>
 				<td>{% if experimental_log.sum_lot_amount %}{{experimental_log.sum_lot_amount|floatformat}}{% endif %}</td>
-				<td>{% if experimental_log.deep_count %}{{experimental_log.deep_count|floatformat}}{% endif %}</td>
-				<td>{% if experimental_log.deep_weight %}{{experimental_log.deep_weight|floatformat}}{% endif %}</td>
 				<td>{% if experimental_log.avg_lot_amount %}{{experimental_log.avg_lot_amount|floatformat:0}}{% endif %}</td>
 				<td>{% if experimental_log.flavor.rawmaterialcost %}{{experimental_log.flavor.rawmaterialcost|floatformat:2}}{% endif %}</td>
 				<td>{% if experimental_log.flavor.unitprice %}{{experimental_log.flavor.unitprice|floatformat:2}}{% endif %}</td>

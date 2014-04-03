@@ -146,32 +146,32 @@ def annotate_experimental_log_object(e):
         e.gross_proft=e.gross_profit
     except:
         e.gross_profit = 0
-    try:
-        if e.flavor is not None:
-            e.deep_count = Lot.objects.filter(
-                    flavor__pk__in=FormulaTree.objects.filter(
-                            node_flavor=e.flavor).exclude(
-                            root_flavor=e.flavor).values_list(
-                            'root_flavor__pk',flat=True
-                        )
-                ).count()
-        else:
-            e.deep_count = 0
-    except:
-        e.deep_count = 0
-    try:
-        if e.flavor is not None:
-            e.deep_weight = Lot.objects.filter(
-                    flavor__pk__in=FormulaTree.objects.filter(
-                            node_flavor=e.flavor).exclude(
-                            root_flavor=e.flavor).values_list(
-                            'root_flavor__pk',flat=True
-                        )
-                ).aggregate(s=Sum('amount'))['s']
-        else:
-            e.deep_weight = 0
-    except:
-        e.deep_weight = 0
+#     try:
+#         if e.flavor is not None:
+#             e.deep_count = Lot.objects.filter(
+#                     flavor__pk__in=FormulaTree.objects.filter(
+#                             node_flavor=e.flavor).exclude(
+#                             root_flavor=e.flavor).values_list(
+#                             'root_flavor__pk',flat=True
+#                         )
+#                 ).count()
+#         else:
+#             e.deep_count = 0
+#     except:
+#         e.deep_count = 0
+#     try:
+#         if e.flavor is not None:
+#             e.deep_weight = Lot.objects.filter(
+#                     flavor__pk__in=FormulaTree.objects.filter(
+#                             node_flavor=e.flavor).exclude(
+#                             root_flavor=e.flavor).values_list(
+#                             'root_flavor__pk',flat=True
+#                         )
+#                 ).aggregate(s=Sum('amount'))['s']
+#         else:
+#             e.deep_weight = 0
+#     except:
+#         e.deep_weight = 0
     
         
 def toggle_exclude_from_reporting(e, new_val):
