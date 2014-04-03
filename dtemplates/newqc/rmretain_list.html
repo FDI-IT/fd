@@ -55,7 +55,7 @@
 			</td>
 		<td><a href="/django/access/ingredient/pin_review/{{ retain.pin }}/">{{ retain.pin }}</a></td>
 		<td>{{ retain.related_ingredient.art_nati }}</td>
-		<td>{{ retain.related_ingredient.name }}</td>
+		<td>{{ retain.related_ingredient.prefixed_name }}</td>
 		<td><a href="/django/qc/rm_retains/supplier/{{retain.supplier}}/">{{ retain.supplier }}</a></td>
 		<td>{{ retain.lot }}</td>
 		<td><a href="/django/qc/rm_retains/{{retain.date|date:'Y'}}/{{retain.date|date:'m'}}/{{retain.date|date:'d'}}/">{{ retain.date|date:"Y-m-d" }}</a></td>

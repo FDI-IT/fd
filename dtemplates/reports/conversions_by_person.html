@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block htmlhead %}
+{{ block.super }}
+{{date_range_form.media}}
+{% endblock %}
+{% block content %}
+
+<div id="content-solo">
+<div class="hideable">
+	<form action="/django/reports/conversions_by_person/" method="get">
+		{{date_range_form.as_p}}
+		<input type="submit" value="Filter">
+	</form>
+</div>
+<div id="object-list">
+	<table>
+		<thead>
+			<tr>
+				<th>Initials</th>
+				<th>Num Conversions</th>
+				<th>Num Successful</th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for object in object_list %}
+			<tr>
+				<td><a href="/django/mysearch/?search_space=experimental&search_string=&initials={{object.initials}}">{{ object.initials }}</a></td>
+				<td>{{ object.num_conversions }}</td>
+				<td>{{ object.num_successful }}</td>
+			</tr>
+		{% endfor %}	
+		</tbody>
+	</table>
+</div>
+</div>
+{% endblock %}

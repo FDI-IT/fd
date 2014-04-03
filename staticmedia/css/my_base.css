@@ -759,3 +759,9 @@ color:red;
     position: absolute;
     width: 150px;
 }
+
+
+
+tr.reports_exclude {
+	background-color:#ffaaaa;
+}

@@ -2043,23 +2043,23 @@ class ExperimentalLog(models.Model):
     fruit = models.BooleanField(db_column='Fruit', default=False)
     sweet = models.BooleanField(db_column='Sweet', default=False)
     nutraceutical = models.BooleanField(db_column='Nutraceutical', default=False)
-    personal_care = models.BooleanField(db_column='Personal Care', default=False) # Field renamed to remove spaces.lc
-    meat_and_savory = models.BooleanField(db_column='Meat and Savory', default=False) # Field renamed to remove spaces.lc
+    personal_care = models.BooleanField(db_column='Personal Care', default=False)  # Field renamed to remove spaces.lc
+    meat_and_savory = models.BooleanField(db_column='Meat and Savory', default=False)  # Field renamed to remove spaces.lc
     beverage = models.BooleanField(db_column='Beverage', default=False)
     chai = models.BooleanField(db_column='Chai', default=False)
-    baked_goods = models.BooleanField(db_column='Baked Goods', default=False) # Field renamed to remove spaces.lc
+    baked_goods = models.BooleanField(db_column='Baked Goods', default=False)  # Field renamed to remove spaces.lc
     dairy = models.BooleanField(db_column='Dairy', default=False)
     pet = models.BooleanField(db_column='Pet', default=False)
     snacks = models.BooleanField(db_column='Snacks', default=False)
     tobacco = models.BooleanField(db_column='Tobacco', default=False)
-    non_food = models.BooleanField(db_column='Non-Food', default=False) # Field renamed to remove dashes.lc
+    non_food = models.BooleanField(db_column='Non-Food', default=False)  # Field renamed to remove dashes.lc
     
-    retain_number = models.PositiveIntegerField(db_column='RetainNumber',null=True,blank=True)
-    retain_present = models.BooleanField(db_column='RetainPresent',default=False)
+    retain_number = models.PositiveIntegerField(db_column='RetainNumber', null=True, blank=True)
+    retain_present = models.BooleanField(db_column='RetainPresent', default=False)
     
-    flavor = models.ForeignKey('Flavor',related_name='experimental_log',blank=True,null=True)
-    location_code_old = models.CharField(blank=True, default="",max_length=20)
-    
+    flavor = models.ForeignKey('Flavor', related_name='experimental_log', blank=True, null=True)
+    location_code_old = models.CharField(blank=True, default="", max_length=20)
+    exclude_from_reporting = models.BooleanField(default=False)
     def __unicode__(self):
         return "%s-%s %s %s %s %s" % (self.experimentalnum, self.initials,
                                 self.natart, self.product_name, self.label_type, self.datesent_short)

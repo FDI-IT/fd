@@ -63,7 +63,7 @@ urlpatterns = patterns('newqc.views',
     (r'^flavors/(?P<flavor_number>\d+)/print/$', 'flavor_history_print'),
     
     (r'^resolve_retains/$', 'resolve_retains_any'),
-    (r'^resolve_retains/(?P<retain_pk>\d+)/$', 'resolve_retains_specific'),
+    #(r'^resolve_retains/(?P<retain_pk>\d+)/$', 'resolve_retains_specific'),
     
     (r'^resolve_testcards/$', 'resolve_testcards_any'),
     (r'^resolve_testcards_ajax_post/$', 'resolve_testcards_ajax_post'),

@@ -1011,6 +1011,9 @@ def process_cell_update(request):
     response_dict = {}
     try:
         ingredient = Ingredient.get_formula_ingredient(number)
+    except:
+        ingredient = None
+    if ingredient is not None:
         response_dict['name'] = ingredient.long_name
         response_dict["pk"] = ingredient.pk
         try:
@@ -1022,11 +1025,11 @@ def process_cell_update(request):
                 response_dict['cost'] = str(Decimal(ingredient.unitprice * Decimal(amount) / 1000).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
         except:
             response_dict['cost'] = ''
-    except:
+    else:
         if number == '':
             response_dict['name'] = ''
         else:
-            response_dict['name'] = "Invalid Ingredient Number"
+            response_dict['name'] = "Invalid ingredient number"
         response_dict['cost'] = ''
     
     return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')
@@ -1038,7 +1041,6 @@ def sanity_check(resultant_objects):
     else:
         return None
 
-@login_required
 @permission_required('access.change_formula')
 @flavor_info_wrapper
 @revision.create_on_success
@@ -1120,17 +1122,19 @@ def formula_entry(request, flavor, status_message=None):
                                    'management_form': formset.management_form,
                                    },
                                    context_instance=RequestContext(request))
-    
-@login_required
+
 @experimental_wrapper
 @revision.create_on_success
 @transaction.commit_on_success
 def experimental_formula_entry(request, experimental, status_message=None):
     page_title = "Experimental Formula Entry"
     status_message = ""
-    if request.user.get_profile().initials == experimental.initials or request.user.is_superuser:
-        pass
-    else:
+    try:
+        if request.user.get_profile().initials == experimental.initials or request.user.is_superuser:
+            pass
+        else:
+            return render_to_response('access/experimental/experimental_edit_permission.html',context_instance=RequestContext(request))
+    except:
         return render_to_response('access/experimental/experimental_edit_permission.html',context_instance=RequestContext(request))
     flavor = experimental.flavor
     if request.method == 'POST':

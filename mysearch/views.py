@@ -89,7 +89,8 @@ def search_guts(request, context_dict, paginate_by=None):
     last_search_space = request.session.get('last_space', None)
     my_order_by = None
     if last_search_space != search_space:
-        request.session.flush()
+        request.session['last_order_by'] = None
+        request.session['search_request_GET'] = None
         request.session['last_space'] = search_space
         my_order_by = None
     else:
@@ -257,3 +258,7 @@ def new_pin_flavor(request):
         context_dict,
         context_instance=RequestContext(request)
     )
+    
+#last_space
+#search_request_GET
+#last_order_by

@@ -210,6 +210,18 @@ FORMULA_EDIT.get_pks = function () {
 //obtain the index of the row where pk = 722
 //jQuery('#formula-rows td.ingredient_pk-cell input').filter(function() { return jQuery(this).val() == 722; }).closest("tr").index();
 
+
+FORMULA_EDIT.toggle_submit = function() {
+	if(FORMULA_EDIT.validate_all_rows() && jQuery("#formula-rows tr.filter_row").length == 0) {
+		jQuery('#formula-submit-button').attr('disabled', false).removeAttr('title');
+	}
+	else {
+		jQuery('#formula-submit-button').attr('disabled', true).attr('title', 'Fix the error(s) in the highlighted rows above.');
+	}
+	
+	//FORMULA_EDIT.add_all_error_messages();
+};
+
 FORMULA_EDIT.filter_update_all = function() {
 	
 	FORMULA_EDIT.remove_all_filters();
@@ -226,19 +238,10 @@ FORMULA_EDIT.filter_update_row = function(row) {
 	FORMULA_EDIT.get_pks();
 	FORMULA_EDIT.get_checked_boxes();
 	FORMULA_EDIT.filter_single_row(row);
+	FORMULA_EDIT.toggle_submit();
 };
 
 
-FORMULA_EDIT.toggle_submit = function() {
-	if(FORMULA_EDIT.validate_all_rows() && jQuery("#formula-rows tr.filter_row").length == 0) {
-		jQuery('#formula-submit-button').attr('disabled', false).removeAttr('title');
-	}
-	else {
-		jQuery('#formula-submit-button').attr('disabled', true).attr('title', 'Fix the error(s) in the highlighted rows above.');
-	}
-	
-	//FORMULA_EDIT.add_all_error_messages();
-};
 
 FORMULA_EDIT.update_formula_row = function(row) {
 	clearTimeout(FORMULA_EDIT.t);	
@@ -350,6 +353,7 @@ jQuery(document).ready(function(){
 		var $this = $(this);
 		var row = $this.closest("tr");
 		FORMULA_EDIT.update_formula_row(row);
+		FORMULA_EDIT.toggle_submit();
 		//FORMULA_EDIT.t2 = setTimeout("FORMULA_EDIT.filter_update_all()", 750);
 		if(!jQuery(row).hasClass("justAdded")){
 			FORMULA_EDIT.t2 = setTimeout(function() {
@@ -369,7 +373,7 @@ jQuery(document).ready(function(){
 				// ui.item.value is the item of interest
 				row.find('.number-cell input').val( ui.item.value );
 				FORMULA_EDIT.update_formula_row(row);
-				
+				FORMULA_EDIT.toggle_submit();
 				//need timeout to ensure that new pk is in FORMULA_EDIT before filtering the row
 				FORMULA_EDIT.t2 = setTimeout(function() {
 					FORMULA_EDIT.filter_update_row(row);
