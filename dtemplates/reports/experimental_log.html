@@ -42,6 +42,7 @@
 		</thead>
 		<tbody>
 		{% for experimental_log in experimental_logs %}
+		    {% if experimental_log.count_lots %}
 			{% if experimental_log.exclude_from_reporting %}
 			<tr class="reports_exclude">
 				<td><input type="checkbox" name="experimental_log_pks" value="{{ experimental_log.pk }}" checked></td>
@@ -64,6 +65,7 @@
 				<td>{% if experimental_log.unit_profit %}{{experimental_log.unit_profit|floatformat:2}}{% endif %}</td>
 				<td>{% if experimental_log.gross_profit %}{{experimental_log.gross_profit|floatformat:2}}{% endif %}</td>
 			</tr>
+			{% endif %}
 		{% endfor %}	
 		</tbody>
 	</table>
