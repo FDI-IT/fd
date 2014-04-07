@@ -7,7 +7,12 @@
 
 {% block content %}
     <div id="content-right">
-    
+    	<ul>
+    		<li><a href="/django/qc/retains/">All statuses</a></li>
+		{% for status in status_list %}
+			<li><a href="/django/qc/retains/{{ status }}/">{{ status }}</a></li>
+		{% endfor %}
+    	</ul>
 		<ul>
 			<li><a href="/django/qc/retains/">Latest</a></li>
 		{% for month in month_list %}

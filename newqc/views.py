@@ -43,6 +43,9 @@ def batchsheet_month_list():
 def retain_month_list():
     return Retain.objects.all().dates('date', 'month').reverse()
 
+def retain_status_list():
+    return Retain.objects.values_list('status',flat=True).order_by().distinct()
+
 def rm_retain_month_list():
     return RMRetain.objects.all().dates('date', 'month').reverse()
 
@@ -91,6 +94,7 @@ retain_list_info =  {
         'print_link': 'javascript:document.forms["retain_selections"].submit()',
         'month_list': retain_month_list,
         'admin_link': "/django/admin/newqc/retain/",
+        'status_list': retain_status_list,
     }, **STATUS_BUTTONS),
 }
 rm_retain_list_info =  {
