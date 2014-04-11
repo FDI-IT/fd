@@ -279,18 +279,17 @@ def synchronize_price(f, verbose=False):
         if lastspdate < ing_ppu:
             lastspdate = ing_ppu
     
-    y = ONE_HUNDRED.__copy__()
-    y = f.yield_field
-    adjustment = y/ONE_HUNDRED
-    if adjustment == ZERO:
-        adjustment = 1
     # print adjustment
     if f.spraydried:
-        f.rawmaterialcost = rmc / 1000 / adjustment + SD_COST
+        f.rawmaterialcost = rmc / 1000 + SD_COST
     else:
-        f.rawmaterialcost = rmc / 1000 / adjustment
+        f.rawmaterialcost = rmc / 1000 
     f.lastspdate = lastspdate
     f.save()
+    
+    for g in f.gazinta.all():
+        g.unitprice = f.rawmaterialcost
+        g.save()
         
 def synchronize_all_prices():
     sd_price = Decimal('2.90')
