@@ -271,19 +271,7 @@ def synchronize_price(f, verbose=False):
     lastspdate = datetime(1990,1,1)
     for leaf in f.leaf_weights.all():
         sub_flavor = leaf.ingredient.sub_flavor
-        adjustment = 1
-        if sub_flavor is not None:
-            y = ONE_HUNDRED.__copy__()
-            y = sub_flavor.yield_field
-            
-            if y == 0:
-                y = 100
-            
-            adjustment = y/ONE_HUNDRED
-            if adjustment == ZERO:
-                adjustment = 1
-        
-        cost_diff = leaf.weight * leaf.ingredient.unitprice / adjustment
+        cost_diff = leaf.weight * leaf.ingredient.unitprice
         rmc += cost_diff
         if verbose:
             print '"%s","%s","%s"' % (leaf.ingredient.id, leaf.ingredient.product_name, cost_diff)
@@ -292,9 +280,7 @@ def synchronize_price(f, verbose=False):
             lastspdate = ing_ppu
     
     y = ONE_HUNDRED.__copy__()
-    
     y = f.yield_field
-    
     adjustment = y/ONE_HUNDRED
     if adjustment == ZERO:
         adjustment = 1

@@ -216,8 +216,12 @@ class Formula(models.Model):
             return Decimal('0')
     
     @property
-    def relative_cost(self):
-        return self.get_exploded_cost()
+    def relative_cost(self, weight_factor=1):
+        rmc = self.ingredient.unitprice
+        try:
+            return self.amount * weight_factor * rmc / Decimal('1000')
+        except TypeError:
+            return Decimal('0')
     
     def gazinta(self):
         try:
