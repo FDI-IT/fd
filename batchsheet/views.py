@@ -22,7 +22,6 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory
 from django.template.loader import get_template
-from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.db.models import Sum
 from django.db import transaction
@@ -471,16 +470,6 @@ def sales_order_list(request, status_message=None):
     summarized_orders = []
     for flavor, details in orders.items():
         
-        if flavor.contains_discontinued_ingredients:
-            contains_discontinued_ingredients = True
-            discontinued_ingredients = []
-            for ing in flavor.discontinued_ingredients:
-                discontinued_ingredients.append(ing)
-            message = "Contains the following discontinued ingredient(s): " + ','.join(discontinued_ingredients)
-        else:
-            contains_discontinued_ingredients = False
-            message = None
-        
         total = Decimal('0')
         for detail in details:
             total += detail.quantity
@@ -491,8 +480,6 @@ def sales_order_list(request, status_message=None):
         except:
             totalcost = 0
         summarized_orders.append({'flavor': flavor,
-                                  'contains_discontinued_ingredients': contains_discontinued_ingredients,
-                                  'discontinued_ingredients': message,
                                   'total': total,
                                   'details':details,
                                   'totalcost':totalcost,

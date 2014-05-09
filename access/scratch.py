@@ -926,6 +926,10 @@ def recalculate_guts(flavor):
             break
     if my_amount != Decimal(1000):
         my_valid=False
+        
+#     if flavor.flavorspecification_set.all().count() == 0:
+#         my_valid = False
+    
     flavor.valid = my_valid
     
     build_tree(flavor)

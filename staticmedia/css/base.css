@@ -131,6 +131,10 @@ td.highlight{
 	background-color:#ffffbb;
 }
 
+tr.error{
+	background-color:red;
+}
+
 td.tc_present{
 	background-color:#bbffbb;
 }

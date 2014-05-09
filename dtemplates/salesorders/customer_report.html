@@ -42,7 +42,27 @@
 		    {% endfor %}
 		    </tbody>
 		</table>
-
 	</div>
+	
+	<div id="ordered-flavors-list">
+		<table width="40%" class="sorttable">
+			<thead><tr>
+				<th>Flavor</th>
+				<th>Create/Edit Customer Specs</th>
+				<th>View Customer Spec Sheet</th>
+			</tr></thead>
+			<tbody>
+				{% for flavor in ordered_flavors %}
+					<tr>
+						<td> <a href="{{ flavor.get_absolute_url }}">{{ flavor.name }}</a> </td>
+						<td> <a href="/django/salesorders/customer/{{ customer.pk }}/customer_specs/{{ flavor.number }}"> Edit </a> </td>
+						<td> <a href="/django/salesorders/customer/{{ customer.pk }}/customer_spec_sheet/{{ flavor.number }}"> Spec Sheet </a></td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		
+	</div>
+	
 {% endblock %}
 

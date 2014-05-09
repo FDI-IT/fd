@@ -11,7 +11,7 @@ from access.models import Flavor
 import re
 
 from access.models import Flavor
-from newqc.models import Retain, RMRetain, TestCard, Lot, ReceivingLog, ProductInfo, STATUS_CHOICES, UNITS_CHOICES
+from newqc.models import Retain, RMRetain, TestCard, Lot, ReceivingLog, ProductInfo, STATUS_CHOICES, UNITS_CHOICES, COA, TestResult
 
 class AddObjectsBatch(forms.Form):
     number_of_objects = forms.IntegerField(label="Number of objects", min_value=1)
@@ -208,3 +208,12 @@ class LotFilterSelectForm(forms.Form):
             required=False,
             choices=status_choices
         )
+    
+    
+class TestResultForm(forms.Form):
+
+    pk = forms.IntegerField(initial=0)
+    name = forms.CharField(max_length=48, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+    specification = forms.CharField(max_length=48, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+    result = forms.CharField(max_length=48, required=False)
+    

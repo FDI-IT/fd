@@ -3,7 +3,7 @@ from datetime import date
 import re
 import copy
 import operator
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.views.generic import list_detail
@@ -17,23 +17,26 @@ from django.forms.models import modelformset_factory, inlineformset_factory
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction
 from django.views.generic.create_update import create_object
+from django.core.urlresolvers import reverse
 
 from reversion import revision
 
-from access.controller import discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors, experimental_approve_from_form
-
+from access.controller import reconcile_flavor, discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors, experimental_approve_from_form
+from access.formatter import formulatree_to_jsinfovis
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
 from access.my_profile import profile
 from access.templatetags.review_table import review_table as legacy_explosion
-from access.templatetags.ft_review_table import consolidated, consolidated_indivisible, explosion, production_lots, retains, raw_material_pin, gzl_ajax, revision_history
+from access.templatetags.ft_review_table import consolidated, consolidated_indivisible, explosion, spec_sheet, customer_info, production_lots, retains, raw_material_pin, gzl_ajax, revision_history
 from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_guts
 from access.tasks import ingredient_replacer_guts
-from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_tsr_form
+from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form #, FlavorSpecificationForm
 from access.formula_filters import ArtNatiFilter, AllergenExcludeFilter, MiscFilter
 
 from solutionfixer.models import Solution, SolutionStatus
+from one_off.mtf import *
+from salesorders.controller import delete_specification, create_new_spec, update_spec
 
 ones = Decimal('1')
 tenths = Decimal('0.0')
@@ -109,7 +112,7 @@ def experimental_wrapper(view):
     return inner     
 
 @experimental_wrapper
-@login_required
+@permission_required('access.view_flavor')
 def experimental_edit(request, experimental):
     if request.method == 'POST':
         form = forms.ExperimentalForm(request.POST, instance=experimental)
@@ -425,10 +428,9 @@ def ft_review(request, flavor):
     weight_factor = weight_factor / Decimal('1000')
     page_title = "FT Review"
     
-    status_message = request.GET.get('status_message', None)
-    dci = flavor.discontinued_ingredients
-    if len(dci) != 0:
-        status_message = "Formula contains discontinued ingredients: %s" % ", ".join(dci)
+#     status_message = request.GET.get('status_message', None)
+    
+    status_message = flavor.status
     
     context_dict = {
                     'status_message':status_message,
@@ -582,7 +584,8 @@ def ingredient_gzl_review(request, ingredients):
     return render_to_response('access/ingredient/gzl.html',
                               context_dict,
                               context_instance=RequestContext(request))
-    
+
+@revision.create_on_success
 def ingredient_activate(request, raw_material_code=False, ingredient_id=False): 
 
     
@@ -642,6 +645,7 @@ def ingredient_activate(request, raw_material_code=False, ingredient_id=False):
                                             
                 updated_flavors = update_prices_and_get_updated_flavors(old_active_ingredient, new_active_ingredient)
                 
+                revision.comment = "Old Active Ingredient: %s, New Active Ingredient: %s" % (old_ingredient.name, new_ingredient.name)
 
             
         else: #if all ingredients were previously discontinued, activate the single ingredient
@@ -654,6 +658,8 @@ def ingredient_activate(request, raw_material_code=False, ingredient_id=False):
             updated_flavors = []
             for lw in LeafWeight.objects.filter(ingredient=new_active_ingredient):
                 updated_flavors.append((lw.root_flavor, lw.weight, "Discontinued", lw.root_flavor.rawmaterialcost, "-"))
+            
+            revision.comment = "Old Active Ingredient: None (ALL DISCONTINUED), New Active Ingredient: %s" % new_active_ingredient.name
             
         context_dict = {
                         'activated_ingredient': new_active_ingredient,
@@ -1252,7 +1258,9 @@ ajax_function = {
     'retains': (retains, 'access/flavor/retains.html'),    
     'raw_material_pin': (raw_material_pin, 'access/ingredient/raw_material_pin.html'),
     'gzl_ajax': (gzl_ajax, 'access/gzl_ajax.html'),
-    'revision_history': (revision_history, 'history_audit/revision_history.html')
+    'revision_history': (revision_history, 'history_audit/revision_history.html'),
+    'spec_sheet': (spec_sheet, 'access/flavor/review_specsheet.html'),
+    'customer_info': (customer_info, 'access/flavor/customer_info.html'),
 }
 
 #def ajax_dispatch(request, template_name, flavor_number):
@@ -1619,3 +1627,463 @@ def new_rm_wizard_rm(request, ingredient_pk):
                 },
     }
     return forms.NewRMWizard([forms.NewRMForm1, forms.NewRMForm2, forms.NewRMForm3, forms.NewRMForm4, forms.NewRMForm5], initial=initial)(request)
+
+
+@flavor_info_wrapper
+def formula_visualization(request, flavor):
+    formatted_ft = formulatree_to_jsinfovis(FormulaTree.objects.filter(root_flavor=flavor))
+
+    st_layout_parameters = {}
+    if request.method == 'GET' and 'levels_to_show' in request.GET:
+        st_layout_form = forms.STLayoutForm(request.GET)
+        if st_layout_form.is_valid():
+            for k,v in st_layout_form.cleaned_data.iteritems():
+                st_layout_parameters[k] = v
+    else:
+        st_layout_form = forms.STLayoutForm()
+        for k,v in st_layout_form.fields.iteritems():
+            st_layout_parameters[k] = v.initial      
+    
+    context_dict = {
+         'flavor':flavor,
+         'st_layout_form':st_layout_form,
+         'st_layout_parameters':  simplejson.dumps(st_layout_parameters),
+        }
+    context_dict.update(formatted_ft)
+    return render_to_response('access/flavor/formula_visualization.html', context_dict)
+
+@flavor_info_wrapper
+def spec_sheet(request, flavor):
+    
+    general_specs = flavor.flavorspecification_set.filter(replaces=None).filter(customer=None)
+    
+    other_specs = general_specs.filter(micro=False)
+    micro_specs = general_specs.filter(micro=True)
+    
+    return render_to_response('access/flavor/spec_sheet.html',
+                              {'flavor':flavor,
+                               'other_specs':other_specs,
+                               'micro_specs':micro_specs})
+
+@permission_required('access.view_flavor')
+def delete_spec(request, flavor_number, spec_id):
+    spec = get_object_or_404(FlavorSpecification, id=spec_id)
+          
+    delete_specification(spec)
+        
+    return HttpResponseRedirect(reverse('access.views.specification_list', args=[flavor_number]))
+
+@flavor_info_wrapper
+def specification_list(request, flavor):
+    page_title = "%s - Spec List" % flavor.name
+    
+    spec_list = []
+    
+    for flavorspec in flavor.flavorspecification_set.filter(customer=None).filter(replaces=None).order_by('name'):
+        edit_url = reverse('access.views.edit_spec', args=[flavor.number, flavorspec.id])
+        delete_url = reverse('access.views.delete_spec', args=[flavor.number, flavorspec.id])
+        spec_list.append((flavorspec.name, flavorspec.specification, flavorspec.micro, edit_url, delete_url))
+    
+    return render_to_response('access/flavor/specification_list.html', 
+                              {
+                               'page_title':page_title,
+                               'flavor':flavor,
+                               'spec_list': spec_list,
+                               'add_url': reverse('access.views.edit_spec', args=[flavor.number])
+                               },
+                              context_instance=RequestContext(request))    
+        
+
+@permission_required('access.view_flavor')
+def edit_spec(request, flavor_number, spec_id=0):
+    page_title = "Edit Customer Spec"
+    
+    flavor = Flavor.objects.get(number=flavor_number) 
+    FlavorSpecificationForm = make_flavorspec_form(flavor)
+    
+    return_url = reverse('access.views.specification_list', args=[flavor_number])
+    
+    if spec_id == 0:
+        spec = None
+        initial_data = {}
+    else:
+        spec = get_object_or_404(FlavorSpecification, id=spec_id)
+    
+        #this is used if NOT post
+        initial_data = {'pk':spec.pk,
+                        'name':spec.name, 
+                        'specification':spec.specification,
+                        'micro':spec.micro,}
+
+    if request.method == 'POST':
+        form = FlavorSpecificationForm(request.POST)
+        if form.is_valid():
+            #if they are adding a new spec
+            if spec_id == 0:
+                    name = form.cleaned_data['name']
+                    specification = form.cleaned_data['specification']
+                    micro = form.cleaned_data['micro']
+                    
+                    create_new_spec(flavor, name, specification, micro)
+            
+            #editing an existing spec
+            else: 
+                name = form.cleaned_data['name']
+                specification = form.cleaned_data['specification']
+                micro = form.cleaned_data['micro']
+                
+                update_spec(spec, name, specification, micro)
+            
+            return HttpResponseRedirect(return_url)
+        
+                
+    if request.method != 'POST':
+        form = FlavorSpecificationForm(initial=initial_data)
+        
+    return render_to_response('access/flavor/edit_spec.html', 
+                                  {'flavor': flavor,
+                                   'spec': spec,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'form': form,
+                                   'return_url': return_url
+                                   },
+                                   context_instance=RequestContext(request))           
+        
+
+
+@flavor_info_wrapper    
+def spec_list(request, flavor):
+    page_title = "%s - Spec List" % flavor.name
+    
+    SpecFormSet = formset_factory(make_flavorspec_form(flavor), extra=1, can_delete=True)
+    
+    if request.method == 'POST':
+        formset = SpecFormSet(request.POST)
+        if formset.is_valid():
+            
+            for form in formset.forms:
+                try: #need this try/except in case they click 'delete' on an empty row and save
+                    if 'DELETE' in form.cleaned_data:
+                        if form.cleaned_data[u'DELETE']==True:
+                            try: 
+                                flavorspec = FlavorSpecification.objects.get(pk=form.cleaned_data['pk'])
+                                flavorspec.delete()
+                            except:
+                                pass
+#                         elif FlavorSpecification.
+                        else:
+                            try: 
+                                flavorspec = FlavorSpecification.objects.get(pk=form.cleaned_data['pk'])
+                                flavorspec.name = form.cleaned_data['name']
+                                flavorspec.specification = form.cleaned_data['specification']
+                                flavorspec.micro = form.cleaned_data['micro']
+                            except:
+                                flavorspec = FlavorSpecification(
+                                    flavor = flavor,
+                                    name = form.cleaned_data['name'],
+                                    specification = form.cleaned_data['specification'],
+                                    micro = form.cleaned_data['micro']
+                                )
+                            flavorspec.save()
+                except:
+                    #error
+                    return HttpResponseRedirect("/django/access/%s/spec_list/EXCEPT" % flavor.number)
+
+            
+            return HttpResponseRedirect("/django/access/%s/spec_list/" % flavor.number)
+        else:
+            return render_to_response('access/flavor/spec_list.html', 
+                                  {'flavor': flavor,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'spec_rows': zip(formset.forms,),
+                                   'flavor_edit_link': '#',
+                                   'management_form': formset.management_form,
+                                   },
+                                   context_instance=RequestContext(request))
+            
+            
+    initial_data = []        
+#     #display all flavorspecs, including customer specs (don't want this for standard flavorspec edit list)
+#     for flavorspec in flavor.flavorspecification_set.all():
+#         if flavorspec.customer is not None:
+#             customer_id = flavorspec.customer.id
+#         else:
+#             customer_id = 0
+#         
+#         if flavorspec.replaces is not None:
+#             replaces_id = flavorspec.replaces.id
+#         else:
+#             replaces_id = 0
+#         
+#         initial_data.append({'pk':flavorspec.pk, 'customer_id':customer_id, 'replaces_id':replaces_id, 'name':flavorspec.name, 'specification':flavorspec.specification, 'micro':flavorspec.micro})
+        
+    #only display non-customer specs    
+    #unedited general specs
+    for flavorspec in flavor.flavorspecification_set.filter(customer=None).filter(replaces=None):
+        
+        initial_data.append({'pk':flavorspec.pk, 
+                             'customer_id':0, 
+                             'replaces_id':0, 
+                             'name':flavorspec.name, 
+                             'specification':flavorspec.specification, 
+                             'micro':flavorspec.micro})
+        
+    formset = SpecFormSet(initial=initial_data)
+            
+    spec_rows = zip(formset.forms)
+    return render_to_response('access/flavor/spec_list.html', 
+                                  {'flavor': flavor,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'spec_rows': spec_rows,
+                                   'flavor_edit_link': '#',
+                                   'management_form': formset.management_form,
+                                   'extra':spec_rows[-1],
+                                   },
+                                   context_instance=RequestContext(request))   
+    
+@flavor_info_wrapper    
+def approve_specs(request, flavor):
+    page_title = "%s - " % flavor.name  
+    
+    #i dont know how to use forms for this.  
+    #need to get the possible flashes (i know how to do that)
+    #and get the user to select which one to keep (idk)
+    
+    #somehow have a dynamic form that takes the possible flashes as arguments?
+    #or save every possible spec as an object (using a script)?
+    #have them be boolean fields where only one in a row can be selected
+       
+    
+    return render_to_response('access/flavor/approve_specs',
+                                {'flavor': flavor,
+                                 #what to pass?  
+                                 })
+
+#get old data
+
+#get new data
+
+class DecimalEncoder(simplejson.JSONEncoder):
+    def _iterencode(self, o, markers=None):
+        if isinstance(o, decimal.Decimal):
+            # wanted a simple yield str(o) in the next line,
+            # but that would mean a yield on the line with super(...),
+            # which wouldn't work (see my comment below), so...
+            return (str(o) for o in [o])
+        return super(DecimalEncoder, self)._iterencode(o, markers)
+
+@login_required
+@flavor_info_wrapper
+def reconcile_specs(request, flavor):
+    
+    page_title = "%s - Reconcile Specs" % flavor.name
+    
+    if request.method == 'POST':
+        ReconciledSpecFormSet = formset_factory(forms.ReconciledSpecForm, extra=0)
+        formset = ReconciledSpecFormSet(request.POST)
+        
+        if formset.is_valid():
+            if request.session.get('scraped_data', False):
+                json_data = request.session['scraped_data']
+            
+                for form in formset.forms:
+                    try:
+                        flavorspec = FlavorSpecification.objects.get(flavor=flavor, name=form.cleaned_data['name'], customer = None)
+                        flavorspec.specification = form.cleaned_data['specification']
+                        flavorspec.save()
+                    except:
+                        create_new_spec(flavor, form.cleaned_data['name'], form.cleaned_data['specification'], False)
+                    
+                if ReconciledFlavor.objects.filter(flavor = flavor).exists():
+                    reconcile_update(flavor, request.user, json_data)
+                else:       
+                    reconcile_flavor(flavor, request.user, json_data)
+                    
+                redirect_path = reverse('access.views.specification_list', args=[flavor.number])
+                return HttpResponseRedirect(redirect_path)
+            else:
+                print "The user somehow posted to this page without going through the reconcile specs view..."
+    
+
+    #get any flavors with the same formula and scrape from those files as well!
+    flavor_pk_list = flavor.loaded_renumber_list
+    flavor_list = [Flavor.objects.get(pk = flavor_pk) for flavor_pk in flavor_pk_list]
+    
+
+    mtf_search_list = [('flash', 'Flash Point'), ('specific gravity', 'Specific Gravity')]
+    mtf_vals = get_mtf_vals(flavor_list, mtf_search_list)
+    
+    db_search_list = [('flashpoint', 'Flash Point'), ('spg', 'Specific Gravity')]
+    db_vals = get_db_vals(flavor_list, db_search_list)
+    
+    if "no_mtf" in mtf_vals:
+        no_mtf = True
+        mtf_vals.pop("no_mtf", None)
+    
+    else:
+        no_mtf = False
+    
+    #combine mtf_vals and db_vals to make it easy to display them in the template
+    #list of tuples...
+    
+    all_vals = []
+    
+    for name in mtf_vals:
+        if name in db_vals:
+            all_vals.append((name, mtf_vals[name], db_vals[name]))
+        else:
+            all_vals.append((name, mtf_vals[name], None))
+    
+    for name in db_vals:
+        if name not in mtf_vals:
+            all_vals.append((name, None, db_vals[name]))
+        else:
+            pass #if the name is in both mtf_vals and db_vals, it should already be in all_vals 
+    
+    #all_vals = [('flash_point', mtf_vals, db_vals), ...]
+
+    #TODO
+    
+    scraped_data = all_vals
+    request.session['scraped_data'] = scraped_data
+    
+    #turn any decimals to strings because json cannot serialize decimals
+    for name, mtf, db in scraped_data:
+        for key in db.keys():
+            if isinstance(db[key], Decimal):
+                db[key] = str(db[key])
+        
+    scraped_data = simplejson.dumps(scraped_data)
+    request.session['scraped_data'] = scraped_data
+    
+    grv = guessed_reconciled_vals(mtf_vals, db_vals)
+    
+    if request.method != "POST":
+        ReconciledSpecFormSet = formset_factory(forms.ReconciledSpecForm, extra=0)    
+        formset = ReconciledSpecFormSet(initial = grv)
+
+    return render_to_response('access/flavor/reconcile_specs.html',
+                              {'page_title': page_title,
+                               'flavor': flavor,
+                               'all_vals': all_vals,
+                               'mtf_vals': mtf_vals,
+                               'no_mtf': no_mtf,
+                               'db_vals': db_vals,
+                               'reconciled_formset': formset,
+                               'management_form': formset.management_form,
+                               },
+                               context_instance=RequestContext(request))   
+    
+ 
+def get_mtf_vals(flavor_list, spec_search_term_list):
+    
+    
+    mtf_list = []
+    
+    for flavor in flavor_list:
+        
+        path = "/home/matta/Master Template Files/%s.xls" % flavor.number
+#         mtf_list.append((path, fl.number))
+        
+        try:
+            mtf = open_workbook(path)
+            mtf_list.append((mtf, flavor.number))
+        except:
+            #print "There does not exist a file at path %s" % path
+            pass
+        
+
+        
+    #search_results = search_mtfs_for_specs(mtf_list, spec_search_term_list)
+    
+    if mtf_list: #if there exist files to be scraped from
+        search_results = search_mtfs_for_specs(mtf_list, spec_search_term_list)
+         
+    else:
+        search_results = {"no_mtf": "No MTF Exists"}
+    
+
+    
+    return search_results 
+
+#     #mtf_list = []
+#     
+#     #for flavor_num in flavor_number_list:
+#     #    blahblah
+#     #    mtf_list.append(mtf)
+#     
+#     #search_results = search_mtfs_for_specs(mtf_list, spec_search_term_list)
+#     
+#     #scraping
+#     path = "/home/matta/Master Template Files/%s.xls" % flavor.number
+#     
+#     try:
+#         mtf = open_workbook(path)
+#     except:
+#         print "There does not exist a file at path %s" % path
+#         
+#     
+#     search_results = search_mtf_for_specs(mtf, spec_search_term_list)
+#     
+# 
+#     return search_results
+    
+def get_db_vals(flavor_list, database_search_list):
+    #return a list of dictionaries (no ranges)
+    #eg. [{'flash_point': 100}]
+    
+    db_values = {}
+        
+    for flavor in flavor_list:
+    
+        for property, user_friendly_term in database_search_list:
+            
+            
+            if not user_friendly_term in db_values:
+                db_values[user_friendly_term] = {}
+            
+            
+            try:
+                db_values[user_friendly_term][flavor.number] = getattr(flavor, property)
+            except:
+                db_values[user_friendly_term][flavor.number] = None
+    
+    return db_values
+    
+#     return {'Flash Point': 180}
+    
+def guessed_reconciled_vals(mtf_vals, db_vals):
+    #return list of dictionaries of initial values for the reconciled specs
+    
+    
+    #only using names for now
+    spec_names = set()
+    
+    for spec_name in mtf_vals:
+        spec_names.add(spec_name)
+        
+    for spec_name in db_vals:
+        spec_names.add(spec_name)
+        
+    reconciled_names = []
+
+    for name in spec_names:
+        reconciled_names.append({
+                                 'name': name,
+                                 'spec': ""
+                                 })
+    
+    return reconciled_names
+
+
+    
+    
+    
+    
+    
+    
+
+    

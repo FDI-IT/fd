@@ -86,6 +86,7 @@
 	    <th>Amount</th>
 	    <th class="sorttable_nosort">Status</th>
 	     <th>QC Tests</th>
+	     <th>COA Tests</th>
 	     <th>Batchsheet</th>
 	</tr>
 	{% for lot in object_list %}
@@ -107,6 +108,12 @@
 			{% if lot.testcards_present %}
 			<a href="{{lot.get_absolute_url}}"><img src="/djangomedia/images/Icons/16x16/accept.png"></a>
 			{% endif %}
+		</td>
+		<td>
+			{% if lot.coa_tests_image %}
+			<a href="{{lot.get_absolute_url}}"><img src={{ lot.coa_tests_image }}></a>
+			{% endif %}
+
 		</td>
 		<td>
 			{% if lot.batchsheets_present %}

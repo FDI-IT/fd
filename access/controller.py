@@ -1,6 +1,26 @@
 from django.core.exceptions import ValidationError
 
-from access import models
+from access.models import *
+from reversion import revision
+
+
+#RECONCILING FLAVOR SPECS
+
+@revision.create_on_success
+def reconcile_flavor(flavor, user, scraped_data_json):
+    rf = ReconciledFlavor(
+                          flavor = flavor,
+                          reconciled = True,
+                          scraped_data = scraped_data_json,
+                          reconciled_by = user
+                          )
+    rf.save()
+    
+def reconcile_update(flavor, user, scraped_data_json):
+    rf = ReconciledFlavor.objects.get(flavor = flavor)
+    rf.reconciled_by = user
+    rf.scraped_data = scraped_data_json
+    rf.save()
 
 
 #ACTIVATING/DISCONTINUING RAW MATERIALS
@@ -15,22 +35,25 @@ def activate_ingredient(ingredient):
     
 def replace_ingredient_foreignkeys(new_ingredient):
     
-    for lw in models.LeafWeight.objects.filter(ingredient__id=new_ingredient.id):
+    for lw in LeafWeight.objects.filter(ingredient__id=new_ingredient.id):
         lw.ingredient = new_ingredient
         lw.save()
         
-    for formula in models.Formula.objects.filter(ingredient__id=new_ingredient.id):
+    for formula in Formula.objects.filter(ingredient__id=new_ingredient.id):
         formula.ingredient=new_ingredient
         formula.save()
         
-    for ft in models.FormulaTree.objects.filter(node_ingredient__id=new_ingredient.id):
+    for ft in FormulaTree.objects.filter(node_ingredient__id=new_ingredient.id):
         ft.node_ingredient=new_ingredient
         ft.save()  
 
+
 def update_prices_and_get_updated_flavors(old_ingredient, new_ingredient): 
+    
+    
     #find all flavors that contain the raw material
     updated_flavors = []
-    for lw in models.LeafWeight.objects.filter(ingredient=new_ingredient):
+    for lw in LeafWeight.objects.filter(ingredient=new_ingredient):
         
         
         root_flavor = lw.root_flavor

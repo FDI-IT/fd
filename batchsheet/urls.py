@@ -4,7 +4,6 @@ from django.conf.urls.defaults import *
 from django.views.generic import list_detail
 from django.views.generic.simple import redirect_to
 from django.views.generic.date_based import archive_index
-from django.contrib.auth.decorators import login_required
 from django.db.models import Q, F
 
 urlpatterns = patterns('batchsheet.views',

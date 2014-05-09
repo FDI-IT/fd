@@ -122,6 +122,24 @@ td.highlight{
 	background-color:#ffffbb;
 }
 
+tr.error{
+	background-color:#ffaaaa;
+}
+
+tr.error a:link{
+	color:#003366;
+}
+
+tr.error a:visited{
+	color:#003366;
+}
+
+tr.error a:hover{
+	color:#FFFFFF;
+}
+
+
+
 td.tc_present{
 	background-color:#bbffbb;
 }

@@ -11,7 +11,7 @@ from django.utils import simplejson
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.utils.functional import wraps
 from django.template import RequestContext
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.db import transaction
 from django.db.models import Sum
 from django.views.generic.date_based import archive_day
@@ -25,7 +25,7 @@ from invoices.utils import parse_report, parse_report_lw
 from invoices.forms import InvoiceReportFileForm
 from invoices.models import Invoice,LineItem
 
-@login_required
+@permission_required('access.view_flavor')
 def upload_report(request):
     if request.method =='POST':
         form = InvoiceReportFileForm(request.POST, request.FILES)
@@ -44,7 +44,7 @@ def upload_report(request):
                               context_instance=RequestContext(request))
 
 
-@login_required
+@permission_required('access.view_flavor')
 def upload_report_lw(request):
     if request.method =='POST':
         form = InvoiceReportFileForm(request.POST, request.FILES)
@@ -66,7 +66,6 @@ def upload_report_lw(request):
 # for x in models.Invoice.objects.values('qb_date').annotate(Sum("lineitem__quantity_cost")).order_by('qb_date'):
 #    print x
 
-@login_required
 @permission_required('invoice.change_invoice')
 def date_detail(request,year,month,day):
     d = date(year=int(year),month=int(month),day=int(day))
@@ -76,7 +75,6 @@ def date_detail(request,year,month,day):
                                'd':d},
                               context_instance=RequestContext(request))
 
-@login_required
 @permission_required('invoice.change_invoice')
 def date_summary(request):
     date_data = Invoice.objects.values('qb_date').annotate(Sum("lineitem__quantity_cost")).order_by('qb_date')
@@ -86,7 +84,6 @@ def date_summary(request):
                                },
                               context_instance=RequestContext(request))
 
-@login_required
 @permission_required('invoice.change_invoice')
 def invoice_archive_day(request, year, month, day):
     queryset = Invoice.objects.all()
@@ -104,7 +101,7 @@ def invoice_archive_day(request, year, month, day):
             allow_empty=True,
         )
 
-#@login_required 
+#@permission_required('access.view_flavor') 
 #def summary(request):
 #    page_title="Invoice Summary"
 #    # the invoices version of parse_orders hasn't been written yet

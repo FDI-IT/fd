@@ -26,9 +26,9 @@ from elaphe import barcode
 
 from newqc import controller
 from access.barcode import barcodeImg, codeBCFromString
-from access.models import Flavor, Ingredient
+from access.models import Flavor, Ingredient, FlavorSpecification
 from access.views import flavor_info_wrapper
-from newqc.forms import NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
+from newqc.forms import TestResultForm, NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
 from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, LotSOLIStamp
 from newqc.utils import process_jbg, get_card_file, scan_card
 from newqc.tasks import walk_scans_qccards
@@ -612,25 +612,244 @@ def batchsheet_detail(request, lot_pk):
                               {'lot':lot})
 
 @permission_required('access.view_flavor')
-def lot_detail(request, lot_pk):
+def lot_detail(request, lot_pk, update=None):
     lot = get_object_or_404(Lot, pk=lot_pk)
     
     lss_list = []
     for lss in lot.lotsolistamp_set.all():
-        if lss.coa_set.exists() == False: #if the lss has no coa, append the url to create a new coa
-            lss_list.append((True, lss.salesordernumber, '/django/qc/new_coa/%s' % lss.pk))
-        else:
-            lss_list.append((False, lss.salesordernumber, '/django/qc/coa/%s' % lss.coa.pk))
-    
+        if lss.coa_set.exists() == False: #if the lss has no coa, append the url to create a new coa, CREATE COA
+            coa = COA(
+                lss = lss
+            )
+            coa.save()
             
+        lss_list.append((lss.salesordernumber, '/django/qc/coa/%s' % lss.coa_set.all()[0].pk))
+    
+    #if user clicks 'update database values'
+    if update == "database":
+        #update flashpoint and specific gravity if the database values changed (should this be separate from other update?)
+        #should these results be pulled in from the database or should the database values be pulled in from here????
+        try:
+            fpresult = lot.testresult_set.get(name = 'Flash Point')
+            if fpresult.result != lot.flavor.flashpoint:
+                fpresult.result = lot.flavor.flashpoint
+                fpresult.save()
+        except:
+            pass
+        try:
+            spgresult = lot.testresult_set.get(name = 'Specific Gravity')
+            if spgresult.result != lot.flavor.spg:
+                spgresult.result = lot.flavor.spg
+                spgresult.save()
+        except:
+            pass
+            
+    #if the user clicks 'update specs'
+    if update == "true":
+
+        #if there is a flavorspec with no corresponding test result object, create a test result 
+        for spec in lot.flavor.flavorspecification_set.all():
+            if lot.testresult_set.filter(name = spec.name).filter(specification = spec.specification).exists() == False:
+                #if the new spec replaces a general spec, copy the result 
+                if spec.replaces != None:
+                    tr = TestResult.objects.get(name=spec.replaces.name, specification=spec.replaces.specification)
+                    result = tr.result
+                else:
+                    tr = None
+                    #get the flashpoint and specific gravity from database (this only occurs if these testresults were just created)
+                    if spec.name == 'Flash Point':
+                        result = spec.flavor.flashpoint
+                    elif spec.name == 'Specific Gravity':
+                        result = spec.flavor.spg
+                    else:
+                        result = ''
+                    
+                
+                testresult = TestResult (
+                            lot = lot,
+                            name = spec.name,
+                            specification = spec.specification,
+                            customer = spec.customer,
+                            result = result,
+                            replaces = tr)
+                testresult.save()
+                 
+        #delete any testresults that correspond to specs that have been deleted
+        spec_list = []
+        for spec in lot.flavor.flavorspecification_set.all():
+            spec_list.append((spec.name, spec.specification))
+         
+        for testresult in lot.testresult_set.all():
+            if (testresult.name, testresult.specification) not in spec_list:
+                testresult.delete()       
+    
+    #if the lot has no test results, initialize them (with no results)
+    #this way, the test results for a given lot are initialized once and will NOT change if the specifications change
+    if lot.testresult_set.exists() == False: 
+        for spec in lot.flavor.flavorspecification_set.filter(replaces=None):
+#             #for each spec, check if a customer spec exists (there should only be one?); if so, use it
+#             if spec.customer_spec_set.exists():
+#                 if spec.customer_spec_set[0].customer == 
+#                     specification = spec.customer_spec_set[0].specification
+#             else:
+            
+            testresult = TestResult (
+                        lot = lot,
+                        name = spec.name,
+                        specification = spec.specification,
+                        customer = spec.customer
+                    )
+            testresult.save()
+            
+        for spec in lot.flavor.flavorspecification_set.exclude(replaces=None):
+            #get the testresult that corresponds to the spec which the spec replaces
+            replace_spec = spec.replaces
+            replace_testresult = TestResult.objects.get(name=replace_spec.name, specification=replace_spec.specification)
+            
+            testresult = TestResult (
+                        lot = lot,
+                        name = spec.name,
+                        specification = spec.specification,
+                        customer = spec.customer,
+                        replaces = replace_testresult
+                    )
+            testresult.save()            
+    #get test results and display them
+    result_list = []
+    for testresult in lot.testresult_set.filter(customer=None):
+        if testresult.result == '':
+            result = 'Not Tested'
+        else:
+            result = testresult.result
+        result_list.append((testresult.name, result, testresult.specification))
+        
+    #get customer results and display them
+    customer_dict = {}
+    for testresult in lot.testresult_set.exclude(customer=None):
+        
+        if testresult.result == '':
+            result = 'Not Tested'
+        else:
+            result = testresult.result 
+            
+#        spec = FlavorSpecification.objects.get(flavor=testresult.lot.flavor, name=testresult.name, specification=testresult.specification)
+#         if spec.replaces != None:
+#             replaces = spec.replaces.name
+#         else:
+#             replaces = None
+
+        if testresult.replaces != None:
+            replaces = testresult.replaces.name
+        else:
+            replaces = None
+        
+        if testresult.customer not in customer_dict:
+            customer_dict[testresult.customer] = [(testresult.name, replaces, result, testresult.specification),]
+        else:
+            customer_dict[testresult.customer].append((testresult.name, replaces, result, testresult.specification))
+        
+                   
     
     return render_to_response('qc/lots/detail.html',
                               {'lot':lot,
+                              'print_link': '/django/batchsheet/%s/' % lot_pk,
                               'lss_list': lss_list,
-                              'print_link': '/django/batchsheet/explosion_print_single/%s/' % lot_pk,
-                               'page_title':"Lot %s  --  %s-%s %s lbs  --  Status: %s"% (lot.number, lot.flavor.prefix, lot.flavor.number, lot.amount, lot.status)},
+                              'result_list': result_list,
+                              'customer_dict': customer_dict,
+                              'page_title':"Lot %s  --  %s-%s %s lbs  --  Status: %s"% (lot.number, lot.flavor.prefix, lot.flavor.number, lot.amount, lot.status)},
                               context_instance=RequestContext(request))
 
+def edit_test_results(request, lot_pk):
+    lot = get_object_or_404(Lot, pk=lot_pk)
+
+    page_title = "Lot #%s - Test Result List" % lot.number
+    
+    TestResultFormSet = formset_factory(TestResultForm, extra=0, can_delete=True)
+    
+    if request.method == 'POST':
+        formset = TestResultFormSet(request.POST)
+        if formset.is_valid():
+            
+            for form in formset.forms:
+
+                if 'DELETE' in form.cleaned_data:
+                    if form.cleaned_data[u'DELETE']==True:
+                        try: 
+                            testresult = TestResult.objects.get(pk=form.cleaned_data['pk'])
+                            testresult.result = ''
+                        except:
+                            pass
+                    else:
+                        testresult = TestResult.objects.get(pk=form.cleaned_data['pk'])
+                        testresult.result = form.cleaned_data['result']
+                        
+#                         #find any testresults for customerspecs that replace this one, and update their results
+#                         spec = FlavorSpecification.objects.get(name=testresult.name, specification=testresult.specification)
+#                         
+                        #adding a replace foreign key to another testresult makes this easier
+                        #get any testresult that replace the edited test result and update their result
+                        for replace_tr in TestResult.objects.filter(replaces = testresult):
+                            replace_tr.result = form.cleaned_data['result']
+                            replace_tr.save()
+# 
+#                         for replace_spec in FlavorSpecification.objects.filter(replaces = spec):
+#                             replace_testresult = TestResult.objects.get(lot=lot, name=replace_spec.name, specification=replace_spec.specification)
+#                             replace_testresult.result = form.cleaned_data['result']
+#                             replace_testresult.save()
+                                            
+                    testresult.save()
+
+
+            
+            return HttpResponseRedirect("/django/qc/lots/%s/" % lot.pk)
+        else:
+            return render_to_response('newqc/testresult_list.html', 
+                                  {'lot': lot,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'result_rows': zip(formset.forms,),
+                                   'management_form': formset.management_form,
+                                   },
+                                   context_instance=RequestContext(request))            
+            
+    initial_data = []        
+#     for testresult in lot.testresult_set.all():
+#         #only show testresults whose corresponding specs have replaces = None
+#         spec = FlavorSpecification.objects.filter(name=testresult.name).filter(specification=testresult.specification)
+#         if spec.count() > 1:
+#             print "MORE THAN ONE SPEC WITH THE SAME NAME AND SPECIFICATION"
+#         else:
+#             if spec[0].replaces == None:
+#                 initial_data.append({'pk':testresult.pk, 'name': testresult.name, 'specification': testresult.specification, 'result':testresult.result})
+#         
+    for testresult in lot.testresult_set.filter(replaces=None):
+        #only show testresults whose corresponding specs have replaces = None
+#         spec = FlavorSpecification.objects.filter(name=testresult.name).filter(specification=testresult.specification)
+#         if spec.count() > 1:
+#             print "MORE THAN ONE SPEC WITH THE SAME NAME AND SPECIFICATION"
+#         else:
+#             if spec[0].replaces == None:
+          initial_data.append({'pk':testresult.pk, 'name': testresult.name, 'specification': testresult.specification, 'result':testresult.result})
+            
+        
+        
+        
+    formset = TestResultFormSet(initial=initial_data)
+    
+#     result_list = []
+#     for result in lot.testresult_set.all():
+#         result_list.append(result)
+            
+    result_rows = zip(formset.forms)
+    return render_to_response('newqc/testresult_list.html', 
+                                  {'lot': lot,
+                                   'window_title': page_title,
+                                   'page_title': page_title,
+                                   'result_rows': result_rows,
+                                   'management_form': formset.management_form,
+                                   'extra':result_rows[-1],
+                                   },
+                                   context_instance=RequestContext(request))  
 
 @permission_required('access.view_flavor')
 def old_lot_detail(request, lot_pk):
@@ -853,6 +1072,112 @@ def receiving_log_print(request):
     return
 
 
+def coa(request, coa_pk):
+    coa = get_object_or_404(COA, pk=coa_pk)
+    testresults = coa.lss.lot.testresult_set.all()
+    
+    salesorder = SalesOrderNumber.objects.get(number=coa.lss.salesordernumber)
+    
+    return render_to_response('qc/flavors/coa.html',
+                              {'coa':coa,
+                               'testresults':testresults,
+                               'salesorder':salesorder})
+    
+
+    
+
+def edit_coa(request, ssl_pk): #TODO TODO TODO DOTODOTDOTO TODOT TODTODO OTODOTDOTO TODO!!!!!!!!!!!!!!!
+    return
+#     lss = LotSOLIStamp.objects.get(pk = ssl_pk)
+#         
+#     page_title = "Sales Order %s, Lot %s - COA Results" % (lss.salesordernumber, lss.lot.number)
+#     
+#     COARFormSet = formset_factory(COAResultForm, extra=0, can_delete=False)
+#     
+#     if request.method == 'POST':
+#         formset = COARFormSet(request.POST)
+#         if formset.is_valid():
+#             
+#             for form in formset.forms: 
+#                 try:
+#                     if 'pk' in form.cleaned_data:
+#                         if form.cleaned_data['pk'] != 0: #there was already an existing result, overwrite result DOESNT MAKE SENSE DO THIS ON WEDNESDAY
+#                             try:
+#                                 coar = COAResult.objects.get(pk=form.cleaned_data['pk'])
+#                                 coar.result = form.cleaned_data['result']
+#                             except:
+#                                 pass
+#                         else:
+#                             try:
+#                                 
+#             
+# 
+#             
+#             #return HttpResponseRedirect("/django/access/%s/spec_list/" % flavor.number)
+#         else:
+#             return render_to_response('access/flavor/spec_list.html', 
+#                                   {'flavor': flavor,
+#                                    'window_title': page_title,
+#                                    'page_title': page_title,
+#                                    'spec_rows': zip(formset.forms,),
+#                                    'flavor_edit_link': '#',
+#                                    'management_form': formset.management_form,
+#                                    },
+#                                    context_instance=RequestContext(request))
+#             
+#             
+#     initial_data = []        
+#     for coar in lss.coa.flavorspecification_set.all():
+#         initial_data.append({'pk':flavorspec.pk, 'name':flavorspec.name, 'specification':flavorspec.specification})
+#         
+#     #if no previous results, make pk 0?  then checked cleaned data for pk 0
+#         
+#     formset = SpecFormSet(initial=initial_data)
+#             
+#     spec_rows = zip(formset.forms)
+#     return render_to_response('access/flavor/spec_list.html', 
+#                                   {'flavor': flavor,
+#                                    'window_title': page_title,
+#                                    'page_title': page_title,
+#                                    'spec_rows': spec_rows,
+#                                    'flavor_edit_link': '#',
+#                                    'management_form': formset.management_form,
+#                                    'extra':spec_rows[-1],
+#                                    },
+#                                    context_instance=RequestContext(request))    
+#     
+        
+    # if request is post
+    #  if form is valid
+    #   c = COA()
+    #   c.save()
+    #   for coar in coa_results_set:
+    #      coar.instance.coa=c
+    #      coar.save()
+    
+    
+    
+    # pull in the  lot/sales order
+    # fill in form initial data
+    # if requst is post
+    #  if form is valid
+    #   save the form
+    
+    # OR
+    
+    # pull in lot/sales order
+    # if request is post
+    #  if form is valid
+    #   fill in related data from spces
+    #   save the form
+
+
+
+
+
+
+
+
 
 #to generate pngs from a pdf file
 # convert -geometry 3000x3000 -density 300x300 -quality 100 test.pdf testdf.png
@@ -869,4 +1194,3 @@ def receiving_log_print(request):
 #    logging.info('Request result: %s' % result.result)
 #    return render_to_response('base.html',
 #                              {"page_title":result.result})
-#    

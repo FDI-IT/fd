@@ -25,6 +25,7 @@ class SalesOrderNumber(models.Model):
     customer = models.ForeignKey('access.Customer',blank=True,null=True)
     open = models.BooleanField(default=True)
     # TODO - remove the above field in production
+    #purchase order number
 
     @staticmethod
     def get_next_internal_number():
