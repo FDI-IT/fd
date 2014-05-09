@@ -200,9 +200,6 @@ def build_tree(root_flavor):
             my_node.rgt = i
             i += 1
             my_node.leaf = True
-            print my_node
-            print my_node.weight
-            print my_node.weight_factor
             my_node.save()
         
     # flush parent_stack and assign rgt numbers

@@ -859,4 +859,67 @@ class NewSolutionForm(forms.Form):
                                  ('50%','50%'),
                                  ))
     solvent = forms.ModelChoiceField(queryset=Solvent.objects.all())
-   
+
+    
+
+# def validate_spec_name(name):
+#     if FlavorSpecification.objects.filter(name=name).count() != 0:
+#         raise ValidationError(u'A specification with that name already exists.')
+
+    
+# class CustomerSpecificationNameField(forms.CharField):
+#     default_validators = [validate_spec_name]
+
+
+#use closure to get the flavor for which the form is being used
+def make_flavorspec_form(flavor):
+    class FlavorSpecificationForm(forms.Form):
+        pk = forms.IntegerField(initial=0)
+        name = forms.CharField(max_length=48, required=True)
+        specification = forms.CharField(max_length=48, required=True)
+        micro = forms.BooleanField(required=False, initial=False)
+    #     customer_id = forms.IntegerField(initial=0, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+    #     replaces_id = forms.IntegerField(initial=0, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+        #result = forms.CharField(max_length=48)
+        def clean(self):
+            cleaned_data = self.cleaned_data
+            pk = cleaned_data.get("pk")
+            name = cleaned_data.get("name").lstrip().rstrip() #get rid of accidental spaces before and after name
+            delete = cleaned_data.get(u'DELETE')
+            
+            if delete == False:
+                if FlavorSpecification.objects.filter(flavor=flavor).filter(name=name).exclude(pk=pk).exists():
+                    raise ValidationError("A specification with the name '%s' already exists" % name)
+      
+            return cleaned_data    
+    
+    
+    return FlavorSpecificationForm
+
+
+#use closure to get the flavor for which the form is being used; flavor is used in validation
+def make_customerspec_form(flavor):
+    class CustomerSpecificationForm(forms.Form):
+        pk = forms.IntegerField(initial=0)
+        name = forms.CharField(max_length=48, required=True)
+        specification = forms.CharField(max_length=48, required=True)
+        micro = forms.BooleanField(required=False)
+        
+        def clean(self):
+            cleaned_data = self.cleaned_data
+            pk = cleaned_data.get("pk")
+            name = cleaned_data.get("name").lstrip().rstrip() #get rid of accidental spaces before and after name
+
+            if FlavorSpecification.objects.filter(flavor=flavor).filter(name=name).exclude(pk=pk).exists():
+                raise ValidationError("A specification with the name '%s' already exists" % name)
+
+       
+            return cleaned_data    
+    
+    
+    return CustomerSpecificationForm    
+
+class ReconciledSpecForm(forms.Form):
+    name = forms.CharField(max_length=48, required=True, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+    specification = forms.CharField(max_length=48, required=True)
+

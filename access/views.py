@@ -22,7 +22,7 @@ from django.core.urlresolvers import reverse
 from reversion import revision
 
 from access.controller import reconcile_flavor, discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors, experimental_approve_from_form
-from access.formatter import formulatree_to_jsinfovis
+#from access.formatter import formulatree_to_jsinfovis
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
 from access.my_profile import profile
@@ -219,7 +219,7 @@ def experimental_review(request, experimental):
         context_dict['approve_link'] = experimental.get_approve_link()
         context_dict['status_message'] = status_message
         context_dict['recalculate_link'] = '/django/access/experimental/%s/recalculate/' % experimental.experimentalnum
-        context_dict['edit_link'] = '#'
+        context_dict['experimental_edit_link'] = '#'
         return render_to_response('access/experimental/experimental_review.html',
                                   context_dict,
                                   context_instance=RequestContext(request))
