@@ -69,7 +69,7 @@ RISK_ASSESSMENT_CHOICES = (  #NEW
 )
 
 DIACETYL_PKS = [262,]
-PG_PKS = [670]
+PG_PKS = [670,6717]
 
 def get_next_flavorid():
     return Flavor.objects.all().order_by('-id')[0].id+1

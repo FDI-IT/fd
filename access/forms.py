@@ -139,6 +139,7 @@ class ExperimentalForm(ModelForm, FieldsetMixin):
                        'artificial',
                        'nfi',
                        'natural_type',
+                       'exclude_from_reporting',
                        ),
             'extra_content':{'divid':'hidden',
                              'legend':'Hidden'}

@@ -18,7 +18,9 @@ from django.db.models.query import EmptyQuerySet
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.decorators import permission_required
 
-from access.models import Flavor, FormulaTree, ExperimentalLog
+from access.models import Flavor, FormulaTree, ExperimentalLog, Formula
+
+from pluggable.parseintset import parseIntSet 
 
 from reports import forms
 from reports import controller
@@ -60,6 +62,8 @@ def lots_by_person(request, date_range_form):
                }                        
            )
     
+
+    
 @date_range_wrapper
 @permission_required('access.add_indivisibleleafweight')
 def conversions_by_person(request, date_range_form):
@@ -99,7 +103,133 @@ def experimental_log_exclude(request):
         return HttpResponse(
                             simplejson.dumps(['Success',])                    
                             )
+        
+def report_parse(report_path='/srv/samba/tank/Share folders by role/Quality Control/xx.csv'):
+    import csv
+    sales_report_file = open(report_path,'rb')
+    csvreader = csv.reader(sales_report_file)
     
+    header = csvreader.next()
+    
+    lines = []
+
+    for x in csvreader:
+        lines.append(x)
+        
+    import re
+    my_re = re.compile('\d+')
+
+    flavor_number_dict = {}
+    for l in lines:
+        try:
+            my_match = my_re.match(l[0]).group()
+        except:
+            continue
+        if my_match in flavor_number_dict:
+            flavor_number_dict[my_match].append(l)
+        else:
+            flavor_number_dict[my_match] = [l,]
+            
+    summarized_flavor_dict = {}
+    for flavor_number, flavor_lines in flavor_number_dict.iteritems():
+        total=0
+        for l in flavor_lines:
+            total+= int(float(l[2]))
+        
+        if flavor_number in summarized_flavor_dict:
+            summarized_flavor_dict[flavor_number]+= total
+        else:
+            summarized_flavor_dict[flavor_number] = total
+            
+    return summarized_flavor_dict
+
+@permission_required('access.add_indivisibleleafweight')
+def sales_by_person(request,):
+    credit_ranges = {
+            'NS':'180050-189999',
+            'SC':'140361-149999',
+            'DR':'120950-129999',
+            'MM':'',     
+            'SK':'',  
+        }
+    
+    complete_credit_sets = {}
+    credit_reverse_map = {}
+    for initials, range_string in credit_ranges.iteritems():
+        my_flavors = set()
+        my_experimentals = ExperimentalLog.objects.filter(initials=initials).exclude(flavor=None)
+        for my_e in my_experimentals:
+            my_flavors.add(my_e.flavor)
+        for f in Flavor.objects.filter(number__in=parseIntSet(range_string)):
+            my_flavors.add(f)
+        complete_credit_sets[initials] = my_flavors
+        for f in my_flavors:
+            credit_reverse_map[f] = initials
+            
+    for formula_line in Formula.objects.filter(amount=1000).exclude(ingredient__sub_flavor=None):
+        my_sub_flavor = formula_line.ingredient.sub_flavor
+        if my_sub_flavor in credit_reverse_map:
+            my_initials = credit_reverse_map[my_sub_flavor]
+            complete_credit_sets[my_initials].add(formula_line.flavor)
+            credit_reverse_map[formula_line.flavor] = my_initials
+                    
+    partial_credit_sets = {}
+    for initials, flavors in complete_credit_sets.iteritems():
+        partial_flavors = set()
+        for f in flavors:
+            for ft in FormulaTree.objects.filter(node_flavor=f).exclude(root_flavor=f):
+                partial_flavors.add(ft.root_flavor)
+        partial_credit_sets[initials] = partial_flavors
+  
+    summarized_flavor_dict = report_parse()
+    sales_per_flavor = {} 
+    for flavor_number, total in summarized_flavor_dict.iteritems():
+        try:
+            flavor = Flavor.objects.get(number=flavor_number)
+            sales_per_flavor[flavor_number] = (total, credit_reverse_map[flavor])
+        except:
+            sales_per_flavor[flavor_number] = (total, "UNK")
+
+    partial_sales_per_person = {}
+    for initials, partial_flavors in partial_credit_sets.iteritems():
+        my_partial_sales = {}
+        for f in partial_flavors:
+            k = str(f.number)
+            if k in sales_per_flavor:
+                if sales_per_flavor[k][1] != initials:
+                    my_partial_sales[f] = sales_per_flavor[k][0]
+        partial_sales_per_person[initials] = my_partial_sales
+        
+    partial_totals = {}
+    for initials, partial_sales in partial_sales_per_person.iteritems():
+        total = 0
+        for ps in partial_sales.values():
+            total += ps
+        partial_totals[initials] = total
+            
+    sales_per_person = {}
+    for flavor_number, details in sales_per_flavor.iteritems():
+        total, initials = details
+        if initials in sales_per_person:
+            sales_per_person[initials] += total
+        else:
+            sales_per_person[initials] = total
+            
+    sales_per_person_with_partials = {}
+    for initials, partial_sales in partial_sales_per_person.iteritems():
+        sales_per_person_with_partials[initials] = sales_per_person[initials] + partial_totals[initials]
+
+    return render_to_response('reports/sales_by_person.html',
+               {
+                'sales_per_flavor':sales_per_flavor,
+                'sales_per_person':sales_per_person,
+                'sales_per_person_with_partials':sales_per_person_with_partials,
+                'partial_sales_per_person':partial_sales_per_person,
+                'page_title': 'Sales by Person',
+               },
+                context_instance=RequestContext(request)                
+           )
+
 @date_range_wrapper
 @permission_required('access.add_indivisibleleafweight')
 def experimental_log(request, date_range_form):

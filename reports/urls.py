@@ -22,6 +22,7 @@ urlpatterns = patterns('reports.views',
     (r'^experimental_log_exclude/$', 'experimental_log_exclude'),
     (r'^conversions_by_person/$', 'conversions_by_person'),
     (r'^formula_usage_summary/$', 'formula_usage_summary'),
+    (r'^sales_by_person/$', 'sales_by_person'),
     
 
 )
