@@ -105,7 +105,7 @@ def get_num_children(ingredient_list, parent_id):
     
     return num_children
 
-@transaction.commit_manually
+#@transaction.commit_manually
 def build_tree(root_flavor):
     """Given a root_flavor model instance, construct a more sane tree-like
     representation of the formula of root_flavor. In order to see the formula
@@ -200,6 +200,9 @@ def build_tree(root_flavor):
             my_node.rgt = i
             i += 1
             my_node.leaf = True
+            print my_node
+            print my_node.weight
+            print my_node.weight_factor
             my_node.save()
         
     # flush parent_stack and assign rgt numbers
@@ -211,7 +214,7 @@ def build_tree(root_flavor):
         
     formula_root.rgt = i
     formula_root.save()
-    transaction.commit()
+#    transaction.commit()
     
 def build_trees(flavors, start, end):
     x = start
