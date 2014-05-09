@@ -71,6 +71,13 @@ function print_qc(flavor_number) {
 	};
 }
 
+function spec_sheet(flavor_number) {
+	newwindow = popup_window('/django/access/' + flavor_number +'/spec_sheet/');
+	newwindow.onload = function (e) {
+		newwindow.print();		
+	};
+}
+
 // This will parse a delimited string into an array of
 // arrays. The default delimiter is the comma, but this
 // can be overriden in the second argument.

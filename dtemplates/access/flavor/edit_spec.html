@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<head>
+	<link rel="stylesheet" type="text/css" href="/djangomedia/css/spec_sheet.css" />
+</head>
+    
+<div id="content-main">
+	
+
+	<form action="" method="POST">
+	{% csrf_token %}
+
+	<h2 class="fdi_print_subtitle">
+		Edit Specification
+		<br> Flavor: <a href="{{ flavor.get_absolute_url }}"> {{ flavor.name }} </a>	
+	</h2>
+	<table class="fdi_specifications_table">
+		<thead>
+			<tr>
+				<th>
+					Name
+				</th>
+				<th>
+					Specification
+				</th>
+				<th>
+					Microbiological
+				</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+
+		{% if form.non_field_errors %}
+			<tr>
+				<td class="highlight" colspan="5"><b>	 Please correct the following error(s). {{form.non_field_errors}}</b></td>
+			</tr>
+		{% endif %}
+		<tr>
+			<td class="pk_row" style="display:none;"> {{ form.pk }} </td>
+			<td class="spec_name" width ="25%"> {{ form.name }} {{form.name.errors}}</td>
+			<td class="spec" width ="25%"> {{ form.specification }} {{form.specification.errors}}</td>
+			<td class="micro" width ="25%"> {{ form.micro }} {{form.micro.errors}}</td>
+			<td><input id="spec-submit-button" type="submit" value="Save" /></td>
+		</tr>
+		
+		
+
+		</tbody>
+	</table>
+	</form>
+
+	<form action = "{{ return_url }}">
+		<input type="submit" value="Back to Specification List">
+	</form>
+</div>
+
+{% endblock %}

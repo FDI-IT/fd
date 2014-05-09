@@ -5,11 +5,15 @@ from django import template
 from django.core.urlresolvers import reverse
 from django.db.models import Sum
 from django.template import RequestContext
+from django.core.urlresolvers import reverse
 
-from access.models import Flavor, FormulaTree, Ingredient, FormulaException, FormulaCycleException
+from access.models import Flavor, FormulaTree, Ingredient, FormulaException, FormulaCycleException, FlavorSpecification
 from access.utils import coster_headers
 from itertools import chain
 from reversion.models import Revision
+
+from salesorders.models import SalesOrderNumber
+
 
 register = template.Library()
 
@@ -154,6 +158,91 @@ def revision_history(flavor):
         'revision_rows': revision_rows,
     }
 
+    
+@register.inclusion_tag('access/flavor/review_specsheet.html')
+def spec_sheet(flavor):
+    
+    #get all customers who have specifications for this flavor (all customers that have ordered it?)
+    
+    #get all customers who ordered this flavor, and the number of customer specs they have for it
+    
+    customer_list = []
+    customer_spec_counts = []
+    customer_report_urls = []
+    customer_specsheet_urls = []
+     
+    for so in SalesOrderNumber.objects.all():
+        for soli in so.lineitem_set.all():
+            if soli.flavor == flavor:
+                customer_list.append(so.customer)
+                 
+    for customer in customer_list:
+        count = FlavorSpecification.objects.filter(customer = customer).count()
+        customer_spec_counts.append(count)
+        customer_report_urls.append(reverse('salesorders.views.customer_report', args=[customer.pk]))
+        
+        #i do this so i can display 'same as below' on the spec sheet tab if the customer doesn't have any customerspecs
+        if count == 0:
+            customer_specsheet_urls.append(None)
+        else:
+            customer_specsheet_urls.append(reverse('salesorders.views.customer_spec_sheet', args=[customer.pk, flavor.number]))
+    
+    customer_table = []
+    customer_table = zip(customer_list, customer_spec_counts, customer_report_urls, customer_specsheet_urls)
+          
+    #make customer_table None so we dont display anything in the template if there aren't any customers
+    if customer_table == []:
+        customer_table = None
+    
+    
+    #get general specs for that flavor
+    specs = FlavorSpecification.objects.filter(flavor = flavor, micro = False, replaces = None, customer = None)
+    micro_specs = FlavorSpecification.objects.filter(flavor = flavor, micro = True, replaces = None, customer = None)
+    
+    
+    return {'flavor': flavor,
+            'specs': specs,
+            'micro_specs': micro_specs,
+            'customer_table': customer_table}
+
+@register.inclusion_tag('access/flavor/customer_info.html')
+def customer_info(flavor):
+    
+    #get all customers who have specifications for this flavor (all customers that have ordered it?)
+    
+    #get all customers who ordered this flavor, and the number of customer specs they have for it
+    
+    customer_list = []
+    customer_spec_counts = []
+    customer_report_urls = []
+    customer_specsheet_urls = []
+     
+    for so in SalesOrderNumber.objects.all():
+        for soli in so.lineitem_set.all():
+            if soli.flavor == flavor:
+                customer_list.append(so.customer)
+                 
+    for customer in customer_list:
+        count = FlavorSpecification.objects.filter(customer = customer).count()
+        customer_spec_counts.append(count)
+        customer_report_urls.append(reverse('salesorders.views.customer_report', args=[customer.pk]))
+        
+        #i do this so i can display 'same as below' on the spec sheet tab if the customer doesn't have any customerspecs
+        if count == 0:
+            customer_specsheet_urls.append(None)
+        else:
+            customer_specsheet_urls.append(reverse('salesorders.views.customer_spec_sheet', args=[customer.pk, flavor.number]))
+    
+    customer_table = []
+    customer_table = zip(customer_list, customer_spec_counts, customer_report_urls, customer_specsheet_urls)
+          
+    #make customer_table None so we dont display anything in the template if there aren't any customers
+    if customer_table == []:
+        customer_table = None
+        
+    return {'flavor': flavor,
+            'customer_table': customer_table}
+        
     
     
     

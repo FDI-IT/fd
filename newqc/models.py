@@ -7,7 +7,7 @@ from django.db.models import Count
 #from django.contrib.contenttypes.models import ContentType
 #from django.contrib.contenttypes import generic
 
-from access.models import Flavor, Ingredient, ExperimentalLog
+from access.models import Flavor, Ingredient, ExperimentalLog, FlavorSpecification, Customer
 
 UNITS_CHOICES = (
     ('lbs','lbs'),
@@ -165,7 +165,7 @@ class Lot(models.Model):
     status = models.CharField(max_length=25, choices=STATUS_CHOICES, default="Created")
     amount = models.DecimalField(max_digits=6, decimal_places=1, blank=True, null=True) 
     flavor = models.ForeignKey(Flavor)
-    ftpks = models.TextField(blank=True)
+   # ftpks = models.TextField(blank=True)
     
     @staticmethod
     def get_object_from_softkey(softkey):
@@ -220,6 +220,7 @@ class Lot(models.Model):
     def get_admin_url(self):
         return "/django/admin/newqc/lot/%s" % self.pk
     
+    
     def retains_present(self):
         return self.retain_set.all().count() > 0
     
@@ -233,6 +234,17 @@ class Lot(models.Model):
     @property
     def batchsheets_present(self): 
         return self.batchsheet_set.all().count() > 0
+    
+    def coa_tests_image(self):
+        all_completed = True
+        if self.testresult_set.count() == 0:
+            return None 
+        
+        for testresult in self.testresult_set.all():
+            if testresult.result == '' or testresult.result == None:
+                return '/djangomedia/images/Icons/16x16/pause.png'
+                
+        return '/djangomedia/images/Icons/16x16/accept.png'
             
     
     headers = (
@@ -257,7 +269,19 @@ class LotSOLIStamp(models.Model):
     salesordernumber = models.PositiveIntegerField()
     quantity = models.DecimalField(max_digits=9,decimal_places=2)
     
+
+class COA(models.Model):
+    lss = models.ForeignKey('LotSOLIStamp')
     
+class TestResult(models.Model):
+    lot = models.ForeignKey('Lot')
+    #spec = models.ForeignKey('access.FlavorSpecification')
+    name = models.CharField(max_length=48)
+    specification = models.CharField(max_length=48)
+    result = models.CharField(max_length=48, blank=True, null=True)
+    replaces = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
+    customer = models.ForeignKey(Customer, blank=True, null=True)
+     
 class Retain(models.Model):
     """
     Data related to the retained sample of a production lot.

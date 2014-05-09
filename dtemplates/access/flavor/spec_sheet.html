@@ -1,0 +1,111 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="/djangomedia/css/spec_sheet.css" />
+	<link rel="stylesheet" type="text/css" href="/djangomedia/css/spec_sheet_print.css" media="print"/>
+</head>
+	
+<body>
+
+
+{% block content %}
+
+<div class="specsheet_application_container">
+	<div class="print_page_container">
+		<div class="print_page_content" id="spec_sheet_page">
+			<div class="float-container fdi_print_header">
+					<img id="fdi_print_header_logo" src="/djangomedia/images/logo.png">
+					<p class="fdi_print_header_address">
+						Flavor Dynamics, Inc.<br>
+						640 Montrose Ave<br>
+						South Plainfield, NJ 07080<br>
+						888.271.8424 - 908.822.8547 fax
+					</p>
+			</div>
+			<div class="float-container">
+				<h1 class="fdi_print_title">
+					{{ flavor.get_fdnum }}<br>
+					{{ flavor.natart_name_with_type }}
+				</h1>
+			</div>
+			
+			<div class="float-container spec_body">
+				<h2 class="fdi_print_subtitle">Specifications</h2>
+				<table class="fdi_specifications_table">
+					<thead>
+						<tr>
+							<th>
+								Name
+							</th>
+							<th>
+								Specification
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for spec in other_specs %}
+						<tr>
+							<td>
+								{{ spec.name }}
+							</td>
+							<td>
+								{{ spec.specification }}
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				
+				{% if micro_specs %}
+					<h2 class="fdi_print_subtitle">Microbiological Specifications</h2>
+					<table class="fdi_specifications_table">
+						<thead>
+							<tr>
+								<th>
+									Name
+								</th>
+								<th>
+									Specification
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for spec in micro_specs %}
+							<tr>
+								<td>
+									{{ spec.name }}
+								</td>
+								<td>
+									{{ spec.specification }}
+								</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				{% endif %}
+			</div>
+			
+			<div class="float-container fdi_print_footer_wrap">
+				<div class="fdi_print_footer">
+					<p>
+						This is the standard statement at the bottom 
+						of all spec sheets. The normal standard stuff 
+						would go here. All the normal things that belong 
+						on this type of document. Specifications are always 
+						subject to change.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- <div class="document_control_sidebar">
+		<h1>SPEC SHEETS</h1>
+		
+		<p>This would have info about all related records.</p>
+		
+
+	</div> -->
+</div>
+{% endblock %}
+</body>
+</html>

@@ -104,6 +104,16 @@ class FormulaTree(models.Model):
     class Meta:
         ordering = ['root_flavor', 'lft']
         
+    #returns the depth of a formula tree node (recursively)       
+    @property 
+    def depth(self):
+        #base case: node is root node, depth = 0
+        if(self.row_id == 0):
+            return 0
+        else:
+            parent_node = FormulaTree.objects.get(root_flavor=self.root_flavor, row_id=self.parent_id)
+            return 1 + parent_node.depth
+        
     @property
     def indivisible_leaf(self):
         if self.rgt == self.lft + 1:
@@ -1002,6 +1012,7 @@ class Ingredient(models.Model):
         ordering = ['id']
         permissions = (
                 ("changeprice_ingredient","Can change the price of raw materials"),
+                ('view_ingredient',"Can view ingredients")
         )
         db_table = u'Raw Materials'
         
@@ -1275,12 +1286,42 @@ class Flavor(FormulaInfo):
     #flavor
     location_code_n = generic.GenericRelation('LocationCode')
     location_code_old = models.CharField(blank=True, default="",max_length=20)
+    
+    #textfields for spec sheet info
+    ingredient_statement = models.TextField(blank=True)
+    shelf_life = models.TextField(blank=True)
+    shipping_storage = models.TextField(blank=True)
+    
+    
+    
     def save(self, *args, **kwargs):
         try:
             self.prefix = self.prefix.upper()
         except:
             pass
+        
+        if not self.flavorspecification_set.filter(name='Specific Gravity').exists():
+            flavorspec = FlavorSpecification(
+                                             flavor = self,
+                                             name = 'Specific Gravity',
+                                             specification = 'SPG Spec',
+                                             )
+            flavorspec.save()      
+            
+        if self.flashpoint != 0: #no flashpoint or powder
+            if not self.flavorspecification_set.filter(name='Flash Point').exists():
+                flavorspec = FlavorSpecification(
+                                                 flavor = self,
+                                                 name = 'Flash Point',
+                                                 specification = 'Flashpoint Spec',
+                                                 )
+                flavorspec.save()
+
         super(Flavor, self).save(*args, **kwargs)
+        
+
+        
+  
         
     def gazintas(self,):
         for ft in FormulaTree.objects.filter(root_flavor=self)[1:]:
@@ -1290,7 +1331,9 @@ class Flavor(FormulaInfo):
     class Meta:
         db_table = u'access_integratedproduct'
         ordering = ['-valid','number']
-    
+        permissions = (
+                ('view_flavor',"Can view flavors"),
+        )
     import_order = 0
 
     
@@ -1321,6 +1364,31 @@ class Flavor(FormulaInfo):
             if lw.ingredient.discontinued == True:
                 return True
         return False
+    
+    @property
+    def status(self):
+         
+        dci = self.discontinued_ingredients
+        
+        message = []
+        
+        if len(dci) != 0:
+            message.append("Contains the following discontinued ingredients: %s" % ", ".join(dci))
+            
+        if not self.reconciled:
+            message.append("Does not have a proper reconciled specification sheet.")
+            
+        if len(message) != 0:
+            return "\n\n".join(message)
+        else:
+            return ""
+            
+    @property
+    def reconciled(self):
+        if ReconciledFlavor.objects.filter(flavor=self,reconciled='True').exists():
+            return True
+        else:
+            return False
     
     @property
     def discontinued_ingredients(self):
@@ -1355,11 +1423,21 @@ class Flavor(FormulaInfo):
     def table_name(self):
         return "%s %s" % (self.name, self.label_type)
     
+    @property
+    def natart_name_with_type(self):
+        return "%s %s %s" % (self.natart, self.name, self.label_type)
+    
     def get_admin_url(self):
         return "/django/admin/access/flavor/%s" % self.id
         
     def get_absolute_url(self):
         return "/django/access/%s/" % self.number
+    
+    def get_specs_url(self):
+        return "/django/access/%s/spec_list" % self.number
+    
+    def get_reconcile_specs_url(self):
+        return "/django/access/%s/reconcile_specs" % self.number
     
     @staticmethod
     def get_absolute_url_from_softkey(softkey):
@@ -1453,6 +1531,8 @@ class Flavor(FormulaInfo):
                        ('/django/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
                        ('/django/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
                        ('/django/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
+                       ('/django/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
+                       ('/django/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
                        ]
         if self.retain_superset().count()>0:
             related_links.append(('/django/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
@@ -1571,6 +1651,68 @@ class Flavor(FormulaInfo):
             
             print f
             
+    
+#     def get_max_depth(self):
+#         return max(for ftnode.depth in FormulaTree.objects.filter(root_flavor=self))
+    
+    
+#     #returns the depth of a formula tree node (recursively)        
+#     def get_depth(self, ftnode):
+#         #base case: node is root node, depth = 0
+#         if(ftnode.row_id == 0):
+#             return 0
+#         else:
+#             parent_node = FormulaTree.objects.get(root_flavor=self, row_id=ftnode.parent_id)
+#             return 1 + self.get_depth(parent_node)
+#     
+    @property
+    def get_max_depth(self):
+        max_depth = 0
+        for ftnode in FormulaTree.objects.filter(root_flavor=self):
+            if ftnode.depth > max_depth:
+                max_depth = ftnode.depth
+        
+        return max_depth
+                
+    def get_max_depth_gazinta(self):
+        
+        max_depth = self.get_max_depth
+        for ftnode in FormulaTree.objects.filter(root_flavor=self):
+            if ftnode.depth == max_depth:
+                #max_depth_ingredients.append(ftnode.node_ingredient)
+                max_depth_gazinta_node = FormulaTree.objects.get(root_flavor=self, row_id=ftnode.parent_id).node_flavor
+                break
+     
+        return max_depth_gazinta
+     
+    @property
+    def leaf_weight_count(self):
+        return self.leaf_nodes.count()
+        
+    @property
+    def consolidated_leaf_weight_count(self):
+        return len(self.consolidated_leafs)
+        
+    @property
+    def gazinta_count(self):  #DOES NOT INCLUDE ROOT FLAVOR
+        count = 0
+        
+#         for ft in FormulaTree.objects.filter(root_flavor = self)[1:]
+#             if ft.node_ingredient.is_gazinta:
+#                 count = count+1
+                
+        #OR
+        for ft in FormulaTree.objects.filter(root_flavor=self)[1:]:
+            if ft.node_flavor is not None:
+                count = count+1
+                
+        #OR
+        
+        #total nodes - leaf nodes = gazinta nodes
+        #count = FormulaTree.objects.filter(root_flavor=self).count() - fl.leaf_nodes.count() - 1 #minus the root flavor
+                
+        return count #this count DOES NOT include the root flavor as a gazinta
+    
     @property
     def leaf_nodes(self):
         return FormulaTree.objects.filter(root_flavor=self).filter(rgt=F('lft') + 1)
@@ -2852,17 +2994,17 @@ class TSR(models.Model):
     
     #approvals needed
     kosher_parve = models.BooleanField(default=False)
-    kosher_dairy = models.BooleanField(default=False)
-    usda = models.BooleanField(default=False, verbose_name="USDA")
-    msds = models.BooleanField(default=False, verbose_name="MSDS")
-    specs = models.BooleanField(default=False)
-    cont_guar = models.BooleanField(default=False)
-    finished_product = models.BooleanField(default=False)
+    kosher_dairy = models.BooleanField(default=False) # not necessary
+    usda = models.BooleanField(default=False, verbose_name="USDA") ##
+    msds = models.BooleanField(default=False, verbose_name="MSDS") ## paperwork group of fields
+    specs = models.BooleanField(default=False)                     ## add nutri, pricing
+    cont_guar = models.BooleanField(default=False) # continuing guarantee
+    finished_product = models.BooleanField(default=False) # showing finished system
     
     #flavor form
     liquid = models.BooleanField(default=False)
     dry = models.BooleanField(default=False)
-    emulsion = models.BooleanField(default=False)
+    emulsion = models.BooleanField(default=False) # not necessary
     natural = models.BooleanField(default=False)
     wonf = models.BooleanField(default=False)
     NA = models.BooleanField(default=False)
@@ -2873,14 +3015,15 @@ class TSR(models.Model):
     oil = models.BooleanField(default=False)
     water = models.BooleanField(default=False)
     coffee = models.BooleanField(default=False)
-    tea = models.BooleanField(default=False)
+    tea = models.BooleanField(default=False) # black, green, herbal
     nopg = models.BooleanField(default=False)
     prop65 = models.BooleanField(default=False)
     nodiacetyl = models.BooleanField(default=False)
     overseas = models.BooleanField(default=False)
     
+    #flash point targets "advise flash point"
     
-    max_price = models.DecimalField(max_digits=7, decimal_places=2)
+    max_price = models.DecimalField(max_digits=7, decimal_places=2) ## max COST field
     lbs_per_year = models.PositiveIntegerField()
     exposed_to_heat = models.BooleanField(default=False)
     temperature = models.DecimalField(null=True, max_digits=5, decimal_places=3, blank=True)
@@ -3312,7 +3455,30 @@ class MagentoFlavor(models.Model):
     
         
         
-        
-        
-        
-        
+
+class FlavorSpecification(models.Model):
+    flavor = models.ForeignKey('Flavor')
+    name = models.CharField(max_length=48) #change this, override save method to enforce uniqueness
+    specification = models.CharField(max_length=48)
+    micro = models.BooleanField(default=False)
+    customer = models.ForeignKey(Customer, blank=True, null=True)
+    replaces = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
+    
+
+
+    def __unicode__(self):
+        return 'Flavor: %s, Name: %s, Specification: %s' % (self.flavor, self.name, self.specification)
+    
+class ReconciledFlavor(models.Model):
+    flavor = models.ForeignKey('Flavor')
+    reconciled = models.BooleanField(default=False)
+    scraped_data = models.CharField(max_length=1000)
+    updated_at = models.DateTimeField(auto_now=True)
+    reconciled_by = models.ForeignKey(User)
+    
+    def __unicode__(self):
+        return 'Flavor: %s, Reconciled By: %s' % (self.flavor, self.reconciled_by.username)
+    
+    
+
+    

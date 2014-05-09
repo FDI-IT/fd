@@ -16,7 +16,6 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.forms.formsets import formset_factory
 from django.forms.models import inlineformset_factory
-from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.db.models import Count, Sum
 

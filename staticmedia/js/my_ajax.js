@@ -406,7 +406,7 @@ jQuery(document).ready(function(){
 	});
 	var menu = jQuery('#edit_menu');
 	menu.menu();
-	jQuery('#experimental_edit_link').click(function(event) {
+	jQuery('#edit_link').click(function(event) {
 		jQuery('#edit_menu').show().position({
 			my:'left top',
 			at:'left bottom',

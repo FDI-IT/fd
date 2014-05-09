@@ -1,0 +1,36 @@
+
+
+h3.center {
+	text-align: center;
+}
+
+table.center {
+	margin-left: auto;
+	margin-right: auto;
+	width:66%;
+	margin-bottom:26px;
+}
+
+td {
+	text-align: center;
+}
+
+td.left {
+	text-align: left;
+}
+
+td.fit-content {
+	white-space: nowrap;
+}
+
+div.center {
+	text-align: center;
+}
+
+input.center{
+	text-align: center;
+}
+
+h3.redtext{
+	color: #FF0000;
+}

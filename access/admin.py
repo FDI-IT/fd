@@ -161,3 +161,14 @@ class SolventAdmin(VersionAdmin):
     search_fields = ['ingredient__id']
 admin.site.register(models.Solvent, SolventAdmin)
 
+class FlavorSpecificationAdmin(VersionAdmin):
+    search_fields = ['flavor__name', 'name']
+    fields = ('name','specification','flavor'
+              )
+    raw_id_fields = ('flavor',)
+admin.site.register(models.FlavorSpecification, FlavorSpecificationAdmin)
+
+class ReconciledFlavorAdmin(VersionAdmin):
+    search_fields = ['flavor__name', 'flavor__number']
+admin.site.register(models.ReconciledFlavor, ReconciledFlavorAdmin)
+

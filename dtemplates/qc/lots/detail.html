@@ -17,10 +17,44 @@ function resizeIframe(obj) {
 <div id="content-right">
 	<h3>Sales orders:</h3>
 	<ul>
-		{% for lss in lot.lotsolistamp_set.all %}
-		<li><a href="/django/salesorders/{{lss.salesordernumber}}/">{{lss.salesordernumber}}</a></li>
+	
+		{% for so_number, url in lss_list %}
+			<li><a href="/django/salesorders/{{ so_number }}/">{{ so_number }}</a> - <a href="{{ url }}"> View COA </a></li>
 		{% endfor %}
 	</ul>
+
+	<h3>Test Results:</h3>
+	<ul>
+	
+		{% for test, result, specification in result_list %}
+			<li><b>{{ test }}</b> <br> <i>{{ specification }}</i> <br> {{ result }} </li>
+		{% endfor %}
+		
+	</ul>
+
+	{% if customer_dict.items %}
+	<h3>Customer Spec Results:</h3>
+	{% endif %}
+
+	{% for customer, results in customer_dict.items %}
+	<b> {{ customer.companyname }} </b>
+	<ul>
+		{% for test, replaces, result, specification in results %}
+			<li>
+				<b> {{ test }} {% if replaces %}: Replaces {{ replaces }}{% endif %} </b>
+				<br> <i>{{ specification }}</i> <br> {{ result }} 
+			</li>
+		{% endfor %}
+		
+	</ul>
+	{% endfor %}
+	
+	
+	<h3> <a href="/django/qc/lots/{{ lot.pk }}/test_results/"> Edit Test Results </a></h3>
+	
+	<h3> <a href="/django/qc/lots/{{ lot.pk }}/update/true"> Update to Current Specs </a></h3>
+	
+	<h3> <a href="/django/qc/lots/{{ lot.pk }}/update/database"> Update Database Values </a></h3>
 </div>
 
 

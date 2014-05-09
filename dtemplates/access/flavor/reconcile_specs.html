@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}    
+
+<head>
+	<link rel="stylesheet" type="text/css" href="/djangomedia/css/mattcss.css" />
+</head>
+
+<div id="content-main">
+	
+<h3> Possible Specifications </h3>
+
+	<table class="center">
+		<thead>
+			<tr>
+				<th>
+					Spec Name
+				</th>
+				<th>
+					MTF Values
+				</th>
+				<th>
+					Database Values 
+				</th>
+			</tr>
+		</thead>
+		
+		<tbody>
+		{% for name, mtf_vals, db_vals in all_vals %}
+			<tr>
+				<td class="spec_name"> {{ name }} </td>
+				
+				{% if no_mtf %}
+					<td class="mtf_values"> No MTF Exists </td>
+				{% else %}
+				
+					{% if mtf_vals %}
+						<td class="mtf_values">
+						<table class="center">
+							<thead>
+								<tr>
+									<th> Source </th>
+									<th> Possible Values </th>
+								</tr>
+							</thead>
+							
+								
+							{% for sheet, spec_list in mtf_vals.iteritems %}
+								<tr>
+									<td class="fit-content left"> {{ sheet }} </td>
+									<td class="fit-content left"> {{ spec_list|join:", " }} </td>
+	
+								</tr>
+							{% endfor %}
+							
+							
+							
+							
+						</table>
+						</td>	
+	
+					{% else %}
+						<td class="mtf_values"> No MTF Values </td>
+					{% endif %}
+
+				{% endif %}
+
+				{% if db_vals == None %}
+					<td class="db_values"> No Database Values </td>
+				{% else %}
+					<td class="db_values">
+						<table class="center">
+							<thead>
+								<tr>
+									<th> Flavor </th>
+									<th> Value </th>
+								</tr>
+							</thead>
+							
+								
+							{% for flavornum, val in db_vals.iteritems %}
+								<tr>
+									<td class="fit-content left"> {{ flavornum }} </td>
+									<td class="fit-content left"> {{ val }} </td>
+	
+								</tr>
+							{% endfor %}
+							
+							
+							
+							
+						</table>
+					</td>
+				{% endif %}
+				
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+
+<h3> Reconciled Specifications </h3>
+	
+	<form action="" method="POST">
+	{% csrf_token %}
+	{{ management_form }}
+	
+	<table id="reconciled_spec-rows" class="center">
+		<thead>
+		<tr>
+			<th>Name</th>
+			<th>Specification</th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for form in reconciled_formset %}
+		{% if form.non_field_errors %}
+			<tr>
+				<td class="highlight" colspan="5"><b>	 Please correct the following error(s) in this row. {{form.non_field_errors}}</b></td>
+			</tr>
+		{% endif %}
+		<tr>
+			<td class="name-cell"> {{ form.name }} {{ form.name.errors }}</td>
+			<td class="specification-cell">{{ form.specification }} {{ form.specification.errors }}</td>
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+	<div class="center">
+		<input id="reconciled-specs-submit-button" type="submit" value="Reconcile" class="center"/>
+	</div>
+	</form>
+
+</div>
+
+{% endblock %}
