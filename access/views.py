@@ -2078,6 +2078,16 @@ def guessed_reconciled_vals(mtf_vals, db_vals):
     
     return reconciled_names
 
+def angularjs_test(request):
+    all_flavors = Flavor.objects.all()
+    flavor_list = []
+    
+    for fl in all_flavors:
+        flavor_list.append({"number":fl.number, "name":str(fl.name)})
+    
+    return render_to_response('access/angularjs_test.html',
+                                {'flavors': flavor_list,
+                                 'page_title': "Testing AngularJS"})
 
     
     

@@ -70,4 +70,5 @@ urlpatterns = patterns('access.views',
     (r'^new_rm/rm/(?P<ingredient_pk>\d+)/$', 'new_rm_wizard_rm'),
     (r'^allergen_list/$', 'allergen_list'),
     (r'^rm_allergen_list/$', 'rm_allergen_list'),
+    (r'^angularjs_test/$', 'angularjs_test'),
 )

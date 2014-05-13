@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %} 
+
+<html data-ng-app="testApp">
+  
+
+
+<head>
+	<link rel="stylesheet" type="text/css" href="/djangomedia/css/mattcss.css" />
+	<script type="text/javascript" src="/djangomedia/js/angular.min.js"></script>
+</head>
+
+
+<div id="content-main" data-ng-controller="testController">
+	
+	<h3> Flavor Search: </h3>
+
+	<div>
+		Search: <input type="text" data-ng-model="searchText" />
+		[[ searchText ]]
+		
+		<div ng-show="searchText.length > 0">
+			<h3> Flavors: </h3>
+			<table>
+				<tr ng-repeat = "flavor in flavors | filter:searchText">
+					<td> <a href="/django/access/[[ flavor.number ]]">[[ flavor.number ]]</a>: [[ flavor.name ]]</td>
+				</tr>
+			</table>
+		</div>
+		
+
+	</div>
+
+
+	<script>
+		var testApp = angular.module('testApp', []);
+		testApp.config(function($interpolateProvider) {
+		  $interpolateProvider.startSymbol('[[');
+		  $interpolateProvider.endSymbol(']]');
+		});
+		
+		testApp.controller('testController', function ($scope) {
+			$scope.flavors = {{ flavors|safe }};
+			
+		});
+		
+	</script>
+
+</div>
+
+</html>
+
+{% endblock %}		
