@@ -614,11 +614,13 @@ class Ingredient(models.Model):
                                choices=OXIDIZING_SOLID_CHOICES)
     organic_peroxide_hazard = models.CharField("Organic Peroxides", max_length=50,blank=True,
                                choices=ORGANIC_PEROXIDE_CHOICES)
-    metal_corrosifve_hazard = models.CharField("Corrosive to Metals", max_length=50,blank=True,
+    metal_corrosive_hazard = models.CharField("Corrosive to Metals", max_length=50,blank=True,
                                choices=CORROSIVE_TO_METAL_CHOICES)
     
     #ing
     location_code_n = generic.GenericRelation('LocationCode')
+    
+    ph = models.DecimalField("pH", max_digits=4 ,decimal_places=4, blank=True, null=True)
     
 #    GERM_CELL_MUTAGENICITY_CHOICES = (
 #        ('No','No'),
@@ -2110,6 +2112,24 @@ class Flavor(FormulaInfo):
         except:
             return None
     
+    def eye_damage_category(self):
+        
+        cat_1_total = 0
+        cat_2_total = 0
+        
+        for ing in self.consolidated_leafs.iteritems():
+            if ing.eye_damage_hazard == "1" or ing.skin_corrosion_hazard == ("1A" | "1B" | "1C"):
+                cat_1_total += ing[1]/10
+                cat_2_total += ing[1] #10 * weight / 10
+            if ing.eye_damage_hazard == ("2A" | "2B"):
+                cat_2_total += ing[1]/10
+                
+        if cat_1_total >= 3:
+            return "Category 1"
+        elif cat_2_total >= 10:
+            return "Category 2"
+        else:
+            return "No Category"
     
 
 class FlavorIterOrder(models.Model):
