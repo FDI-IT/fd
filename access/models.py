@@ -614,13 +614,13 @@ class Ingredient(models.Model):
                                choices=OXIDIZING_SOLID_CHOICES)
     organic_peroxide_hazard = models.CharField("Organic Peroxides", max_length=50,blank=True,
                                choices=ORGANIC_PEROXIDE_CHOICES)
-    metal_corrosive_hazard = models.CharField("Corrosive to Metals", max_length=50,blank=True,
+    metal_corrosifve_hazard = models.CharField("Corrosive to Metals", max_length=50,blank=True,
                                choices=CORROSIVE_TO_METAL_CHOICES)
     
     #ing
     location_code_n = generic.GenericRelation('LocationCode')
     
-    ph = models.DecimalField("pH", max_digits=4 ,decimal_places=4, blank=True, null=True)
+    ph = models.DecimalField("pH", max_digits=4 ,decimal_places=2, blank=True, null=True)
     
 #    GERM_CELL_MUTAGENICITY_CHOICES = (
 #        ('No','No'),
@@ -2114,20 +2114,30 @@ class Flavor(FormulaInfo):
     
     def eye_damage_category(self):
         
+        total_weight = 0
         cat_1_total = 0
         cat_2_total = 0
         
         for ing in self.consolidated_leafs.iteritems():
-            if ing.eye_damage_hazard == "1" or ing.skin_corrosion_hazard == ("1A" | "1B" | "1C"):
+            
+            total_weight += ing[1]
+            
+            if ing[0].eye_damage_hazard == "1" or ing[0].skin_corrosion_hazard == ("1A" or "1B" or "1C"):
                 cat_1_total += ing[1]/10
                 cat_2_total += ing[1] #10 * weight / 10
-            if ing.eye_damage_hazard == ("2A" | "2B"):
+            if ing[0].eye_damage_hazard == ("2A" or "2B"):
                 cat_2_total += ing[1]/10
                 
-        if cat_1_total >= 3:
-            return "Category 1"
-        elif cat_2_total >= 10:
-            return "Category 2"
+        #ex: cat_1_total = 3, total_weight/10 = 100 -> cat_1_percentage = 3        
+                
+        cat_1_percentage = cat_1_total/(total_weight/10) * 100
+        cat_2_percentage = cat_2_total/(total_weight/10) * 100      
+        
+                
+        if cat_1_percentage >= 3:
+            return "Category 1; Eye/Skin Category 1 = %s%%" % cat_1_percentage.quantize(Decimal(10) ** -4)
+        elif cat_2_percentage >= 10:
+            return "Category 2; 10*(Eye/Skin Category 1) + Eye Category 2 = %s%%" % cat_2_percentage.quantize(Decimal(10) ** -4)
         else:
             return "No Category"
     
