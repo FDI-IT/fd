@@ -32,24 +32,8 @@ LOGIN_URL = '/django/accounts/login/'
 
 MANAGERS = ADMINS
 
-''
+from LOCAL_database_settings import *
 
-DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = 'fd_test'#os.environ['DJANGO_DATABASE_NAME']             # Or path to database file if using sqlite3.
-DATABASE_USER = 'www-data'#os.environ['DJANGO_DATABASE_USER']             # Not used with sqlite3.
-DATABASE_PASSWORD = 'fdi'#os.environ['DJANGO_DATABASE_PASSWORD']         # Not used with sqlite3.
-DATABASE_HOST = '192.168.10.247'#'192.168.1.129'#'10.1.10.182'#os.environ['DJANGO_DATABASE_HOST']             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
-
-'''
-#Use os.environ variables to store remote database information #NOT WORKING
-DATABASE_ENGINE = 'postgresql_psycopg2'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = os.environ['DJANGO_DATABASE_NAME']             # Or path to database file if using sqlite3.
-DATABASE_USER = os.environ['DJANGO_DATABASE_USER']             # Not used with sqlite3.
-DATABASE_PASSWORD = os.environ['DJANGO_DATABASE_PASSWORD']         # Not used with sqlite3.
-DATABASE_HOST = os.environ['DJANGO_DATABASE_HOST']             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
-'''
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
