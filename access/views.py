@@ -112,7 +112,6 @@ def experimental_wrapper(view):
     return inner     
 
 @experimental_wrapper
-@permission_required('access.view_flavor')
 def experimental_edit(request, experimental):
     if request.method == 'POST':
         form = forms.ExperimentalForm(request.POST, instance=experimental)
