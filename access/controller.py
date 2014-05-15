@@ -5,11 +5,12 @@ from reversion import revision
 from django.db import connection
 from django.db.models import Q
 
+@transaction.commit_on_success
 def ji_update(flavor_num):
     cursor = connection.cursor()
     cursor.execute('select jilist_update(%s)' % flavor_num)  #doesn't actually save the objects
     
-    #have to go through all the 'temporary' objects and save them 
+#     #have to go through all the 'temporary' objects and save them 
     for ji in JIList.objects.filter(Q(a=10481) | Q(b=10481)):
         ji.save()
 
