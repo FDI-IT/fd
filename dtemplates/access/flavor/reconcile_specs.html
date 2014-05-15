@@ -126,7 +126,10 @@
 		</tbody>
 	</table>
 	<div class="center">
-		<input id="reconciled-specs-submit-button" type="submit" value="Reconcile" class="center"/>
+		<input id="reconciled-specs-submit-button-single" type="submit" name="single" value="Reconcile just this Flavor" class="left"/>
+		{% if renumber_button %}
+			<input id="reconciled-specs-submit-button-with-renumbers" type="submit" name="renumbers" value="Reconcile all Flavors with this Formula" title="{{renumber_list}}" class="center"/>
+		{% endif %}
 	</div>
 	</form>
 

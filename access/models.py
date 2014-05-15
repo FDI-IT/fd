@@ -2111,27 +2111,86 @@ class Flavor(FormulaInfo):
             return self.gazinta.all()[0]
         except:
             return None
+            
     
-    def eye_damage_category(self):
+#     skin_hazard_dict = {
+#                             'ingredient_hazard': 'skin_corrosion_hazard'
+#                             'hazard_categories': ["1", "2"]
+#                             'criteria_list': ["1A" or "1B" or "1C"]
+#                             
+#                         }
+#     
+#     {
+#         "1A" or "1B" or "1C": [("Category 1", 1), ("Category 2", 10)]
+#         "2": [("Category 2", 1)]
+#     }
+#     
+#     {
+#         "Category 1": 5   #value specifies the percentage that the criteria for that category must meet 
+#         "Category 2": 10  # in order for the flavor to be in that category
+#     }
+#     
+#     {
+#         "Category 1": [("1A" or "1B" or "1C", 1), 5]
+#         "Category 2": [("1A" or "1B" or "1C", 10), ("2", 1), 10]
+#     }
+    
+    def find_hazards(self):
+        skin_hazard_arguments = ['skin_corrosion_hazard', ("1A" or "1B" or "1C", )]
+    
+    def skin_damage_hazard(self):
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+    
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                cat_1_total += weight #total ingredient weight will be 100
+                cat_2_total += weight * 10   #10 * weight/10
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                cat_2_total += weight
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100                   
+                
+        if cat_1_percentage >= 5:
+            return "Category 1; Skin Category 1 = %s%%" % cat_1_percentage.quantize(Decimal(10) ** -4)
+        elif cat_2_percentage >= 10:
+            return "Category 2; 10*(Skin Category 1) + Skin Category 2 = %s%%" % cat_2_percentage.quantize(Decimal(10) ** -4)
+        else:
+            return "No Hazard"       
+    
+    
+    def eye_damage_hazard(self):
         
         total_weight = 0
         cat_1_total = 0
         cat_2_total = 0
         
-        for ing in self.consolidated_leafs.iteritems():
+        for leaf in self.consolidated_leafs.iteritems():
             
-            total_weight += ing[1]
+            ingredient = leaf[0]
+            weight = leaf[1]
             
-            if ing[0].eye_damage_hazard == "1" or ing[0].skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                cat_1_total += ing[1]/10
-                cat_2_total += ing[1] #10 * weight / 10
-            if ing[0].eye_damage_hazard == ("2A" or "2B"):
-                cat_2_total += ing[1]/10
+            total_weight += weight
+            
+            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                cat_1_total += weight
+                cat_2_total += weight * 10 #10 * weight / 10
+            if ingredient.eye_damage_hazard == ("2A" or "2B"):
+                cat_2_total += weight
                 
         #ex: cat_1_total = 3, total_weight/10 = 100 -> cat_1_percentage = 3        
                 
-        cat_1_percentage = cat_1_total/(total_weight/10) * 100
-        cat_2_percentage = cat_2_total/(total_weight/10) * 100      
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100      
         
                 
         if cat_1_percentage >= 3:
@@ -2139,8 +2198,106 @@ class Flavor(FormulaInfo):
         elif cat_2_percentage >= 10:
             return "Category 2; 10*(Eye/Skin Category 1) + Eye Category 2 = %s%%" % cat_2_percentage.quantize(Decimal(10) ** -4)
         else:
-            return "No Category"
+            return "No Hazard"
     
+    def respiratory_sensitation_hazard(self):
+        
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.respiratory_hazard == ("1" or "1A" or "1B"):
+                cat_1_total += weight
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        
+        if cat_1_percentage >= Decimal('0.1'):
+            return "Category 1: Respiratory Sensitation = %s%%" % cat_1_percentage.quantize(Decimal(10) ** -4)
+        else:
+            return "No Hazard"
+    
+    def germ_mutagenicity_hazard(self):
+        total_weight = 0
+        cat_1A_total = 0
+        cat_1B_total = 0
+        cat_2_total = 0
+
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.germ_cell_mutagenicity_hazard == ("1A"):
+                cat_1A_total += weight
+            if ingredient.germ_cell_mutagenicity_hazard == ("1B"):
+                cat_1B_total += weight
+            if ingredient.germ_cell_mutagenicity_hazard == ("2"):
+                cat_2_total += weight
+                
+        cat_1A_percentage = cat_1A_total/(total_weight) * 100
+        cat_1B_percentage = cat_1B_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100
+        
+        if cat_1A_percentage >= Decimal('0.1'):
+            return "Category 1: Respiratory Sensitation = %s%%" % cat_1A_percentage.quantize(Decimal(10) ** -4)
+        elif cat_1B_percentage >= Decimal('0.1'):
+            return "Category 1B"
+        elif cat_2_percentage >= 1:
+            return "Category 2"
+        else:
+            return "No Hazard" 
+                                
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        
+        if cat_1_percentage >= 0.1:
+            return "Category 1"
+        else:
+            return "No Hazard"
+        
+    def carcinogenicity_hazard(self):
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.germ_cell_mutagenicity_hazard == ("1A" or "1B"):
+                cat_1_total += weight
+            if ingredient.germ_cell_mutagenicity_hazard == ("2"):
+                cat_2_total += weight
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100
+        
+        if cat_1_percentage >= Decimal('0.1'):
+            return "Category 1"
+        elif cat_2_percentage >= 1:
+            return "Category 2"
+        else:
+            return "No Hazard" 
+                                
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        
+        if cat_1_percentage >= 0.1:
+            return "Category 1: Respiratory Sensitation = %s%%" % cat_1_percentage.quantize(Decimal(10) ** -4)
+        else:
+            return "No Hazard"
 
 class FlavorIterOrder(models.Model):
     flavor = models.ForeignKey(Flavor)
