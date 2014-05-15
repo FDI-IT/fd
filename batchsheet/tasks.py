@@ -29,7 +29,7 @@ def process_jbg(jbg_path):
     jbg_name = jbg_path.split('/')[-1]
     
     # a copy is made before it's deleted...better that than lose anything
-    cache_jbg_path = "/usr/local/django/dump/imagecache/%s - %s" % (datetime.now(), jbg_name)
+    cache_jbg_path = "/var/www/django/dump/imagecache/%s - %s" % (datetime.now(), jbg_name)
     shutil.copyfile(jbg_path, cache_jbg_path)
     
     # a converted and rotated png on the ram disk
@@ -47,7 +47,7 @@ def process_jbg(jbg_path):
     process.wait()
     # just in case you need to convert to a cropped selection, increase
     # zbarimg success rated
-    # convert /usr/local/django/dump/scanbatch/image\(6\).png -crop 1100x1100+400+400 crop.png
+    # convert /var/www/django/dump/scanbatch/image\(6\).png -crop 1100x1100+400+400 crop.png
     #
     # parsing the results
     scan_value = process.communicate()[0]

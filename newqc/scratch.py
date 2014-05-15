@@ -293,13 +293,13 @@ def fix_lot_statuses():
 def import_flavor_cards():
     delete_all_cards()
     
-    filename = '/usr/local/django/dump/qc_flavor_import%s.csv' % datetime.datetime.now()
+    filename = '/var/www/django/dump/qc_flavor_import%s.csv' % datetime.datetime.now()
     log_file = open(filename, 'w')
     log_headers = "filename,error,additional_info\n"
     log_file.write(log_headers)
     
     
-    os.chdir("/usr/local/django/dump/qc")
+    os.chdir("/var/www/django/dump/qc")
     card_path_list = glob.glob("*.[Xx][Ll][Ss]")
     card_list = []
     for card_path in card_path_list:
@@ -361,7 +361,7 @@ def process_jbg(jbg_path):
     jbg_name = jbg_path.split('/')[-1]
     
     # a copy is made before it's deleted...better that than lose anything
-    cache_jbg_path = "/usr/local/django/dump/imagecache/%s - %s" % (datetime.now(), jbg_name)
+    cache_jbg_path = "/var/www/django/dump/imagecache/%s - %s" % (datetime.now(), jbg_name)
     shutil.copyfile(jbg_path, cache_jbg_path)
     
     # a converted and rotated png on the ram disk
@@ -379,7 +379,7 @@ def process_jbg(jbg_path):
     process.wait()
     # just in case you need to convert to a cropped selection, increase
     # zbarimg success rated
-    # convert /usr/local/django/dump/scanbatch/image\(6\).png -crop 1100x1100+400+400 crop.png
+    # convert /var/www/django/dump/scanbatch/image\(6\).png -crop 1100x1100+400+400 crop.png
     #
     # parsing the results
     scan_value = process.communicate()[0]

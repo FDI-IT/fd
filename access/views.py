@@ -112,7 +112,6 @@ def experimental_wrapper(view):
     return inner     
 
 @experimental_wrapper
-@permission_required('access.view_flavor')
 def experimental_edit(request, experimental):
     if request.method == 'POST':
         form = forms.ExperimentalForm(request.POST, instance=experimental)
@@ -2035,7 +2034,7 @@ def get_mtf_vals(flavor_list, spec_search_term_list):
     
     for flavor in flavor_list:
         
-        path = "/home/matta/Master Template Files/%s.xls" % flavor.number
+        path = "/srv/samba/tank/Share folders by role/CENTER/My Documents/FDI Paperwork/Master Template Files/%s.xls" % flavor.number
 #         mtf_list.append((path, fl.number))
         
         try:

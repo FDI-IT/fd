@@ -88,13 +88,13 @@ key_index = {
 
 
 
-def get_sheet(spreadsheet_path="/usr/local/django/dump/sample_data/flavors.xls"):
+def get_sheet(spreadsheet_path="/var/www/django/dump/sample_data/flavors.xls"):
     re_init()
     wb = open_workbook(spreadsheet_path)
     sheet = wb.sheets()[0]
     return sheet
 
-def scan_objects(spreadsheet_path="/usr/local/django/dump/sample_data/flavors.xls"):
+def scan_objects(spreadsheet_path="/var/www/django/dump/sample_data/flavors.xls"):
     production_numbers = {}
     experimental_numbers = {}
     
@@ -119,7 +119,7 @@ def scan_objects(spreadsheet_path="/usr/local/django/dump/sample_data/flavors.xl
                 
     return (production_numbers, experimental_numbers)
 
-def update_location_codes(spreadsheet_path="/usr/local/django/dump/sample_data/flavors.xls"):
+def update_location_codes(spreadsheet_path="/var/www/django/dump/sample_data/flavors.xls"):
     wb = open_workbook(spreadsheet_path)
     sheet = wb.sheets()[0]
     
@@ -128,7 +128,7 @@ def update_location_codes(spreadsheet_path="/usr/local/django/dump/sample_data/f
         
         
         
-def import_objects(spreadsheet_path="/usr/local/django/dump/sample_data/flavors.xls"):
+def import_objects(spreadsheet_path="/var/www/django/dump/sample_data/flavors.xls"):
     re_init()
     wb = open_workbook(spreadsheet_path)
     sheet = wb.sheets()[0]
