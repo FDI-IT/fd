@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append('/usr/local/django/fd')
+sys.path.append('/var/www/django/fd')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 os.environ["CELERY_LOADER"] = "django"
 

@@ -1187,7 +1187,7 @@ def edit_coa(request, ssl_pk): #TODO TODO TODO DOTODOTDOTO TODOT TODTODO OTODOTD
 
 #
 #def logger_test(request):
-#    logging.basicConfig(filename='/usr/local/django/fd/curlprinter.log', level=logging.INFO)
+#    logging.basicConfig(filename='/var/www/django/fd/curlprinter.log', level=logging.INFO)
 #    
 #    result = logger_test_task.delay(request.META['QUERY_STRING'])
 #    result.wait()

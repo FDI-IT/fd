@@ -127,7 +127,7 @@ def try_globs():
     Scoring.objects.all().delete()
     TeamStats.objects.all().delete()
     Game.objects.all().delete()
-    os.chdir('/usr/local/django/fdileague/')
+    os.chdir('/var/www/django/fdileague/')
     file_list = []
     for f in glob.glob('*.htm'):
         file_list.append(f)
@@ -136,13 +136,13 @@ def try_globs():
     for f in file_list:
         print try_boxscore(f)
     
-def try_boxscore(file_path="/usr/local/django/fdileague/201112180crd.htm"):
+def try_boxscore(file_path="/var/www/django/fdileague/201112180crd.htm"):
     try:
         return parse_boxscore(file_path)
     except Exception as e:
         return e
 
-def parse_boxscore(file_path="/usr/local/django/fdileague/201112180crd.htm"):
+def parse_boxscore(file_path="/var/www/django/fdileague/201112180crd.htm"):
     p, h = get_parser_objs(file_path)
     g = parse_scoring(p,h,file_path)
     
@@ -191,7 +191,7 @@ def parse_scoring(p,h,file_path):
         kp.save()
     return g
     
-def get_parser_objs(file_path="/usr/local/django/fdileague/201112180crd.htm"):
+def get_parser_objs(file_path="/var/www/django/fdileague/201112180crd.htm"):
     p = html.parse(file_path)
     h = CSSSelector('html')(p)[0]
     return (p, h)

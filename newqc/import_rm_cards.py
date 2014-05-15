@@ -195,10 +195,10 @@ def normalize_statuses():
                 r.status = 'Rejected'
                 r.save()
 
-def test(rm_path="/usr/local/django/dump/sample_data/qc/Raw Materials/"):
+def test(rm_path="/var/www/django/dump/sample_data/qc/Raw Materials/"):
     delete_all_cards()
     
-#    filename = '/usr/local/django/dump/qc_flavor_import%s.csv' % datetime.datetime.now()
+#    filename = '/var/www/django/dump/qc_flavor_import%s.csv' % datetime.datetime.now()
 #    log_file = open(filename, 'w')
 #    log_headers = "filename,error,additional_info\n"
 #    log_file.write(log_headers)

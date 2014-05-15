@@ -3,7 +3,7 @@ import re
 import html5lib
 
 domain = "http://www.pro-football-reference.com"
-save_path = "/usr/local/django/fdileague"
+save_path = "/var/www/django/fdileague"
 
 class CurlOutput:
     def __init__(self):

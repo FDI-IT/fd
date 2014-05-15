@@ -1382,8 +1382,8 @@ class Flavor(FormulaInfo):
         if len(dci) != 0:
             message.append("Contains the following discontinued ingredients: %s" % ", ".join(dci))
             
-        if not self.reconciled:
-            message.append("Does not have a proper reconciled specification sheet.")
+#         if not self.reconciled:
+#             message.append("Does not have a proper reconciled specification sheet.")
             
         if len(message) != 0:
             return "\n\n".join(message)
@@ -3327,7 +3327,7 @@ class LegacyPurchase(models.Model):
 
 
 def get_lorem_queue():
-    loremfile = open('/usr/local/django/fd/loremipsum.txt', 'r')
+    loremfile = open('/var/www/django/fd/loremipsum.txt', 'r')
     lorems = loremfile.read().split(',')
     q = Queue.Queue()
     for word in lorems[0:len(lorems)-1]:

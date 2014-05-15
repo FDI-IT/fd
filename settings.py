@@ -8,15 +8,15 @@ TEMPLATE_DEBUG = DEBUG
 
 #HAYSTACK_SITECONF = 'search_sites'
 #HAYSTACK_SEARCH_ENGINE = 'whoosh'
-#HAYSTACK_WHOOSH_PATH = '/usr/local/django/dump/haystack'
+#HAYSTACK_WHOOSH_PATH = '/var/www/django/dump/haystack'
 
 THUMBNAIL_FORMAT = 'PNG'
-DUMP_DIR = '/usr/local/django/dump'
-#FIXTURE_DIRS = '/usr/local/django/fd/fixtures'
-CSVSOURCE_PATH = '/usr/local/django/dump/sample_data/sql_files'
+DUMP_DIR = '/var/www/django/dump'
+#FIXTURE_DIRS = '/var/www/django/fd/fixtures'
+CSVSOURCE_PATH = '/var/www/django/dump/sample_data/sql_files'
 MDB_FILE = 'flv.mdb'
-CSVTEST_PATH = '/usr/local/django/dump/sql_filestt'
-CSVEXCEPTION_PATH = '/usr/local/django/dump/exceptions'
+CSVTEST_PATH = '/var/www/django/dump/sql_filestt'
+CSVEXCEPTION_PATH = '/var/www/django/dump/exceptions'
 SOUTH_TESTS_MIGRATE = False
 
 AUTH_PROFILE_MODULE = 'personnel.UserProfile'
@@ -107,7 +107,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/usr/local/django/fd/dtemplates',
+    '/var/www/django/fd/dtemplates',
 )
 
 #

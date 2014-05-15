@@ -24,7 +24,7 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--report', action='store', 
                     dest='report', 
-                    default='/usr/local/django/dump/report.PRN',
+                    default='/var/www/django/dump/report.PRN',
                     type='string',
                     help='Path to report file (PRN) to use.'),
     )
