@@ -1985,7 +1985,7 @@ def get_mtf_vals(flavor_list, spec_search_term_list):
     
     for flavor in flavor_list:
         
-        path = "/home/matta/Master Template Files/%s.xls" % flavor.number
+        path = "/srv/samba/tank/Share folders by role/CENTER/My Documents/FDI Paperwork/Master Template Files/%s.xls" % flavor.number
 #         mtf_list.append((path, fl.number))
         
         try:
