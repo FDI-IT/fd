@@ -6,6 +6,36 @@ from django.db import connection
 from django.db.models import Q
 
 
+def ji_function_initialize():
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        DROP FUNCTION IF EXISTS jaccard_index(integer, integer);
+        
+        CREATE FUNCTION jaccard_index(integer, integer) RETURNS numeric AS
+        'SELECT sum("intersection")/sum("union") AS "jaccard_index" FROM (SELECT leafa.ingredient_id, COALESCE(weighta, 0) AS weighta, COALESCE(weightb, 0) AS weightb, LEAST(COALESCE(weighta, 0), COALESCE(weightb, 0)) AS intersection, GREATEST(weighta, weightb) AS union FROM (SELECT "access_leafweight"."ingredient_id", "access_leafweight"."weight" AS weighta FROM "access_leafweight", "access_integratedproduct" WHERE "access_integratedproduct"."number" = $1 AND "access_leafweight"."root_flavor_id" = "access_integratedproduct"."id") AS leafa full outer join (SELECT "access_leafweight"."ingredient_id", "access_leafweight"."weight" AS weightb FROM "access_leafweight", "access_integratedproduct" WHERE "access_integratedproduct"."number" = $2 AND "access_leafweight"."root_flavor_id" = "access_integratedproduct"."id") AS leafb on ("leafa"."ingredient_id" = "leafb"."ingredient_id")) AS fulljoin;'
+        LANGUAGE SQL
+        STABLE
+        RETURNS NULL ON NULL INPUT;                       
+  
+        DROP FUNCTION IF EXISTS jilist_update(integer);
+        
+        CREATE FUNCTION jilist_update(integer) RETURNS VOID AS
+        'UPDATE access_jilist SET score = jaccard_index($1, "access_integratedproduct"."number") FROM "access_integratedproduct" WHERE a = $1 AND b = "access_integratedproduct"."number" OR a = "access_integratedproduct"."number" AND b = $1;
+        INSERT INTO access_jilist(a, b, score) SELECT $1, "access_integratedproduct"."number", jaccard_index($1, "access_integratedproduct"."number") FROM "access_integratedproduct" WHERE NOT ("access_integratedproduct"."number" = $1) AND NOT EXISTS (SELECT 1 FROM access_jilist WHERE a = $1 AND b = "access_integratedproduct"."number" OR a = "access_integratedproduct"."number" AND b = $1);'
+        LANGUAGE SQL
+        RETURNS NULL ON NULL INPUT;
+        
+        """                   
+        )
+
+        
+    cursor.execute('COMMIT')    
+
+
+
+
+
 def ji_update(flavor_num):
     cursor = connection.cursor()
     cursor.execute('select jilist_update(%s)' % flavor_num)  #doesn't actually save the objects
