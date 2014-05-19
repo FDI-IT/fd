@@ -2138,6 +2138,73 @@ class Flavor(FormulaInfo):
     def find_hazards(self):
         skin_hazard_arguments = ['skin_corrosion_hazard', ("1A" or "1B" or "1C", )]
     
+    
+    def get_hazard_dict(self):
+        
+        hazard_dict = {}
+        
+        total_weight = 0
+        
+        #HAZARD CATEGORY TOTALS (for now just do two)
+        #skin damage 
+        skin1 = 0
+        skin2 = 0
+        
+        #eye damage
+        eye1 = 0
+        eye2 = 0
+        
+        #respiratory damage
+        #blahblah other hazard damage
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            #skin hazard requirements
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                skin1 += weight #total ingredient weight will be 100
+                skin2 += weight * 10   #10 * weight/10
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                skin2 += weight       
+            
+            
+            #eye hazard requirements    
+            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                eye1 += weight
+                eye2 += weight * 10 #10 * weight / 10
+            if ingredient.eye_damage_hazard == ("2A" or "2B"):
+                eye2 += weight      
+        
+        
+        
+        #Calculate total hazard percentages and determine final categories    
+        skin1_percentage = skin1/total_weight * 100
+        skin2_percentage = skin2/total_weight * 100
+        
+        if skin1_percentage >= 5:
+            hazard_dict["skin"] = "Category 1"
+        elif skin2_percentage >= 10:
+            hazard_dict["skin"] = "Category 2"
+        else:
+            hazard_dict["skin"] = "No Hazard"
+        
+        eye1_percentage = eye1/total_weight * 100
+        eye2_percenage = eye2/total_weight * 100          
+                     
+        if eye1_percentage >= 3:
+            hazard_dict["eye"] = "Category 1"
+        elif eye2_percentage >= 10:
+            hazard_dict["eye"] = "Category 2"
+        else:
+            hazard_dict["eye"] = "No Hazard"
+    
+        
+    
     def skin_damage_hazard(self):
         total_weight = 0
         cat_1_total = 0

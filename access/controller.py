@@ -17,7 +17,7 @@ def ji_function_initialize():
         LANGUAGE SQL
         STABLE
         RETURNS NULL ON NULL INPUT;                       
-  
+        
         DROP FUNCTION IF EXISTS jilist_update(integer);
         
         CREATE FUNCTION jilist_update(integer) RETURNS VOID AS
