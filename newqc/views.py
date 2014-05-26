@@ -29,7 +29,7 @@ from access.barcode import barcodeImg, codeBCFromString
 from access.models import Flavor, Ingredient, FlavorSpecification
 from access.views import flavor_info_wrapper
 from newqc.forms import TestResultForm, NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
-from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, LotSOLIStamp
+from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, LotSOLIStamp, TestResult
 from newqc.utils import process_jbg, get_card_file, scan_card
 from newqc.tasks import walk_scans_qccards
 from salesorders.models import SalesOrderNumber, LineItem
