@@ -124,7 +124,7 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'django.contrib.databrowse',
     'django.contrib.messages',
-    #'djcelery',
+    'djcelery',
     'pluggable',
     'homepage', 
     'haccp',
