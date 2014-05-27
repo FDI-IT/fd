@@ -21,7 +21,7 @@ from django.core.urlresolvers import reverse
 
 from reversion import revision
 
-from access.controller import reconcile_flavor, discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors, experimental_approve_from_form
+from access.controller import reconcile_flavor, reconcile_update, discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors, experimental_approve_from_form
 #from access.formatter import formulatree_to_jsinfovis
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
@@ -937,7 +937,7 @@ def process_cell_update(request):
         if number == '':
             response_dict['name'] = ''
         else:
-            response_dict['name'] = "Invalid ingredient number"
+            response_dict['name'] = "Invalid Ingredient Number"
         response_dict['cost'] = ''
     
     return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')

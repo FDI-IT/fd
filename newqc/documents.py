@@ -76,13 +76,6 @@ class ImportBCDoc():
             # maybe by inspecting the returned object from within tasks
             return
         
-        # generating thumbnail should really be inside another method.
-        # it should be tied to the success of creating a django object from the file
-        # if that does not happen, a thumbnail isn't needed.
-        # maybe this should go in the init method of the file model
- 
-        # this is a django File object
-        
         # get the return code of zbarimg, and the value
         bc_returncode, bc_value = self.scan_for_barcode()
         

@@ -5,21 +5,43 @@ from reversion import revision
 from django.db import connection
 from django.db.models import Q
 
+from collections import namedtuple
+
+CategoryAndMultiplier = namedtuple('CategoryAndMultiplier', 'final_category multiplier')
+
 def make_hazard_class(hazard_dict):
+    
+    """INSERT HIGH-LEVEL DOCUMENTATION HERE!!.
+    
+    #. Create a HazardAccumulator class with the dictionary as the argument.
+    #. Create a function that will accumulate the hazard totals based on the input dictionary.
+    #. Create a function that returns the final category of the flavor.
+    #. In the flavor model, create an instance of this class for each hazard and return the final categories for all hazards.
+            #Might want to change this later since these classes/instances will have to be created each time a flavor's hazards are calculated.
+    
+    """
+    
     class HazardAccumulator():
         hazard_vars = {}
         
-        for cat in hazard_dict["categories"]: #this just gets the keys by default
+        #the "categories" key in the input dictionary stores the possible final categories that the flavor might be in.
+        #hazard_vars is a dictionary where the keys are the possible final categories, and the value is the accumulation associated with each of those categories
+        #the loop below generates these keys, with a default value of 0 
+        for cat in hazard_dict["categories"]: 
             hazard_vars[cat] = 0
 
+        #this function goes through an ingredient and adds the correct weight to the total accumulation for each final category 
+        #this means adding to the values in the hazard_vars dictionary created above
         def accumulate(self, ingredient, weight):
-            for hazard in hazard_dict['requirements']:
-                for criteria in hazard_dict['requirements'][hazard]:
-                    if getattr(ingredient, hazard) == criteria:
-                        for cat in hazard_dict['requirements'][hazard][criteria]:
-                            self.hazard_vars[cat[0]] += weight * cat[1]
+            for ingredient_hazard_property in hazard_dict['requirements']:
+                ingredient_hazard_categories = hazard_dict['requirements'][ingredient_hazard_property]
+                for category in ingredient_hazard_categories:
+                    if getattr(ingredient, ingredient_hazard_property) == category:
+                        accumulate_list = ingredient_hazard_categories[category]
+                        for cat_and_mult in accumulate_list:
+                            self.hazard_vars[cat_and_mult.final_category] += weight * cat_and_mult.multiplier
                             
-                    
+        #this function takes            
         def get_category(self, total_weight):    
             for var in self.hazard_vars: #gets variable names
                 hazard_percentage = self.hazard_vars[var]/total_weight * 100
@@ -34,9 +56,50 @@ def make_hazard_class(hazard_dict):
         
     return HazardAccumulator
 
+# class BaseHazard():
+# # eye_hazard_dict = {
+# #                    'name': 'Eye Hazard',
+# #                    'categories': {"Category 1": 3, "Category 2": 10},
+# #                    'requirements':
+# #                         {
+# #                          'skin_corrosion_hazard':
+# #                              {
+# #                               "1A": [("Category 1", 1), ("Category 2", 10)],
+# #                               "1B": [("Category 1", 1), ("Category 2", 10)],
+# #                               "1C": [("Category 1", 1), ("Category 2", 10)],
+# #                               },
+# #                          'eye_damage_hazard':
+# #                             {
+# #                              "1": [("Category 1", 1), ("Category 2", 10)],
+# #                              "2A": [("Category 2", 1)],
+# #                              "2B": [("Category 2", 1)],
+# #                              }
+# #                          }
+# #                    }
+#     def accumulate(self, ingredient, weight):
+#         pass
+# 
+#                 
+#     def get_category(self, total_weight):    
+#         for var in self.hazard_vars: #gets variable names
+#             hazard_percentage = self.hazard_vars[var]/total_weight * 100
+#             
+#             if hazard_percentage >= hazard_dict["categories"][var]:
+#                 return var
+#             
+#         return "No Hazard"
+#     
+#     def get_name(self):
+#         return hazard_dict['name']
+#     
+# 
+# class SkinHazard(BaseHazard):
+#     name = "Skin Hazard"
+    
+
 #SKIN HAZARD REQUIREMENTS AND DICTIONARY
-skin_reqs = dict.fromkeys(["1A", "1B", "1C"], [("Category 1", 1), ("Category 2", 10)])
-skin_reqs.update(dict.fromkeys(["2"], [("Category 2", 1)]))
+skin_reqs = dict.fromkeys(["1A", "1B", "1C"], [CategoryAndMultiplier("Category 1", 1), CategoryAndMultiplier("Category 2", 10)])
+skin_reqs.update(dict.fromkeys(["2"], [CategoryAndMultiplier("Category 2", 1)]))
 
 skin_hazard_dict = {
                     'name': 'Skin Hazard',
@@ -48,10 +111,10 @@ skin_hazard_dict = {
                     }
 
 #EYE HAZARD REQUIREMENTS AND DICTIONARY
-eye_reqs_SKIN = dict.fromkeys(["1A", "1B", "1C"], [("Category 1", 1), ("Category 2", 10)])
+eye_reqs_SKIN = dict.fromkeys(["1A", "1B", "1C"], [CategoryAndMultiplier("Category 1", 1), CategoryAndMultiplier("Category 2", 10)])
 
-eye_reqs_EYE = dict.fromkeys(["1"], [("Category 1", 1), ("Category 2", 2)])
-eye_reqs_EYE.update(dict.fromkeys(["2A", "2B"], [("Category 2", 1)]))
+eye_reqs_EYE = dict.fromkeys(["1"], [CategoryAndMultiplier("Category 1", 1), CategoryAndMultiplier("Category 2", 10)])
+eye_reqs_EYE.update(dict.fromkeys(["2A", "2B"], [CategoryAndMultiplier("Category 2", 1)]))
 
 eye_hazard_dict = {
                    'name': 'Eye Hazard',
@@ -64,7 +127,7 @@ eye_hazard_dict = {
                    }
 
 #RESPIRATORY/SENSITATION HAZARD REQUIREMENTS AND DICTIONARY
-respiratory_reqs = dict.fromkeys(["1", "1A", "1B"], [("Category 1", 1)])
+respiratory_reqs = dict.fromkeys(["1", "1A", "1B"], [CategoryAndMultiplier("Category 1", 1)])
 
 respiratory_hazard_dict = {
                            'name': 'Respiratory Sensitation Hazard',
@@ -77,9 +140,9 @@ respiratory_hazard_dict = {
 
 #GERM MUTAGENICITY HAZARD REQUIREMETNS AND DICTIONARY
 germ_mutagenicity_reqs = {
-                          "1A": [("Category 1A", 1)],
-                          "1B": [("Category 1B", 1)],
-                          "2": [("Category 2", 1)],
+                          "1A": [CategoryAndMultiplier("Category 1A", 1)],
+                          "1B": [CategoryAndMultiplier("Category 1B", 1)],
+                          "2": [CategoryAndMultiplier("Category 2", 1)],
                           }
 
 germ_mutagenicity_dict = {
@@ -110,25 +173,7 @@ germ_mutagenicity_dict = {
 #                         }
 #                     }
 # 
-# eye_hazard_dict = {
-#                    'name': 'Eye Hazard',
-#                    'categories': {"Category 1": 3, "Category 2": 10},
-#                    'requirements':
-#                         {
-#                          'skin_corrosion_hazard':
-#                              {
-#                               "1A": [("Category 1", 1), ("Category 2", 10)],
-#                               "1B": [("Category 1", 1), ("Category 2", 10)],
-#                               "1C": [("Category 1", 1), ("Category 2", 10)],
-#                               },
-#                          'eye_damage_hazard':
-#                             {
-#                              "1": [("Category 1", 1), ("Category 2", 2)],
-#                              "2A": [("Category 2", 1)],
-#                              "2B": [("Category 2", 1)],
-#                              }
-#                          }
-#                    }
+
 
 def ji_function_initialize():
     cursor = connection.cursor()
