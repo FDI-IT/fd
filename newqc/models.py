@@ -1,5 +1,4 @@
 from datetime import date
-from PIL import Image
 
 from django.db.models import Q, F
 from django.db import models
@@ -102,6 +101,16 @@ class TestCard(models.Model):
 
     def __unicode__(self):
         return "%s" % (self.retain)
+    
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            r = Retain.objects.get(pk=bc_key)
+        except Retain.DoesNotExist:
+            r = None
+        return TestCard(
+                    retain=r,
+                    **document_create_kwargs)
 
 class RMTestCard(models.Model):
     retain = models.ForeignKey('RMRetain', null=True)
@@ -113,6 +122,16 @@ class RMTestCard(models.Model):
 
     def __unicode__(self):
         return "%s" % (self.retain)
+    
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            r = RMRetain.objects.get(pk=bc_key)
+        except RMRetain.DoesNotExist:
+            r = None
+        return RMTestCard(
+                    retain=r,
+                    **document_create_kwargs)
 
 class BatchSheet(models.Model):
     lot = models.ForeignKey('Lot', null=True)
@@ -123,6 +142,16 @@ class BatchSheet(models.Model):
     
     class Meta:
         ordering = ['-id']
+
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            l = Lot.objects.get(number=bc_key)
+        except Lot.DoesNotExist:
+            l = None
+        return BatchSheet(
+                    lot=l,
+                    **document_create_kwargs)
 
 class GenericTestCard(models.Model):
     image_hash = models.CharField(max_length=64)
