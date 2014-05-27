@@ -15,6 +15,8 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
+from access.controller import make_hazard_class, skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict
+
 from pluggable.sets import AncestorSet
 
 one_hundred = Decimal('100')
@@ -2111,27 +2113,507 @@ class Flavor(FormulaInfo):
             return self.gazinta.all()[0]
         except:
             return None
+            
+    #This function takes the individual hazard dictionaries, creates an instance of a hazard class
+    #    for each hazard, and uses those instances to compute the hazard categories for each hazard
+    def get_hazards_consolidated(self):
+        
+        complete_hazard_dict = {}
+        
+        hazard_accumulators = []
+        
+        for hazard_dict in [skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict]:
+            hazard_class = make_hazard_class(hazard_dict)
+            hazard_accumulators.append(hazard_class())
+        
+        total_weight = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            for accumulator in hazard_accumulators:
+                accumulator.accumulate(ingredient, weight)
+                
+        for accumulator in hazard_accumulators:
+            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
+            
+        return complete_hazard_dict
     
-    def eye_damage_category(self):
+
+    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
+    def get_hazard_dict(self):
+        
+        hazard_dict = {}
+        
+        total_weight = 0
+        
+        #HAZARD CATEGORY TOTALS (for now just do two)
+        #skin damage 
+
+        
+        #the inner function of a closure cannot modify a variable defined in its outer scope  
+        #the only way to get around this is to use a mutable object like a dictionary 
+        skin = {1: 0, 2: 0}
+        
+        #eye damage
+        eye = {1: 0, 2: 0}
+
+        #respiratory damage
+        #blahblah other hazard damage
+               
+         
+        def skin_accumulate(ingredient, weight):
+            
+            #skin hazard requirements
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                skin[1] += weight #total ingredient weight will be 100
+                skin[2] += weight * 10   #10 * weight/10  
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                skin[2] += weight            
+                
+        def eye_accumulate(ingredient, weight):
+            
+            #eye hazard requirements    
+            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                eye[1] += weight
+                eye[2] += weight * 10 #10 * weight / 10
+            if ingredient.eye_damage_hazard == ("2A" or "2B"):
+                eye[2] += weight               
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            skin_accumulate(ingredient, weight)
+            eye_accumulate(ingredient, weight)
+            
+        
+        #skin_hazard(skin1, skin2, total_weight)
+        
+        #Calculate total hazard percentages and determine final categories    
+        
+#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
+#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
+#             they are equivalent, but i think list comprehension is faster?
+        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
+        
+        if skin1_percentage >= 5:
+            hazard_dict["skin"] = "Category 1"
+        elif skin2_percentage >= 10:
+            hazard_dict["skin"] = "Category 2"
+        else:
+            hazard_dict["skin"] = "No Hazard"
+            
+                     
+        if eye1_percentage >= 3:
+            hazard_dict["eye"] = "Category 1"
+        elif eye2_percentage >= 10:
+            hazard_dict["eye"] = "Category 2"
+        else:
+            hazard_dict["eye"] = "No Hazard"
+    
+        return hazard_dict
+    
+    
+    #Below I have separate functions for each hazard.  
+    #Each one has to loop through the consolidated_leafs once, where the functions above
+    #    only go through that loop once to compute all hazards
+    
+    def skin_damage_hazard(self):
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+    
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                cat_1_total += weight #total ingredient weight will be 100
+                cat_2_total += weight * 10   #10 * weight/10
+                
+        for accumulator in hazard_accumulators:
+            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
+            
+        return complete_hazard_dict
+    
+
+    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
+    def get_hazard_dict(self):
+        
+        hazard_dict = {}
+        
+        total_weight = 0
+        
+        #HAZARD CATEGORY TOTALS (for now just do two)
+        #skin damage 
+
+        
+        #the inner function of a closure cannot modify a variable defined in its outer scope  
+        #the only way to get around this is to use a mutable object like a dictionary 
+        skin = {1: 0, 2: 0}
+        
+        #eye damage
+        eye = {1: 0, 2: 0}
+
+        #respiratory damage
+        #blahblah other hazard damage
+               
+         
+        def skin_accumulate(ingredient, weight):
+            
+            #skin hazard requirements
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                skin[1] += weight #total ingredient weight will be 100
+                skin[2] += weight * 10   #10 * weight/10  
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                skin[2] += weight            
+                
+        def eye_accumulate(ingredient, weight):
+            
+            #eye hazard requirements    
+            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                eye[1] += weight
+                eye[2] += weight * 10 #10 * weight / 10
+            if ingredient.eye_damage_hazard == ("2A" or "2B"):
+                eye[2] += weight               
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            skin_accumulate(ingredient, weight)
+            eye_accumulate(ingredient, weight)
+            
+        
+        #skin_hazard(skin1, skin2, total_weight)
+        
+        #Calculate total hazard percentages and determine final categories    
+        
+#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
+#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
+#             they are equivalent, but i think list comprehension is faster?
+        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
+        
+        if skin1_percentage >= 5:
+            hazard_dict["skin"] = "Category 1"
+        elif skin2_percentage >= 10:
+            hazard_dict["skin"] = "Category 2"
+        else:
+            hazard_dict["skin"] = "No Hazard"
+            
+                     
+        if eye1_percentage >= 3:
+            hazard_dict["eye"] = "Category 1"
+        elif eye2_percentage >= 10:
+            hazard_dict["eye"] = "Category 2"
+        else:
+            hazard_dict["eye"] = "No Hazard"
+    
+        return hazard_dict
+    
+    
+    #Below I have separate functions for each hazard.  
+    #Each one has to loop through the consolidated_leafs once, where the functions above
+    #    only go through that loop once to compute all hazards
+    
+    def skin_damage_hazard(self):
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+    
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                cat_1_total += weight #total ingredient weight will be 100
+                cat_2_total += weight * 10   #10 * weight/10
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                cat_2_total += weight
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100                   
+                
+        for accumulator in hazard_accumulators:
+            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
+            
+        return complete_hazard_dict
+    
+
+    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
+    def get_hazard_dict(self):
+        
+        hazard_dict = {}
+        
+        total_weight = 0
+        
+        #HAZARD CATEGORY TOTALS (for now just do two)
+        #skin damage 
+
+        
+        #the inner function of a closure cannot modify a variable defined in its outer scope  
+        #the only way to get around this is to use a mutable object like a dictionary 
+        skin = {1: 0, 2: 0}
+        
+        #eye damage
+        eye = {1: 0, 2: 0}
+
+        #respiratory damage
+        #blahblah other hazard damage
+               
+         
+        def skin_accumulate(ingredient, weight):
+            
+            #skin hazard requirements
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                skin[1] += weight #total ingredient weight will be 100
+                skin[2] += weight * 10   #10 * weight/10  
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                skin[2] += weight            
+                
+        def eye_accumulate(ingredient, weight):
+            
+            #eye hazard requirements    
+            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                eye[1] += weight
+                eye[2] += weight * 10 #10 * weight / 10
+            if ingredient.eye_damage_hazard == ("2A" or "2B"):
+                eye[2] += weight               
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            skin_accumulate(ingredient, weight)
+            eye_accumulate(ingredient, weight)
+            
+        
+        #skin_hazard(skin1, skin2, total_weight)
+        
+        #Calculate total hazard percentages and determine final categories    
+        
+#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
+#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
+#             they are equivalent, but i think list comprehension is faster?
+        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
+        
+        if skin1_percentage >= 5:
+            hazard_dict["skin"] = "Category 1"
+        elif skin2_percentage >= 10:
+            hazard_dict["skin"] = "Category 2"
+        else:
+            hazard_dict["skin"] = "No Hazard"
+            
+                     
+        if eye1_percentage >= 3:
+            hazard_dict["eye"] = "Category 1"
+        elif eye2_percentage >= 10:
+            hazard_dict["eye"] = "Category 2"
+        else:
+            hazard_dict["eye"] = "No Hazard"
+    
+        return hazard_dict
+    
+    
+    #Below I have separate functions for each hazard.  
+    #Each one has to loop through the consolidated_leafs once, where the functions above
+    #    only go through that loop once to compute all hazards
+    
+    def skin_damage_hazard(self):
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+    
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                cat_1_total += weight #total ingredient weight will be 100
+                cat_2_total += weight * 10   #10 * weight/10
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                cat_2_total += weight
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100                   
+                
+        for accumulator in hazard_accumulators:
+            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
+            
+        return complete_hazard_dict
+    
+
+    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
+    def get_hazard_dict(self):
+        
+        hazard_dict = {}
+        
+        total_weight = 0
+        
+        #HAZARD CATEGORY TOTALS (for now just do two)
+        #skin damage 
+
+        
+        #the inner function of a closure cannot modify a variable defined in its outer scope  
+        #the only way to get around this is to use a mutable object like a dictionary 
+        skin = {1: 0, 2: 0}
+        
+        #eye damage
+        eye = {1: 0, 2: 0}
+
+        #respiratory damage
+        #blahblah other hazard damage
+               
+         
+        def skin_accumulate(ingredient, weight):
+            
+            #skin hazard requirements
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                skin[1] += weight #total ingredient weight will be 100
+                skin[2] += weight * 10   #10 * weight/10  
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                skin[2] += weight            
+                
+        def eye_accumulate(ingredient, weight):
+            
+            #eye hazard requirements    
+            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                eye[1] += weight
+                eye[2] += weight * 10 #10 * weight / 10
+            if ingredient.eye_damage_hazard == ("2A" or "2B"):
+                eye[2] += weight               
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            skin_accumulate(ingredient, weight)
+            eye_accumulate(ingredient, weight)
+            
+        
+        #skin_hazard(skin1, skin2, total_weight)
+        
+        #Calculate total hazard percentages and determine final categories    
+        
+#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
+#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
+#             they are equivalent, but i think list comprehension is faster?
+        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
+        
+        if skin1_percentage >= 5:
+            hazard_dict["skin"] = "Category 1"
+        elif skin2_percentage >= 10:
+            hazard_dict["skin"] = "Category 2"
+        else:
+            hazard_dict["skin"] = "No Hazard"
+            
+                     
+        if eye1_percentage >= 3:
+            hazard_dict["eye"] = "Category 1"
+        elif eye2_percentage >= 10:
+            hazard_dict["eye"] = "Category 2"
+        else:
+            hazard_dict["eye"] = "No Hazard"
+    
+        return hazard_dict
+    
+    
+    #Below I have separate functions for each hazard.  
+    #Each one has to loop through the consolidated_leafs once, where the functions above
+    #    only go through that loop once to compute all hazards
+    
+    def skin_damage_hazard(self):
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+    
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                cat_1_total += weight #total ingredient weight will be 100
+                cat_2_total += weight * 10   #10 * weight/10
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                cat_2_total += weight
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100                   
+                
+        if cat_1_percentage >= 5:
+            return "Category 1; Skin Category 1 = %s%%" % cat_1_percentage.quantize(Decimal(10) ** -4)
+        elif cat_2_percentage >= 10:
+            return "Category 2; 10*(Skin Category 1) + Skin Category 2 = %s%%" % cat_2_percentage.quantize(Decimal(10) ** -4)
+        else:
+            return "No Hazard"       
+    
+    
+    def eye_damage_hazard(self):
         
         total_weight = 0
         cat_1_total = 0
         cat_2_total = 0
         
-        for ing in self.consolidated_leafs.iteritems():
+        for leaf in self.consolidated_leafs.iteritems():
             
-            total_weight += ing[1]
+            ingredient = leaf[0]
+            weight = leaf[1]
             
-            if ing[0].eye_damage_hazard == "1" or ing[0].skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                cat_1_total += ing[1]/10
-                cat_2_total += ing[1] #10 * weight / 10
-            if ing[0].eye_damage_hazard == ("2A" or "2B"):
-                cat_2_total += ing[1]/10
+            total_weight += weight
+            
+            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                cat_1_total += weight
+                cat_2_total += weight * 10 #10 * weight / 10
+            if ingredient.eye_damage_hazard == ("2A" or "2B"):
+                cat_2_total += weight
                 
         #ex: cat_1_total = 3, total_weight/10 = 100 -> cat_1_percentage = 3        
                 
-        cat_1_percentage = cat_1_total/(total_weight/10) * 100
-        cat_2_percentage = cat_2_total/(total_weight/10) * 100      
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100      
         
                 
         if cat_1_percentage >= 3:
@@ -2139,8 +2621,106 @@ class Flavor(FormulaInfo):
         elif cat_2_percentage >= 10:
             return "Category 2; 10*(Eye/Skin Category 1) + Eye Category 2 = %s%%" % cat_2_percentage.quantize(Decimal(10) ** -4)
         else:
-            return "No Category"
+            return "No Hazard"
     
+    def respiratory_sensitation_hazard(self):
+        
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.respiratory_hazard == ("1" or "1A" or "1B"):
+                cat_1_total += weight
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        
+        if cat_1_percentage >= Decimal('0.1'):
+            return "Category 1: Respiratory Sensitation = %s%%" % cat_1_percentage.quantize(Decimal(10) ** -4)
+        else:
+            return "No Hazard"
+    
+    def germ_mutagenicity_hazard(self):
+        total_weight = 0
+        cat_1A_total = 0
+        cat_1B_total = 0
+        cat_2_total = 0
+
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.germ_cell_mutagenicity_hazard == ("1A"):
+                cat_1A_total += weight
+            if ingredient.germ_cell_mutagenicity_hazard == ("1B"):
+                cat_1B_total += weight
+            if ingredient.germ_cell_mutagenicity_hazard == ("2"):
+                cat_2_total += weight
+                
+        cat_1A_percentage = cat_1A_total/(total_weight) * 100
+        cat_1B_percentage = cat_1B_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100
+        
+        if cat_1A_percentage >= Decimal('0.1'):
+            return "Category 1: Respiratory Sensitation = %s%%" % cat_1A_percentage.quantize(Decimal(10) ** -4)
+        elif cat_1B_percentage >= Decimal('0.1'):
+            return "Category 1B"
+        elif cat_2_percentage >= 1:
+            return "Category 2"
+        else:
+            return "No Hazard" 
+                                
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        
+        if cat_1_percentage >= 0.1:
+            return "Category 1"
+        else:
+            return "No Hazard"
+        
+    def carcinogenicity_hazard(self):
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.germ_cell_mutagenicity_hazard == ("1A" or "1B"):
+                cat_1_total += weight
+            if ingredient.germ_cell_mutagenicity_hazard == ("2"):
+                cat_2_total += weight
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100
+        
+        if cat_1_percentage >= Decimal('0.1'):
+            return "Category 1"
+        elif cat_2_percentage >= 1:
+            return "Category 2"
+        else:
+            return "No Hazard" 
+                                
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        
+        if cat_1_percentage >= 0.1:
+            return "Category 1: Respiratory Sensitation = %s%%" % cat_1_percentage.quantize(Decimal(10) ** -4)
+        else:
+            return "No Hazard"
 
 class FlavorIterOrder(models.Model):
     flavor = models.ForeignKey(Flavor)

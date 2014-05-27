@@ -2,6 +2,172 @@ from django.core.exceptions import ValidationError
 
 from access.models import *
 from reversion import revision
+from django.db import connection
+from django.db.models import Q
+
+def make_hazard_class(hazard_dict):
+    class HazardAccumulator():
+        hazard_vars = {}
+        
+        for cat in hazard_dict["categories"]: #this just gets the keys by default
+            hazard_vars[cat] = 0
+
+        def accumulate(self, ingredient, weight):
+            for hazard in hazard_dict['requirements']:
+                for criteria in hazard_dict['requirements'][hazard]:
+                    if getattr(ingredient, hazard) == criteria:
+                        for cat in hazard_dict['requirements'][hazard][criteria]:
+                            self.hazard_vars[cat[0]] += weight * cat[1]
+                            
+                    
+        def get_category(self, total_weight):    
+            for var in self.hazard_vars: #gets variable names
+                hazard_percentage = self.hazard_vars[var]/total_weight * 100
+                
+                if hazard_percentage >= hazard_dict["categories"][var]:
+                    return var
+                
+            return "No Hazard"
+        
+        def get_name(self):
+            return hazard_dict['name']
+        
+    return HazardAccumulator
+
+#SKIN HAZARD REQUIREMENTS AND DICTIONARY
+skin_reqs = dict.fromkeys(["1A", "1B", "1C"], [("Category 1", 1), ("Category 2", 10)])
+skin_reqs.update(dict.fromkeys(["2"], [("Category 2", 1)]))
+
+skin_hazard_dict = {
+                    'name': 'Skin Hazard',
+                    'categories': {"Category 1": 5, "Category 2": 10},
+                    'requirements': 
+                        {
+                         'skin_corrosion_hazard': skin_reqs,
+                        }
+                    }
+
+#EYE HAZARD REQUIREMENTS AND DICTIONARY
+eye_reqs_SKIN = dict.fromkeys(["1A", "1B", "1C"], [("Category 1", 1), ("Category 2", 10)])
+
+eye_reqs_EYE = dict.fromkeys(["1"], [("Category 1", 1), ("Category 2", 2)])
+eye_reqs_EYE.update(dict.fromkeys(["2A", "2B"], [("Category 2", 1)]))
+
+eye_hazard_dict = {
+                   'name': 'Eye Hazard',
+                   'categories': {"Category 1": 3, "Category 2": 10},
+                   'requirements':
+                        {
+                         'skin_corrosion_hazard': eye_reqs_SKIN,
+                         'eye_damage_hazard': eye_reqs_EYE,
+                         }
+                   }
+
+#RESPIRATORY/SENSITATION HAZARD REQUIREMENTS AND DICTIONARY
+respiratory_reqs = dict.fromkeys(["1", "1A", "1B"], [("Category 1", 1)])
+
+respiratory_hazard_dict = {
+                           'name': 'Respiratory Sensitation Hazard',
+                           'categories': {"Category 1": 0.1},
+                           'requirements':
+                                {
+                                 'germ_cell_mutagenicity_hazard': respiratory_reqs,
+                                 }
+                           }
+
+#GERM MUTAGENICITY HAZARD REQUIREMETNS AND DICTIONARY
+germ_mutagenicity_reqs = {
+                          "1A": [("Category 1A", 1)],
+                          "1B": [("Category 1B", 1)],
+                          "2": [("Category 2", 1)],
+                          }
+
+germ_mutagenicity_dict = {
+                           'name': 'Germ Mutagenicity Hazard',
+                           'categories': {"Category 1A": 0.1, "Category 1B": 0.1, "Category 2": 1},
+                           'requirements':
+                                {
+                                 'germ_cell_mutagenicity_hazard': germ_mutagenicity_reqs,
+                                 }
+                           }
+
+# Hazard dictionaries without using other dictionaries
+# 
+# skin_hazard_dict = {
+#                     'name': 'Skin Hazard',
+#                     'categories': {"Category 1": 5, "Category 2": 10},
+#                     'requirements': 
+#                         {
+#                          'skin_corrosion_hazard':                      
+#                             {
+#                              #IS THERE A FASTER WAY TO ADD SAME VALUES TO DIFFERENT KEYS??
+#                              #OR SOMEHOW HAVE "1A" or "1B" or "1C" AS A KEY
+#                             "1A": [("Category 1", 1), ("Category 2", 10)],
+#                             "1B": [("Category 1", 1), ("Category 2", 10)],
+#                             "1C": [("Category 1", 1), ("Category 2", 10)],
+#                             "2": [("Category 2", 1)]                             
+#                              },
+#                         }
+#                     }
+# 
+# eye_hazard_dict = {
+#                    'name': 'Eye Hazard',
+#                    'categories': {"Category 1": 3, "Category 2": 10},
+#                    'requirements':
+#                         {
+#                          'skin_corrosion_hazard':
+#                              {
+#                               "1A": [("Category 1", 1), ("Category 2", 10)],
+#                               "1B": [("Category 1", 1), ("Category 2", 10)],
+#                               "1C": [("Category 1", 1), ("Category 2", 10)],
+#                               },
+#                          'eye_damage_hazard':
+#                             {
+#                              "1": [("Category 1", 1), ("Category 2", 2)],
+#                              "2A": [("Category 2", 1)],
+#                              "2B": [("Category 2", 1)],
+#                              }
+#                          }
+#                    }
+
+def ji_function_initialize():
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        DROP FUNCTION IF EXISTS jaccard_index(integer, integer);
+        
+        CREATE FUNCTION jaccard_index(integer, integer) RETURNS numeric AS
+        'SELECT sum("intersection")/sum("union") AS "jaccard_index" FROM (SELECT leafa.ingredient_id, COALESCE(weighta, 0) AS weighta, COALESCE(weightb, 0) AS weightb, LEAST(COALESCE(weighta, 0), COALESCE(weightb, 0)) AS intersection, GREATEST(weighta, weightb) AS union FROM (SELECT "access_leafweight"."ingredient_id", "access_leafweight"."weight" AS weighta FROM "access_leafweight", "access_integratedproduct" WHERE "access_integratedproduct"."number" = $1 AND "access_leafweight"."root_flavor_id" = "access_integratedproduct"."id") AS leafa full outer join (SELECT "access_leafweight"."ingredient_id", "access_leafweight"."weight" AS weightb FROM "access_leafweight", "access_integratedproduct" WHERE "access_integratedproduct"."number" = $2 AND "access_leafweight"."root_flavor_id" = "access_integratedproduct"."id") AS leafb on ("leafa"."ingredient_id" = "leafb"."ingredient_id")) AS fulljoin;'
+        LANGUAGE SQL
+        STABLE
+        RETURNS NULL ON NULL INPUT;                       
+        
+        DROP FUNCTION IF EXISTS jilist_update(integer);
+        
+        CREATE FUNCTION jilist_update(integer) RETURNS VOID AS
+        'UPDATE access_jilist SET score = jaccard_index($1, "access_integratedproduct"."number") FROM "access_integratedproduct" WHERE a = $1 AND b = "access_integratedproduct"."number" OR a = "access_integratedproduct"."number" AND b = $1;
+        INSERT INTO access_jilist(a, b, score) SELECT $1, "access_integratedproduct"."number", jaccard_index($1, "access_integratedproduct"."number") FROM "access_integratedproduct" WHERE NOT ("access_integratedproduct"."number" = $1) AND NOT EXISTS (SELECT 1 FROM access_jilist WHERE a = $1 AND b = "access_integratedproduct"."number" OR a = "access_integratedproduct"."number" AND b = $1);'
+        LANGUAGE SQL
+        RETURNS NULL ON NULL INPUT;
+        
+        """                   
+        )
+
+        
+    cursor.execute('COMMIT')    
+
+
+
+
+
+def ji_update(flavor_num):
+    cursor = connection.cursor()
+    cursor.execute('select jilist_update(%s)' % flavor_num)  #doesn't actually save the objects
+    cursor.execute('COMMIT')
+#     #have to go through all the 'temporary' objects and save them 
+#    for ji in JIList.objects.filter(Q(a=10481) | Q(b=10481)):
+#        ji.save()
+
 
 
 #RECONCILING FLAVOR SPECS
