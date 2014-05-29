@@ -15,6 +15,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
+from access.controller import hazard_list
 #from access.controller import make_hazard_class, skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict
 
 from pluggable.sets import AncestorSet
@@ -282,6 +283,11 @@ class HazardFields(models.Model):
         ('1','1'),
         ('1A','1A'),
         ('1B','1B'),)
+    SKIN_SENSITIZATION_CHOICES = (
+        ('No','No'),
+        ('1','1'),
+        ('1A','1A'),
+        ('1B','1B'),)
     GERM_CELL_MUTAGENICITY_CHOICES = (
         ('No','No'),
         ('1A','1A'),
@@ -338,6 +344,8 @@ class HazardFields(models.Model):
                                 choices=CARCINOGENICTY_CHOICES)
     reproductive_hazard = models.CharField("Reproductive Toxicity",max_length=50,blank=True,
                                 choices=REPRODUCTIVE_CHOICES)
+    skin_sensitization_hazard = models.CharField("Skin Sensitization", max_length=50, blank=True,
+                                choices=SKIN_SENSITIZATION_CHOICES)
     tost_single_hazard = models.CharField("TOST Single Exposure",max_length=50,blank=True,
                                 choices=TOST_SINGLE_EXPOSURE_CHOICES)
     tost_repeat_hazard = models.CharField("TOST Repeated Exposure",max_length=50,blank=True,
@@ -373,6 +381,10 @@ class HazardFields(models.Model):
     ALTER TABLE "access_integratedproduct" ADD COLUMN  skin_corrosion_hazard varchar(50) DEFAULT '' NOT NULL;
     ALTER TABLE "access_integratedproduct" ADD COLUMN  eye_damage_hazard varchar(50) DEFAULT '' NOT NULL;
     ALTER TABLE "access_integratedproduct" ADD COLUMN  respiratory_hazard varchar(50) DEFAULT '' NOT NULL;
+    ALTER TABLE "access_integratedproduct" ADD COLUMN  skin_sensitization_hazard varchar(50) DEFAULT '' NOT NULL;
+    
+    ALTER TABLE "Raw Materials" ADD COLUMN skin_sensitization_hazard varchar(50) DEFAULT '' NOT NULL;
+
     """
 
     FLAMMABLE_LIQUID_CHOICES = (
@@ -2139,7 +2151,7 @@ class Flavor(FormulaInfo, HazardFields):
     def accumulate_hazards(self):
         
         #The list of all hazards to keep track of
-        hazards_to_accumulate = ['skin_corrosion_hazard', 'eye_damage_hazard',]
+        #hazards_to_accumulate = ['skin_corrosion_hazard', 'eye_damage_hazard',]
         
         #The KEYS in this dictionary are in the format 'subhazard_category' (eg. 'skin_corrosion_hazard_1A')
         #The VALUES are the accumulation of ingredient weights that correspond to each hazard
@@ -2149,7 +2161,7 @@ class Flavor(FormulaInfo, HazardFields):
         hazard_dict['total_weight'] = 0
         
         #initialize all the values to zero
-        for hazard in hazards_to_accumulate:
+        for hazard in hazard_list:
             for category in Ingredient._meta.get_field(hazard).choices:
                 if category[0] != 'No':     #category[0] and category[1] are always the same
                     hazard_dict[hazard + '_' + category[0]] = 0
@@ -2162,7 +2174,7 @@ class Flavor(FormulaInfo, HazardFields):
             
             hazard_dict['total_weight'] += weight
             
-            for hazard in hazards_to_accumulate:
+            for hazard in hazard_list:
                 ingredient_hazard_category = getattr(ingredient, hazard)
                 if ingredient_hazard_category != '':
                     hazard_dict[hazard + '_' + ingredient_hazard_category] += weight

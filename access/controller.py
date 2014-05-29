@@ -3,11 +3,26 @@ from django.core.exceptions import ValidationError
 from reversion import revision
 from django.db import connection
 from django.db.models import Q
+from decimal import Decimal
 
-from collections import namedtuple
+#from collections import namedtuple
 
 
-hazard_list = ['skin_corrosion_hazard', 'eye_damage_hazard']
+hazard_list = ['skin_corrosion_hazard', 
+               'eye_damage_hazard', 
+               'germ_cell_mutagenicity_hazard', 
+               'carcinogenicty_hazard', 
+               'reproductive_hazard',
+               'tost_single_hazard',
+               'tost_repeat_hazard',
+               'respiratory_hazard',
+               'skin_sensitization_hazard']
+
+"""
+To add another hazard:
+1. Make a function in the HazardAccumulator class below
+2. Add the hazard property to the hazard list above
+"""
 
 class HazardAccumulator():
     def __init__(self, flavor):
@@ -53,6 +68,99 @@ class HazardAccumulator():
         
         else:
             return 'No'
+        
+    @property
+    def germ_cell_mutagenicity_hazard(self):
+        if (self.subhazard_dict['germ_cell_mutagenicity_hazard_1A'])/self.subhazard_dict['total_weight'] * 100 >= Decimal('0.1'):
+            return '1A'
+        elif (self.subhazard_dict['germ_cell_mutagenicity_hazard_1B'])/self.subhazard_dict['total_weight'] * 100 >= Decimal('0.1'):
+            return '1B'
+        elif (self.subhazard_dict['germ_cell_mutagenicity_hazard_2'])/self.subhazard_dict['total_weight'] * 100 >= Decimal('1.0'):
+            return '2'
+        else:
+            return 'No'
+        
+    @property
+    def carcinogenicty_hazard(self):
+        if (self.subhazard_dict['carcinogenicty_hazard_1A'] + self.subhazard_dict['carcinogenicty_hazard_1B'])/self.subhazard_dict['total_weight'] * 100 >= Decimal('0.1'):
+            if self.subhazard_dict['carcinogenicty_hazard_1A'] >= 0:
+                return '1A'
+            else:
+                return '1B'
+        elif (self.subhazard_dict['carcinogenicty_hazard_2'])/self.subhazard_dict['total_weight'] * 100 >= Decimal('1.0'):
+            return '2'
+        else:
+            return 'No'
+            
+    @property
+    def reproductive_hazard(self):
+        reproductive_1 = self.subhazard_dict['reproductive_hazard_1A'] + self.subhazard_dict['reproductive_hazard_1B']
+        
+        if reproductive_1/self.subhazard_dict['total_weight'] * 100 >= Decimal('0.1'):
+            if self.subhazard_dict['reproductive_hazard_1A'] >= 0:
+                return '1A'
+            else:
+                return '1B'
+            
+        elif self.subhazard_dict['reproductive_hazard_2']/self.subhazard_dict['total_weight'] * 100 >= Decimal('0.1'):
+            return '2'
+        
+        elif self.subhazard_dict['reproductive_hazard_3']/self.subhazard_dict['total_weight'] * 100 >= Decimal('0.1'):
+            return '3'
+        
+        else:
+            return 'No'
+        
+    @property
+    def tost_single_hazard(self):
+        if self.subhazard_dict['tost_single_hazard_1']/self.subhazard_dict['total_weight'] * 100 >= Decimal('1.0'):
+            return '1'
+        elif self.subhazard_dict['tost_single_hazard_2']/self.subhazard_dict['total_weight'] * 100 >= Decimal('1.0'):
+            return '2'
+        elif self.subhazard_dict['tost_single_hazard_3']/self.subhazard_dict['total_weight'] * 100 >= Decimal('20.0'):
+            return '3'
+        else:
+            return 'No'
+        
+    @property
+    def tost_repeat_hazard(self):
+        if self.subhazard_dict['tost_repeat_hazard_1']/self.subhazard_dict['total_weight'] * 100 >= Decimal('1.0'):
+            return '1'
+        elif self.subhazard_dict['tost_repeat_hazard_2']/self.subhazard_dict['total_weight'] * 100 >= Decimal('1.0'):
+            return '2'
+
+        else:
+            return 'No'
+
+    @property
+    def respiratory_hazard(self):
+        respiratory_1 = self.subhazard_dict['respiratory_hazard_1A'] + self.subhazard_dict['respiratory_hazard_1B']
+                
+        if respiratory_1/self.subhazard_dict['total_weight'] * 100 >= Decimal('0.1'):
+            if self.subhazard_dict['respiratory_hazard_1A']/self.subhazard_dict['total_weight'] * 100 >= Decimal('0.1'):
+                return '1A'
+            elif self.subhazard_dict['respiratory_hazard_1B']/self.subhazard_dict['total_weight'] * 100 >= Decimal('1.0'):
+                return '1B'
+            else:
+                return '1'
+        else:
+            return 'No'
+        
+    @property
+    def skin_sensitization_hazard(self):
+        skin_1 = self.subhazard_dict['skin_sensitization_hazard_1A'] + self.subhazard_dict['skin_sensitization_hazard_1B']
+                
+        if skin_1/self.subhazard_dict['total_weight'] * 100 >= Decimal('0.1'):
+            if self.subhazard_dict['skin_sensitization_hazard_1A']/self.subhazard_dict['total_weight'] * 100 >= Decimal('0.1'):
+                return '1A'
+            elif self.subhazard_dict['skin_sensitization_hazard_1B']/self.subhazard_dict['total_weight'] * 100 >= Decimal('1.0'):
+                return '1B'
+            else:
+                return '1'
+        else:
+            return 'No'
+            
+            
         
     def get_hazard_dict(self):
         
