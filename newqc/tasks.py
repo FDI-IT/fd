@@ -16,12 +16,12 @@ def walk_scans_qccards(walk_paths=['/srv/samba/tank/scans/qccards',]):
             for filename in fnmatch.filter(filenames, '*.jpg'):
                 full_file_path = os.path.join(root,filename)
                 print "debug: Attempting import of %s " % full_file_path
-                try:
-                    import_result = ImportBCDoc(full_file_path)
-                    returns.append(import_result)
-                    print "info: Imported %s" % full_file_path
-                except Exception as e:
-                    print "warn: Failed to import %s -- %s: %s" % (full_file_path, type(e), e)
-                    move_exc_image(full_file_path)
+#            try:
+                import_result = ImportBCDoc(full_file_path)
+                returns.append(import_result)
+                print "info: Imported %s" % full_file_path
+#                except Exception as e:
+#                    print "warn: Failed to import %s -- %s: %s" % (full_file_path, type(e), e)
+#                    move_exc_image(full_file_path)
     return returns
 
