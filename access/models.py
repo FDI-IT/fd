@@ -15,7 +15,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
-from access.controller import hazard_list
+from access.controller import hazard_list, acute_toxicity_list
 #from access.controller import make_hazard_class, skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict
 
 from pluggable.sets import AncestorSet
@@ -320,6 +320,29 @@ class HazardFields(models.Model):
     ASPHYXIANT_CHOICES = (
         ('No','No'),
         ('Single Category','Single Category'),)
+    
+    #for now, their default values are just above the threshold in which they would be counted for the formula
+    oral_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=2001)
+    dermal_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=2001)
+    gases_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=20001)
+    vapors_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=21)
+    dusts_mists_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=6.0)
+    
+    '''
+    ALTER TABLE "access_integratedproduct" ADD COLUMN oral_ld50 numeric(10,3) DEFAULT 2001 NOT NULL;
+    ALTER TABLE "access_integratedproduct" ADD COLUMN dermal_ld50 numeric(10,3) DEFAULT 2001 NOT NULL;
+    ALTER TABLE "access_integratedproduct" ADD COLUMN gases_ld50 numeric(10,3) DEFAULT 20001 NOT NULL;
+    ALTER TABLE "access_integratedproduct" ADD COLUMN vapors_ld50 numeric(10,3) DEFAULT 21 NOT NULL;
+    ALTER TABLE "access_integratedproduct" ADD COLUMN dusts_mists_ld50 numeric(10,3) DEFAULT 6.0 NOT NULL;
+    
+    ALTER TABLE "Raw Materials" ADD COLUMN oral_ld50 numeric(10,3) DEFAULT 2001 NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN dermal_ld50 numeric(10,3) DEFAULT 2001 NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN gases_ld50 numeric(10,3) DEFAULT 20001 NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN vapors_ld50 numeric(10,3) DEFAULT 21 NOT NULL;
+    ALTER TABLE "Raw Materials" ADD COLUMN dusts_mists_ld50 numeric(10,3) DEFAULT 6.0 NOT NULL;   
+    '''
+    
+    #NOT IN PACKET
     acute_hazard_not_specified = models.CharField("Acute Toxicity - Type Not Specified", max_length=50,blank=True,
                                choices=ACUTE_TOXICITY_CHOICES)
     acute_hazard_oral = models.CharField("Acute Toxicity - Oral", max_length=50,blank=True,
@@ -353,10 +376,14 @@ class HazardFields(models.Model):
     
     aspiration_hazard = models.CharField("Aspiration", max_length=50,blank=True,
                                choices=ASPIRATION_CHOICES)
+    
+    #NOT IN PACKET
     asphyxiation_hazard = models.CharField("Simple Asphyxiants", max_length=50,blank=True,
                                choices=ASPHYXIANT_CHOICES)
 
     """
+    make sure these columns are in both 'access_integratedproduct' and 'Raw Materials'
+    
     ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_not_specified varchar(50) DEFAULT '' NOT NULL;
     ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_oral varchar(50) DEFAULT '' NOT NULL;
     ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_dermal varchar(50) DEFAULT '' NOT NULL;
@@ -2165,19 +2192,63 @@ class Flavor(FormulaInfo, HazardFields):
             for category in Ingredient._meta.get_field(hazard).choices:
                 if category[0] != 'No':     #category[0] and category[1] are always the same
                     hazard_dict[hazard + '_' + category[0]] = 0
-                    
         
-        #for each base ingredient in the flavor, find any hazards it has and add its weight to each of those
-        for leaf in self.consolidated_leafs.iteritems():
-            ingredient = leaf[0]
-            weight = leaf[1]
+        '''
+        CALCULATING ACUTE TOXICITY HAZARDS (NOT THE SAME AS CALCULATING OTHER HAZARDS)
+        
+        The formula to obtain the ld50 of a flavor is:
+            100/flavor_ld50 = Sigma(ingredient_concentration, ingredient_ld50)
             
+        To calculate the final sum of the Sigma operation, I would originally do something like:
+            
+            for ingredient in ingredients_under_the_ld50_threshold:
+                sigma += (weight/total_weight * 100) / ingredient.ld50
+                
+        However, since I'm calculating the total_weight in the same loop, I do not yet have access
+            to the total weight.  To work around this, I factor our the 100/total_weight from the sigma
+            equation since these remain constant.  I end up with:
+            
+            for ingredient in ingredients_under_the_ld50_threshold:
+                sigma += weight / ingredient.ld50
+                
+        The value above is what I store in the hazard_dict for each acute hazard.        
+        
+        Then, once I have access to the total_weight, I can find the final value for sigma.
+        
+            sigma = sigma * (100/total_weight)
+            
+        Now, since the final formula is LD50_flavor = 100/sigma, I can just cancel out the 100's
+            and not even multiply sigma by 100; so instead of the formula above:
+            
+            sigma = sigma/total_weight
+            
+            LD50_flavor = 1/sigma
+    
+        I do that in the controller.  Using sigma, I can then find the ld50 for the flavor, and 
+            based on that ld50, place the flavor in a hazard category.
+                
+        '''
+        
+        #sigma(weight/ld50), explained above
+        for acute_hazard, max_ld50 in acute_toxicity_list:
+            hazard_dict[acute_hazard] = 0
+                
+        #for each base ingredient in the flavor, find any hazards it has and add its weight to each of those
+        for ingredient, weight in self.consolidated_leafs.iteritems():
+           
             hazard_dict['total_weight'] += weight
             
             for hazard in hazard_list:
                 ingredient_hazard_category = getattr(ingredient, hazard)
                 if ingredient_hazard_category != '':
                     hazard_dict[hazard + '_' + ingredient_hazard_category] += weight
+            
+            #here I add weight/ld50 for each of the acute hazards
+            for acute_hazard, max_ld50 in acute_toxicity_list:
+                ld50_property = acute_hazard.split('acute_hazard_')[1] + '_ld50'
+                if getattr(ingredient, ld50_property) < max_ld50:
+                    hazard_dict[acute_hazard] += weight/getattr(ingredient, ld50_property)
+                
                     
         return hazard_dict
 
