@@ -1203,10 +1203,6 @@ class FormulaInfo(models.Model):
         abstract = True
 
 class Flavor(FormulaInfo, HazardFields):
-    """
-    ALTER TABLE access_integratedproduct
-    ADD COLUMN keywords text DEFAULT '' NOT NULL; 
-    """
     
     #retains = generic.GenericRelation(Retain)
     id = models.PositiveIntegerField(
