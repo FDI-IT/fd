@@ -410,8 +410,7 @@
             "acute_hazard_oral": "", 
             "supplierid": 0
         }
-    }
-
+    },
     {
         "pk": 45481, 
         "model": "access.formula", 
@@ -483,8 +482,7 @@
             "totalweight": "0.000", 
             "ingredient": 5823
         }
-    }
-
+    },
     {
         "pk": 24463, 
         "model": "access.flavor", 
@@ -605,8 +603,7 @@
             "quantityperunit": null, 
             "acute_hazard_oral": ""
         }
-    }
-
+    },
     {
         "pk": 7563248, 
         "model": "access.formulatree", 

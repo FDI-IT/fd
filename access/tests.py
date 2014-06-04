@@ -37,9 +37,9 @@ class HazardTest(TestCase):
     
     def setUp(self):
         self.count = Flavor.objects.count()
-        #self.flavor = Flavor.objects.get(number=1000)
-        #self.accumulator = HazardAccumulator(self.flavor)
-        #self.subhazard_dict = self.accumulator.subhazard_dict
+        self.flavor = Flavor.objects.get(number=1000)
+        self.accumulator = HazardAccumulator(self.flavor)
+        self.subhazard_dict = self.accumulator.subhazard_dict
         
     def test_ld50s(self):
         self.assertEqual(round(self.subhazard_dict['dermal_ld50']), 24286)
