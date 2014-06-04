@@ -180,7 +180,8 @@ class HazardAccumulator():
         if self.subhazard_dict['aspiration_hazard_1']/self.total_weight * 100 >= Decimal('10.0'):
             return '1'
     
-    #the function 'calculate_and_save_ld50s' should be run before these
+    #the function 'calculate_ld50s' should be run before these
+    #calculate_ld50s is now in 'init' so they're calculated when the instance is made
     @property
     def acute_hazard_oral(self):
 
@@ -268,6 +269,7 @@ class HazardAccumulator():
         else:
             return 'No'
 
+       
 
     def calculate_ld50s(self):
         for acute_hazard, max_ld50 in acute_toxicity_list:
@@ -297,9 +299,6 @@ class HazardAccumulator():
         
     
     def get_hazard_dict(self):
-        
-        #self.calculate_and_save_ld50s() #I put this here so that the ld50s are always calculated before 
-                                        #the acute hazards are determined (even if the hazards are not saved)
         
         hazard_dict = {}
         

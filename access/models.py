@@ -326,7 +326,7 @@ class HazardFields(models.Model):
     dermal_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=2001)
     gases_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=20001)
     vapors_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=21)
-    dusts_mists_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=6.0)
+    dusts_mists_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default='6.0')
     
     '''
     ALTER TABLE "access_integratedproduct" ADD COLUMN oral_ld50 numeric(10,3) DEFAULT 2001 NOT NULL;
@@ -1368,6 +1368,8 @@ class Flavor(FormulaInfo, HazardFields):
         except:
             pass
         
+        super(Flavor, self).save(*args, **kwargs)
+        
         if not self.flavorspecification_set.filter(name='Specific Gravity').exists():
             flavorspec = FlavorSpecification(
                                              flavor = self,
@@ -1385,7 +1387,7 @@ class Flavor(FormulaInfo, HazardFields):
                                                  )
                 flavorspec.save()
 
-        super(Flavor, self).save(*args, **kwargs)
+        
         
 
         
@@ -2188,7 +2190,7 @@ class Flavor(FormulaInfo, HazardFields):
         hazard_dict['total_weight'] = 0
         
         #initialize all the values to zero
-        for hazard in hazard_list:
+        for hazard in hazard_list[5:]:  #I do the list splice because I don't want the acute hazards in here
             for category in Ingredient._meta.get_field(hazard).choices:
                 if category[0] != 'No':     #category[0] and category[1] are always the same
                     hazard_dict[hazard + '_' + category[0]] = 0
