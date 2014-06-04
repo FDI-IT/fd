@@ -356,37 +356,6 @@ class HazardFields(models.Model):
     asphyxiation_hazard = models.CharField("Simple Asphyxiants", max_length=50,blank=True,
                                choices=ASPHYXIANT_CHOICES)
 
-    """
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_not_specified varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_oral varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_dermal varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_gases varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_vapors varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_dusts_mists varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN germ_cell_mutagenicity_hazard  varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  carcinogenicty_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  reproductive_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN TOST_single_hazard  varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  TOST_repeat_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  aspiration_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  asphyxiation_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  flammable_liquid_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  flamamble_solid_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  self_reactive_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  emit_flammable_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  oxidizing_liquid_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  oxidizing_solid_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  organic_peroxide_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  metal_corrosifve_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  skin_corrosion_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  eye_damage_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  respiratory_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  skin_sensitization_hazard varchar(50) DEFAULT '' NOT NULL;
-    
-    ALTER TABLE "Raw Materials" ADD COLUMN skin_sensitization_hazard varchar(50) DEFAULT '' NOT NULL;
-
-    """
-
     FLAMMABLE_LIQUID_CHOICES = (
                 ('No','No'),
                 ('1','1'),
