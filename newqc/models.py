@@ -1,9 +1,11 @@
 from datetime import date
-from PIL import Image
 
 from django.db.models import Q, F
 from django.db import models
 from django.db.models import Count
+
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 #from django.contrib.contenttypes.models import ContentType
 #from django.contrib.contenttypes import generic
 
@@ -91,45 +93,137 @@ class ProductInfo(models.Model):
 
     def get_admin_url(self):
         return "/django/admin/newqc/productinfo/%s" % self.pk
-        
-class TestCard(models.Model):
-    retain = models.ForeignKey('Retain', null=True)
-    image_hash = models.CharField(max_length=64)
-    large = models.ImageField(upload_to="testcards")
-    thumbnail = models.ImageField(upload_to="testcards_thumbnail")
-    notes = models.TextField(blank=True, default="")
-    status = models.CharField(max_length=25,choices=STATUS_CHOICES,default="Pending")
-
-    def __unicode__(self):
-        return "%s" % (self.retain)
-
-class RMTestCard(models.Model):
-    retain = models.ForeignKey('RMRetain', null=True)
-    image_hash = models.CharField(max_length=64)
-    large = models.ImageField(upload_to="rmtestcards")
-    thumbnail = models.ImageField(upload_to="rmtestcards_thumbnail")
-    notes = models.TextField(blank=True, default="")
-    status = models.CharField(max_length=25,choices=STATUS_CHOICES,default="Pending")
-
-    def __unicode__(self):
-        return "%s" % (self.retain)
-
-class BatchSheet(models.Model):
-    lot = models.ForeignKey('Lot', null=True)
-    image_hash = models.CharField(max_length=64)
-    large = models.ImageField(upload_to="batchsheets")
-    thumbnail = models.ImageField(upload_to="batchsheets_thumbnail")
-    notes = models.TextField(blank=True, default="")
     
+
+class AbstractScannedDoc(models.Model):
+    class Meta:
+        abstract = True
+    
+    related_object_name = None
+        
+    def get_my_large_upload_path(self):
+        pass
+    
+    def get_my_thumbnail_upload_path(self):
+        pass
+
+    @property
+    def get_related_object(self):
+        return getattr(self, self.related_object_name)
+
+    image_hash = models.CharField(max_length=64)
+    large = models.ImageField(upload_to=get_my_large_upload_path)
+    thumbnail = models.ImageField(upload_to=get_my_thumbnail_upload_path)
+    notes = models.TextField(blank=True, default="")
+    create_time = models.DateTimeField(auto_now_add=True)
+    modified_time = models.DateTimeField(auto_now=True)
+    
+class ScannedDoc(models.Model):
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('content_type','object_id')
+        
     class Meta:
         ordering = ['-id']
+        
+class TestCard(AbstractScannedDoc):
+    related_object_name = 'retain'
+    
+    def get_my_large_upload_path(self):
+        return 'testcards'
+    
+    def get_my_thumbnail_upload_path(self):
+        return 'testcards_thumbnail'
 
-class GenericTestCard(models.Model):
-    image_hash = models.CharField(max_length=64)
-    large = models.ImageField(upload_to="generctestcards")
-    thumbnail = models.ImageField(upload_to="generictestcards_thumbnail")
-    notes = models.TextField(blank=True, default="")
-    status = models.CharField(max_length=25,choices=STATUS_CHOICES,default="Pending")
+    retain = models.ForeignKey('Retain', null=True)
+    status = models.CharField(max_length=25,choices=STATUS_CHOICES,default='Pending QC')
+    
+    def __unicode__(self):
+        return "%s" % (self.retain)
+    
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            r = Retain.objects.get(pk=bc_key)
+        except Retain.DoesNotExist:
+            r = None
+        return TestCard(
+                    retain=r,
+                    **document_create_kwargs)
+
+
+class RMTestCard(AbstractScannedDoc):
+    related_object_name = 'retain'
+    
+    def get_my_large_upload_path(self):
+        return 'rmtestcards'
+    
+    def get_my_thumbnail_upload_path(self):
+        return 'rmtestcards_thumbnail'
+    
+    retain = models.ForeignKey('RMRetain', null=True)
+    status = models.CharField(max_length=25,choices=RM_STATUS_CHOICES,default='Pending QC')
+    
+    def __unicode__(self):
+        return "%s" % (self.retain)
+    
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            r = RMRetain.objects.get(pk=bc_key)
+        except RMRetain.DoesNotExist:
+            r = None
+        return RMTestCard(
+                    retain=r,
+                    **document_create_kwargs)
+        
+    @staticmethod
+    def get_absolute_url(self):
+        return "/django/access/ingredient/pin_review/%s/" % self.retain.pin
+
+class BatchSheet(AbstractScannedDoc):
+    related_object_name = 'lot'
+    
+    def get_my_large_upload_path(self):
+        return 'batchsheets'
+    
+    def get_my_thumbnail_upload_path(self):
+        return 'batchsheets_thumbnail'
+    
+    lot = models.ForeignKey('Lot', null=True)
+    status = models.CharField(max_length=25, default='')
+
+    class Meta:
+        ordering = ['-id']
+        
+    def __unicode__(self):
+        return "%s" % (self.lot.number)
+
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            l = Lot.objects.get(number=bc_key)
+        except Lot.DoesNotExist:
+            l = None
+        return BatchSheet(
+                    lot=l,
+                    **document_create_kwargs)
+
+class GenericTestCard(AbstractScannedDoc):
+    def get_related_object(self):
+        return None
+    
+    def get_my_large_upload_path(self):
+        return 'generctestcards'
+    
+    def get_my_thumbnail_upload_path(self):
+        return 'generictestcards_thumbnail'
+    
+    def get_my_status_choices(self):
+        return STATUS_CHOICES
+    
+    def get_my_status_default(self):
+        return 'Pending QC'
 
 def get_next_lot_number():
     today = date.today()
@@ -320,6 +414,10 @@ class Retain(models.Model):
         except:
             return 0
         return last_retain.retain + 1
+    
+    @staticmethod
+    def get_absolute_url(self):
+        return "/django/qc/lots/%s/" % self.lot.pk
 
 class ImportRetain(models.Model):
     number = models.PositiveSmallIntegerField(blank=True, null=True)
@@ -396,6 +494,11 @@ class RMRetain(models.Model):
 
     def __unicode__(self):
         return u"PIN: " + str(self.pin) + " " + str(self.date.year)[2:5] + "-R" + str(self.r_number).zfill(3)
+
+        
+    @staticmethod
+    def get_absolute_url(self):
+        return "/django/access/ingredient/pin_review/%s/" % self.pin
 
     def get_admin_url(self):
         return "/django/admin/newqc/rmretain/%s/" % self.pk
@@ -484,3 +587,16 @@ class ExperimentalRetain(models.Model):
 
     def get_admin_url(self):
         return "/django/admin/newqc/experimentalretain/%s/" % self.pk
+    
+    """
+    ALTER TABLE newqc_batchsheet ADD COLUMN status varchar(25) DEFAULT '' NOT NULL;
+    ALTER TABLE newqc_batchsheet ADD COLUMN create_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+    ALTER TABLE newqc_batchsheet ADD COLUMN modified_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+    ALTER TABLE newqc_testcard ADD COLUMN create_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+    ALTER TABLE newqc_testcard ADD COLUMN modified_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+    ALTER TABLE newqc_rmtestcard ADD COLUMN create_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+    ALTER TABLE newqc_rmtestcard ADD COLUMN modified_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+    ALTER TABLE newqc_generictestcard ADD COLUMN create_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+    ALTER TABLE newqc_generictestcard ADD COLUMN modified_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+    
+    """

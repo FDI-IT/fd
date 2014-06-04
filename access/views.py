@@ -937,7 +937,7 @@ def process_cell_update(request):
         if number == '':
             response_dict['name'] = ''
         else:
-            response_dict['name'] = "Invalid ingredient number"
+            response_dict['name'] = "Invalid Ingredient Number"
         response_dict['cost'] = ''
     
     return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')
@@ -1874,78 +1874,32 @@ class DecimalEncoder(simplejson.JSONEncoder):
             return (str(o) for o in [o])
         return super(DecimalEncoder, self)._iterencode(o, markers)
 
-
-# @login_requried
-# @flavor_info_wrapper
-# 
-# def reconcile_spec_post(request):
-#     
-#     
-#     page_title = "%s - Reconcile Specs" % flavor.name
-#     
-#     if request.method == 'POST':
-#         ReconciledSpecFormSet = formset_factory(forms.ReconciledSpecForm, extra=0)
-#         formset = ReconciledSpecFormSet(request.POST)
-#         
-#         if formset.is_valid():
-#             if request.session.get('scraped_data', False):
-#                 json_data = request.session['scraped_data']
-#             
-#                 for form in formset.forms:
-#                     try:
-#                         flavorspec = FlavorSpecification.objects.get(flavor=flavor, name=form.cleaned_data['name'], customer = None)
-#                         flavorspec.specification = form.cleaned_data['specification']
-#                         flavorspec.save()
-#                     except:
-#                         create_new_spec(flavor, form.cleaned_data['name'], form.cleaned_data['specification'], False)
-#                     
-#                 if ReconciledFlavor.objects.filter(flavor = flavor).exists():
-#                     reconcile_update(flavor, request.user, json_data)
-#                 else:       
-#                     reconcile_flavor(flavor, request.user, json_data)
-#                     
-#                 redirect_path = reverse('access.views.specification_list', args=[flavor.number])
-#                 return HttpResponseRedirect(redirect_path)
-#             else:
-#                 print "The user somehow posted to this page without going through the reconcile specs view..."
-#      
-
 @login_required
 @flavor_info_wrapper
 def reconcile_specs(request, flavor):
     
     page_title = "%s - Reconcile Specs" % flavor.name
     
-    #get any flavors with the same formula and scrape from those files as well!
-    flavor_pk_list = flavor.loaded_renumber_list
-    flavor_list = [Flavor.objects.get(pk = flavor_pk) for flavor_pk in flavor_pk_list]    
-    
     if request.method == 'POST':
         ReconciledSpecFormSet = formset_factory(forms.ReconciledSpecForm, extra=0)
         formset = ReconciledSpecFormSet(request.POST)
-        
-        if 'renumbers' in request.POST:
-            reconcile_list = flavor_list #include all the renumbers
-        else:
-            reconcile_list = [flavor] #only reconcile single flavor
         
         if formset.is_valid():
             if request.session.get('scraped_data', False):
                 json_data = request.session['scraped_data']
             
-                for flavor in reconcile_list:
-                    for form in formset.forms:
-                        try:
-                            flavorspec = FlavorSpecification.objects.get(flavor=flavor, name=form.cleaned_data['name'], customer = None)
-                            flavorspec.specification = form.cleaned_data['specification']
-                            flavorspec.save()
-                        except:
-                            create_new_spec(flavor, form.cleaned_data['name'], form.cleaned_data['specification'], False)
-                        
-                    if ReconciledFlavor.objects.filter(flavor = flavor).exists():
-                        reconcile_update(flavor, request.user, json_data)
-                    else:       
-                        reconcile_flavor(flavor, request.user, json_data)
+                for form in formset.forms:
+                    try:
+                        flavorspec = FlavorSpecification.objects.get(flavor=flavor, name=form.cleaned_data['name'], customer = None)
+                        flavorspec.specification = form.cleaned_data['specification']
+                        flavorspec.save()
+                    except:
+                        create_new_spec(flavor, form.cleaned_data['name'], form.cleaned_data['specification'], False)
+                    
+                if ReconciledFlavor.objects.filter(flavor = flavor).exists():
+                    reconcile_update(flavor, request.user, json_data)
+                else:       
+                    reconcile_flavor(flavor, request.user, json_data)
                     
                 redirect_path = reverse('access.views.specification_list', args=[flavor.number])
                 return HttpResponseRedirect(redirect_path)
@@ -1953,11 +1907,10 @@ def reconcile_specs(request, flavor):
                 print "The user somehow posted to this page without going through the reconcile specs view..."
     
 
-    renumber_list = "Renumbers: " + ", ".join(str(flavor.number) for flavor in flavor_list)
-    if len(flavor_list) > 1:
-        add_renumber_button = True
-    else:
-        add_renumber_button = False
+    #get any flavors with the same formula and scrape from those files as well!
+    flavor_pk_list = flavor.loaded_renumber_list
+    flavor_list = [Flavor.objects.get(pk = flavor_pk) for flavor_pk in flavor_pk_list]
+    
 
     mtf_search_list = [('flash', 'Flash Point'), ('specific gravity', 'Specific Gravity')]
     mtf_vals = get_mtf_vals(flavor_list, mtf_search_list)
@@ -2010,7 +1963,6 @@ def reconcile_specs(request, flavor):
     if request.method != "POST":
         ReconciledSpecFormSet = formset_factory(forms.ReconciledSpecForm, extra=0)    
         formset = ReconciledSpecFormSet(initial = grv)
-        
 
     return render_to_response('access/flavor/reconcile_specs.html',
                               {'page_title': page_title,
@@ -2019,8 +1971,6 @@ def reconcile_specs(request, flavor):
                                'mtf_vals': mtf_vals,
                                'no_mtf': no_mtf,
                                'db_vals': db_vals,
-                               'renumber_button': add_renumber_button,
-                               'renumber_list': renumber_list,
                                'reconciled_formset': formset,
                                'management_form': formset.management_form,
                                },

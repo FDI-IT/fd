@@ -29,7 +29,7 @@ from access.barcode import barcodeImg, codeBCFromString
 from access.models import Flavor, Ingredient, FlavorSpecification
 from access.views import flavor_info_wrapper
 from newqc.forms import TestResultForm, NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
-from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, LotSOLIStamp
+from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, LotSOLIStamp, TestResult, ScannedDoc
 from newqc.utils import process_jbg, get_card_file, scan_card
 from newqc.tasks import walk_scans_qccards
 from salesorders.models import SalesOrderNumber, LineItem
@@ -1051,9 +1051,7 @@ def passed_finder(request):
                                'form_action_url':'/django/qc/passed_finder/',
                                'testcards':testcards},
                               context_instance=RequestContext(request))
-    
-def test():
-    return 1
+
 
 def last_chance(request):
    
@@ -1172,11 +1170,75 @@ def edit_coa(request, ssl_pk): #TODO TODO TODO DOTODOTDOTO TODOT TODTODO OTODOTD
     #   save the form
 
 
+lot_list_queryset = Lot.objects.extra(select={'lotyear':'extract(year from date)','lotmonth':'extract(month from date)'})
+lls = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
+#Lot.objects.extra(select={'lotyear':'YEAR(date)','lotmonth':'MONTH(date)'}, order_by=['lotyear','lotmonth',],),
 
 
+# @permission_required('access.view_flavor')
+# def lot_list(request, paginate_by = 'default', queryset = 'default'):
+#     
+#     
+#     if (queryset != 'default'): #use different queryset (eg. lots by day)
+#         queryset = queryset
+#         pagination_count = None
+#     else:
+#         
+#         lot_list_queryset = Lot.objects.extra(select={'lotyear':'extract(year from date)','lotmonth':'extract(month from date)'})   
+#         queryset = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
+#     
+#         if (paginate_by != 'default'): #when the user clicks a new pagination value, save the new value into the user's userprofile
+#             request.user.userprofile.lot_paginate_by = int(paginate_by)
+#             pagination_count = int(paginate_by)
+#         else:
+#             pagination_count = request.user.userprofile.lot_paginate_by 
+#             if pagination_count == None: #this only occurs once; when the user accesses the lots page for the first time it will no longer be None
+#                 request.user.userprofile.lot_paginate_by = 100
+#                 pagination_count = 100
+#             
+#         request.user.userprofile.save() #save new lot pagination value
+# 
+#     return list_detail.object_list(
+#         request,
+#         queryset = queryset,
+#         paginate_by = pagination_count,
+#         extra_context = dict({
+#             'page_title': 'Lots',
+#             'print_link': 'javascript:document.forms["lot_selections"].submit()',
+#             'month_list': lot_month_list,
+#             'status_list': lot_status_list,
+#             'filterselect':LotFilterSelectForm(),
+#             'user': request.user.get_full_name(),
+#             'pagination_list': [10, 25, 50, 100, 500, 1000],
+#             'pagination_count': pagination_count,
+#             'lot_list_admin': "/django/admin/newqc/lot/"
+#             # fix this javascript...
+#         }),
+#     )
+def scanned_docs(request, paginate_by='default',):
+    scanned_doc_type = request.GET.get('content_type__id', None)
+    if scanned_doc_type is not None:
+        scanned_docs_qs = ScannedDoc.objects.filter(content_type=scanned_doc_type).select_related()
+    else:
+        scanned_docs_qs = ScannedDoc.objects.all().select_related()
+    if (paginate_by != 'default'): #when the user clicks a new pagination value, save the new value into the user's userprofile
+        pagination_count = int(paginate_by)
+    else:
+        pagination_count = 100
+        
 
-
-
+    scanned_doc_types = ScannedDoc.objects.all().order_by('content_type__name').values('content_type__id', 'content_type__name').distinct()
+    return list_detail.object_list(
+        request,
+        queryset=scanned_docs_qs,
+        paginate_by=pagination_count,
+        extra_context={
+            'page_title': "Scanned Documents",
+            'pagination_count': pagination_count,
+            'pagination_list': [10, 25, 50, 100, 500, 1000],
+            'scanned_doc_types': scanned_doc_types,
+        }
+    )
 
 
 #to generate pngs from a pdf file

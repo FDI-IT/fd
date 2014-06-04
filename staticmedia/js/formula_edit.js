@@ -111,7 +111,7 @@ FORMULA_EDIT.add_row_error_messages = function(row) {
 	row = jQuery(row);
 
 	if (row.hasClass('invalid_number')) {
-		error_message.push("Invalid ingredient number");
+		error_message.push("Invalid Ingredient Number");
 	}
 	if (row.hasClass('empty')) {
 		error_message.push("Empty field(s)");
