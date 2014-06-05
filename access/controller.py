@@ -269,14 +269,38 @@ class HazardAccumulator():
         else:
             return 'No'
 
-       
+    
+    
+    '''
+    TODO?
+    
+    Regarding the 'except' statement below.  This currently handles two different exceptions.
+    
+    When none of the ingredients are hazardous, the final flavor_ld50 will equal total_weight / 0.
+    I get a ZeroDivisionError and store the flavor_ld50 as None.
+    
+    When all of the ingredients have unknown ld50s, the final flavor_ld50 will equal 0 / 0.
+    I get an InvalidOperation and store the flavor_ld50 as None.
+    
+    So currently, if flavor_ld50 is None, it could mean different things;
+        1. None of the ingredients are hazardous (they are all above the threshold)
+            -The flavor is definitely not hazardous, but ld50 cannot be calculated
+            -Should I store it as a value just above the threshold?
+        2. None of the ingredients are known (they all have NULL/None ld50s)
+            -The ld50 of the flavor is UNKNOWN; this should probably stay None
+            
+    '''
+    
 
     def calculate_ld50s(self):
         for acute_hazard, max_ld50 in acute_toxicity_list:
+            
+            unknown_weight_key = acute_hazard.split('acute_hazard_')[1] + '_unknown'
+            
             try:
-                ld50 = 1/(self.subhazard_dict[acute_hazard]/self.total_weight)
-            except ZeroDivisionError:
-                ld50 = max_ld50 + 1
+                ld50 = (self.total_weight - self.subhazard_dict[unknown_weight_key])/(self.subhazard_dict[acute_hazard])
+            except:
+                ld50 = None
             
             self.subhazard_dict[acute_hazard.split('acute_hazard_')[1] + '_ld50'] = ld50
     

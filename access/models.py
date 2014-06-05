@@ -322,24 +322,24 @@ class HazardFields(models.Model):
         ('Single Category','Single Category'),)
     
     #for now, their default values are just above the threshold in which they would be counted for the formula
-    oral_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=2001)
-    dermal_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=2001)
-    gases_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=20001)
-    vapors_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default=21)
-    dusts_mists_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, default='6.0')
+    oral_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, null=True)
+    dermal_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, null=True)
+    gases_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, null=True)
+    vapors_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, null=True)
+    dusts_mists_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, null=True)
     
     '''
-    ALTER TABLE "access_integratedproduct" ADD COLUMN oral_ld50 numeric(10,3) DEFAULT 2001 NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN dermal_ld50 numeric(10,3) DEFAULT 2001 NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN gases_ld50 numeric(10,3) DEFAULT 20001 NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN vapors_ld50 numeric(10,3) DEFAULT 21 NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN dusts_mists_ld50 numeric(10,3) DEFAULT 6.0 NOT NULL;
+    ALTER TABLE "access_integratedproduct" ADD COLUMN oral_ld50 numeric(10,3);
+    ALTER TABLE "access_integratedproduct" ADD COLUMN dermal_ld50 numeric(10,3);
+    ALTER TABLE "access_integratedproduct" ADD COLUMN gases_ld50 numeric(10,3);
+    ALTER TABLE "access_integratedproduct" ADD COLUMN vapors_ld50 numeric(10,3);
+    ALTER TABLE "access_integratedproduct" ADD COLUMN dusts_mists_ld50 numeric(10,3);
     
-    ALTER TABLE "Raw Materials" ADD COLUMN oral_ld50 numeric(10,3) DEFAULT 2001 NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN dermal_ld50 numeric(10,3) DEFAULT 2001 NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN gases_ld50 numeric(10,3) DEFAULT 20001 NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN vapors_ld50 numeric(10,3) DEFAULT 21 NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN dusts_mists_ld50 numeric(10,3) DEFAULT 6.0 NOT NULL;   
+    ALTER TABLE "Raw Materials" ADD COLUMN oral_ld50 numeric(10,3);
+    ALTER TABLE "Raw Materials" ADD COLUMN dermal_ld50 numeric(10,3);
+    ALTER TABLE "Raw Materials" ADD COLUMN gases_ld50 numeric(10,3);
+    ALTER TABLE "Raw Materials" ADD COLUMN vapors_ld50 numeric(10,3);
+    ALTER TABLE "Raw Materials" ADD COLUMN dusts_mists_ld50 numeric(10,3);   
     '''
     
     #NOT IN PACKET
@@ -2186,8 +2186,14 @@ class Flavor(FormulaInfo, HazardFields):
         #The VALUES are the accumulation of ingredient weights that correspond to each hazard
         hazard_dict = {}
         
-        #include the total weight of the flavor in the dict
+        #include the total weight and unknown weight of the flavor in the dict
         hazard_dict['total_weight'] = 0
+        
+        
+        #initialize all unknown_weights for acute hazards to zero
+        #there will be an unknown weight for each hazard; eg. hazard_dict['oral_unknown'], ...
+        for hazard in hazard_list[:5]:
+            hazard_dict[hazard.split('acute_hazard_')[1] + '_unknown'] = 0
         
         #initialize all the values to zero
         for hazard in hazard_list[5:]:  #I do the list splice because I don't want the acute hazards in here
@@ -2198,8 +2204,10 @@ class Flavor(FormulaInfo, HazardFields):
         '''
         CALCULATING ACUTE TOXICITY HAZARDS (NOT THE SAME AS CALCULATING OTHER HAZARDS)
         
+        A BUNCH OF ALGEBRA TO GET THE FINAL FORMULA BELOW 
+        
         The formula to obtain the ld50 of a flavor is:
-            100/flavor_ld50 = Sigma(ingredient_concentration, ingredient_ld50)
+            (100 - unknown_concentration)/flavor_ld50 = Sigma(ingredient_concentration/ingredient_ld50)
             
         To calculate the final sum of the Sigma operation, I would originally do something like:
             
@@ -2213,21 +2221,37 @@ class Flavor(FormulaInfo, HazardFields):
             for ingredient in ingredients_under_the_ld50_threshold:
                 sigma += weight / ingredient.ld50
                 
-        The value above is what I store in the hazard_dict for each acute hazard.        
+        The value 'sigma' above is what I store in the hazard_dict for each acute hazard.        
+                    
+        We know that:
         
-        Then, once I have access to the total_weight, I can find the final value for sigma.
+            LD50_flavor = (100 - unknown_concentration) / (100 * sigma/total_weight),
+            
+            unknown_concentration = (weight_unknown/total_weight) * 100
+            
+        Substitute everything in:
         
-            sigma = sigma * (100/total_weight)
+            LD50_flavor = (100 - 100 * (weight_unknown/total_weight)) / 100 * (sigma/total_weight)
             
-        Now, since the final formula is LD50_flavor = 100/sigma, I can just cancel out the 100's
-            and not even multiply sigma by 100; so instead of the formula above:
+        Cancel out the 100's: 
+        
+            LD50_flavor = (1 - weight_unknown/total_weight) / (sigma/total_weight),
+        
+        Replace the 1 on the left side with total_weight/total_weight, then cancel the total_weights:
+        
+        FINAL FORMULA ------------------------------------------------------------------------
+                
+            LD50_flavor = (total_weight - weight_unknown) / sigma
             
-            sigma = sigma/total_weight
+                where sigma = sum(ingredient_weights/ingredient_ld50s)
             
-            LD50_flavor = 1/sigma
+        --------------------------------------------------------------------------------------
     
-        I do that in the controller.  Using sigma, I can then find the ld50 for the flavor, and 
-            based on that ld50, place the flavor in a hazard category.
+        Steps to calculate ld50 of a flavor:
+        1. Store weight_unknown and sigma in the hazard_dictionary
+            -Note: Each acute subhazard (oral, dermal, etc.) needs its own weight_unknown
+        2. In the controller, use the total_weight and the final formula above to find LD50_flavor    
+
                 
         '''
         
@@ -2248,7 +2272,16 @@ class Flavor(FormulaInfo, HazardFields):
             #here I add weight/ld50 for each of the acute hazards
             for acute_hazard, max_ld50 in acute_toxicity_list:
                 ld50_property = acute_hazard.split('acute_hazard_')[1] + '_ld50'
-                if getattr(ingredient, ld50_property) < max_ld50:
+                unknown_weight_key = acute_hazard.split('acute_hazard_')[1] + '_unknown'
+                
+                ingredient_ld50 = getattr(ingredient, ld50_property)
+                
+                if ingredient_ld50 == None:
+                    #only add the weight to unknown_weight if its concentration is >10%
+                    #here I just assume that the total_weight is 1000 because it would be hard to do this check in the controller
+                    if (weight/1000) * 100 > 10: 
+                        hazard_dict[unknown_weight_key] += weight
+                elif ingredient_ld50 < max_ld50:
                     hazard_dict[acute_hazard] += weight/getattr(ingredient, ld50_property)
                 
                     
