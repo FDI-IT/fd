@@ -114,21 +114,3 @@ def update_prices_and_get_updated_flavors(old_ingredient, new_ingredient):
 
     return updated_flavors
 
-def experimental_approve_from_form(approve_form, experimental):
-    approve_form.save()
-    new_flavor = approve_form.instance
-    experimental.product_number = new_flavor.number
-    experimental.save()
-    gazintas = Ingredient.objects.filter(sub_flavor=new_flavor)
-    if gazintas.count() > 1:
-        # hack job. this will raise exception because get() expects 1
-        Ingredient.objects.get(sub_flavor=new_flavor)
-    if gazintas.count() == 1:
-        gazinta = gazintas[0]
-        gazinta.prefix = "%s-%s" % (new_flavor.prefix, new_flavor.number)
-        gazinta.flavornum = new_flavor.number
-        gazinta.save()
-    for ft in FormulaTree.objects.filter(root_flavor=new_flavor).exclude(node_flavor=None).exclude(node_flavor=new_flavor).filter(node_flavor__prefix="EX"):
-        ft.node_flavor.prefix="GZ"
-        ft.node_flavor.save()
-        

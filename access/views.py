@@ -21,7 +21,7 @@ from django.core.urlresolvers import reverse
 
 from reversion import revision
 
-from access.controller import reconcile_flavor, reconcile_update, discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors, experimental_approve_from_form
+from access.controller import reconcile_flavor, reconcile_update, discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors
 #from access.formatter import formulatree_to_jsinfovis
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
@@ -2138,6 +2138,28 @@ def angularjs_test(request):
                                 {'flavors': flavor_list,
                                  'page_title': "Testing AngularJS"})
 
+
+# TODO this was in the controller, had to move it back because it 
+# uses a bare call to Ingredient and controller shouldn't import models...
+# or should it...
+def experimental_approve_from_form(approve_form, experimental):
+    approve_form.save()
+    new_flavor = approve_form.instance
+    experimental.product_number = new_flavor.number
+    experimental.save()
+    gazintas = Ingredient.objects.filter(sub_flavor=new_flavor)
+    if gazintas.count() > 1:
+        # hack job. this will raise exception because get() expects 1
+        Ingredient.objects.get(sub_flavor=new_flavor)
+    if gazintas.count() == 1:
+        gazinta = gazintas[0]
+        gazinta.prefix = "%s-%s" % (new_flavor.prefix, new_flavor.number)
+        gazinta.flavornum = new_flavor.number
+        gazinta.save()
+    for ft in FormulaTree.objects.filter(root_flavor=new_flavor).exclude(node_flavor=None).exclude(node_flavor=new_flavor).filter(node_flavor__prefix="EX"):
+        ft.node_flavor.prefix="GZ"
+        ft.node_flavor.save()
+        
     
     
     
