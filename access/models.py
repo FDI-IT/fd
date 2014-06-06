@@ -15,6 +15,9 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
+from access.controller import hazard_list
+#from access.controller import make_hazard_class, skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict
+
 from pluggable.sets import AncestorSet
 
 one_hundred = Decimal('100')
@@ -249,7 +252,211 @@ class Formula(models.Model):
                                   (self.flavor, self.ingredient.flavornum))
 
 
-class Ingredient(models.Model):
+
+#Since both Flavor and Ingredient models will have the same hazard fields, they can inherit them from this class
+class HazardFields(models.Model):
+
+    class Meta:
+        abstract = True
+    
+    ACUTE_TOXICITY_CHOICES = (
+        ('No','No'),
+        ('1','1'),
+        ('2','2'),
+        ('3','3'),
+        ('4','4'),
+        ('5','5'),)
+    SKIN_CORROSION_CHOICES = (
+        ('No','No'),
+        ('1A','1A'),
+        ('1B','1B'),
+        ('1C','1C'),
+        ('2','2'),
+        ('3','3'),)
+    EYE_DAMAGE_CHOICES = (
+        ('No','No'),
+        ('1','1'),
+        ('2A','2A'),
+        ('2B','2B'),)
+    RESPIRATORY_SENSITIZATION_CHOICES = (
+        ('No','No'),
+        ('1','1'),
+        ('1A','1A'),
+        ('1B','1B'),)
+    SKIN_SENSITIZATION_CHOICES = (
+        ('No','No'),
+        ('1','1'),
+        ('1A','1A'),
+        ('1B','1B'),)
+    GERM_CELL_MUTAGENICITY_CHOICES = (
+        ('No','No'),
+        ('1A','1A'),
+        ('1B','1B'),
+        ('2','2'),)
+    CARCINOGENICTY_CHOICES = (
+        ('No','No'),
+        ('1A','1A'),
+        ('1B','1B'),
+        ('2','2'),)
+    REPRODUCTIVE_CHOICES = (
+        ('No','No'),
+        ('1A','1A'),
+        ('1B','1B'),
+        ('2','2'),
+        ('3','3'))
+    TOST_SINGLE_EXPOSURE_CHOICES = (
+         ('No','No'),
+        ('1','1'),
+        ('2','2'),
+        ('3','3'),)
+    TOST_REPEAT_EXPOSURE_CHOICES = (
+        ('No','No'),
+        ('1','1'),
+        ('2','2'), )
+    ASPIRATION_CHOICES = (
+        ('No','No'),
+        ('1','1'),
+        ('2','2'),)
+    ASPHYXIANT_CHOICES = (
+        ('No','No'),
+        ('Single Category','Single Category'),)
+    acute_hazard_not_specified = models.CharField("Acute Toxicity - Type Not Specified", max_length=50,blank=True,
+                               choices=ACUTE_TOXICITY_CHOICES)
+    acute_hazard_oral = models.CharField("Acute Toxicity - Oral", max_length=50,blank=True,
+                               choices=ACUTE_TOXICITY_CHOICES)
+    acute_hazard_dermal = models.CharField("Acute Toxicity - Dermal", max_length=50,blank=True,
+                               choices=ACUTE_TOXICITY_CHOICES)
+    acute_hazard_gases = models.CharField("Acute Toxicity - Gases", max_length=50,blank=True,
+                               choices=ACUTE_TOXICITY_CHOICES)
+    acute_hazard_vapors = models.CharField("Acute Toxicity - Vapors", max_length=50,blank=True,
+                               choices=ACUTE_TOXICITY_CHOICES)
+    acute_hazard_dusts_mists = models.CharField("Acute Toxicity - Dust & Mists", max_length=50,blank=True,
+                               choices=ACUTE_TOXICITY_CHOICES)
+    skin_corrosion_hazard = models.CharField("Skin Corrosion/Irritation", max_length=50,blank=True,
+                               choices=SKIN_CORROSION_CHOICES)
+    eye_damage_hazard = models.CharField("Serious Eye Damage/Eye Irritation", max_length=50,blank=True,
+                               choices=EYE_DAMAGE_CHOICES)
+    respiratory_hazard = models.CharField("Respiratory or Skin Sensitization", max_length=50,blank=True,
+                               choices=RESPIRATORY_SENSITIZATION_CHOICES)
+    germ_cell_mutagenicity_hazard = models.CharField("Germ Cell Mutagenicity",max_length=50,blank=True,
+                                choices=GERM_CELL_MUTAGENICITY_CHOICES)
+    carcinogenicty_hazard = models.CharField("Carcinogenicty",max_length=50,blank=True,
+                                choices=CARCINOGENICTY_CHOICES)
+    reproductive_hazard = models.CharField("Reproductive Toxicity",max_length=50,blank=True,
+                                choices=REPRODUCTIVE_CHOICES)
+    skin_sensitization_hazard = models.CharField("Skin Sensitization", max_length=50, blank=True,
+                                choices=SKIN_SENSITIZATION_CHOICES)
+    tost_single_hazard = models.CharField("TOST Single Exposure",max_length=50,blank=True,
+                                choices=TOST_SINGLE_EXPOSURE_CHOICES)
+    tost_repeat_hazard = models.CharField("TOST Repeated Exposure",max_length=50,blank=True,
+                                choices=TOST_REPEAT_EXPOSURE_CHOICES) 
+    
+    aspiration_hazard = models.CharField("Aspiration", max_length=50,blank=True,
+                               choices=ASPIRATION_CHOICES)
+    asphyxiation_hazard = models.CharField("Simple Asphyxiants", max_length=50,blank=True,
+                               choices=ASPHYXIANT_CHOICES)
+
+    FLAMMABLE_LIQUID_CHOICES = (
+                ('No','No'),
+                ('1','1'),
+                ('2','2'),
+                ('3','3'),
+                ('4','4'),)
+    FLAMMABLE_SOLID_CHOICES = (
+                ('No','No'),
+                ('1','1'),
+                ('2','2'),)
+    SELF_REACTIVE_CHOICES = (
+                ('No','No'),
+                ('Type A','Type A'),
+                ('Type B','Type B'),
+                ('Type C','Type C'),
+                ('Type D','Type D'),
+                ('Type E','Type E'),
+                ('Type F','Type F'),
+                ('Type G','Type G'),)
+    EMIT_FLAMMABLE_GAS_CHOICES = (
+                ('No','No'),
+                ('1','1'),
+                ('2','2'),
+                ('3','3'),)
+    OXIDIZING_LIQUID_CHOICES = (
+                ('No','No'),
+                ('1','1'),
+                ('2','2'),
+                ('3','3'),)
+    OXIDIZING_SOLID_CHOICES = (
+                ('No','No'),
+                ('1','1'),
+                ('2','2'),
+                ('3','3'),)
+    ORGANIC_PEROXIDE_CHOICES = (
+                ('No','No'),
+                ('Type A','Type A'),
+                ('Type B','Type B'),
+                ('Type C','Type C'),
+                ('Type D','Type D'),
+                ('Type E','Type E'),
+                ('Type F','Type F'),
+                ('Type G','Type G'),)
+    CORROSIVE_TO_METAL_CHOICES = (
+                ('No','No'),
+                ('1','1'),)
+    flammable_liquid_hazard = models.CharField("Flammable Liquids", max_length=50,blank=True,
+                               choices=FLAMMABLE_LIQUID_CHOICES)
+    flamamble_solid_hazard = models.CharField("Flammable Solids", max_length=50,blank=True,
+                               choices=FLAMMABLE_SOLID_CHOICES)
+    self_reactive_hazard = models.CharField("Self-Reactive Chemicals", max_length=50,blank=True,
+                               choices=SELF_REACTIVE_CHOICES)
+    emit_flammable_hazard = models.CharField("Chemicals, which in contact with water, emit flammable gas", max_length=50,blank=True,
+                               choices=EMIT_FLAMMABLE_GAS_CHOICES)
+    oxidizing_liquid_hazard = models.CharField("Oxidizing Liquids", max_length=50,blank=True,
+                               choices=OXIDIZING_LIQUID_CHOICES)
+    oxidizing_solid_hazard = models.CharField("Oxidizing Solids", max_length=50,blank=True,
+                               choices=OXIDIZING_SOLID_CHOICES)
+    organic_peroxide_hazard = models.CharField("Organic Peroxides", max_length=50,blank=True,
+                               choices=ORGANIC_PEROXIDE_CHOICES)
+    metal_corrosifve_hazard = models.CharField("Corrosive to Metals", max_length=50,blank=True,
+                               choices=CORROSIVE_TO_METAL_CHOICES)
+    
+    
+#    GERM_CELL_MUTAGENICITY_CHOICES = (
+#        ('No','No'),
+#        ('1A','1A'),
+#        ('1B','1B'),
+#        ('2','2'),)
+#    CARCINOGENICITY_CHOICES = (
+#        ('No','No'),
+#        ('1A','1A'),
+#        ('1B','1B'),
+#        ('2','2'),)
+#    REPRODUCTIVE_CHOICES = (
+#        ('No','No'),
+#        ('1A','1A'),
+#        ('1B','1B'),
+#        ('2','2'),
+#        ('Lactation','Lactation'),)
+#    STOT_SINGLE_CHOICES = (
+#        ('No','No'),
+#        ('1','1'),
+#        ('2','2'),
+#        ('3','3'),)
+#    STOT_REPEAT_CHOICES = (
+#        ('No','No'),
+#        ('1','1'),
+#        ('2','2'),)   
+#    germ_cell_hazard = models.CharField("Germ Cell Mutagenicity", max_length=50,blank=True,
+#                               choices=GERM_CELL_MUTAGENICITY_CHOICES)
+#    carcinogenicity_hazard = models.CharField("Carcinogenicity", max_length=50,blank=True,
+#                               choices=CARCINOGENICITY_CHOICES)
+#    reproductive_hazard = models.CharField("Reproductive Toxicity", max_length=50,blank=True,
+#                               choices=REPRODUCTIVE_CHOICES)
+#    stot_single_hazard = models.CharField("STOT Single Exposure", max_length=50,blank=True,
+#                               choices=STOT_SINGLE_CHOICES)
+#    stot_repeat_hazard = models.CharField("STOT Repeated Exposure", max_length=50,blank=True,
+#                               choices=STOT_REPEAT_CHOICES)
+
+class Ingredient(HazardFields):
     """Raw materials for use in production.
     
     The unique indentifier for this table is 'rawmaterialcode'.
@@ -450,213 +657,9 @@ class Ingredient(models.Model):
         'yellow_5',
     ]
     
-    ACUTE_TOXICITY_CHOICES = (
-        ('No','No'),
-        ('1','1'),
-        ('2','2'),
-        ('3','3'),
-        ('4','4'),
-        ('5','5'),)
-    SKIN_CORROSION_CHOICES = (
-        ('No','No'),
-        ('1A','1A'),
-        ('1B','1B'),
-        ('1C','1C'),
-        ('2','2'),
-        ('3','3'),)
-    EYE_DAMAGE_CHOICES = (
-        ('No','No'),
-        ('1','1'),
-        ('2A','2A'),
-        ('2B','2B'),)
-    RESPIRATORY_SENSITIZATION_CHOICES = (
-        ('No','No'),
-        ('1','1'),
-        ('1A','1A'),
-        ('1B','1B'),)
-    GERM_CELL_MUTAGENICITY_CHOICES = (
-        ('No','No'),
-        ('1A','1A'),
-        ('1B','1B'),
-        ('2','2'),)
-    CARCINOGENICTY_CHOICES = (
-        ('No','No'),
-        ('1A','1A'),
-        ('1B','1B'),
-        ('2','2'),)
-    REPRODUCTIVE_CHOICES = (
-        ('No','No'),
-        ('1A','1A'),
-        ('1B','1B'),
-        ('2','2'),
-        ('3','3'))
-    TOST_SINGLE_EXPOSURE_CHOICES = (
-         ('No','No'),
-        ('1','1'),
-        ('2','2'),
-        ('3','3'),)
-    TOST_REPEAT_EXPOSURE_CHOICES = (
-        ('No','No'),
-        ('1','1'),
-        ('2','2'), )
-    ASPIRATION_CHOICES = (
-        ('No','No'),
-        ('1','1'),
-        ('2','2'),)
-    ASPHYXIANT_CHOICES = (
-        ('No','No'),
-        ('Single Category','Single Category'),)
-    acute_hazard_not_specified = models.CharField("Acute Toxicity - Type Not Specified", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    acute_hazard_oral = models.CharField("Acute Toxicity - Oral", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    acute_hazard_dermal = models.CharField("Acute Toxicity - Dermal", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    acute_hazard_gases = models.CharField("Acute Toxicity - Gases", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    acute_hazard_vapors = models.CharField("Acute Toxicity - Vapors", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    acute_hazard_dusts_mists = models.CharField("Acute Toxicity - Dust & Mists", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    skin_corrosion_hazard = models.CharField("Skin Corrosion/Irritation", max_length=50,blank=True,
-                               choices=SKIN_CORROSION_CHOICES)
-    eye_damage_hazard = models.CharField("Serious Eye Damage/Eye Irritation", max_length=50,blank=True,
-                               choices=EYE_DAMAGE_CHOICES)
-    respiratory_hazard = models.CharField("Respiratory or Skin Sensitization", max_length=50,blank=True,
-                               choices=RESPIRATORY_SENSITIZATION_CHOICES)
-    germ_cell_mutagenicity_hazard = models.CharField("Germ Cell Mutagenicity",max_length=50,blank=True,
-                                choices=GERM_CELL_MUTAGENICITY_CHOICES)
-    carcinogenicty_hazard = models.CharField("Carcinogenicty",max_length=50,blank=True,
-                                choices=CARCINOGENICTY_CHOICES)
-    reproductive_hazard = models.CharField("Reproductive Toxicity",max_length=50,blank=True,
-                                choices=REPRODUCTIVE_CHOICES)
-    tost_single_hazard = models.CharField("TOST Single Exposure",max_length=50,blank=True,
-                                choices=TOST_SINGLE_EXPOSURE_CHOICES)
-    tost_repeat_hazard = models.CharField("TOST Repeated Exposure",max_length=50,blank=True,
-                                choices=TOST_REPEAT_EXPOSURE_CHOICES) 
-    
-    aspiration_hazard = models.CharField("Aspiration", max_length=50,blank=True,
-                               choices=ASPIRATION_CHOICES)
-    asphyxiation_hazard = models.CharField("Simple Asphyxiants", max_length=50,blank=True,
-                               choices=ASPHYXIANT_CHOICES)
-
-    """
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_not_specified varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_oral varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_dermal varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_gases varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_vapors varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_dusts_mists varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN germ_cell_mutagenicity_hazard  varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN  carcinogenicty_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN  reproductive_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN TOST_single_hazard  varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN  TOST_repeat_hazard varchar(50) DEFAULT '' NOT NULL;
-    """
-
-    FLAMMABLE_LIQUID_CHOICES = (
-                ('No','No'),
-                ('1','1'),
-                ('2','2'),
-                ('3','3'),
-                ('4','4'),)
-    FLAMMABLE_SOLID_CHOICES = (
-                ('No','No'),
-                ('1','1'),
-                ('2','2'),)
-    SELF_REACTIVE_CHOICES = (
-                ('No','No'),
-                ('Type A','Type A'),
-                ('Type B','Type B'),
-                ('Type C','Type C'),
-                ('Type D','Type D'),
-                ('Type E','Type E'),
-                ('Type F','Type F'),
-                ('Type G','Type G'),)
-    EMIT_FLAMMABLE_GAS_CHOICES = (
-                ('No','No'),
-                ('1','1'),
-                ('2','2'),
-                ('3','3'),)
-    OXIDIZING_LIQUID_CHOICES = (
-                ('No','No'),
-                ('1','1'),
-                ('2','2'),
-                ('3','3'),)
-    OXIDIZING_SOLID_CHOICES = (
-                ('No','No'),
-                ('1','1'),
-                ('2','2'),
-                ('3','3'),)
-    ORGANIC_PEROXIDE_CHOICES = (
-                ('No','No'),
-                ('Type A','Type A'),
-                ('Type B','Type B'),
-                ('Type C','Type C'),
-                ('Type D','Type D'),
-                ('Type E','Type E'),
-                ('Type F','Type F'),
-                ('Type G','Type G'),)
-    CORROSIVE_TO_METAL_CHOICES = (
-                ('No','No'),
-                ('1','1'),)
-    flammable_liquid_hazard = models.CharField("Flammable Liquids", max_length=50,blank=True,
-                               choices=FLAMMABLE_LIQUID_CHOICES)
-    flamamble_solid_hazard = models.CharField("Flammable Solids", max_length=50,blank=True,
-                               choices=FLAMMABLE_SOLID_CHOICES)
-    self_reactive_hazard = models.CharField("Self-Reactive Chemicals", max_length=50,blank=True,
-                               choices=SELF_REACTIVE_CHOICES)
-    emit_flammable_hazard = models.CharField("Chemicals, which in contact with water, emit flammable gas", max_length=50,blank=True,
-                               choices=EMIT_FLAMMABLE_GAS_CHOICES)
-    oxidizing_liquid_hazard = models.CharField("Oxidizing Liquids", max_length=50,blank=True,
-                               choices=OXIDIZING_LIQUID_CHOICES)
-    oxidizing_solid_hazard = models.CharField("Oxidizing Solids", max_length=50,blank=True,
-                               choices=OXIDIZING_SOLID_CHOICES)
-    organic_peroxide_hazard = models.CharField("Organic Peroxides", max_length=50,blank=True,
-                               choices=ORGANIC_PEROXIDE_CHOICES)
-    metal_corrosifve_hazard = models.CharField("Corrosive to Metals", max_length=50,blank=True,
-                               choices=CORROSIVE_TO_METAL_CHOICES)
-    
     #ing
-    location_code_n = generic.GenericRelation('LocationCode')
-    
-    ph = models.DecimalField("pH", max_digits=4 ,decimal_places=2, blank=True, null=True)
-    
-#    GERM_CELL_MUTAGENICITY_CHOICES = (
-#        ('No','No'),
-#        ('1A','1A'),
-#        ('1B','1B'),
-#        ('2','2'),)
-#    CARCINOGENICITY_CHOICES = (
-#        ('No','No'),
-#        ('1A','1A'),
-#        ('1B','1B'),
-#        ('2','2'),)
-#    REPRODUCTIVE_CHOICES = (
-#        ('No','No'),
-#        ('1A','1A'),
-#        ('1B','1B'),
-#        ('2','2'),
-#        ('Lactation','Lactation'),)
-#    STOT_SINGLE_CHOICES = (
-#        ('No','No'),
-#        ('1','1'),
-#        ('2','2'),
-#        ('3','3'),)
-#    STOT_REPEAT_CHOICES = (
-#        ('No','No'),
-#        ('1','1'),
-#        ('2','2'),)   
-#    germ_cell_hazard = models.CharField("Germ Cell Mutagenicity", max_length=50,blank=True,
-#                               choices=GERM_CELL_MUTAGENICITY_CHOICES)
-#    carcinogenicity_hazard = models.CharField("Carcinogenicity", max_length=50,blank=True,
-#                               choices=CARCINOGENICITY_CHOICES)
-#    reproductive_hazard = models.CharField("Reproductive Toxicity", max_length=50,blank=True,
-#                               choices=REPRODUCTIVE_CHOICES)
-#    stot_single_hazard = models.CharField("STOT Single Exposure", max_length=50,blank=True,
-#                               choices=STOT_SINGLE_CHOICES)
-#    stot_repeat_hazard = models.CharField("STOT Repeated Exposure", max_length=50,blank=True,
-#                               choices=STOT_REPEAT_CHOICES)
+    location_code_n = generic.GenericRelation('LocationCode')    
+
     
     @staticmethod
     def anonymize():
@@ -1168,11 +1171,7 @@ class FormulaInfo(models.Model):
     class Meta:
         abstract = True
 
-class Flavor(FormulaInfo):
-    """
-    ALTER TABLE access_integratedproduct
-    ADD COLUMN keywords text DEFAULT '' NOT NULL; 
-    """
+class Flavor(FormulaInfo, HazardFields):
     
     #retains = generic.GenericRelation(Retain)
     id = models.PositiveIntegerField(
@@ -2111,32 +2110,492 @@ class Flavor(FormulaInfo):
             return self.gazinta.all()[0]
         except:
             return None
+
+
+    #the final accumulation function; adds up the weights for each subhazard category
+    def accumulate_hazards(self):
+        
+        #The list of all hazards to keep track of
+        #hazards_to_accumulate = ['skin_corrosion_hazard', 'eye_damage_hazard',]
+        
+        #The KEYS in this dictionary are in the format 'subhazard_category' (eg. 'skin_corrosion_hazard_1A')
+        #The VALUES are the accumulation of ingredient weights that correspond to each hazard
+        hazard_dict = {}
+        
+        #include the total weight of the flavor in the dict
+        hazard_dict['total_weight'] = 0
+        
+        #initialize all the values to zero
+        for hazard in hazard_list:
+            for category in Ingredient._meta.get_field(hazard).choices:
+                if category[0] != 'No':     #category[0] and category[1] are always the same
+                    hazard_dict[hazard + '_' + category[0]] = 0
+                    
+        
+        #for each base ingredient in the flavor, find any hazards it has and add its weight to each of those
+        for leaf in self.consolidated_leafs.iteritems():
+            ingredient = leaf[0]
+            weight = leaf[1]
             
+            hazard_dict['total_weight'] += weight
+            
+            for hazard in hazard_list:
+                ingredient_hazard_category = getattr(ingredient, hazard)
+                if ingredient_hazard_category != '':
+                    hazard_dict[hazard + '_' + ingredient_hazard_category] += weight
+                    
+        return hazard_dict
+
+            
+    #This function takes the individual hazard dictionaries, creates an instance of a hazard class
+    #    for each hazard, and uses those instances to compute the hazard categories for each hazard
+    def get_hazards_consolidated(self):
+        
+        complete_hazard_dict = {}
+        
+        hazard_accumulators = []
+        
+        for hazard_dict in [skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict]:
+            hazard_class = make_hazard_class(hazard_dict)
+            hazard_accumulators.append(hazard_class())
+        
+        total_weight = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            for accumulator in hazard_accumulators:
+                accumulator.accumulate(ingredient, weight)
+                
+        for accumulator in hazard_accumulators:
+            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
+            
+        return complete_hazard_dict
     
-#     skin_hazard_dict = {
-#                             'ingredient_hazard': 'skin_corrosion_hazard'
-#                             'hazard_categories': ["1", "2"]
-#                             'criteria_list': ["1A" or "1B" or "1C"]
-#                             
-#                         }
-#     
-#     {
-#         "1A" or "1B" or "1C": [("Category 1", 1), ("Category 2", 10)]
-#         "2": [("Category 2", 1)]
-#     }
-#     
-#     {
-#         "Category 1": 5   #value specifies the percentage that the criteria for that category must meet 
-#         "Category 2": 10  # in order for the flavor to be in that category
-#     }
-#     
-#     {
-#         "Category 1": [("1A" or "1B" or "1C", 1), 5]
-#         "Category 2": [("1A" or "1B" or "1C", 10), ("2", 1), 10]
-#     }
+
+    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
+    def get_hazard_dict(self):
+        
+        hazard_dict = {}
+        
+        total_weight = 0
+        
+        #HAZARD CATEGORY TOTALS (for now just do two)
+        #skin damage 
+
+        
+        #the inner function of a closure cannot modify a variable defined in its outer scope  
+        #the only way to get around this is to use a mutable object like a dictionary 
+        skin = {1: 0, 2: 0}
+        
+        #eye damage
+        eye = {1: 0, 2: 0}
+
+        #respiratory damage
+        #blahblah other hazard damage
+               
+         
+        def skin_accumulate(ingredient, weight):
+            
+            #skin hazard requirements
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                skin[1] += weight #total ingredient weight will be 100
+                skin[2] += weight * 10   #10 * weight/10  
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                skin[2] += weight            
+                
+        def eye_accumulate(ingredient, weight):
+            
+            #eye hazard requirements    
+            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                eye[1] += weight
+                eye[2] += weight * 10 #10 * weight / 10
+            if ingredient.eye_damage_hazard == ("2A" or "2B"):
+                eye[2] += weight               
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            skin_accumulate(ingredient, weight)
+            eye_accumulate(ingredient, weight)
+            
+        
+        #skin_hazard(skin1, skin2, total_weight)
+        
+        #Calculate total hazard percentages and determine final categories    
+        
+#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
+#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
+#             they are equivalent, but i think list comprehension is faster?
+        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
+        
+        if skin1_percentage >= 5:
+            hazard_dict["skin"] = "Category 1"
+        elif skin2_percentage >= 10:
+            hazard_dict["skin"] = "Category 2"
+        else:
+            hazard_dict["skin"] = "No Hazard"
+            
+                     
+        if eye1_percentage >= 3:
+            hazard_dict["eye"] = "Category 1"
+        elif eye2_percentage >= 10:
+            hazard_dict["eye"] = "Category 2"
+        else:
+            hazard_dict["eye"] = "No Hazard"
     
-    def find_hazards(self):
-        skin_hazard_arguments = ['skin_corrosion_hazard', ("1A" or "1B" or "1C", )]
+        return hazard_dict
+    
+    
+    #Below I have separate functions for each hazard.  
+    #Each one has to loop through the consolidated_leafs once, where the functions above
+    #    only go through that loop once to compute all hazards
+    
+    def skin_damage_hazard(self):
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+    
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                cat_1_total += weight #total ingredient weight will be 100
+                cat_2_total += weight * 10   #10 * weight/10
+                
+        for accumulator in hazard_accumulators:
+            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
+            
+        return complete_hazard_dict
+    
+
+    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
+    def get_hazard_dict(self):
+        
+        hazard_dict = {}
+        
+        total_weight = 0
+        
+        #HAZARD CATEGORY TOTALS (for now just do two)
+        #skin damage 
+
+        
+        #the inner function of a closure cannot modify a variable defined in its outer scope  
+        #the only way to get around this is to use a mutable object like a dictionary 
+        skin = {1: 0, 2: 0}
+        
+        #eye damage
+        eye = {1: 0, 2: 0}
+
+        #respiratory damage
+        #blahblah other hazard damage
+               
+         
+        def skin_accumulate(ingredient, weight):
+            
+            #skin hazard requirements
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                skin[1] += weight #total ingredient weight will be 100
+                skin[2] += weight * 10   #10 * weight/10  
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                skin[2] += weight            
+                
+        def eye_accumulate(ingredient, weight):
+            
+            #eye hazard requirements    
+            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                eye[1] += weight
+                eye[2] += weight * 10 #10 * weight / 10
+            if ingredient.eye_damage_hazard == ("2A" or "2B"):
+                eye[2] += weight               
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            skin_accumulate(ingredient, weight)
+            eye_accumulate(ingredient, weight)
+            
+        
+        #skin_hazard(skin1, skin2, total_weight)
+        
+        #Calculate total hazard percentages and determine final categories    
+        
+#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
+#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
+#             they are equivalent, but i think list comprehension is faster?
+        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
+        
+        if skin1_percentage >= 5:
+            hazard_dict["skin"] = "Category 1"
+        elif skin2_percentage >= 10:
+            hazard_dict["skin"] = "Category 2"
+        else:
+            hazard_dict["skin"] = "No Hazard"
+            
+                     
+        if eye1_percentage >= 3:
+            hazard_dict["eye"] = "Category 1"
+        elif eye2_percentage >= 10:
+            hazard_dict["eye"] = "Category 2"
+        else:
+            hazard_dict["eye"] = "No Hazard"
+    
+        return hazard_dict
+    
+    
+    #Below I have separate functions for each hazard.  
+    #Each one has to loop through the consolidated_leafs once, where the functions above
+    #    only go through that loop once to compute all hazards
+    
+    
+    
+    
+    def skin_damage_hazard(self):
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+    
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                cat_1_total += weight #total ingredient weight will be 100
+                cat_2_total += weight * 10   #10 * weight/10
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                cat_2_total += weight
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100                   
+                
+        for accumulator in hazard_accumulators:
+            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
+            
+        return complete_hazard_dict
+    
+
+    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
+    def get_hazard_dict(self):
+        
+        hazard_dict = {}
+        
+        total_weight = 0
+        
+        #HAZARD CATEGORY TOTALS (for now just do two)
+        #skin damage 
+
+        
+        #the inner function of a closure cannot modify a variable defined in its outer scope  
+        #the only way to get around this is to use a mutable object like a dictionary 
+        skin = {1: 0, 2: 0}
+        
+        #eye damage
+        eye = {1: 0, 2: 0}
+
+        #respiratory damage
+        #blahblah other hazard damage
+               
+         
+        def skin_accumulate(ingredient, weight):
+            
+            #skin hazard requirements
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                skin[1] += weight #total ingredient weight will be 100
+                skin[2] += weight * 10   #10 * weight/10  
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                skin[2] += weight            
+                
+        def eye_accumulate(ingredient, weight):
+            
+            #eye hazard requirements    
+            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                eye[1] += weight
+                eye[2] += weight * 10 #10 * weight / 10
+            if ingredient.eye_damage_hazard == ("2A" or "2B"):
+                eye[2] += weight               
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            skin_accumulate(ingredient, weight)
+            eye_accumulate(ingredient, weight)
+            
+        
+        #skin_hazard(skin1, skin2, total_weight)
+        
+        #Calculate total hazard percentages and determine final categories    
+        
+#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
+#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
+#             they are equivalent, but i think list comprehension is faster?
+        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
+        
+        if skin1_percentage >= 5:
+            hazard_dict["skin"] = "Category 1"
+        elif skin2_percentage >= 10:
+            hazard_dict["skin"] = "Category 2"
+        else:
+            hazard_dict["skin"] = "No Hazard"
+            
+                     
+        if eye1_percentage >= 3:
+            hazard_dict["eye"] = "Category 1"
+        elif eye2_percentage >= 10:
+            hazard_dict["eye"] = "Category 2"
+        else:
+            hazard_dict["eye"] = "No Hazard"
+    
+        return hazard_dict
+    
+    
+    #Below I have separate functions for each hazard.  
+    #Each one has to loop through the consolidated_leafs once, where the functions above
+    #    only go through that loop once to compute all hazards
+    
+    def skin_damage_hazard(self):
+        total_weight = 0
+        cat_1_total = 0
+        cat_2_total = 0
+        
+        for leaf in self.consolidated_leafs.iteritems():
+    
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                cat_1_total += weight #total ingredient weight will be 100
+                cat_2_total += weight * 10   #10 * weight/10
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                cat_2_total += weight
+                
+        cat_1_percentage = cat_1_total/(total_weight) * 100
+        cat_2_percentage = cat_2_total/(total_weight) * 100                   
+                
+        for accumulator in hazard_accumulators:
+            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
+            
+        return complete_hazard_dict
+    
+
+    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
+    def get_hazard_dict(self):
+        
+        hazard_dict = {}
+        
+        total_weight = 0
+        
+        #HAZARD CATEGORY TOTALS (for now just do two)
+        #skin damage 
+
+        
+        #the inner function of a closure cannot modify a variable defined in its outer scope  
+        #the only way to get around this is to use a mutable object like a dictionary 
+        skin = {1: 0, 2: 0}
+        
+        #eye damage
+        eye = {1: 0, 2: 0}
+
+        #respiratory damage
+        #blahblah other hazard damage
+               
+         
+        def skin_accumulate(ingredient, weight):
+            
+            #skin hazard requirements
+            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                skin[1] += weight #total ingredient weight will be 100
+                skin[2] += weight * 10   #10 * weight/10  
+                
+            if ingredient.skin_corrosion_hazard == ("2"):
+                skin[2] += weight            
+                
+        def eye_accumulate(ingredient, weight):
+            
+            #eye hazard requirements    
+            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
+                eye[1] += weight
+                eye[2] += weight * 10 #10 * weight / 10
+            if ingredient.eye_damage_hazard == ("2A" or "2B"):
+                eye[2] += weight               
+        
+        for leaf in self.consolidated_leafs.iteritems():
+            
+            ingredient = leaf[0]
+            weight = leaf[1]
+            
+            total_weight += weight
+            
+            skin_accumulate(ingredient, weight)
+            eye_accumulate(ingredient, weight)
+            
+        
+        #skin_hazard(skin1, skin2, total_weight)
+        
+        #Calculate total hazard percentages and determine final categories    
+        
+#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
+#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
+#             they are equivalent, but i think list comprehension is faster?
+        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
+            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
+        
+        if skin1_percentage >= 5:
+            hazard_dict["skin"] = "Category 1"
+        elif skin2_percentage >= 10:
+            hazard_dict["skin"] = "Category 2"
+        else:
+            hazard_dict["skin"] = "No Hazard"
+            
+                     
+        if eye1_percentage >= 3:
+            hazard_dict["eye"] = "Category 1"
+        elif eye2_percentage >= 10:
+            hazard_dict["eye"] = "Category 2"
+        else:
+            hazard_dict["eye"] = "No Hazard"
+    
+        return hazard_dict
+    
+    
+    #Below I have separate functions for each hazard.  
+    #Each one has to loop through the consolidated_leafs once, where the functions above
+    #    only go through that loop once to compute all hazards
     
     def skin_damage_hazard(self):
         total_weight = 0
@@ -3668,13 +4127,51 @@ class FlavorSpecification(models.Model):
 class ReconciledFlavor(models.Model):
     flavor = models.ForeignKey('Flavor')
     reconciled = models.BooleanField(default=False)
-    scraped_data = models.CharField(max_length=1000)
+    scraped_data = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
     reconciled_by = models.ForeignKey(User)
     
     def __unicode__(self):
         return 'Flavor: %s, Reconciled By: %s' % (self.flavor, self.reconciled_by.username)
-    
-    
 
-    
+
+
+
+# def accumulate_hazards(flavor):
+#     
+#     hazards_to_accumulate = ['skin_corrosion_hazard', 'eye_damage_hazard',]
+#     
+#     #The KEYS in this dictionary are in the format 'hazard_category' (eg. 'skin_corrosion_hazard_1A')
+#     #The VALUES are the accumulation of ingredient weights that correspond to each hazard
+#     hazard_dict = {}
+#     
+#     #include the total weight of the flavor in the dict
+#     hazard_dict['total_weight'] = 0
+#     
+#     #initialize all the values to zero
+#     for hazard in hazards_to_accumulate:
+#         for category in Ingredient._meta.get_field(hazard).choices:
+#             if category[0] != 'No':     #category[0] and category[1] are always the same
+#                 hazard_dict[hazard + '_' + category[0]] = 0
+#                 
+#     
+#     #for each base ingredient in the flavor, find any hazards it has and add its weight to each of those
+#     for leaf in flavor.consolidated_leafs.iteritems():
+#         ingredient = leaf[0]
+#         weight = leaf[1]
+#         
+#         hazard_dict['total_weight'] += weight
+#         
+#         for hazard in hazards_to_accumulate:
+#             ingredient_hazard_category = getattr(ingredient, hazard)
+#             if ingredient_hazard_category != '':
+#                 hazard_dict[hazard + '_' + ingredient_hazard_category] += weight
+#                 
+#     return hazard_dict
+                
+        
+
+        
+        
+        
+

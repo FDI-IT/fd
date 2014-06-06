@@ -402,9 +402,11 @@ def populate_renumbers(jils=jil_setify()):
             if v == k:
                 continue
             b = Flavor.objects.get(number=num)
-            if a != b:
-                r = Renumber(a=a,b=b)
-                r.save()
+            r = Renumber(a=a,b=b)
+            r.save()
+    for r in Renumber.objects.all():
+        if r.a == r.b:
+            r.delete()
             
 def lotted_flavors():
     return set(Lot.objects.all().order_by('pk').values_list('flavor',flat=True))

@@ -740,6 +740,9 @@ margin-right:auto;
 	height:10px;
 }
 
+img.scanned_doc_thumbnail {
+	height:100px;
+}
 
 
 h1.status_message {
