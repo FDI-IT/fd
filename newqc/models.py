@@ -108,14 +108,17 @@ class AbstractScannedDoc(models.Model):
         pass
 
     @property
-    def get_related_object(self):
-        return getattr(self, self.related_object_name)
+    def related_object(self):
+        if self.related_object_name is None:
+            return None
+        else:
+            return getattr(self, self.related_object_name)
 
     image_hash = models.CharField(max_length=64)
     large = models.ImageField(upload_to=get_my_large_upload_path)
     thumbnail = models.ImageField(upload_to=get_my_thumbnail_upload_path)
     notes = models.TextField(blank=True, default="")
-    create_time = models.DateTimeField(auto_now_add=True)
+    create_time = models.DateTimeField()
     modified_time = models.DateTimeField(auto_now=True)
     
 class ScannedDoc(models.Model):
