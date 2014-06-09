@@ -35,4 +35,14 @@
     ALTER TABLE newqc_rmtestcard ADD COLUMN modified_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
     ALTER TABLE newqc_generictestcard ADD COLUMN create_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
     ALTER TABLE newqc_generictestcard ADD COLUMN modified_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
-
+    ALTER TABLE "access_integratedproduct" ADD COLUMN oral_ld50 numeric(10,3);
+    ALTER TABLE "access_integratedproduct" ADD COLUMN dermal_ld50 numeric(10,3);
+    ALTER TABLE "access_integratedproduct" ADD COLUMN gases_ld50 numeric(10,3);
+    ALTER TABLE "access_integratedproduct" ADD COLUMN vapors_ld50 numeric(10,3);
+    ALTER TABLE "access_integratedproduct" ADD COLUMN dusts_mists_ld50 numeric(10,3);
+    
+    ALTER TABLE "Raw Materials" ADD COLUMN oral_ld50 numeric(10,3);
+    ALTER TABLE "Raw Materials" ADD COLUMN dermal_ld50 numeric(10,3);
+    ALTER TABLE "Raw Materials" ADD COLUMN gases_ld50 numeric(10,3);
+    ALTER TABLE "Raw Materials" ADD COLUMN vapors_ld50 numeric(10,3);
+    ALTER TABLE "Raw Materials" ADD COLUMN dusts_mists_ld50 numeric(10,3);   
