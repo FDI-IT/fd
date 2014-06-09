@@ -7,8 +7,19 @@ from decimal import Decimal
 
 #from collections import namedtuple
 
+acute_toxicity_list = [('acute_hazard_oral', 2000),
+                       ('acute_hazard_dermal', 2000),
+                       ('acute_hazard_gases', 20000),
+                       ('acute_hazard_vapors', 20.0),
+                       ('acute_hazard_dusts_mists', 5.0)]
 
-hazard_list = ['skin_corrosion_hazard', 
+
+hazard_list = ['acute_hazard_oral',
+               'acute_hazard_dermal',
+               'acute_hazard_gases',
+               'acute_hazard_vapors',
+               'acute_hazard_dusts_mists',               
+               'skin_corrosion_hazard', 
                'eye_damage_hazard', 
                'germ_cell_mutagenicity_hazard', 
                'carcinogenicty_hazard', 
@@ -29,6 +40,10 @@ class HazardAccumulator():
         self.flavor = flavor
         
         self.subhazard_dict = self.flavor.accumulate_hazards()
+                
+        self.total_weight = self.subhazard_dict['total_weight']
+        
+        self.calculate_ld50s()
         
     #Each hazard has a function below which describes the requirements/criteria the ingredients must meet in order for 
     #the flavor to be in a specific hazard category.  
@@ -159,9 +174,154 @@ class HazardAccumulator():
                 return '1'
         else:
             return 'No'
-            
-            
+    
+    @property
+    def aspiration_hazard(self):
+        if self.subhazard_dict['aspiration_hazard_1']/self.total_weight * 100 >= Decimal('10.0'):
+            return '1'
+    
+    #the function 'calculate_ld50s' should be run before these
+    #calculate_ld50s is now in 'init' so they're calculated when the instance is made
+    @property
+    def acute_hazard_oral(self):
+
+        #oral_ld50 = self.flavor.oral_ld50
+        oral_ld50 = self.subhazard_dict['oral_ld50']
         
+        if 0 < oral_ld50 <= 5:
+            return '1'
+        elif 5 < oral_ld50 <= 50:
+            return '2'
+        elif 50 < oral_ld50 <= 300:
+            return '3'
+        elif 300 < oral_ld50 <= 2000:
+            return '4'
+        else:
+            return 'No'
+        
+    @property
+    def acute_hazard_dermal(self):
+        
+        #dermal_ld50 = self.flavor.dermal_ld50
+        dermal_ld50 = self.subhazard_dict['dermal_ld50']
+        
+        save_ld50(self.flavor, 'dermal_ld50', dermal_ld50)
+        
+        if 0 < dermal_ld50 <= 50:
+            return '1'
+        elif 50 < dermal_ld50 <= 200:
+            return '2'
+        elif 200 < dermal_ld50 <= 1000:
+            return '3'
+        elif 1000 < dermal_ld50 <= 2000:
+            return '4'
+        else:
+            return 'No'
+        
+    @property
+    def acute_hazard_gases(self):
+                
+        #gases_ld50 = self.flavor.gases_ld50
+        gases_ld50 = self.subhazard_dict['gases_ld50']
+        
+        if 0 < gases_ld50 <= 100:
+            return '1'
+        elif 100 < gases_ld50 <= 500:
+            return '2'
+        elif 500 < gases_ld50 <= 2500:
+            return '3'
+        elif 2500 < gases_ld50 <= 20000:
+            return '4'
+        else:
+            return 'No'
+        
+    @property
+    def acute_hazard_vapors(self):
+        
+        #vapors_ld50 = self.flavor.vapors_ld50
+        vapors_ld50 = self.subhazard_dict['vapors_ld50']
+        
+        if 0 < vapors_ld50 <= 0.5:
+            return '1'
+        elif 0.5 < vapors_ld50 <= 2.0:
+            return '2'
+        elif 2.0 < vapors_ld50 <= 10.0:
+            return '3'
+        elif 10.0 < vapors_ld50 <= 20.0:
+            return '4'
+        else:
+            return 'No'
+        
+    @property
+    def acute_hazard_dusts_mists(self):
+        
+        #dusts_mists_ld50 = self.flavor.dusts_mists_ld50
+        dusts_mists_ld50 = self.subhazard_dict['dusts_mists_ld50']
+        
+        if 0 < dusts_mists_ld50 <= 0.05:
+            return '1'
+        elif 0.05 < dusts_mists_ld50 <= 0.5:
+            return '2'
+        elif 0.5 < dusts_mists_ld50 <= 1.0:
+            return '3'
+        elif 1.0 < dusts_mists_ld50 <= 5.0:
+            return '4'
+        else:
+            return 'No'
+
+    
+    
+    '''
+    TODO?
+    
+    Regarding the 'except' statement below.  This currently handles two different exceptions.
+    
+    When none of the ingredients are hazardous, the final flavor_ld50 will equal total_weight / 0.
+    I get a ZeroDivisionError and store the flavor_ld50 as None.
+    
+    When all of the ingredients have unknown ld50s, the final flavor_ld50 will equal 0 / 0.
+    I get an InvalidOperation and store the flavor_ld50 as None.
+    
+    So currently, if flavor_ld50 is None, it could mean different things;
+        1. None of the ingredients are hazardous (they are all above the threshold)
+            -The flavor is definitely not hazardous, but ld50 cannot be calculated
+            -Should I store it as a value just above the threshold?
+        2. None of the ingredients are known (they all have NULL/None ld50s)
+            -The ld50 of the flavor is UNKNOWN; this should probably stay None
+            
+    '''
+    
+
+    def calculate_ld50s(self):
+        for acute_hazard, max_ld50 in acute_toxicity_list:
+            
+            unknown_weight_key = acute_hazard.split('acute_hazard_')[1] + '_unknown'
+            
+            try:
+                ld50 = (self.total_weight - self.subhazard_dict[unknown_weight_key])/(self.subhazard_dict[acute_hazard])
+            except:
+                ld50 = None
+            
+            self.subhazard_dict[acute_hazard.split('acute_hazard_')[1] + '_ld50'] = ld50
+    
+    def save_ld50s(self):
+        for acute_hazard, max_ld50 in acute_toxicity_list:
+            
+            ld50_property = acute_hazard.split('acute_hazard_')[1] + '_ld50'
+            
+            save_ld50(self.flavor, ld50_property, Decimal(str(self.subhazard_dict[ld50_property])))
+    
+#     def calculate_and_save_ld50s(self):
+#         for acute_hazard, max_ld50 in acute_toxicity_list:
+#         
+#             try:
+#                 ld50 = 1/(self.subhazard_dict[acute_hazard]/self.total_weight)
+#             except ZeroDivisionError:
+#                 ld50 = max_ld50 + 1
+#             
+#             save_ld50(self.flavor, acute_hazard.split('acute_hazard_')[1] + '_ld50', Decimal(str(ld50)))
+        
+    
     def get_hazard_dict(self):
         
         hazard_dict = {}
@@ -180,186 +340,19 @@ class HazardAccumulator():
             
         self.flavor.save()
         
-
-
-
-#my previous implementation of the hazard calculator.  
-
-# CategoryAndMultiplier = namedtuple('CategoryAndMultiplier', 'final_category multiplier')
-# 
-# def make_hazard_class(hazard_dict):
-#     
-#     """INSERT HIGH-LEVEL DOCUMENTATION HERE!!.
-#     
-#     #. Create a HazardAccumulator class with the dictionary as the argument.
-#     #. Create a function that will accumulate the hazard totals based on the input dictionary.
-#     #. Create a function that returns the final category of the flavor.
-#     #. In the flavor model, create an instance of this class for each hazard and return the final categories for all hazards.
-#             #Might want to change this later since these classes/instances will have to be created each time a flavor's hazards are calculated.
-#     
-#     """
-#     
-#     class HazardAccumulator():
-#         hazard_vars = {}
-#         
-#         #the "categories" key in the input dictionary stores the possible final categories that the flavor might be in.
-#         #hazard_vars is a dictionary where the keys are the possible final categories, and the value is the accumulation associated with each of those categories
-#         #the loop below generates these keys, with a default value of 0 
-#         for cat in hazard_dict["categories"]: 
-#             hazard_vars[cat] = 0
-# 
-#         #this function goes through an ingredient and adds the correct weight to the total accumulation for each final category 
-#         #this means adding to the values in the hazard_vars dictionary created above
-#         def accumulate(self, ingredient, weight):
-#             for ingredient_hazard_property in hazard_dict['requirements']:
-#                 ingredient_hazard_categories = hazard_dict['requirements'][ingredient_hazard_property]
-#                 for category in ingredient_hazard_categories:
-#                     if getattr(ingredient, ingredient_hazard_property) == category:
-#                         accumulate_list = ingredient_hazard_categories[category]
-#                         for cat_and_mult in accumulate_list:
-#                             self.hazard_vars[cat_and_mult.final_category] += weight * cat_and_mult.multiplier
-#                             
-#         #this function takes            
-#         def get_category(self, total_weight):    
-#             for var in self.hazard_vars: #gets variable names
-#                 hazard_percentage = self.hazard_vars[var]/total_weight * 100
-#                 
-#                 if hazard_percentage >= hazard_dict["categories"][var]:
-#                     return var + str(hazard_percentage)
-#                 
-#             return "No Hazard"
-#         
-#         def get_name(self):
-#             return hazard_dict['name']
-#         
-#     return HazardAccumulator
-# 
-# 
-
-
-
+        self.save_ld50s()
+        
+    def recalculate_hazards(self):
+        self.subhazard_dict = self.flavor.accumulate_hazards()
+        self.calculate_ld50s()
         
         
-    
-    
 
-# class BaseHazard():
-# # eye_hazard_dict = {
-# #                    'name': 'Eye Hazard',
-# #                    'categories': {"Category 1": 3, "Category 2": 10},
-# #                    'requirements':
-# #                         {
-# #                          'skin_corrosion_hazard':
-# #                              {
-# #                               "1A": [("Category 1", 1), ("Category 2", 10)],
-# #                               "1B": [("Category 1", 1), ("Category 2", 10)],
-# #                               "1C": [("Category 1", 1), ("Category 2", 10)],
-# #                               },
-# #                          'eye_damage_hazard':
-# #                             {
-# #                              "1": [("Category 1", 1), ("Category 2", 10)],
-# #                              "2A": [("Category 2", 1)],
-# #                              "2B": [("Category 2", 1)],
-# #                              }
-# #                          }
-# #                    }
-#     def accumulate(self, ingredient, weight):
-#         pass
-# 
-#                 
-#     def get_category(self, total_weight):    
-#         for var in self.hazard_vars: #gets variable names
-#             hazard_percentage = self.hazard_vars[var]/total_weight * 100
-#             
-#             if hazard_percentage >= hazard_dict["categories"][var]:
-#                 return var
-#             
-#         return "No Hazard"
-#     
-#     def get_name(self):
-#         return hazard_dict['name']
-#     
-# 
-# class SkinHazard(BaseHazard):
-#     name = "Skin Hazard"
+def save_ld50(flavor, ld50_attr, ld50):
+    setattr(flavor, ld50_attr, ld50)
     
+    flavor.save()
 
-# #SKIN HAZARD REQUIREMENTS AND DICTIONARY
-# skin_reqs = dict.fromkeys(["1A", "1B", "1C"], [CategoryAndMultiplier("Category 1", 1), CategoryAndMultiplier("Category 2", 10)])
-# skin_reqs.update(dict.fromkeys(["2"], [CategoryAndMultiplier("Category 2", 1)]))
-# 
-# skin_hazard_dict = {
-#                     'name': 'Skin Hazard',
-#                     'categories': {"Category 1": 5, "Category 2": 10},
-#                     'requirements': 
-#                         {
-#                          'skin_corrosion_hazard': skin_reqs,
-#                         }
-#                     }
-# 
-# #EYE HAZARD REQUIREMENTS AND DICTIONARY
-# eye_reqs_SKIN = dict.fromkeys(["1A", "1B", "1C"], [CategoryAndMultiplier("Category 1", 1), CategoryAndMultiplier("Category 2", 10)])
-# 
-# eye_reqs_EYE = dict.fromkeys(["1"], [CategoryAndMultiplier("Category 1", 1), CategoryAndMultiplier("Category 2", 10)])
-# eye_reqs_EYE.update(dict.fromkeys(["2A", "2B"], [CategoryAndMultiplier("Category 2", 1)]))
-# 
-# eye_hazard_dict = {
-#                    'name': 'Eye Hazard',
-#                    'categories': {"Category 1": 3, "Category 2": 10},
-#                    'requirements':
-#                         {
-#                          'skin_corrosion_hazard': eye_reqs_SKIN,
-#                          'eye_damage_hazard': eye_reqs_EYE,
-#                          }
-#                    }
-# 
-# #RESPIRATORY/SENSITATION HAZARD REQUIREMENTS AND DICTIONARY
-# respiratory_reqs = dict.fromkeys(["1", "1A", "1B"], [CategoryAndMultiplier("Category 1", 1)])
-# 
-# respiratory_hazard_dict = {
-#                            'name': 'Respiratory Sensitation Hazard',
-#                            'categories': {"Category 1": 0.1},
-#                            'requirements':
-#                                 {
-#                                  'germ_cell_mutagenicity_hazard': respiratory_reqs,
-#                                  }
-#                            }
-# 
-# #GERM MUTAGENICITY HAZARD REQUIREMETNS AND DICTIONARY
-# germ_mutagenicity_reqs = {
-#                           "1A": [CategoryAndMultiplier("Category 1A", 1)],
-#                           "1B": [CategoryAndMultiplier("Category 1B", 1)],
-#                           "2": [CategoryAndMultiplier("Category 2", 1)],
-#                           }
-# 
-# germ_mutagenicity_dict = {
-#                            'name': 'Germ Mutagenicity Hazard',
-#                            'categories': {"Category 1A": 0.1, "Category 1B": 0.1, "Category 2": 1},
-#                            'requirements':
-#                                 {
-#                                  'germ_cell_mutagenicity_hazard': germ_mutagenicity_reqs,
-#                                  }
-#                            }
-
-# Hazard dictionaries without using other dictionaries
-# 
-# skin_hazard_dict = {
-#                     'name': 'Skin Hazard',
-#                     'categories': {"Category 1": 5, "Category 2": 10},
-#                     'requirements': 
-#                         {
-#                          'skin_corrosion_hazard':                      
-#                             {
-#                              #IS THERE A FASTER WAY TO ADD SAME VALUES TO DIFFERENT KEYS??
-#                              #OR SOMEHOW HAVE "1A" or "1B" or "1C" AS A KEY
-#                             "1A": [("Category 1", 1), ("Category 2", 10)],
-#                             "1B": [("Category 1", 1), ("Category 2", 10)],
-#                             "1C": [("Category 1", 1), ("Category 2", 10)],
-#                             "2": [("Category 2", 1)]                             
-#                              },
-#                         }
-#                     }
-# 
 
 
 def ji_function_initialize():
