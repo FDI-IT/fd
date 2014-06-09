@@ -299,7 +299,7 @@ class HazardAccumulator():
             
             try:
                 ld50 = (self.total_weight - self.subhazard_dict[unknown_weight_key])/(self.subhazard_dict[acute_hazard])
-            except:
+            except: #ZeroDivisionError or InvalidOperation
                 ld50 = None
             
             self.subhazard_dict[acute_hazard.split('acute_hazard_')[1] + '_ld50'] = ld50
