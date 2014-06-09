@@ -6,8 +6,11 @@ import subprocess
 import shutil
 import hashlib
 from PIL import Image
+import paramiko
 
 from django.core.files import File
+
+ZBARSERVER_HOSTNAME
 
 """we should try to get this out of this file. 
 documents shouldn't depend on models.
@@ -33,7 +36,7 @@ exc_directory = '/srv/samba/tank/scans/exc/'
 hash_exists_directory = '/srv/samba/tank/scans/old/'
 
 # move will silently overwrite the destination, 
-# so we should rename the file to the hash 
+# so we should rename the fifrom django.conf import settingsle to the hash 
 # so no different files overwrite each other
 def move_exc_image(full_file_path):
     shutil.move(full_file_path, exc_directory)
@@ -137,6 +140,20 @@ class ImportBCDoc():
         
     #@task()
     def scan_for_barcode(self):
+        client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        
+        client.connect(ZBARSERVER_HOSTNAME)
+        
+        initial_command = 'zbarimg -q -Sean13.disable -Sean8.disable -Si25.disable -Scode39.disable -Scode128.disable %s' % self.path 
+        sin, sout, serr = client.exec_command(initial_command)
+        exit_status = client.stdout.channel.recv_exit_status()
+        
+        if exit_status == 0:
+            scan_value_raw = sout.read().strip()
+            scan_value = scan_value_raw.split(':')[1]
+            return (0, scan_value)
+        
         process = subprocess.Popen(
             [
                 '/usr/bin/zbarimg',
@@ -176,7 +193,7 @@ class ImportBCDoc():
                 '-Scode39.disable',
                 '-Scode128.disable',
                 hash_path
-            ], 
+            ],
             shell=False, 
             stdout=subprocess.PIPE)
             process.wait()

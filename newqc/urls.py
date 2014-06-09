@@ -81,4 +81,7 @@ urlpatterns = patterns('newqc.views',
     (r'^receiving_log/$', list_detail.object_list, receiving_log_list_info),
     (r'^receiving_log_print/$', 'receiving_log_print'),
     (r'^add_receiving_log/$', 'add_receiving_log'),
+    
+    (r'^scanned_docs/$', 'scanned_docs'),
+    (r'^scanned_docs/paginate(?P<paginate_by>\d+)/$', 'scanned_docs'),
 )

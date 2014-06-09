@@ -3,6 +3,8 @@ import os
 import sys
 sys.path.append(os.getcwd())
 
+from LOCAL_SECRETS import DATABASES, SECRET_KEY
+
 DEBUG =True 
 TEMPLATE_DEBUG = DEBUG
 
@@ -31,8 +33,6 @@ CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
 LOGIN_URL = '/django/accounts/login/'
 
 MANAGERS = ADMINS
-
-from LOCAL_database_settings import *
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -66,8 +66,6 @@ MEDIA_URL = '/djangomedia/'
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/djangoadminmedia/'
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '=doe#s2k1d0hv+zl9ar*b44rc=(mpl@datvu1h=30h_kg1sclx'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (

@@ -934,7 +934,7 @@ def recalculate_guts(flavor):
     my_leaf_weights = LeafWeight.objects.filter(root_flavor=flavor).select_related()
     
     sulfites = Decimal('0')
-    allergens = {}
+    allergens = set()
     my_prop_65 = False
     my_diacetyl = False
     my_pg = False
@@ -949,7 +949,7 @@ def recalculate_guts(flavor):
         
         for allergen in Ingredient.aller_attrs:
             if getattr(lw.ingredient, allergen):
-                allergens[allergen]=1
+                allergens.add(allergen)
                 
         if lw.ingredient.prop65 == True:
             my_prop_65 = True
@@ -964,20 +964,26 @@ def recalculate_guts(flavor):
     flavor.sulfites_ppm = sulfites.quantize(tenths)
     if sulfites > 10:
         flavor.sulfites = True
-        flavor.sulfites_usage_threshold = ONE_HUNDRED / (sulfites / TEN)    
+        flavor.sulfites_usage_threshold = ONE_HUNDRED / (sulfites / TEN)
     else:
         flavor.sulfites = False
         flavor.sulfites_usage_threshold = 0
-        
-    allergens = allergens.keys()
+    
+    # defaults    
+    flavor.allergen = "None"
+    flavor.ccp2 = False
+    flavor.ccp4 = False
+    
+    # change defaults if needed
     if len(allergens) > 0:
+        if flavor.sulfites == True:
+            allergens.add('sulfites')
         flavor.allergen = "Yes: %s" % ','.join(allergens)
         flavor.ccp2 = True
         flavor.ccp4 = True
-    else:
-        flavor.allergen = "None"
-        flavor.ccp2 = False
-        flavor.ccp4 = False
+    elif flavor.sulfites == True:
+        flavor.allergen = "Yes: sulfites"
+        flavor.ccp4 = True
 
     flavor.prop_65 = my_prop_65
     flavor.diacetyl = not my_diacetyl

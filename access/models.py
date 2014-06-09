@@ -376,43 +376,8 @@ class HazardFields(models.Model):
     
     aspiration_hazard = models.CharField("Aspiration", max_length=50,blank=True,
                                choices=ASPIRATION_CHOICES)
-    
-    #NOT IN PACKET
     asphyxiation_hazard = models.CharField("Simple Asphyxiants", max_length=50,blank=True,
                                choices=ASPHYXIANT_CHOICES)
-
-    """
-    make sure these columns are in both 'access_integratedproduct' and 'Raw Materials'
-    
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_not_specified varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_oral varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_dermal varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_gases varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_vapors varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN acute_hazard_dusts_mists varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN germ_cell_mutagenicity_hazard  varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  carcinogenicty_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  reproductive_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN TOST_single_hazard  varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  TOST_repeat_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  aspiration_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  asphyxiation_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  flammable_liquid_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  flamamble_solid_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  self_reactive_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  emit_flammable_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  oxidizing_liquid_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  oxidizing_solid_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  organic_peroxide_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  metal_corrosifve_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  skin_corrosion_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  eye_damage_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  respiratory_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "access_integratedproduct" ADD COLUMN  skin_sensitization_hazard varchar(50) DEFAULT '' NOT NULL;
-    
-    ALTER TABLE "Raw Materials" ADD COLUMN skin_sensitization_hazard varchar(50) DEFAULT '' NOT NULL;
-
-    """
 
     FLAMMABLE_LIQUID_CHOICES = (
                 ('No','No'),
@@ -1230,10 +1195,6 @@ class FormulaInfo(models.Model):
         abstract = True
 
 class Flavor(FormulaInfo, HazardFields):
-    """
-    ALTER TABLE access_integratedproduct
-    ADD COLUMN keywords text DEFAULT '' NOT NULL; 
-    """
     
     #retains = generic.GenericRelation(Retain)
     id = models.PositiveIntegerField(
@@ -1387,8 +1348,6 @@ class Flavor(FormulaInfo, HazardFields):
                                                  )
                 flavorspec.save()
 
-        
-        
 
         
   
