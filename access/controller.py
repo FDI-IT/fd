@@ -7,6 +7,18 @@ from decimal import Decimal
 
 #from collections import namedtuple
 
+#TEST THIS, STILL NEEDS FIXING
+#hazard_re = re.compile('([\w\s\-]+([(][\w\s\-,]*[)])*[\w\s\-]*),?')
+
+#hazard_re2 = re.compile('([^(,]*(?:(?:\([^)]*\))*[^,]*)*),?')
+
+#THIS ONE ACCOUNTS FOR NEW LINES
+#hazard_re3 = re.compile('([^(,\n]*(?:(?:\([^)]*\))*[^,(\n]*)*)[,\n]?')
+
+#token is the entire token, paren contains the string within the parentheses
+#for token, paren in hazard_re.findall(string):
+#    print token
+
 acute_toxicity_list = [('acute_hazard_oral', 2000),
                        ('acute_hazard_dermal', 2000),
                        ('acute_hazard_gases', 20000),
