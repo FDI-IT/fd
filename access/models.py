@@ -327,21 +327,7 @@ class HazardFields(models.Model):
     gases_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, null=True)
     vapors_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, null=True)
     dusts_mists_ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, null=True)
-    
-    '''
-    ALTER TABLE "access_integratedproduct" ADD COLUMN oral_ld50 numeric(10,3);
-    ALTER TABLE "access_integratedproduct" ADD COLUMN dermal_ld50 numeric(10,3);
-    ALTER TABLE "access_integratedproduct" ADD COLUMN gases_ld50 numeric(10,3);
-    ALTER TABLE "access_integratedproduct" ADD COLUMN vapors_ld50 numeric(10,3);
-    ALTER TABLE "access_integratedproduct" ADD COLUMN dusts_mists_ld50 numeric(10,3);
-    
-    ALTER TABLE "Raw Materials" ADD COLUMN oral_ld50 numeric(10,3);
-    ALTER TABLE "Raw Materials" ADD COLUMN dermal_ld50 numeric(10,3);
-    ALTER TABLE "Raw Materials" ADD COLUMN gases_ld50 numeric(10,3);
-    ALTER TABLE "Raw Materials" ADD COLUMN vapors_ld50 numeric(10,3);
-    ALTER TABLE "Raw Materials" ADD COLUMN dusts_mists_ld50 numeric(10,3);   
-    '''
-    
+
     #NOT IN PACKET
     acute_hazard_not_specified = models.CharField("Acute Toxicity - Type Not Specified", max_length=50,blank=True,
                                choices=ACUTE_TOXICITY_CHOICES)
