@@ -5,6 +5,7 @@ import os
 import subprocess
 import shutil
 import hashlib
+import zbar
 from PIL import Image
 
 from django.core.files import File
