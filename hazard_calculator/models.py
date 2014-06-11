@@ -69,17 +69,17 @@ class HazardFields(models.Model):
     ASPHYXIANT_CHOICES = (
         ('No','No'),
         ('Single Category','Single Category'),)
-#     ACUTE_AQUATIC_TOXICITY_CHOICES = (
-#         ('No','No'),
-#         ('1','1'),
-#         ('2','2'),
-#         ('3','3'))          
-#     CHRONIC_AQUATIC_TOXICITY_CHOICES = (
-#         ('No','No'),
-#         ('1','1'),
-#         ('2','2'),
-#         ('3','3'),
-#         ('4','4'))       
+    ACUTE_AQUATIC_TOXICITY_CHOICES = (
+        ('No','No'),
+        ('1','1'),
+        ('2','2'),
+        ('3','3'))          
+    CHRONIC_AQUATIC_TOXICITY_CHOICES = (
+        ('No','No'),
+        ('1','1'),
+        ('2','2'),
+        ('3','3'),
+        ('4','4'))       
             
     
     
@@ -139,11 +139,11 @@ class HazardFields(models.Model):
     
     #NOT IN PACKET
     #CONGRESS SAID WE DONT NEED THESE!
-#     acute_aquatic_toxicity_hazard = models.CharField("Acute Aquatic Toxicity", max_length=50, blank=True,
-#                                             choices=ACUTE_AQUATIC_TOXICITY_CHOICES)
-#     chronic_aquatic_toxicity_hazard = models.CharField("Chronic Aquatic Toxicity", max_length=50, blank=True,
-#                                               choices=CHRONIC_AQUATIC_TOXICITY_CHOICES)
-#     
+    acute_aquatic_toxicity_hazard = models.CharField("Acute Aquatic Toxicity", max_length=50, blank=True,
+                                            choices=ACUTE_AQUATIC_TOXICITY_CHOICES)
+    chronic_aquatic_toxicity_hazard = models.CharField("Chronic Aquatic Toxicity", max_length=50, blank=True,
+                                              choices=CHRONIC_AQUATIC_TOXICITY_CHOICES)
+     
     
     aspiration_hazard = models.CharField("Aspiration", max_length=50,blank=True,
                                choices=ASPIRATION_CHOICES)
@@ -214,21 +214,29 @@ class HazardFields(models.Model):
                                choices=CORROSIVE_TO_METAL_CHOICES)
     
 #Since both Flavor and Ingredient models will have the same hazard fields, they can inherit them from this class
-class ChemicalHazardFields(models.Model):
+class GHSIngredient(HazardFields):
 
-        
-    class Meta:
-        db_table = 'Raw Materials'
+    #can't figure out a way to use this
+    #just save same data in two tables for now
+#     class Meta:
+#         managed = False
+#         db_table = 'Raw Materials'
 
-        
-    rawmaterialcode = models.PositiveIntegerField(
-            primary_key=True,
-            db_column='RawMaterialCode',
-            blank=True,)    
-        
+    # This is the formula identifier. there may be multiple but only one active
+#     id = models.PositiveIntegerField("PIN", 
+#                                      db_column='ProductID',)
+#                                      #default=get_next_rawmaterialcode)
+
     cas = models.CharField(
             max_length=15,
             blank=True)
+
+#     rawmaterialcode = models.PositiveIntegerField(
+#             primary_key=True,
+#             db_column='RawMaterialCode',
+#             blank=True,)    
+        
+
     
     
     

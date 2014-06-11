@@ -6,11 +6,11 @@ import subprocess
 import shutil
 import hashlib
 from PIL import Image
-import paramiko
+#import paramiko
 
 from django.core.files import File
 
-ZBARSERVER_HOSTNAME
+#ZBARSERVER_HOSTNAME
 
 """we should try to get this out of this file. 
 documents shouldn't depend on models.

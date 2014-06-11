@@ -19,7 +19,7 @@ from access.controller import hazard_list, acute_toxicity_list
 #from access.controller import make_hazard_class, skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict
 
 
-from hazard_calculator.models import HazardFields, ChemicalHazardFields
+from hazard_calculator.models import HazardFields, GHSIngredient
 
 from pluggable.sets import AncestorSet
 
@@ -257,7 +257,7 @@ class Formula(models.Model):
 
 
 
-class Ingredient(ChemicalHazardFields):
+class Ingredient(models.Model):
     """Raw materials for use in production.
     
     The unique indentifier for this table is 'rawmaterialcode'.
@@ -265,10 +265,10 @@ class Ingredient(ChemicalHazardFields):
     productid; this represents equivalent raw materials from alternate
     suppliers.
     """
-    # This is the formula identifier. there may be multiple but only one active
-    id = models.PositiveIntegerField("PIN", 
-                                     db_column='ProductID',
-                                     default=get_next_rawmaterialcode)
+
+    cas = models.CharField(
+            max_length=15,
+            blank=True)
     rawmaterialcode = models.PositiveIntegerField(
             primary_key=True,
             db_column='RawMaterialCode',
