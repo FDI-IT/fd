@@ -6,11 +6,8 @@ import subprocess
 import shutil
 import hashlib
 from PIL import Image
-import paramiko
 
 from django.core.files import File
-
-ZBARSERVER_HOSTNAME
 
 """we should try to get this out of this file. 
 documents shouldn't depend on models.
@@ -23,6 +20,11 @@ type_map = {
     'RM':(RMRetain, RMTestCard),
     'BATCHSHEET_LOT':(Lot, BatchSheet),
 }
+
+scanner = zbar.ImageScanner()
+# configure the reader
+scanner.parse_config('enable')
+
 
 def my_hash(my_path):
     with open(my_path,'r') as my_file:
@@ -79,6 +81,8 @@ class ImportBCDoc():
             # maybe by inspecting the returned object from within tasks
             return
         
+        self.image = Image.open(path)
+        
         # get the return code of zbarimg, and the value
         bc_returncode, bc_value = self.scan_for_barcode()
         
@@ -125,12 +129,11 @@ class ImportBCDoc():
         return
 
     def generate_thumbnail(self):
-        large = Image.open(self.path,)
-        width, height = large.size
+        width, height = self.image.size
         if width > height:
-            tn = large.resize((490,380), Image.ANTIALIAS)
+            tn = self.image.resize((490,380), Image.ANTIALIAS)
         else:
-            tn = large.resize((380,490), Image.ANTIALIAS)
+            tn = self.image.resize((380,490), Image.ANTIALIAS)
         tn_path = os.path.join(
                 '/tmp',
                 '%s-tn.png' % self.hash)
@@ -138,75 +141,10 @@ class ImportBCDoc():
         thumbnail_file = File(open(tn_path,'r'))
         return thumbnail_file
         
-    #@task()
-    def scan_for_barcode(self):
-        client = paramiko.SSHClient()
-        client.load_system_host_keys()
-        
-        client.connect(ZBARSERVER_HOSTNAME)
-        
-        initial_command = 'zbarimg -q -Sean13.disable -Sean8.disable -Si25.disable -Scode39.disable -Scode128.disable %s' % self.path 
-        sin, sout, serr = client.exec_command(initial_command)
-        exit_status = client.stdout.channel.recv_exit_status()
-        
-        if exit_status == 0:
-            scan_value_raw = sout.read().strip()
-            scan_value = scan_value_raw.split(':')[1]
-            return (0, scan_value)
-        
-        process = subprocess.Popen(
-            [
-                '/usr/bin/zbarimg',
-                '-q', 
-                '-Sean13.disable',
-                '-Sean8.disable',
-                '-Si25.disable',
-                '-Scode39.disable',
-                '-Scode128.disable',
-                self.path,
-            ], 
-            shell=False, 
-            stdout=subprocess.PIPE)
-        process.wait()
-        if process.returncode != 0:
-            hash_path = '/tmp/%s.jpg' % self.hash
-            process = subprocess.Popen(
-                [
-                    '/usr/bin/convert',
-                    '-quiet',
-                    '-blur',
-                    '2',
-                    '-black-threshold',
-                    '70%',
-                    self.path,
-                    hash_path,
-                ],
-            )
-            process.wait()
-            process = subprocess.Popen(
-            [
-                '/usr/bin/zbarimg',
-                '-q', 
-                '-Sean13.disable',
-                '-Sean8.disable',
-                '-Si25.disable',
-                '-Scode39.disable',
-                '-Scode128.disable',
-                hash_path
-            ],
-            shell=False, 
-            stdout=subprocess.PIPE)
-            process.wait()
-            if process.returncode != 0:
-                return (process.returncode, process.communicate()[0])
-            # TODO
-            # Error handling code here
-            #  -crop 500x500+1950x500
-            # -blur 2
-            # -black-threshold 70%
-        try:
-            scan_value_raw = process.communicate()[0]
-            scan_value = scan_value_raw.split(':')[1]
-            return (0, scan_value)
-        except Exception as e:
-            return (0, process.communicate()[0])
+    def python_scan(self, path):
+        converted_image = self.image.convert('L')
+        width, height = converted_image.size
+        raw = converted_image.tostring()
+        scanned_image = zbar.Image(width, height, 'Y800', raw)
+        scanner.scan(scanned_image)
+        return scanned_image
