@@ -7,6 +7,18 @@ from decimal import Decimal
 
 #from collections import namedtuple
 
+#TEST THIS, STILL NEEDS FIXING
+#hazard_re = re.compile('([\w\s\-]+([(][\w\s\-,]*[)])*[\w\s\-]*),?')
+
+#hazard_re2 = re.compile('([^(,]*(?:(?:\([^)]*\))*[^,]*)*),?')
+
+#THIS ONE ACCOUNTS FOR NEW LINES
+#hazard_re3 = re.compile('([^(,\n]*(?:(?:\([^)]*\))*[^,(\n]*)*)[,\n]?')
+
+#token is the entire token, paren contains the string within the parentheses
+#for token, paren in hazard_re.findall(string):
+#    print token
+
 acute_toxicity_list = [('acute_hazard_oral', 2000),
                        ('acute_hazard_dermal', 2000),
                        ('acute_hazard_gases', 20000),
@@ -299,7 +311,7 @@ class HazardAccumulator():
             
             try:
                 ld50 = (self.total_weight - self.subhazard_dict[unknown_weight_key])/(self.subhazard_dict[acute_hazard])
-            except:
+            except: #ZeroDivisionError or InvalidOperation
                 ld50 = None
             
             self.subhazard_dict[acute_hazard.split('acute_hazard_')[1] + '_ld50'] = ld50
