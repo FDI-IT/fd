@@ -21,7 +21,7 @@ from django.core.urlresolvers import reverse
 
 from reversion import revision
 
-from access.controller import reconcile_flavor, reconcile_update, discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors
+from access.controller import reconcile_flavor, reconcile_update, discontinue_ingredient, activate_ingredient
 #from access.formatter import formulatree_to_jsinfovis
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
@@ -644,7 +644,7 @@ def ingredient_activate(request, raw_material_code=False, ingredient_id=False):
                                             
                 updated_flavors = update_prices_and_get_updated_flavors(old_active_ingredient, new_active_ingredient)
                 
-                revision.comment = "Old Active Ingredient: %s, New Active Ingredient: %s" % (old_ingredient.name, new_ingredient.name)
+                revision.comment = "Old Active Ingredient: %s, New Active Ingredient: %s" % (old_active_ingredient.name, new_active_ingredient.name)
 
             
         else: #if all ingredients were previously discontinued, activate the single ingredient

@@ -212,29 +212,38 @@ class HazardFields(models.Model):
                                choices=ORGANIC_PEROXIDE_CHOICES)
     metal_corrosifve_hazard = models.CharField("Corrosive to Metals", max_length=50,blank=True,
                                choices=CORROSIVE_TO_METAL_CHOICES)
+
+
+class HazardousChemical(HazardFields):
+
+    class Meta:
+        abstract=True
+        
+    cas = models.CharField(
+        max_length=15,
+        blank=True)
+    
     
 #Since both Flavor and Ingredient models will have the same hazard fields, they can inherit them from this class
-class GHSIngredient(HazardFields):
+class GHSIngredient(HazardousChemical):
 
     #can't figure out a way to use this
     #just save same data in two tables for now
-#     class Meta:
-#         managed = False
-#         db_table = 'Raw Materials'
+    class Meta:
+        managed = False
+        db_table = 'Raw Materials'
 
     # This is the formula identifier. there may be multiple but only one active
 #     id = models.PositiveIntegerField("PIN", 
 #                                      db_column='ProductID',)
 #                                      #default=get_next_rawmaterialcode)
 
-    cas = models.CharField(
-            max_length=15,
-            blank=True)
 
-#     rawmaterialcode = models.PositiveIntegerField(
-#             primary_key=True,
-#             db_column='RawMaterialCode',
-#             blank=True,)    
+
+    rawmaterialcode = models.PositiveIntegerField(
+            primary_key=True,
+            db_column='RawMaterialCode',
+            blank=True,)    
         
 
     

@@ -1,6 +1,29 @@
 import xlrd  # @UnresolvedImport
 import re
 
+#use regular expressions to match tokens with expected hazards
+
+
+#LD50 RE: covers ATI, ATO, and ATD; returns category and ld50
+#examples: ATI 5(300), ATO 3(300), ATI 4(3350 ppm), 
+
+#NEED TO ALSO RETURN THE HAZARD (HOW WILL YOU KNOW IF IT'S INHALATION/ORAL/DERMAL??)
+ld50_re = re.compile('AT([IOD])[^\d]*(\d)[^(\d]*\([^\d]*([\d]+)[^)]*')
+
+#the above will match '#anything ATI #anything (digit) #anything ( #anything digits #anything )
+
+
+
+        
+        
+#EH RE: covers EH A and EH C; returns chronic/acute and category
+
+#in the re below, there must be ONE SPACE between 'EH' and either 'A' or 'C' and no space between A/C and the category
+eh_re = re.compile('EH ([AC])(\d)')
+
+
+
+
 #this file defines the main function of this application
 #it takes the path to the labels file, calculates the hazards, execute the callback function if it is defined,
 #and return a dictionary of calculated hazards
@@ -68,26 +91,11 @@ def parse_hazards(path_to_labels):
         #input is a token
         #output tells us what parser we should use on the token
         
-        #use regular expressions to match tokens with expected hazards
-        
-        
-        #LD50 RE: covers ATI, ATO, and ATD; returns category and ld50
-        #examples: ATI 5(300), ATO 3(300), ATI 4(3350 ppm), 
-        
-        #NEED TO ALSO RETURN THE HAZARD (HOW WILL YOU KNOW IF IT'S INHALATION/ORAL/DERMAL??)
-        ld50_re = re.compile('AT([IOD])[^\d]*(\d)[^(\d]*\([^\d]*([\d]+)[^)]*')
-        
-        #the above will match '#anything ATI #anything (digit) #anything ( #anything digits #anything )
 
         if ld50_re.search(token):
             return ['ld50_hazard', ld50_re.findall(token)[0]]
         
-        
-        
-        #EH RE: covers EH A and EH C; returns chronic/acute and category
-        
-        #in the re below, there must be ONE SPACE between 'EH' and either 'A' or 'C' and no space between A/C and the category
-        eh_re = re.compile('EH ([AC])(\d)')
+
         
         if eh_re.search(token):
             if eh_re.findall(token)[0][0] == 'A':
