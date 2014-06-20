@@ -48,7 +48,9 @@ class CIPM(models.Model):
     comments = models.TextField(blank=True)
     
     class Meta:
-        verbose_name = "Continuous Improvement and Preventative Maintenance"
+        #verbose_name = "Continuous Improvement and Preventative Maintenance" #THIS FIELD IS >50 CHARS TOO LONG FOR AUTH_PERMISSION NAME FIELD
+                                                                                #CHECK POSTGRES LOGS
+        verbose_name = "CIPM" #changed this for now, for some reason still checks for 50 chars even though i changed the 'name' field to varchar(100)
         verbose_name_plural = "CIPMs"
         
     def __unicode__(self):

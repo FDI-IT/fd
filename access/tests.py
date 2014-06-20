@@ -5,37 +5,64 @@ from django.test.client import Client
 from access.models import Flavor
 from access.controller import HazardAccumulator
 
-class FlavorTest(TestCase):
-    fixtures = ['access.json']
-    
-    
-#     from access.models import Flavor
+# class FlavorTest(TestCase):
+#     fixtures = ['access.json']
 #     
-#     test_count = Flavor.objects.all().count()
-#     print test_count
-# 
-#     def setUp(self):
-#         self.client = Client()
-#         self.count = Flavor.objects.count()
-#         self.test_flavor = Flavor.objects.get(number=8851)
+#     
+# #     from access.models import Flavor
+# #     
+# #     test_count = Flavor.objects.all().count()
+# #     print test_count
+# # 
+# #     def setUp(self):
+# #         self.client = Client()
+# #         self.count = Flavor.objects.count()
+# #         self.test_flavor = Flavor.objects.get(number=8851)
+# #         
+# #     def test_f(self):
+# #         self.assertEqual(self.test_flavor.number,8851)
+# #         self.assertEqual(self.test_flavor.leaf_weights.all().count(), 20)
+# #     
+# #     def test_count(self):
+# #         self.assertEqual(self.count, 40) #WTF 0
+# #     
+# #     def test_review(self):
+# #         response = self.client.get('/access/8851/', follow=True)
+# #         self.assertEqual(response.status_code, 200)
+# #         self.assertEqual(response.context['flavor'], self.test_flavor)   
 #         
-#     def test_f(self):
-#         self.assertEqual(self.test_flavor.number,8851)
-#         self.assertEqual(self.test_flavor.leaf_weights.all().count(), 20)
-#     
-#     def test_count(self):
-#         self.assertEqual(self.count, 40) #WTF 0
-#     
-#     def test_review(self):
-#         response = self.client.get('/access/8851/', follow=True)
-#         self.assertEqual(response.status_code, 200)
-#         self.assertEqual(response.context['flavor'], self.test_flavor)   
         
+
+'''
+IMPORTANT:
+-ALWAYS prefix individual tests with 'test_'
+-When testing http responses, make sure to always add a trailing slash to the url being tested
+
+'''
+
+        
+class HttpResponseTest(TestCase):
+    #fixtures = ['access.json'] this json file is outdated and using it will result in an error 
+                                    #FieldDoesNotExist: ExperimentalLog has no field named u'flavor_coat'
+
+     
+    def test_flavorview(self):
+#         response = self.client.post('/accounts/login/', {'username': 'matta', 'password': 'fdi'})
+#         self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/access/') #works
+        self.assertEqual(response.status_code, 200)
+        
+        response = self.client.post('/mysearch/?search_space=flavor&search_string=')    #works
+        self.assertEqual(response.status_code, 200)
+        
+#         response = self.client.post('/mysearch/?search_space=flavor&search_string=')    #does not work
+#         self.assertEqual(response.status_code, 200)
         
         
 #MIXTURE EXAMPLE 1 - from GHS packet   
 class HazardTest1(TestCase):
-    fixtures = ['testdata2.json']
+    fixtures = ['testdata.json']
     
     def setUp(self):
         self.count = Flavor.objects.count()

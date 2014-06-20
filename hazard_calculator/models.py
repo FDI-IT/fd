@@ -138,7 +138,7 @@ class HazardFields(models.Model):
     
     
     #NOT IN PACKET
-    #CONGRESS SAID WE DONT NEED THESE!
+    #CONGRESS SAID WE DONT NEED THESE! #record them in ingredients but don't calculate them for flavors
     acute_aquatic_toxicity_hazard = models.CharField("Acute Aquatic Toxicity", max_length=50, blank=True,
                                             choices=ACUTE_AQUATIC_TOXICITY_CHOICES)
     chronic_aquatic_toxicity_hazard = models.CharField("Chronic Aquatic Toxicity", max_length=50, blank=True,

@@ -128,56 +128,6 @@ def parse_hazards(path_to_labels):
 
    
     
-# def parse_hazards(path_to_labels):
-#     
-#     
-#     labels = xlrd.open_workbook(path_to_labels)
-#     
-#     #pseudocode
-#     
-#     token_dict = {
-#                   ''
-#                   
-#                   
-#                   }
-#     
-#     def ld50_hazard(token):
-#         #determine hazard from token characters
-#         #find ld50 from token
-#         
-#         #save hazard and ld50 to GHSIngredient - need cas number to do that
-#         pass
-#     
-#     hazard_re = re.compile('([^(,\n]*(?:(?:\([^)]*\))*[^,(\n]*)*)[,\n]?')
-#     
-# #     token_list = set()
-#     sheet = labels.sheets()[0]
-#     
-# #     for row in range(sheet.rows):
-# #         contents = sheet.cell(row, 3).value
-# #         for token in hazard_re.findall(contents):
-# #             token_list.add(token)
-#     
-#     ingredient_tokens = {}
-#     
-#     for row in range(sheet.rows):
-#         
-#         cas_number = sheet.cell(row, 0).value
-#         ingredient_tokens[cas_number] = []
-#         
-#         contents = sheet.cell(row, 3).value
-#         
-#         ingredient_tokens[cas_number] = hazard_re.findall(contents)
-#         
-# #         for token in hazard_re.findall(contents):
-# #             ingredient_tokens[cas_number].append(token)
-#     
-#     
-#     dictionary = {
-#                   'ld50_hazard':'AT[IOD][^\d]*(\d)[^(\d]*\([^\d]*([\d]+)[^)]*',
-#                   }
-#     
-    
 re_dict = {
                 ld50_re:
                     {
@@ -209,11 +159,6 @@ re_dict = {
           }
 
 def parse_token(token):
-    #input is a token
-    #output tells us what parser we should use on the token
-    
-    #or maybe the output should just be the hazard, category etc.
-    #why not just do the additional parsing in here
     
     '''
     input: a token
@@ -233,8 +178,10 @@ def parse_token(token):
     
     First option: This is the 'less redundant' implementation, which uses the dictionary 're_dict' above.
     
-    Once again, it is not very verbose, hard to understand, and uses a confusing data structure...
-                
+    It can be hard to understand and uses a confusing data structure...
+    
+    for re in re_dict:
+               
     
     '''
     
