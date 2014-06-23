@@ -316,7 +316,7 @@ class Ingredient(HazardousChemical):
     discontinued = models.BooleanField(
             db_column='Discontinued',
             blank=True)
-    experimental = models.BooleanField(blank=True)
+    experimental = models.BooleanField(blank=True) #AKDJFLKJADLFDAFLADFAFKDADFDAfkj
     unitprice = models.DecimalField(
             decimal_places=3,
             max_digits=10,

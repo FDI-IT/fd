@@ -45,12 +45,20 @@ class HttpResponseTest(TestCase):
     #fixtures = ['access.json'] this json file is outdated and using it will result in an error 
                                     #FieldDoesNotExist: ExperimentalLog has no field named u'flavor_coat'
 
+    
+    fixtures = ['testdata.json']
      
     def test_flavorview(self):
 #         response = self.client.post('/accounts/login/', {'username': 'matta', 'password': 'fdi'})
 #         self.assertEqual(response.status_code, 200)
 
         response = self.client.post('/access/') #works
+        self.assertEqual(response.status_code, 200)
+        
+        response = self.client.post('/access/1000/') 
+        
+        print response.has_header('location')
+        
         self.assertEqual(response.status_code, 200)
         
         response = self.client.post('/mysearch/?search_space=flavor&search_string=')    #works
