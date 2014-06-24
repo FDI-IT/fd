@@ -1,4 +1,5 @@
 from datetime import date
+import os,errno
 import tempfile, shlex, subprocess, codecs
 import csv
 from decimal import Decimal
@@ -12,6 +13,15 @@ from access.models import Ingredient, Flavor, ExperimentalLog
 from pluggable.unicode_to_ascii import unicode_to_ascii
 
 hundredths = Decimal('0.00')
+
+LABEL_PATH = "/var/www/django/dump/labels/"
+try:
+    os.makedirs(LABEL_PATH)
+except OSError as e:
+    if e.errno == errno.EEXIST and os.path.isdir(LABEL_PATH):
+        pass
+    else:
+        raise
 
 def label_data_to_csv(label_data):
     ascii_data = []
@@ -51,7 +61,7 @@ def rm_sample_label(receiving_log):
     label_data.append(u"%s" % (receiving_log.date))
     label_data_to_csv(label_data)
     output_file = "/var/www/django/dump/labels/label.pdf"
-    command_line = "glabels-batch -o %s -i %s %s" % (output_file,
+    command_line = "glabels-3-batch -o %s -i %s %s" % (output_file,
                                                      "/var/www/django/dump/labels/label.csv",
                                                      template_path)
     args = shlex.split(command_line)
@@ -79,7 +89,7 @@ def solution_label(request):
     
     output_file = "/var/www/django/dump/labels/label.pdf"
     
-    command_line = "glabels-batch -o %s -i %s %s" % (output_file,
+    command_line = "glabels-3-batch -o %s -i %s %s" % (output_file,
                                                      "/var/www/django/dump/labels/label.csv",
                                                      template_path)
     args = shlex.split(command_line)
@@ -115,7 +125,7 @@ def rm_label(number):
     
     output_file = "/var/www/django/dump/labels/label.pdf"
     
-    command_line = "glabels-batch -o %s -i %s %s" % (output_file,
+    command_line = "glabels-3-batch -o %s -i %s %s" % (output_file,
                                                     "/var/www/django/dump/labels/label.csv",
                                                      template_path)
     args = shlex.split(command_line)
@@ -151,7 +161,7 @@ def finished_product_label(number):
     
     output_file = "/var/www/django/dump/labels/label.pdf"
     
-    command_line = "glabels-batch -o %s -i %s %s" % (output_file,
+    command_line = "glabels-3-batch -o %s -i %s %s" % (output_file,
                                                      "/var/www/django/dump/labels/label.csv",
                                                      template_path)
     args = shlex.split(command_line)
@@ -186,7 +196,7 @@ def experimental_label(number):
     label_data_to_csv(label_data)
     output_file = "/var/www/django/dump/labels/label.pdf"
     
-    command_line = "glabels-batch -o %s -i %s %s" % (output_file,
+    command_line = "glabels-3-batch -o %s -i %s %s" % (output_file,
                                                      "/var/www/django/dump/labels/label.csv",
                                                      template_path)
     args = shlex.split(command_line)
