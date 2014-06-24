@@ -14,8 +14,8 @@ from django.core.files import File
 documents shouldn't depend on models.
 it should be the other way around.
 """
-from newqc.models import Retain, RMRetain, Lot, TestCard, RMTestCard, BatchSheet, GenericTestCard
-DocumentTypes = (TestCard, RMTestCard, GenericTestCard, BatchSheet)
+from newqc.models import Retain, RMRetain, Lot, TestCard, RMTestCard, BatchSheet
+DocumentTypes = (TestCard, RMTestCard, BatchSheet)
 type_map = {
     'RETAIN':(Retain, TestCard),
     'RM':(RMRetain, RMTestCard),
@@ -121,13 +121,13 @@ class ImportBCDoc():
                 'image_hash':self.hash,
                 'large':File(open(self.path,'r')),
             }
-            
-    def save_as_generic_document(self, document_create_kwargs):
-        self.tc = GenericTestCard(
-                **document_create_kwargs
-            )
-        self.tc.save()
-        return
+#             
+#     def save_as_generic_document(self, document_create_kwargs):
+#         self.tc = GenericTestCard(
+#                 **document_create_kwargs
+#             )
+#         self.tc.save()
+#         return
 
     def generate_thumbnail(self):
         width, height = self.image.size

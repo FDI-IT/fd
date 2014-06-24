@@ -99,20 +99,22 @@
 		<th title="Select Box">Select</th>
 		<th>Image</th>
 		<th>Scan Time</th>
-		<th>Doc Object</th>
+		<th>Doc Link</th>
 		<th>Doc Status</th>
-		<th>Object Status</th>
+		<th>Doc Notes</th>
+		<th>Related Status</th>
 	</tr>
 	{% for scanned_doc in object_list %}
 	    <tr>
 	    <td>
 			<input type="checkbox" name="scanned_doc_pks" value="{{scanned_doc.pk}}"{% if checkall %}checked{% endif %}>
 		</td>
-	    <td><a href="/djangomedia/{{scanned_doc.content_object.large}}"><img class="scanned_doc_thumbnail" src="/djangomedia/{{scanned_doc.content_object.thumbnail}}"></a></td>
-	    <td>{{scanned_doc.content_object.create_time}}</td>	
-	    <td><a href="{{scanned_doc.content_object.get_related_object.get_absolute_url}}">{{ scanned_doc.content_type }}: {{ scanned_doc.content_object }}</a></td>
-	    <td>{{scanned_doc.content_object.status}}</td>
-	    <td>{{scanned_doc.content_object.get_related_object.status}}</td>
+	    <td><a href="/djangomedia/{{scanned_doc.large}}"><img class="scanned_doc_thumbnail" src="/djangomedia/{{scanned_doc.thumbnail}}"></a></td>
+	    <td>{{scanned_doc.scan_time}}</td>	
+	    <td><a href="{{scanned_doc.doc_link}}">{{ scanned_doc.subclass_object_repr }}</a></td>
+	    <td>{{scanned_doc.related_object.status}}</td>
+	    <td>{{scanned_doc.notes}}</td>
+	    <td>{{scanned_doc.related_object.status}}</td>
 	    </tr>
 	{% endfor %}
     </table>
