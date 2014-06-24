@@ -1,5 +1,7 @@
 from django.conf.urls.defaults import *
 
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 from django.contrib import databrowse
@@ -54,6 +56,8 @@ urlpatterns = patterns('',
     (r'^export/', include ('export.urls')),
     (r'^reports/', include ('reports.urls')),
 )
+
+urlpatterns += staticfiles_urlpatterns()
 
 from access.models import Flavor, Ingredient, ExperimentalLog, Formula
 

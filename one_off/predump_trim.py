@@ -1,6 +1,10 @@
 from access.models import *
 from newqc.models import *
 from solutionfixer.models import *
+from unified_adapter.models import *
+from reversion.models import *
+from haccp.models import *
+from salesorders.models import *
 from django.db.models import Avg, Max, Min, Count
 
 complex_flavors = set(
@@ -92,7 +96,57 @@ def delete_jilist():
     for j in JIList.objects.all():
         print j
         j.delete()
-        
+     
+def delete_unified_adapter_models():
+    for pi in ProductInfo.objects.all():
+        pi.delete()     
+
+
+#keep only the most recent 10 lots per flavor
+def trim_lots():
+    for fl in Flavor.objects.all():
+        for lot in fl.lot_set.all()[10:]:
+            print "Deleting lot %s" % lot
+            lot.delete()
+
+#only keep 10 digitized formula per experimental log
+def trim_digitizedformulas():
+    for el in ExperimentalLog.objects.all():
+        for df in el.digitizedformula_set.all()[10:]:
+            df.delete()
+            
+#delete all salesordernumbers with no line items
+def trim_salesordernumbers():
+    for son in SalesOrderNumber.objects.all():
+        if son.lineitem_set.count() == 0:
+            son.delete()
+            
+#delete all customers who don't have any salesorders
+def trim_customers():
+    for c in Customer.objects.all():
+        if c.salesordernumber_set.count() == 0:
+            c.delete()
+
+#this deletes all retains that have foreign keys to importretains as well
+def delete_importretains():
+    ImportRetain.objects.all().delete()
+    
+#this deletes all rmretains that have foreign keys to rmimportretains
+def delete_rmimportretains():
+    RMImportRetain.objects.all().delete()
+    
+def delete_revisions():
+    Revision.objects.all().delete()
+    
+def delete_legacypurchases():
+    LegacyPurchase.objects.all().delete()
+    
+def delete_receivinglogs():
+    ReceivingLog.objects.all().delete()
+
+def delete_watertests():
+    WaterTest.objects.all().delete()
+
 def trim_database():
     most_made_flavors = find_most_made_flavors()
     save_flavors = add_some_invalid_flavors(most_made_flavors)
@@ -105,6 +159,19 @@ def trim_database():
     trim_purchase_orders()
 
     JIList.objects.all().delete()
+    
+    #if you want to keep any of the stuff below (for testing purposes) just comment them out
+    delete_importretains()
+    delete_rmimportretains()
+    delete_legacypurchases()
+    delete_revisions()
+    delete_receivinglogs()
+    delete_watertests()
 
+    trim_lots()
+    trim_digitizedformulas()
+    trim_salesordernumbers()
+    trim_customers()
+    
 if __name__ == "__main__":
     trim_database()

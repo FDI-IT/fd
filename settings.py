@@ -52,15 +52,43 @@ SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 # to load the internationalization machinery.
 USE_I18N = True
 
+
+
+
+'''
+added all this stuff so static files are deployed when using runserver/testserver
+i don't know if this interferes with all the 'media' stuff
+
+to create a test server: python manage.py testserver access/fixtures/testdata.json --addrport 0.0.0.0:8000
+
+'''
+STATIC_ROOT = ''
+STATIC_URL = '/djangomedia/'
+STATICFILES_DIRS = ('/var/www/django/fd/staticmedia',)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.contrib.auth.context_processors.auth',
+    'django.contrib.messages.context_processors.messages',
+) 
+
+
+
+
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/media/djangomedia/media/'
+MEDIA_ROOT = '/var/www/django/fd/staticmedia/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/djangomedia/'
 #MEDIA_URL = 'http://localhost:8000/djangomedia/'
+#MEDIA_URL = '/staticmedia/'
+
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".

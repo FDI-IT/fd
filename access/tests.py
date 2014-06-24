@@ -45,28 +45,37 @@ class HttpResponseTest(TestCase):
     #fixtures = ['access.json'] this json file is outdated and using it will result in an error 
                                     #FieldDoesNotExist: ExperimentalLog has no field named u'flavor_coat'
 
-    
-    fixtures = ['testdata.json']
+    fixtures = ['testdb.json']
+     
+    def setUp(self):
+        self.client = Client()
+        self.flavor = Flavor.objects.get(number=8851)
+     
      
     def test_flavorview(self):
-#         response = self.client.post('/accounts/login/', {'username': 'matta', 'password': 'fdi'})
-#         self.assertEqual(response.status_code, 200)
+        
+        #test /access/
+        response = self.client.post('/access/') 
+        self.assertEqual(response.status_code, 200)
 
-        response = self.client.post('/access/') #works
+        
+        #test /access/9999, make sure that non-existent flavors throw a 404
+        response = self.client.get('/access/9999/')
+        self.assertEqual(response.status_code, 404)
+        
+        #test /access/1000
+        response = self.client.get('/access/8851/') 
         self.assertEqual(response.status_code, 200)
         
-        response = self.client.post('/access/1000/') 
+        #check that there is a 'flavor' key in context
+        self.assertTrue('flavor' in response.context)
         
-        print response.has_header('location')
+        #make sure the flavor has number 1000
+        self.assertEqual(response.context['flavor'].number, 8851)
+
+
         
-        self.assertEqual(response.status_code, 200)
-        
-        response = self.client.post('/mysearch/?search_space=flavor&search_string=')    #works
-        self.assertEqual(response.status_code, 200)
-        
-#         response = self.client.post('/mysearch/?search_space=flavor&search_string=')    #does not work
-#         self.assertEqual(response.status_code, 200)
-        
+       
         
 #MIXTURE EXAMPLE 1 - from GHS packet   
 class HazardTest1(TestCase):
