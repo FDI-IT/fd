@@ -9,9 +9,9 @@
 
     <div id="content-right">
 		<ul>
-			<li><a href="/django/qc/receiving_log/">Latest</a></li>
+			<li><a href="/qc/receiving_log/">Latest</a></li>
 		{% for month in month_list %}
-			<li><a href="/django/qc/receiving_log/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+			<li><a href="/qc/receiving_log/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
 		{% endfor %}
 		</ul>
 	</div>
@@ -32,7 +32,7 @@
 	    </span>
 	</div>
 	
-    <form name="receiving_log_selections" action="/django/qc/receiving_log_print/" method="post">
+    <form name="receiving_log_selections" action="/qc/receiving_log_print/" method="post">
     <table class="sorttable" class="receiving_logtable" width="100%">
     <caption><a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a></caption>	
 	<tr class="qcheaders">

@@ -41,7 +41,7 @@ class SalesOrderNumber(models.Model):
         return None
     
     def get_absolute_url(self):
-        return '/django/salesorders/%s' % self.number
+        return '/salesorders/%s' % self.number
 
     headers = (
                     ('number','Number', 'width="80px"'),
@@ -53,7 +53,7 @@ class SalesOrderNumber(models.Model):
         ordering = ["-number"]
     
     def get_url(self):
-        return "/django/salesorder/%s/" % self.id
+        return "/salesorder/%s/" % self.id
         
     def __unicode__(self):
         return u"%s - %s %s" % (self.number, 

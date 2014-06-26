@@ -2,7 +2,7 @@ var TSRLI_ENTRY = {};
 
 /*
 function update_poli_row(row) {
-	jQuery.get('/django/access/process_cell_update/', 
+	jQuery.get('/access/process_cell_update/', 
 		{number: row.find('.pin-cell input').val(), amount: row.find('.quantity-cell input').val()},
 		function (data) {
 			row.children('.name-cell').html(data.name).end().children('.price-cell').html(data.cost);
@@ -32,7 +32,7 @@ TSRLI_ENTRY.update_all_rows = function() {
 };
 
 TSRLI_ENTRY.update_tsrli_row = function(row) {
-	jQuery.get('/django/access/process_tsrli_update/',
+	jQuery.get('/access/process_tsrli_update/',
 		{type: row.find(':checked').val(), number: row.find('.code-cell input').val()},
 		function (data) {
 			row.children('.name-cell').html(data.name).end();
@@ -64,7 +64,7 @@ jQuery(document).ready(function(){
 		
 		/*
 		$this.autocomplete({
-			source: '/django/access/ingredient_autocomplete',
+			source: '/access/ingredient_autocomplete',
 			minLength: 1,
 			select: function( event, ui ) {
 				// ui.item.value is the item of interest

@@ -300,7 +300,7 @@ class ExperimentalLog(models.Model):
         super(ExperimentalLog, self).save(*args, **kwargs)
     
     def get_absolute_url(self):
-        return '/django/access/experimental/%s/' % self.experimentalnum
+        return '/access/experimental/%s/' % self.experimentalnum
     
 
     @staticmethod
@@ -326,14 +326,14 @@ class ExperimentalLog(models.Model):
         related_links = []
         if self.flavor:
             related_links.append(
-                ('/django/access/%s/' % self.flavor.number, 'Flavor Formula')
+                ('/access/%s/' % self.flavor.number, 'Flavor Formula')
             )
-        related_links.append(('/django/access/experimental/%s/' % self.experimentalnum,'Experimental'))
+        related_links.append(('/access/experimental/%s/' % self.experimentalnum,'Experimental'))
             
         return related_links
 
     def get_admin_url(self):
-        return "/django/admin/access/experimentallog/%s" % self.id
+        return "/admin/access/experimentallog/%s" % self.id
 
     import_order = 3
     

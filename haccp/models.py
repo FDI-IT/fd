@@ -57,7 +57,7 @@ class CIPM(models.Model):
         return "%s -- %s" % (self.date.date(), self.description[:50])
     
     def url(self):
-        return '/django/haccp/cipm/%s/' % self.pk
+        return '/haccp/cipm/%s/' % self.pk
 
 class WaterTest(models.Model):
     test_date = models.DateField()

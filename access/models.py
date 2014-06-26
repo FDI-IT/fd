@@ -496,7 +496,7 @@ class Ingredient(HazardousChemical):
     
     @property
     def url(self):
-        return "/django/access/ingredient/pin_review/%s/" % self.id
+        return "/access/ingredient/pin_review/%s/" % self.id
     
     @property
     def info_slice(self):
@@ -508,9 +508,9 @@ class Ingredient(HazardousChemical):
     
     def get_absolute_url(self):
         if self.discontinued == False:
-            return "/django/access/ingredient/pin_review/%s/" % self.id
+            return "/access/ingredient/pin_review/%s/" % self.id
         else:
-            return "/django/access/ingredient/%s/" % self.rawmaterialcode
+            return "/access/ingredient/%s/" % self.rawmaterialcode
 
     @staticmethod
     def build_kwargs(qdict, default, get_filter_kwargs):
@@ -729,14 +729,14 @@ class Ingredient(HazardousChemical):
         related_links = []
         if self.sub_flavor:
             related_links.append(
-                ('/django/access/%s/' % self.id, 'Flavor Formula')
+                ('/access/%s/' % self.id, 'Flavor Formula')
             )
         
         if self.is_solution_related():
             related_links.append(
-                ('/django/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions')
+                ('/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions')
             )
-        related_links.append(('/django/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'))
+        related_links.append(('/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'))
         return related_links
 
     def resembles(self, ingredient):
@@ -842,10 +842,10 @@ class Ingredient(HazardousChemical):
             return self.id
     
     def get_admin_url(self):
-        return "/django/admin/access/ingredient/%s" % self.rawmaterialcode
+        return "/admin/access/ingredient/%s" % self.rawmaterialcode
     
     def get_review_url(self):
-        return "/django/access/ingredient/pin_review/%s/" % self.id
+        return "/access/ingredient/pin_review/%s/" % self.id
 
     def get_branch(self):
         # this is where the Explode? field would be checke
@@ -1163,7 +1163,7 @@ class Flavor(FormulaInfo, HazardFields):
 #    
     @property
     def url(self):
-        return "/django/access/%s/" % self.number
+        return "/access/%s/" % self.number
     
     @property
     def reconciled(self):
@@ -1235,16 +1235,16 @@ class Flavor(FormulaInfo, HazardFields):
         return "%s %s %s" % (self.natart, self.name, self.label_type)
     
     def get_admin_url(self):
-        return "/django/admin/access/flavor/%s" % self.id
+        return "/admin/access/flavor/%s" % self.id
         
     def get_absolute_url(self):
-        return "/django/access/%s/" % self.number
+        return "/access/%s/" % self.number
     
     def get_specs_url(self):
-        return "/django/access/%s/spec_list" % self.number
+        return "/access/%s/spec_list" % self.number
     
     def get_reconcile_specs_url(self):
-        return "/django/access/%s/reconcile_specs" % self.number
+        return "/access/%s/reconcile_specs" % self.number
     
     @staticmethod
     def get_absolute_url_from_softkey(softkey):
@@ -1333,29 +1333,29 @@ class Flavor(FormulaInfo, HazardFields):
     def get_related_links(self):
         related_links = [
                        ('#flat_review_table','Formula'),
-                       ('/django/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
-                       ('/django/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
-                       ('/django/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
-                       ('/django/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
-                       ('/django/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
-                       ('/django/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
-                       ('/django/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
+                       ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
+                       ('/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
+                       ('/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
+                       ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
+                       ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
+                       ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
+                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
                        ]
         if self.retain_superset().count()>0:
-            related_links.append(('/django/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
-            related_links.append(('/django/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
+            related_links.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
+            related_links.append(('/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
 
         try:
             self.experimentallog
-            related_links.append(('/django/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
+            related_links.append(('/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
         except:
             pass
         try:
             rmr = self.raw_material_record
             if rmr:
-                related_links.append(('/django/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
+                related_links.append(('/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
                 if Formula.objects.filter(ingredient=rmr).count() > 0:
-                    related_links.append(('/django/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
+                    related_links.append(('/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
         except:
             pass
 
@@ -1368,14 +1368,14 @@ class Flavor(FormulaInfo, HazardFields):
         for i in range(len(tokens)):
             try:
                 Flavor.objects.get(number=tokens[i])
-                tokens[i] = '<a href="/django/access/%s/">%s</a>' % (tokens[i], tokens[i])
+                tokens[i] = '<a href="/access/%s/">%s</a>' % (tokens[i], tokens[i])
             except:
                 pass
         return ''.join(tokens)
     
     @property
     def naive_linked_memo(self):
-        return re.sub('(\d{3,})', r'<a href="/django/access/\1/">\1</a>', self.productmemo)
+        return re.sub('(\d{3,})', r'<a href="/access/\1/">\1</a>', self.productmemo)
     
     @property
     def allergen_list(self):
@@ -2916,7 +2916,7 @@ class ExperimentalLog(models.Model):
         if self.flavor.approved==True:
             return None
         elif self.flavor.valid == True:
-            return "/django/access/experimental/%s/approve/" % self.experimentalnum
+            return "/access/experimental/%s/approve/" % self.experimentalnum
         else:
             return None
     
@@ -2947,7 +2947,7 @@ class ExperimentalLog(models.Model):
         super(ExperimentalLog, self).save(*args, **kwargs)
     
     def get_absolute_url(self):
-        return '/django/access/experimental/%s/' % self.experimentalnum
+        return '/access/experimental/%s/' % self.experimentalnum
     
 
     @staticmethod
@@ -3000,14 +3000,14 @@ class ExperimentalLog(models.Model):
         related_links = []
         if self.product_number != None and self.product_number != 0:
             related_links.append(
-                ('/django/access/%s/' % self.product_number, 'Flavor Formula')
+                ('/access/%s/' % self.product_number, 'Flavor Formula')
             )
-        related_links.append(('/django/access/experimental/%s/' % self.experimentalnum,'Experimental'))
+        related_links.append(('/access/experimental/%s/' % self.experimentalnum,'Experimental'))
             
         return related_links
 
     def get_admin_url(self):
-        return "/django/admin/access/experimentallog/%s" % self.id
+        return "/admin/access/experimentallog/%s" % self.id
 
     import_order = 3
     
@@ -3568,11 +3568,11 @@ class TSR(models.Model):
         return "%s - %s - %s" % (self.number, self.customer, str(self.date_in))    
     
     def get_related_links(self):
-        related_links = [('/django/access/tsr/%s/tsr_entry/' % self.number, 'Edit Items')]
+        related_links = [('/access/tsr/%s/tsr_entry/' % self.number, 'Edit Items')]
         return related_links
     
     def get_absolute_url(self):
-        return "/django/access/tsr/%s/" % self.number
+        return "/access/tsr/%s/" % self.number
 
     @staticmethod
     def get_object_from_softkey(softkey):
@@ -3656,11 +3656,11 @@ class PurchaseOrder(models.Model):
         ordering=['-date_ordered']
         
     def get_related_links(self):
-        related_links = [('/django/access/purchase/%s/po_entry/' % self.number, 'Edit Items')]
+        related_links = [('/access/purchase/%s/po_entry/' % self.number, 'Edit Items')]
         return related_links
 
     def get_absolute_url(self):
-        return "/django/access/purchase/%s/" % self.number
+        return "/access/purchase/%s/" % self.number
 
     @staticmethod
     def get_absolute_url_from_softkey(softkey):

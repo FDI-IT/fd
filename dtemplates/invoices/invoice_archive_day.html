@@ -31,7 +31,7 @@
 	{% for line_item in queryset %}
 	<tr>
 		<td>{{line_item.invoice.number}}</td>
-		<td><a href="/django/access/{{line_item.flavor.number}}/">{{line_item.flavor}}</a></td>
+		<td><a href="/access/{{line_item.flavor.number}}/">{{line_item.flavor}}</a></td>
 		<td>{{line_item.quantity}}</td>
 		<td>${{line_item.rawmaterialcost|floatformat:2}}</td>
 		<td>${{line_item.quantity_cost|floatformat:2}}</td>

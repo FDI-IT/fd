@@ -6,13 +6,13 @@
 	{{ year }}
 		<ul>
 		{% for status in status_list %}
-			<li><a href="/django/qc/lots/{{ status }}/">{{ status }}</a></li>
+			<li><a href="/qc/lots/{{ status }}/">{{ status }}</a></li>
 		{% endfor %}
 		</ul>
 		<ul>
-			<li><a href="/django/qc/lots/">Latest</a></li>
+			<li><a href="/qc/lots/">Latest</a></li>
 		{% for month in date_list %}
-			<li><a href="/django/qc/lots/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+			<li><a href="/qc/lots/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
 		{% endfor %}
 		</ul>
 </div>
@@ -47,7 +47,7 @@
 	    <td>{{ game.week }}</td>
 		<td>{{ game.game_date|date:"D" }}</td>
 		<td>{{ game.game_date|date:"F d" }}</td>
-		<td><a href="/django/fdileague/games/{{game.pk}}/">boxscore</a></td>
+		<td><a href="/fdileague/games/{{game.pk}}/">boxscore</a></td>
 		<td>{{ game.away_team.full_name }}</td>
 		<td>{{ game.home_team.full_name }}</td>
 	    </tr>

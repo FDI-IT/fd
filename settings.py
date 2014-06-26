@@ -30,7 +30,7 @@ ADMINS = (
 
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
 
-LOGIN_URL = '/django/accounts/login/'
+LOGIN_URL = '/accounts/login/'
 
 MANAGERS = ADMINS
 

@@ -19,7 +19,7 @@ function resizeIframe(obj) {
 	<ul>
 	
 		{% for so_number, url in lss_list %}
-			<li><a href="/django/salesorders/{{ so_number }}/">{{ so_number }}</a> - <a href="{{ url }}"> View COA </a></li>
+			<li><a href="/salesorders/{{ so_number }}/">{{ so_number }}</a> - <a href="{{ url }}"> View COA </a></li>
 		{% endfor %}
 	</ul>
 
@@ -50,11 +50,11 @@ function resizeIframe(obj) {
 	{% endfor %}
 	
 	
-	<h3> <a href="/django/qc/lots/{{ lot.pk }}/test_results/"> Edit Test Results </a></h3>
+	<h3> <a href="/qc/lots/{{ lot.pk }}/test_results/"> Edit Test Results </a></h3>
 	
-	<h3> <a href="/django/qc/lots/{{ lot.pk }}/update/true"> Update to Current Specs </a></h3>
+	<h3> <a href="/qc/lots/{{ lot.pk }}/update/true"> Update to Current Specs </a></h3>
 	
-	<h3> <a href="/django/qc/lots/{{ lot.pk }}/update/database"> Update Database Values </a></h3>
+	<h3> <a href="/qc/lots/{{ lot.pk }}/update/database"> Update Database Values </a></h3>
 </div>
 
 
@@ -69,7 +69,7 @@ function resizeIframe(obj) {
 		<input type="hidden" name="productinfo_pk" value="{{ lot.flavor.productinfo.pk }}">
 	</div>
 	-->
-	<iframe width="1100px" height="600px" src="/django/batchsheet/{{ lot.pk }}/" style="transform:translate(-150px,-70px) scale(0.7);" onload='javascript:resizeIframe(this);'></iframe>
+	<iframe width="1100px" height="600px" src="/batchsheet/{{ lot.pk }}/" style="transform:translate(-150px,-70px) scale(0.7);" onload='javascript:resizeIframe(this);'></iframe>
 	<div class="float-container">
 		{% for retain in lot.retain_set.all %}
 		<div id="retain__{{retain.pk}}" class="parent_object_detail float-container">

@@ -41,7 +41,7 @@
 	        		{% if pagination_count == count %}
 	        			<b>{{ count }}</b>
 	        		{% else %}
-	        			<a href="/django/qc/scanned_docs/paginate{{count}}"> {{count}} </a>
+	        			<a href="/qc/scanned_docs/paginate{{count}}"> {{count}} </a>
 	        		{% endif %}
 	        	{% endfor %}
 	        </div>
@@ -91,7 +91,7 @@
 	</script>
 	-->
 	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
-	<form onsubmit="return validate()" id="form" name="lot_selections" method="post" action="/django/batchsheet/batchsheet_batch_print/" >
+	<form onsubmit="return validate()" id="form" name="lot_selections" method="post" action="/batchsheet/batchsheet_batch_print/" >
 	    {% csrf_token %}
 	
     <table class="sorttable" width="100%">

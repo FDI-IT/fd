@@ -2,7 +2,7 @@ jQuery(document).ready(function() {
 	var progress_steps = jQuery('#progress-steps li');
 	var i = 0;
 	var process_next_card = function(){
-		jQuery.post('/django/qc/analyze_scanned_cards/', 
+		jQuery.post('/qc/analyze_scanned_cards/', 
 			[null], 
 			function(data){
 				jQuery(progress_steps[i]).removeClass('active').addClass('complete');

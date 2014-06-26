@@ -14,7 +14,7 @@
 	
 	{% for scorer in score_list.1 %}
 	    <tr>
-		<td><a href="/django/fdileague/players/{{scorer.pk}}/">{{ scorer }}</a></td>
+		<td><a href="/fdileague/players/{{scorer.pk}}/">{{ scorer }}</a></td>
 		<td>{{ scorer.yearscore__score__sum }}</td>
 		<td>{{ scorer.best_year }}</td>
 	    </tr>

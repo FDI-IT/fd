@@ -9,9 +9,9 @@
 
     <div id="content-right">
 		<ul>
-			<li><a href="/django/qc/rm_retains/">Latest</a></li>
+			<li><a href="/qc/rm_retains/">Latest</a></li>
 		{% for month in month_list %}
-			<li><a href="/django/qc/rm_retains/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+			<li><a href="/qc/rm_retains/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
 		{% endfor %}
 		</ul>
 	</div>
@@ -32,7 +32,7 @@
 	    </span>
 	</div>
 	
-    <form name="retain_selections" action="/django/qc/batch_print/" method="post">
+    <form name="retain_selections" action="/qc/batch_print/" method="post">
     <table class="sorttable" class="retaintable" width="100%">
     <caption><a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a></caption>	
 	<tr class="qcheaders">
@@ -53,13 +53,13 @@
 			<td>
 			<a href="{{ retain.get_admin_url }}">{{ retain.r_number }}</a>
 			</td>
-		<td><a href="/django/access/ingredient/pin_review/{{ retain.pin }}/">{{ retain.pin }}</a></td>
+		<td><a href="/access/ingredient/pin_review/{{ retain.pin }}/">{{ retain.pin }}</a></td>
 		<td>{{ retain.related_ingredient.art_nati }}</td>
 		<td>{{ retain.related_ingredient.prefixed_name }}</td>
-		<td><a href="/django/qc/rm_retains/supplier/{{retain.supplier}}/">{{ retain.supplier }}</a></td>
+		<td><a href="/qc/rm_retains/supplier/{{retain.supplier}}/">{{ retain.supplier }}</a></td>
 		<td>{{ retain.lot }}</td>
-		<td><a href="/django/qc/rm_retains/{{retain.date|date:'Y'}}/{{retain.date|date:'m'}}/{{retain.date|date:'d'}}/">{{ retain.date|date:"Y-m-d" }}</a></td>
-		<td><a href="/django/qc/rm_retains/{{retain.status}}/">{{ retain.status }}</a></td>
+		<td><a href="/qc/rm_retains/{{retain.date|date:'Y'}}/{{retain.date|date:'m'}}/{{retain.date|date:'d'}}/">{{ retain.date|date:"Y-m-d" }}</a></td>
+		<td><a href="/qc/rm_retains/{{retain.status}}/">{{ retain.status }}</a></td>
 		{% if retain.rmtestcard_set.all.count > 0 %}
 			<td class="tc_present cell_icon"><img src="/djangomedia/images/Icons/16x16/accept.png">
 		{% else %}

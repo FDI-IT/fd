@@ -133,7 +133,7 @@ FORMULA_EDIT.add_all_error_messages = function() {
 };
 
 FORMULA_EDIT.filter_single_row = function(row) {
-	jQuery.get('/django/access/process_filter_update/',
+	jQuery.get('/access/process_filter_update/',
 		{
 			pks: FORMULA_EDIT.pks,
 			checked_boxes: FORMULA_EDIT.checked_boxes,
@@ -159,7 +159,7 @@ FORMULA_EDIT.filter_single_row = function(row) {
 };
 
 FORMULA_EDIT.filter_all_rows = function() {
-	jQuery.get('/django/access/process_filter_update/',
+	jQuery.get('/access/process_filter_update/',
 		{
 			pks: FORMULA_EDIT.pks,
 			checked_boxes: FORMULA_EDIT.checked_boxes,
@@ -246,7 +246,7 @@ FORMULA_EDIT.filter_update_row = function(row) {
 FORMULA_EDIT.update_formula_row = function(row) {
 	clearTimeout(FORMULA_EDIT.t);	
 	
-	jQuery.get('/django/access/process_cell_update/', 
+	jQuery.get('/access/process_cell_update/', 
 		{
 		    number: row.find('.number-cell input').val(), 
 		    amount: row.find('.amount-cell input').val()
@@ -367,7 +367,7 @@ jQuery(document).ready(function(){
 		var row = $this.closest("tr");
 		//FORMULA_EDIT.update_formula_row(row);
 		$this.autocomplete({
-			source: '/django/access/ingredient_autocomplete',
+			source: '/access/ingredient_autocomplete',
 			minLength: 1,
 			select: function( event, ui ) {
 				// ui.item.value is the item of interest

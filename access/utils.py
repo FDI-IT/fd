@@ -529,7 +529,7 @@ class MemoAnalyzer():
         pass
     
     def analyze_flavor(self, f):
-        return re.sub('(\d{3,})', r'<a href="/django/access/\1/">\1</a>', f.productmemo)
+        return re.sub('(\d{3,})', r'<a href="/access/\1/">\1</a>', f.productmemo)
         
         
 def renumber_finder():

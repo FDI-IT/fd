@@ -34,7 +34,7 @@ jQuery(document).ready(function(){
 		console.log(rm_code);
 		
 		
-		window.location.href = "/django/access/ingredient/activate/" + rm_code + "/";
+		window.location.href = "/access/ingredient/activate/" + rm_code + "/";
 	});
 
 });

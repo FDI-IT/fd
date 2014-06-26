@@ -43,7 +43,7 @@ def upload_report(request):
         form = SalesOrderReportFileForm(request.POST, request.FILES)
         if form.is_valid():
             parse_orders(request.FILES['file'])
-        return HttpResponseRedirect('/django/salesorders/')
+        return HttpResponseRedirect('/salesorders/')
     else:
         form = SalesOrderReportFileForm()
     return render_to_response('salesorders/upload_report.html', 
@@ -376,10 +376,10 @@ def delete_customer_spec(request, customer_pk, flavor_number, spec_id):
 #                             
 #                 
 # #                 except:
-# #                     return HttpResponseRedirect("/django/salesorder/customer/{{ customer.id }}/customer_specs/{{ flavor.number }}/FOOBARERROR")
+# #                     return HttpResponseRedirect("/salesorder/customer/{{ customer.id }}/customer_specs/{{ flavor.number }}/FOOBARERROR")
 # 
 #             
-#             redirect_url="/django/salesorders/customer/%s/customer_specs/%s" % (customer.id, flavor.number)
+#             redirect_url="/salesorders/customer/%s/customer_specs/%s" % (customer.id, flavor.number)
 #             return HttpResponseRedirect(redirect_url)
 #         
 #         #if formset is not valid

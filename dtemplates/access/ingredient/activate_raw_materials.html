@@ -46,8 +46,8 @@
 				<tr class="active">
 				{% endif %} -->
 				<tr align="center">
-					<td><a href="/django/access/{{ flavor.number }}/">{{ flavor.number }}</a></td>
-					<!-- <td><a href="/django/access/ingredient/{{ ingredient.rawmaterialcode }}/">{{ ingredient.rawmaterialcode }}</a></td> -->
+					<td><a href="/access/{{ flavor.number }}/">{{ flavor.number }}</a></td>
+					<!-- <td><a href="/access/ingredient/{{ ingredient.rawmaterialcode }}/">{{ ingredient.rawmaterialcode }}</a></td> -->
 					<td>{{ weight }}</td>
 					<td>{{ old_price }}</td>
 					<td>{{ new_price }}</td>
@@ -56,7 +56,7 @@
 			{% endfor %}
 			</tbody>
 		</table>	
-		<a href="/django/access/ingredient/pin_review/{{ activated_ingredient.id }}/"> Back to Ingredient Review Page </a>
+		<a href="/access/ingredient/pin_review/{{ activated_ingredient.id }}/"> Back to Ingredient Review Page </a>
 		<!-- <button id="update-submit-button" type="button"> Update Raw Materials </button>
 		BLAHBLAHBLHA -->
 	</div>

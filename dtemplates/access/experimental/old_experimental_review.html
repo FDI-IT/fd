@@ -6,7 +6,7 @@
 
 <div id="content-main">
 <div id="title-left">
-	<span id="name">{{experimental}} -- <a href="/django/access/experimental/{{experimental.experimentalnum}}/edit/">edit</a></span>
+	<span id="name">{{experimental}} -- <a href="/access/experimental/{{experimental.experimentalnum}}/edit/">edit</a></span>
 </div>
 
 {% if status_message %}
@@ -17,7 +17,7 @@
 <div class="product-memo"><span class="label">Mixing Instructions</span>{{ experimental.mixing_instructions }}</div>
 
 <p>
-	<form action="/django/access/experimental/{{experimental.experimentalnum}}/add_formula/" method="POST">
+	<form action="/access/experimental/{{experimental.experimentalnum}}/add_formula/" method="POST">
 	<input type="submit" value="Add Formula">
 	</form>
 </p>

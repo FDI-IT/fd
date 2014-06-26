@@ -22,12 +22,12 @@ def validate_flavor_number(num):
 
 def validate_lot_number(num):
 #     if Lot.objects.filter(number = num).exists() == False:
-#         raise ValidationError(mark_safe("<a href='/django/qc/lots/'>Please enter a valid lot number."))
+#         raise ValidationError(mark_safe("<a href='/qc/lots/'>Please enter a valid lot number."))
     if num.isdigit() == False:
         raise ValidationError("Lot number must be an integer.")
 #     if Lot.objects.filter(number = num).count() > 0:
 #         num = str(num)
-#         raise ValidationError(mark_safe("<a href='/django/admin/newqc/lot/?q=%s'>A lot with this number already exists." % escape(num)))
+#         raise ValidationError(mark_safe("<a href='/admin/newqc/lot/?q=%s'>A lot with this number already exists." % escape(num)))
 
         
 class FlavorNumberField(forms.IntegerField):
@@ -61,11 +61,11 @@ class NewLotForm(forms.Form):
                 lot_pk = lot.pk
 
                 if new_amount == lot.amount:
-                    raise ValidationError(mark_safe("<a href='/django/access/%s/#ui-tabs-6' style='color: #330066'> This lot already exists with the same flavor and amount. </a>" % escape(str(flavor_number))))
+                    raise ValidationError(mark_safe("<a href='/access/%s/#ui-tabs-6' style='color: #330066'> This lot already exists with the same flavor and amount. </a>" % escape(str(flavor_number))))
                 elif lot.flavor.number == flavor_number:
-                    raise ValidationError(mark_safe("This lot/flavor combination already exists. <a href='/django/batchsheet/update_lots/%s/%s' style='color: #330066'>Update Lot</a>" % (escape(str(lot_pk)), escape(str(new_amount)))))
+                    raise ValidationError(mark_safe("This lot/flavor combination already exists. <a href='/batchsheet/update_lots/%s/%s' style='color: #330066'>Update Lot</a>" % (escape(str(lot_pk)), escape(str(new_amount)))))
                 else:
-                    raise ValidationError(mark_safe("There already exists a lot corresponding to a different flavor. <a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/django/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))
+                    raise ValidationError(mark_safe("There already exists a lot corresponding to a different flavor. <a href='/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))
 
         
         return cleaned_data
@@ -88,14 +88,14 @@ class UpdateLotForm(forms.Form):
                 lot = Lot.objects.get(number = lot_number)
                 lot_pk = lot.pk
             except:
-                raise ValidationError(mark_safe("<a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Invalid lot number." % escape(str(flavor_number))))
+                raise ValidationError(mark_safe("<a href='/access/%s/#ui-tabs-6' style='color: #330066'>Invalid lot number." % escape(str(flavor_number))))
             
             if lot.flavor.number != flavor_number:
-                raise ValidationError(mark_safe("There already exists a lot corresponding to a different flavor. <a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/django/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))                      
+                raise ValidationError(mark_safe("There already exists a lot corresponding to a different flavor. <a href='/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))                      
             elif lot.status != ('Created' or 'Batchsheet Printed'):
                 raise ValidationError("This lot has status %s and cannot be updated." % lot.status)
             elif new_amount == lot.amount:
-                raise ValidationError(mark_safe("<a href='/django/access/%s/#ui-tabs-6' style='color: #330066'> This lot already exists with the same flavor and amount. </a>" % escape(str(flavor_number))))
+                raise ValidationError(mark_safe("<a href='/access/%s/#ui-tabs-6' style='color: #330066'> This lot already exists with the same flavor and amount. </a>" % escape(str(flavor_number))))
                 
             
         return cleaned_data            

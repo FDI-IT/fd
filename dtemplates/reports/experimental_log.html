@@ -9,7 +9,7 @@
 <div id="content-solo">
 <div class="hideable">
 	<a id="showhidetoggle" href="#" onclick="toggle_visible();">Show search options</a>
-	<form action="/django/reports/experimental_log/" method="get">
+	<form action="/reports/experimental_log/" method="get">
 		<div id="advanced-search" class="hidden">
 		{{filterselect.as_p}}
 		{{date_range_form.as_p}}
@@ -19,7 +19,7 @@
 </div>
 <div id="object-list">
 	<h3>Details</h3>
-	<form action="/django/reports/experimental_log_exclude/" method="post">
+	<form action="/reports/experimental_log_exclude/" method="post">
 	<table id="reports_experimental_log_details">
 		<thead>
 			<tr>
@@ -51,7 +51,7 @@
 				<td><input type="checkbox" name="experimental_log_pks" value="{{ experimental_log.pk }}"></td>
 			{% endif %}
 				<td><a href="{{experimental_log.get_absolute_url}}">{{experimental_log.experimentalnum}}</a></td>
-				<td><a href="/django/mysearch/?search_space=experimental&search_string=&initials={{experimental_log.initials}}">{{ experimental_log.initials }}</a></td>
+				<td><a href="/mysearch/?search_space=experimental&search_string=&initials={{experimental_log.initials}}">{{ experimental_log.initials }}</a></td>
 				<td>{{experimental_log.natart}}</td>
 				<td>{{experimental_log.table_name}}</td>
 				<td>{{experimental_log.datesent|date:"m-Y"}}</td>

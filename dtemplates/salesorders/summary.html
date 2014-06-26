@@ -37,7 +37,7 @@
 		{% if forloop.last %}
 			<td>
 			{% for subsub in sub %}
-				<a href="/django/access/{{ subsub.flavor.number }}/">{{ subsub }}</a>;
+				<a href="/access/{{ subsub.flavor.number }}/">{{ subsub }}</a>;
 			{% endfor %}
 			</td>
 		{% else %}

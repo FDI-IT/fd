@@ -16,8 +16,8 @@
 		{% for obj in queryset %}
 		
 		<tr>
-			<td><a href="/django/lab/experimentals_by_customer/{{obj.customer}}/">{{ obj.customer }}</a></td>
-			<td><a href="/django/lab/experimentals_by_customer/{{obj.customer}}/">{{ obj.customer__count }}</a></td>
+			<td><a href="/lab/experimentals_by_customer/{{obj.customer}}/">{{ obj.customer }}</a></td>
+			<td><a href="/lab/experimentals_by_customer/{{obj.customer}}/">{{ obj.customer__count }}</a></td>
 		</tr>
 		</a>
 		{% endfor %}

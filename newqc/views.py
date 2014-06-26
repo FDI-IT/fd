@@ -93,7 +93,7 @@ retain_list_info =  {
         'page_title': 'QC Retains',
         'print_link': 'javascript:document.forms["retain_selections"].submit()',
         'month_list': retain_month_list,
-        'admin_link': "/django/admin/newqc/retain/",
+        'admin_link': "/admin/newqc/retain/",
         'status_list': retain_status_list,
     }, **STATUS_BUTTONS),
 }
@@ -104,7 +104,7 @@ rm_retain_list_info =  {
         'page_title': 'RM Retains',
         'print_link': 'javascript:document.forms["retain_selections"].submit()',
         'month_list': rm_retain_month_list,
-        'admin_link': "/django/admin/newqc/rmretain/",
+        'admin_link': "/admin/newqc/rmretain/",
     }, **STATUS_BUTTONS),
 }
 
@@ -114,7 +114,7 @@ receiving_log_list_info = {
     'extra_context': dict({
         'page_title': 'Receiving Log',
         'month_list': receiving_log_month_list,
-        'admin_link': "/django/admin/newqc/receivinglog/",
+        'admin_link': "/admin/newqc/receivinglog/",
     }),                    
 }
 
@@ -159,7 +159,7 @@ def lot_list(request, paginate_by = 'default', queryset = 'default'):
             'user': request.user.get_full_name(),
             'pagination_list': [10, 25, 50, 100, 500, 1000],
             'pagination_count': pagination_count,
-            'lot_list_admin': "/django/admin/newqc/lot/"
+            'lot_list_admin': "/admin/newqc/lot/"
             # fix this javascript...
         }),
     )
@@ -585,7 +585,7 @@ def flavor_history_print(request, flavor):
 #    try:
 #        retain = Retain.objects.filter(status='Pending')[0]
 #    except:
-#        return HttpResponseRedirect('/django/qc/pending_retains/')
+#        return HttpResponseRedirect('/qc/pending_retains/')
 #    request.session['retainpk'] = retain.pk
 #    f = ResolveRetainForm(instance=retain)
 #    # preview_image = get_thumbnail(test_card.large.file, '800')
@@ -603,7 +603,7 @@ def resolve_retains_any(request):
         testcard = tcs[0]
         testcard_ondeck = tcs[1]
     except:
-        return HttpResponseRedirect('/django/qc/')
+        return HttpResponseRedirect('/qc/')
     
 @permission_required('access.view_flavor')
 def batchsheet_detail(request, lot_pk):
@@ -623,7 +623,7 @@ def lot_detail(request, lot_pk, update=None):
             )
             coa.save()
             
-        lss_list.append((lss.salesordernumber, '/django/qc/coa/%s' % lss.coa_set.all()[0].pk))
+        lss_list.append((lss.salesordernumber, '/qc/coa/%s' % lss.coa_set.all()[0].pk))
     
     #if user clicks 'update database values'
     if update == "database":
@@ -752,7 +752,7 @@ def lot_detail(request, lot_pk, update=None):
     
     return render_to_response('qc/lots/detail.html',
                               {'lot':lot,
-                              'print_link': '/django/batchsheet/%s/' % lot_pk,
+                              'print_link': '/batchsheet/%s/' % lot_pk,
                               'lss_list': lss_list,
                               'result_list': result_list,
                               'customer_dict': customer_dict,
@@ -801,7 +801,7 @@ def edit_test_results(request, lot_pk):
 
 
             
-            return HttpResponseRedirect("/django/qc/lots/%s/" % lot.pk)
+            return HttpResponseRedirect("/qc/lots/%s/" % lot.pk)
         else:
             return render_to_response('newqc/testresult_list.html', 
                                   {'lot': lot,
@@ -977,7 +977,7 @@ def resolve_testcards_any(request):
         testcard = tcs[0]
         testcard_ondeck = tcs[1]
     except:
-        return HttpResponseRedirect('/django/qc/no_testcards_left/')
+        return HttpResponseRedirect('/qc/no_testcards_left/')
     return render_to_response('qc/testcards/resolve.html', 
                               {
                                'testcard':testcard,
@@ -1024,7 +1024,7 @@ def rm_passed_finder(request):
     testcards = RMTestCard.objects.filter(status="Pending").annotate(num_tcs=Count('retain__rmtestcard')).filter(num_tcs=1)[0:10]
     return render_to_response('qc/testcards/passed_finder.html',
                               {
-                               'form_action_url':'/django/qc/rm_passed_finder/',
+                               'form_action_url':'/qc/rm_passed_finder/',
                                'testcards':testcards},
                               context_instance=RequestContext(request))
 
@@ -1048,7 +1048,7 @@ def passed_finder(request):
     testcards = TestCard.objects.filter(status="Pending").annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1)[0:10]
     return render_to_response('qc/testcards/passed_finder.html',
                               {
-                               'form_action_url':'/django/qc/passed_finder/',
+                               'form_action_url':'/qc/passed_finder/',
                                'testcards':testcards},
                               context_instance=RequestContext(request))
 
@@ -1111,7 +1111,7 @@ def edit_coa(request, ssl_pk): #TODO TODO TODO DOTODOTDOTO TODOT TODTODO OTODOTD
 #             
 # 
 #             
-#             #return HttpResponseRedirect("/django/access/%s/spec_list/" % flavor.number)
+#             #return HttpResponseRedirect("/access/%s/spec_list/" % flavor.number)
 #         else:
 #             return render_to_response('access/flavor/spec_list.html', 
 #                                   {'flavor': flavor,
@@ -1211,7 +1211,7 @@ lls = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
 #             'user': request.user.get_full_name(),
 #             'pagination_list': [10, 25, 50, 100, 500, 1000],
 #             'pagination_count': pagination_count,
-#             'lot_list_admin': "/django/admin/newqc/lot/"
+#             'lot_list_admin': "/admin/newqc/lot/"
 #             # fix this javascript...
 #         }),
 #     )

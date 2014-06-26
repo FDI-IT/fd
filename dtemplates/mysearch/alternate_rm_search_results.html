@@ -7,7 +7,7 @@
 <div id="content-solo">
 
 <div>
-	<form action="/django/mysearch/access/alternate_rm/" id="mainsearch" method="GET">
+	<form action="/mysearch/access/alternate_rm/" id="mainsearch" method="GET">
 		<div id="advanced-search" >
 			<div>{% rm_search %}<input type="submit" value="Filter Results"></div>
 			<ul class="filterselect_list">
@@ -40,7 +40,7 @@
 	    {% for object, fields in rows %}
 	    <tr id="{{ object.pk }}">
 	    	{% for field in fields %}
-			<td><a href="/django/access/new_rm/rm/{{ object.pk }}/">{{ field }}</a></td>
+			<td><a href="/access/new_rm/rm/{{ object.pk }}/">{{ field }}</a></td>
 			{% endfor %}
 	    </tr>
 	    {% endfor %}

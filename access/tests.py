@@ -43,17 +43,51 @@ IMPORTANT:
 '''
 
 class PostViewTest(TestCase):
-    fixtures = ['testdb.json']
+    fixtures = ['emptydb.json']
      
     def setUp(self):
         self.client = Client()
+        self.client.login(username='matta', password='fdi')
         #self.factory = RequestFactory()
         #self.user = User.objects.create_user(
         #    username='matta_test', email='matta@flavordynamics.com', password='fdi')
         self.flavor = Flavor.objects.get(number=8851)  
+        
+    '''
+    might wanna try using assertFormError:
+    
+    self.assertFormError(response, 'form', 'something', 'message')
+        'form' is the context variable name for form, 
+        'something' is the field name
+        'message' is expected text of validation error
+        
+    '''
+
+    def test_add_rawmaterial(self):
+        response = self.client.post('/access/new_rm/basic/', {'pk': 1,
+                                                              'art_nati': 'Nat',
+                                                               'product_name': 'Test Ingredient',
+                                                               'solubility': 'Water',
+                                                               'unitprice': 1,
+                                                               'purchase_price_update': '2014-06-26',
+                                                               'supplier': 'Foobar',
+                                                               'package_size': 1,
+                                                               'minimum_quantity': 2,
+                                                               'fob_point': 3,
+                                                               'lead_time': 4,
+                                                               'lastkoshdt': '1990-01-01',
+                                                               'hazardous': False,
+                                                               'microsensitive': '',
+                                                               'prop65': False,
+                                                               'nutri': False,
+                                                               'sulfites_ppm': 5,
+                                                               'allergen': '',
+                                                               })
+        
+        self.assertEqual(response.status_code, 302)
 
     def test_add_flavorspec(self):
-        self.client.login(username='matta', password='fdi')
+        #self.client.login(username='matta', password='fdi')
         
         #find number of objects before posting to add/save
         flavorspec_count = FlavorSpecification.objects.count()

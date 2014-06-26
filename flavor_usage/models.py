@@ -20,7 +20,7 @@ class Application(models.Model):
     added_from_spreadsheet = models.BooleanField(default=False,blank=True)
     original_spreadsheet_fields = models.CharField(max_length=100,default="",blank=True)
     def get_admin_url(self):
-        return "/django/admin/flavor_usage/application/%s/" % self.pk
+        return "/admin/flavor_usage/application/%s/" % self.pk
     
     def __unicode__(self):
         if self.top_usage_level:

@@ -20,7 +20,7 @@ var getParameterByName = function (name) {
 };
 
 var ajax_refresh_batchsheet = function(e) {
-	return jQuery.get('/django/batchsheet/batchsheet_print/' + jQuery('#id_flavor_number').val() + '/',
+	return jQuery.get('/batchsheet/batchsheet_print/' + jQuery('#id_flavor_number').val() + '/',
 		{
 			batch_amount: jQuery('#id_batch_amount').val()
 		},
@@ -68,7 +68,7 @@ var print_with_next_lot_number = function(data) {
 		async: false,
 		type: 'GET',
 		contentType: 'json',
-		url: '/django/batchsheet/lot_init/',
+		url: '/batchsheet/lot_init/',
 		data: 
 		{
 			flavor_number:jQuery('#id_flavor_number').val(),
@@ -88,7 +88,7 @@ var print_with_no_lot_number = function() {
 };
 
 var ajax_get_batchsheet_with_next_lot = function() {
-	jQuery.get('/django/batchsheet/batchsheet_print/' + jQuery('#id_flavor_number').val() + '/',
+	jQuery.get('/batchsheet/batchsheet_print/' + jQuery('#id_flavor_number').val() + '/',
 		{
 			batch_amount: jQuery('#id_batch_amount').val(),
 			get_next_lot: 1,
@@ -216,6 +216,6 @@ jQuery(document).ready(function(){
 	$('#print_link, #next_lot_link').click( initial_link_alert );
 	
 	$('#refresh_link').click(function(e) {
-		window.location = "/django/batchsheet/"
+		window.location = "/batchsheet/"
 	});
 });

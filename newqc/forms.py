@@ -23,12 +23,12 @@ def validate_flavor_number(num):
     
 def validate_lot_number(num):
 #     if Lot.objects.filter(number = num).exists() == False:
-#         raise ValidationError(mark_safe("<a href='/django/qc/lots/'>Please enter a valid lot number."))
+#         raise ValidationError(mark_safe("<a href='/qc/lots/'>Please enter a valid lot number."))
     if num.isdigit() == False:
         raise ValidationError("Lot number must be an integer.")
     if Lot.objects.filter(number = num).count() > 1:
         num = str(num)
-        raise ValidationError(mark_safe("<a href='/django/admin/newqc/lot/?q=%s'>Multiple lots exist with this lot number." % escape(num)))
+        raise ValidationError(mark_safe("<a href='/admin/newqc/lot/?q=%s'>Multiple lots exist with this lot number." % escape(num)))
 
         
 class FlavorNumberField(forms.IntegerField):
@@ -54,7 +54,7 @@ class NewFlavorRetainForm(forms.Form):
         try:
             lot_pk = Lot.objects.get(number=lot_number).pk
         except Lot.DoesNotExist:
-            raise ValidationError(mark_safe("A lot with that number does not exist. <a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a>"))
+            raise ValidationError(mark_safe("A lot with that number does not exist. <a href='/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a>"))
         
         
         if flavor_number and lot_number: #only do this if both fields are valid so far
@@ -65,9 +65,9 @@ class NewFlavorRetainForm(forms.Form):
                     if lot.flavor.number == flavor_number:
                         raise_error = False
                 if raise_error == True:
-                    raise ValidationError(mark_safe("The given lot number does not correspond to the given flavor number. <a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/django/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))
+                    raise ValidationError(mark_safe("The given lot number does not correspond to the given flavor number. <a href='/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))
             else:
-                raise ValidationError(mark_safe("<a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Invalid lot number." % escape(str(flavor_number))))
+                raise ValidationError(mark_safe("<a href='/access/%s/#ui-tabs-6' style='color: #330066'>Invalid lot number." % escape(str(flavor_number))))
         
         return cleaned_data
 

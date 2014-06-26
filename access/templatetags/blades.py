@@ -44,7 +44,7 @@ class FlavorBlades(ObjectBlades):
     
     @property
     def pin(self):
-        return ("PIN", '<a href="/django/access/ingredient/pin_review/%s/">%s</a>'% (self.flavor.pinnumber, self.flavor.pinnumber))
+        return ("PIN", '<a href="/access/ingredient/pin_review/%s/">%s</a>'% (self.flavor.pinnumber, self.flavor.pinnumber))
     
     @property
     def profit_ratio(self):
@@ -214,7 +214,7 @@ class FlavorBlades(ObjectBlades):
     
     @property
     def new_usage(self):
-        return ("Add New Usage", '<a href="/django/flavor_usage/%s/new_usage/">Click Here</a>' % self.flavor.number)
+        return ("Add New Usage", '<a href="/flavor_usage/%s/new_usage/">Click Here</a>' % self.flavor.number)
 
     @property
     def application_list(self):

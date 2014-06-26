@@ -22,12 +22,12 @@
 		    	{% for li in sales_order.lineitem_set.all %}
 			    	{% if forloop.first %}
 			    	<tr id="{{ sales_order.number }}">
-			    	<td class="main_row"><a href="/django/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.number }}</a></td>
+			    	<td class="main_row"><a href="/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.number }}</a></td>
 			    	{% else %}
 			    	<tr id="{{ sales_order.number }}">
 			    	<td class="sub_row"></td>
 			    	{% endif %}
-			    	<td><a href="/django/access/{{ li.flavor.number }}/">{{ li.flavor }}</a></td>
+			    	<td><a href="/access/{{ li.flavor.number }}/">{{ li.flavor }}</a></td>
 			    	<td>{{ li.quantity|floatformat:0 }}</td>
 			    	<td>{{ li.unit_price|floatformat:2 }}</td>
 			    	<td>{{ sales_order.create_date|date:'m-d' }}</td>
@@ -55,8 +55,8 @@
 				{% for flavor in ordered_flavors %}
 					<tr>
 						<td> <a href="{{ flavor.get_absolute_url }}">{{ flavor.name }}</a> </td>
-						<td> <a href="/django/salesorders/customer/{{ customer.pk }}/customer_specs/{{ flavor.number }}"> Edit </a> </td>
-						<td> <a href="/django/salesorders/customer/{{ customer.pk }}/customer_spec_sheet/{{ flavor.number }}"> Spec Sheet </a></td>
+						<td> <a href="/salesorders/customer/{{ customer.pk }}/customer_specs/{{ flavor.number }}"> Edit </a> </td>
+						<td> <a href="/salesorders/customer/{{ customer.pk }}/customer_spec_sheet/{{ flavor.number }}"> Spec Sheet </a></td>
 					</tr>
 				{% endfor %}
 			</tbody>
