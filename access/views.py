@@ -1735,6 +1735,8 @@ def edit_spec(request, flavor_number, spec_id=0):
             
             return HttpResponseRedirect(return_url)
         
+#         else: #for testing purposes
+#             raise forms.ValidationError(form.errors)
                 
     if request.method != 'POST':
         form = FlavorSpecificationForm(initial=initial_data)

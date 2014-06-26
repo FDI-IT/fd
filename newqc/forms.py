@@ -50,7 +50,12 @@ class NewFlavorRetainForm(forms.Form):
         cleaned_data = self.cleaned_data
         flavor_number = cleaned_data.get("flavor_number")
         lot_number = cleaned_data.get("lot_number")
-        lot_pk = Lot.objects.get(number=lot_number).pk
+        
+        try:
+            lot_pk = Lot.objects.get(number=lot_number).pk
+        except Lot.DoesNotExist:
+            raise ValidationError(mark_safe("A lot with that number does not exist. <a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a>"))
+        
         
         if flavor_number and lot_number: #only do this if both fields are valid so far
             raise_error = True

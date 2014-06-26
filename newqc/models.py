@@ -415,7 +415,7 @@ class Retain(models.Model):
         try:
             last_retain = current_retains[0]
         except:
-            return 0
+            return 1 #start at 1, you get an error if you add a retain with number 0
         return last_retain.retain + 1
     
     @staticmethod

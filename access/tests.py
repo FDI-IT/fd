@@ -42,6 +42,33 @@ IMPORTANT:
 
 '''
 
+class PostViewTest(TestCase):
+    fixtures = ['testdb.json']
+     
+    def setUp(self):
+        self.client = Client()
+        #self.factory = RequestFactory()
+        #self.user = User.objects.create_user(
+        #    username='matta_test', email='matta@flavordynamics.com', password='fdi')
+        self.flavor = Flavor.objects.get(number=8851)  
+
+    def test_add_flavorspec(self):
+        self.client.login(username='matta', password='fdi')
+        
+        #find number of objects before posting to add/save
+        flavorspec_count = FlavorSpecification.objects.count()
+        
+        response = self.client.post('/access/8851/spec_list/add/', {'pk': '0',
+                                                                    'name': 'test_spec', 
+                                                                   'specification': 'test_spec',
+                                                                   'micro': True}) 
+                                                           
+        #self.assertTrue('flavor' in response.context)
+        self.assertEqual(response.status_code, 302)
+        
+        #assert that a flavorspecification object was successfully created and saved        
+        self.assertEqual(FlavorSpecification.objects.count(), flavorspec_count + 1)
+        
         
 class HttpResponseTest(TestCase):
     #fixtures = ['access.json'] this json file is outdated and using it will result in an error 
@@ -51,50 +78,12 @@ class HttpResponseTest(TestCase):
      
     def setUp(self):
         self.client = Client()
-        self.factory = RequestFactory()
-        self.user = User.objects.create_user(
-            username='matta_test', email='matta@flavordynamics.com', password='fdi')
+        #self.factory = RequestFactory()
+        #self.user = User.objects.create_user(
+        #    username='matta_test', email='matta@flavordynamics.com', password='fdi')
         self.flavor = Flavor.objects.get(number=8851)
-     
-    def test_factory(self):
-        request = self.factory.post('/access/8851/spec_list/add/', {'pk': 10,
-                                                                    'name': 'test_spec', 
-                                                                   'specification': 'test_spec',
-                                                                   'micro': True}) 
-        request.user = self.user
-        response =  ft_review(request, 8851)
-        
-        self.assertEqual(response.status_code, 200, 0)
-     
-    def test_post(self):
-        self.client.login(username='matta', password='fdi')
-        
-        print FlavorSpecification.objects.count()
-        
-        response = self.client.post('/access/8851/spec_list/add/', {'name': 'test_spec', 
-                                                                   'specification': 'test_spec',
-                                                                   'micro': 'asdf'}) 
-                                                            #WHY IS THIS WORKING?!?!  MICRO SHOULD BE TRUE OR FALSE
-        
-        #self.assertTrue('flavor' in response.context)
-        self.assertEqual(response.status_code, 200)
-        
-        print FlavorSpecification.objects.count()
-        
-        #fs = FlavorSpecification.objects.get(name='test_spec', specification='test_spec')
-        #print "pk: %s" % fs.pk
-        
-    def test_post2(self):
-        self.client.login(username='matta', password='fdi')
-        
-        response = self.client.get('/access/8851/spec_list/add/', {'name': 'test_spec', 
-                                                                   'specification': 'test_spec',
-                                                                   'foo': 'error!'}, follow=True) #/spec_list/add/')) 
-        
-        self.assertTrue('flavor' in response.context)
-        self.assertEqual(response.status_code, 200)
-        
-     
+    
+              
     def test_flavorview(self):
         
         #test /access/
