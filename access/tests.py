@@ -63,28 +63,28 @@ class PostViewTest(TestCase):
         
     '''
 
-    def test_add_rawmaterial(self):
-        response = self.client.post('/access/new_rm/basic/', {'pk': 1,
-                                                              'art_nati': 'Nat',
-                                                               'product_name': 'Test Ingredient',
-                                                               'solubility': 'Water',
-                                                               'unitprice': 1,
-                                                               'purchase_price_update': '2014-06-26',
-                                                               'supplier': 'Foobar',
-                                                               'package_size': 1,
-                                                               'minimum_quantity': 2,
-                                                               'fob_point': 3,
-                                                               'lead_time': 4,
-                                                               'lastkoshdt': '1990-01-01',
-                                                               'hazardous': False,
-                                                               'microsensitive': '',
-                                                               'prop65': False,
-                                                               'nutri': False,
-                                                               'sulfites_ppm': 5,
-                                                               'allergen': '',
-                                                               })
-        
-        self.assertEqual(response.status_code, 302)
+#     def test_add_rawmaterial(self):
+#         response = self.client.post('/access/new_rm/basic/', {'pk': 1,
+#                                                               'art_nati': 'Nat',
+#                                                                'product_name': 'Test Ingredient',
+#                                                                'solubility': 'Water',
+#                                                                'unitprice': 1,
+#                                                                'purchase_price_update': '2014-06-26',
+#                                                                'supplier': 'Foobar',
+#                                                                'package_size': 1,
+#                                                                'minimum_quantity': 2,
+#                                                                'fob_point': 3,
+#                                                                'lead_time': 4,
+#                                                                'lastkoshdt': '1990-01-01',
+#                                                                'hazardous': False,
+#                                                                'microsensitive': '',
+#                                                                'prop65': False,
+#                                                                'nutri': False,
+#                                                                'sulfites_ppm': 5,
+#                                                                'allergen': '',
+#                                                                })
+#         
+#         self.assertEqual(response.status_code, 302)
 
     def test_add_flavorspec(self):
         #self.client.login(username='matta', password='fdi')
@@ -93,7 +93,7 @@ class PostViewTest(TestCase):
         flavorspec_count = FlavorSpecification.objects.count()
         
         response = self.client.post('/access/8851/spec_list/add/', {'pk': '0',
-                                                                    'name': 'test_spec', 
+                                                                    'name': 'test', 
                                                                    'specification': 'test_spec',
                                                                    'micro': True}) 
                                                            
