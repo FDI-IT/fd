@@ -146,7 +146,9 @@ def process_scanned_doc(scanned_doc):
     try:
         s = create_new_related_object(scanned_doc)
         s.save()
-        revision.comment ="Migrated from %s:%s" % (type(scanned_doc), scanned_doc.pk)
+        migration_string = "Migrated from %s:%s" % (type(scanned_doc), scanned_doc.pk) 
+        revision.comment = migration_string
+        logger.info(migration_string)
     except IOError as e:
         logger.warn("IOError on %s:%s -- %s" % (type(scanned_doc), scanned_doc.pk, e))
     except Exception as e:
@@ -157,13 +159,15 @@ def execute():
     model object.
     """
     scrub_old_data()
-    ScannedDoc.objects.all().delete()
+    ScannedDoc.objects.all().delete()    
+    logger.info("Cleared ScannedDoc model")
     full_object_list = get_full_object_list()
     sorted_full_object_list = sorted(full_object_list, key=scanned_doc_pre_key_function)
     for scanned_doc in sorted_full_object_list:
         process_scanned_doc(scanned_doc)
 
 def main():
+    logger.info("Starting to migrate scanned docs")
     execute()
     
 if __name__ == "__main__":
