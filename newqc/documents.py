@@ -49,9 +49,8 @@ def my_hash(my_path):
     return None
 
 EXC_DIRECTORY = '/srv/samba/tank/scans/exc/'
-HASH_EXISTS_DIRECTORY = '/srv/samba/tank/scans/old/'
 COMPLETE_PATH = '/srv/samba/tank/scans/qccards_complete/'
-for MY_DESTINATION_DIR in (EXC_DIRECTORY, HASH_EXISTS_DIRECTORY, COMPLETE_PATH):
+for MY_DESTINATION_DIR in (EXC_DIRECTORY, COMPLETE_PATH):
     try:
         os.makedirs(MY_DESTINATION_DIR)
     except OSError as e:
@@ -120,7 +119,7 @@ class ImportBCDoc():
         # document type classes (retain, rmretain, lot, etc)
         self.sd = DocumentType.create_from_referred_object_from_bc_key(self.bc_key, document_create_kwargs)
         self.sd.save()
-        logger.info("Saved a %s:%s from %s" % (str(DocumentType), self.document.pk, self.path))
+        logger.info("Saved a %s:%s from %s" % (str(DocumentType), self.sd.pk, self.path))
         my_name, my_extension = os.path.splitext(self.path)
         my_move_name = "%s%s" % (self.hash, my_extension)
         move_complete_path = os.path.join(COMPLETE_PATH, my_move_name)
