@@ -1,4 +1,4 @@
-import os
+import os, errno, logging
 
 import fnmatch
 
