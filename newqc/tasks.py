@@ -22,7 +22,7 @@ def walk_scans_qccards(walk_paths=['/srv/samba/tank/scans/qccards','/srv/samba/t
     for wp in walk_paths:
         for root, dirnames, filenames in os.walk(wp):
             for filename in filenames:
-                if filename.lower().endwith(('jpg','png')):
+                if filename.lower().endswith(('jpg','png')):
                     full_file_path = os.path.join(root,filename)
                     logger.info("Attempting import of %s " % full_file_path)
                     returns.append(import_result)
