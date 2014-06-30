@@ -18,9 +18,6 @@ from django.contrib.auth.models import User
 from access.controller import hazard_list, acute_toxicity_list
 #from access.controller import make_hazard_class, skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict
 
-
-from hazard_calculator.models import HazardFields, HazardousChemical
-
 from pluggable.sets import AncestorSet
 
 one_hundred = Decimal('100')
@@ -257,7 +254,7 @@ class Formula(models.Model):
 
 
 
-class Ingredient(HazardousChemical):
+class Ingredient(models.Model):
     """Raw materials for use in production.
     
     The unique indentifier for this table is 'rawmaterialcode'.
@@ -972,7 +969,7 @@ class FormulaInfo(models.Model):
     class Meta:
         abstract = True
 
-class Flavor(FormulaInfo, HazardFields):
+class Flavor(FormulaInfo):
     
     #retains = generic.GenericRelation(Retain)
     id = models.PositiveIntegerField(

@@ -165,6 +165,7 @@ INSTALLED_APPS = (
     'docvault',
     'unified_adapter',
     'reports',
+    'hazard_calculator',
     #'history_audit',
     #'haystack',
 )
