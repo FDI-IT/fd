@@ -95,15 +95,16 @@ class ImportBCDoc():
             logger.warn("Existing hash found, moving %s to %s" % (self.path, self.move_path))
             return
         
-        self.image = Image.open(path)
-        
-        # get the return code of zbarimg, and the value
-        bc_returncode, bc_value = self.scan_for_barcode()
-        logger.info("BC Return %s | BC Value %s | for %s" % (bc_returncode, bc_value, self.path))
-        
+        self.image = Image.open(self.path)
         # this dict is required to create any type of document, even generic
         document_create_kwargs = self.get_document_create_kwargs()
         
+        
+        # get the return code of zbarimg, and the value
+        # the value, if valid, is a two tuple, doc_type_str and bc_key
+        bc_returncode, bc_value = self.scan_for_barcode()
+        logger.info("BC Return %s | BC Value %s | for %s" % (bc_returncode, bc_value, self.path))
+
         # if bc_returncode != 0 it means 
         # something went wrong scanning, but not making a thumbnail
         # we save this as a generic doc type for later analysis
@@ -111,23 +112,15 @@ class ImportBCDoc():
             self.save_as_generic_document(document_create_kwargs)
             return
     
-        # try to split bc on -, if that does not yield 2 parts
-        # we save this as a generic doc type for later analysis
-        bc_split = bc_value.split('-')
-        if len(bc_split) != 2:
-            self.save_as_generic_document(document_create_kwargs)
-            return
-            
-        self.doc_type_str, self.bc_key = bc_split
-        create_from_referred_object_from_bc_key
+        self.doc_type_str, self.bc_key = bc_value
         # get the django ORM types from the type_map
         ReferredObjectType, DocumentType = type_map[self.doc_type_str]
         # we need this method specifically because the name of the 
         # referred object attribute is not standard between the 
         # document type classes (retain, rmretain, lot, etc)
-        self.document = DocumentType.create_from_referred_object_from_bc_key(self.bc_key, document_create_kwargs)
-        self.document.save()
-        logger.info("Saved a %s:%s from %s" % (str(DocumentType), self.document.pk))
+        self.sd = DocumentType.create_from_referred_object_from_bc_key(self.bc_key, document_create_kwargs)
+        self.sd.save()
+        logger.info("Saved a %s:%s from %s" % (str(DocumentType), self.document.pk, self.path))
         my_name, my_extension = os.path.splitext(self.path)
         my_move_name = "%s%s" % (self.hash, my_extension)
         move_complete_path = os.path.join(COMPLETE_PATH, my_move_name)
@@ -162,10 +155,24 @@ class ImportBCDoc():
         thumbnail_file = File(open(tn_path,'r'))
         return thumbnail_file
         
-    def python_scan(self, path):
+    def scan_for_barcode(self):
         converted_image = self.image.convert('L')
         width, height = converted_image.size
         raw = converted_image.tostring()
         scanned_image = zbar.Image(width, height, 'Y800', raw)
         scanner.scan(scanned_image)
-        return scanned_image
+        
+        symbols = list(scanned_image.symbols)
+        
+        if len(symbols) != 1:
+            return (1, "")
+        
+        s = symbols[0]
+        
+        # try to split bc on -, if that does not yield 2 parts
+        # we save this as a generic doc type for later analysis
+        bc_split = s.data.split('-')
+        if len(bc_split) != 2:
+            return (1, s.data)
+        
+        return (0, bc_split)

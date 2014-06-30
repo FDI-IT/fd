@@ -4,7 +4,7 @@ import fnmatch
 
 from celery.task import task
 
-from newqc.documents import ImportBCDoc, EXC_DIRECTORY
+from newqc.documents import ImportBCDoc
 
 # set up logging
 LOG_PATH = '/var/log/django/'
@@ -22,8 +22,6 @@ logger = logging.getLogger()
 @task()
 def walk_scans_qccards(walk_paths=['/srv/samba/tank/scans/qccards',]):
     returns = []
-    if not os.path.exists(exc_directory):
-        os.makedirs(exc_directory)
     for wp in walk_paths:
         for root, dirnames, filenames in os.walk(wp):
             for filename in fnmatch.filter(filenames, '*.jpg'):
