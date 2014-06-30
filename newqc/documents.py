@@ -25,7 +25,7 @@ type_map = {
 # set up logging
 LOG_PATH = '/var/log/django/'
 try:
-    os.makedirs(LOG_PATH)import_result = ImportBCDoc(full_file_path)
+    os.makedirs(LOG_PATH)
 except OSError as e:
     if e.errno == errno.EEXIST and os.path.isdir(LOG_PATH):
         pass
