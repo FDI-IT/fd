@@ -79,12 +79,12 @@ class ImportBCDoc():
         if self.hash is None:
             # Not sure what to do if the file cannot be hashed.
             logger.warn("%s has no hash!" % self.path)
-            return self
+            return
         
         # this should do something like,
         # remove if hash exists and is verified in the database
         if ScannedDoc.objects.filter(image_hash=self.hash).exists():
-            return self.process_hash_exists()
+            return
         
         try:
             self.image = Image.open(self.path)
@@ -101,8 +101,8 @@ class ImportBCDoc():
         # we save this as a generic doc type for later analysis
         if bc_returncode != 0:
             self.save_as_generic_document()
-            return self
-    
+            return
+        
         self.doc_type_str, self.bc_key = bc_value
         # get the django ORM types from the type_map
         ReferredObjectType, DocumentType = type_map[self.doc_type_str]
@@ -142,7 +142,6 @@ class ImportBCDoc():
             )
         self.sd.save()
         logger.info("Saved a generic ScannedDoc:%s from %s" % (self.sd.pk, self.path))
-        return
 
     def generate_thumbnail(self):
         width, height = self.image.size
