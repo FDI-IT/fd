@@ -19,15 +19,12 @@ logger = logging.getLogger()
 
 @task()
 def walk_scans_qccards(walk_paths=['/srv/samba/tank/scans/qccards','/srv/samba/tank/scans/barcode_docs']):
-    returns = []
     for wp in walk_paths:
         for root, dirnames, filenames in os.walk(wp):
             for filename in filenames:
                 if filename.lower().endwith(('jpg','png')):
                     full_file_path = os.path.join(root,filename)
                     logger.info("Attempting import of %s " % full_file_path)
-                    import_result = ImportBCDoc(full_file_path)
                     returns.append(import_result)
                     logger.info("Imported %s" % full_file_path)
-    return returns
 
