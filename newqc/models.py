@@ -101,7 +101,7 @@ class ScannedDoc(models.Model):
     large = models.ImageField(upload_to='scanned_doc_large')
     thumbnail = models.ImageField(upload_to='scanned_doc_thumbnail')
     notes = models.TextField(blank=True, default="")
-    scan_time = models.DateTimeField(blank=True,null=True)
+    scan_time = models.DateTimeField(blank=True,null=True,auto_now_add=True)
     
     class Meta:
         ordering = ['-id']

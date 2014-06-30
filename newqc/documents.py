@@ -1,7 +1,7 @@
 """
 Bar code documents
 """
-import os
+import os, errno, logging
 import subprocess
 import shutil
 import hashlib
@@ -14,13 +14,26 @@ from django.core.files import File
 documents shouldn't depend on models.
 it should be the other way around.
 """
-from newqc.models import Retain, RMRetain, Lot, TestCard, RMTestCard, BatchSheet
+from newqc.models import Retain, RMRetain, Lot, TestCard, RMTestCard, BatchSheet, ScannedDoc
 DocumentTypes = (TestCard, RMTestCard, BatchSheet)
 type_map = {
     'RETAIN':(Retain, TestCard),
     'RM':(RMRetain, RMTestCard),
     'BATCHSHEET_LOT':(Lot, BatchSheet),
 }
+
+# set up logging
+LOG_PATH = '/var/log/django/'
+try:
+    os.makedirs(LOG_PATH)
+except OSError as e:
+    if e.errno == errno.EEXIST and os.path.isdir(LOG_PATH):
+        pass
+    else:
+        raise
+LOG_FILENAME = '/var/log/django/scan_docs.log'
+logging.basicConfig(filename=LOG_FILENAME, level=logging.INFO)
+logger = logging.getLogger()
 
 scanner = zbar.ImageScanner()
 # configure the reader
@@ -35,17 +48,17 @@ def my_hash(my_path):
         return sha.hexdigest()
     return None
 
-exc_directory = '/srv/samba/tank/scans/exc/'
-hash_exists_directory = '/srv/samba/tank/scans/old/'
-
-# move will silently overwrite the destination, 
-# so we should rename the fifrom django.conf import settingsle to the hash 
-# so no different files overwrite each other
-def move_exc_image(full_file_path):
-    shutil.move(full_file_path, exc_directory)
-    
-def move_old_image(full_file_path):
-    shutil.move(full_file_path, hash_exists_directory)
+EXC_DIRECTORY = '/srv/samba/tank/scans/exc/'
+HASH_EXISTS_DIRECTORY = '/srv/samba/tank/scans/old/'
+COMPLETE_PATH = '/srv/samba/tank/scans/qccards_complete/'
+for MY_DESTINATION_DIR in (EXC_DIRECTORY, HASH_EXISTS_DIRECTORY, COMPLETE_PATH):
+    try:
+        os.makedirs(MY_DESTINATION_DIR)
+    except OSError as e:
+        if e.errno == errno.EEXIST and os.path.isdir(LOG_PATH):
+            pass
+        else:
+            raise
 
 class ImportBCDoc():
        
@@ -71,21 +84,22 @@ class ImportBCDoc():
         # this should do something like,
         # remove if hash exists and is verified in the database
         self.hash_uniqueness = True
-        for DocumentType in DocumentTypes:
-            if DocumentType.objects.filter(image_hash=self.hash).exists():
-                self.hash_uniqueness = False
+        if ScannedDoc.objects.filter(image_hash=self.hash).exists():
+            self.hash_uniqueness = False
                 
         if not self.hash_uniqueness:
-            self.move_path = os.path.join(hash_exists_directory, self.hash)
+            my_name, my_extension = os.path.splitext(self.path)
+            my_move_name = "%s%s" % (self.hash, my_extension)
+            self.move_path = os.path.join(HASH_EXISTS_DIRECTORY, my_move_name)
             shutil.move(self.path, self.move_path)
-            # TODO: there should be a way to log this from tasks
-            # maybe by inspecting the returned object from within tasks
+            logger.warn("Existing hash found, moving %s to %s" % (self.path, self.move_path))
             return
         
         self.image = Image.open(path)
         
         # get the return code of zbarimg, and the value
         bc_returncode, bc_value = self.scan_for_barcode()
+        logger.info("BC Return %s | BC Value %s | for %s" % (bc_returncode, bc_value, self.path))
         
         # this dict is required to create any type of document, even generic
         document_create_kwargs = self.get_document_create_kwargs()
@@ -105,15 +119,20 @@ class ImportBCDoc():
             return
             
         self.doc_type_str, self.bc_key = bc_split
-        
+        create_from_referred_object_from_bc_key
         # get the django ORM types from the type_map
         ReferredObjectType, DocumentType = type_map[self.doc_type_str]
         # we need this method specifically because the name of the 
         # referred object attribute is not standard between the 
         # document type classes (retain, rmretain, lot, etc)
-        self.document = DocumentType.create_from_referred_object_from_bc_key(self.bc_key)
-        
+        self.document = DocumentType.create_from_referred_object_from_bc_key(self.bc_key, document_create_kwargs)
         self.document.save()
+        logger.info("Saved a %s:%s from %s" % (str(DocumentType), self.document.pk))
+        my_name, my_extension = os.path.splitext(self.path)
+        my_move_name = "%s%s" % (self.hash, my_extension)
+        move_complete_path = os.path.join(COMPLETE_PATH, my_move_name)
+        shutil.move(self.path, move_complete_path)
+        logger.info("Moved scanned file %s to %s" % (self.path, move_complete_path))
 
     def get_document_create_kwargs(self):
         return {
@@ -121,13 +140,14 @@ class ImportBCDoc():
                 'image_hash':self.hash,
                 'large':File(open(self.path,'r')),
             }
-#             
-#     def save_as_generic_document(self, document_create_kwargs):
-#         self.tc = GenericTestCard(
-#                 **document_create_kwargs
-#             )
-#         self.tc.save()
-#         return
+             
+    def save_as_generic_document(self, document_create_kwargs):
+        self.sd = ScannedDoc(
+                **document_create_kwargs
+            )
+        self.sd.save()
+        logger.info("Saved a generic ScannedDoc:%s from %s" % (self.sd.pk, self.path))
+        return
 
     def generate_thumbnail(self):
         width, height = self.image.size
