@@ -3,6 +3,9 @@ import os
 import sys
 sys.path.append(os.getcwd())
 
+#add the ghs project to access hazard calculator
+sys.path.append('/var/www/django/ghs')
+
 from LOCAL_SECRETS import DATABASES, SECRET_KEY
 
 DEBUG =True 
