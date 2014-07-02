@@ -3,7 +3,7 @@ import subprocess
 import hashlib
 import fnmatch
 
-from newqc.models import TestCard, RMTestCard, GenericTestCard
+from newqc.models import TestCard, RMTestCard
 
 def test():
     for tc in TestCard.objects.filter(large__isnull=False):

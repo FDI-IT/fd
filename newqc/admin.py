@@ -1,4 +1,4 @@
-from newqc.models import Retain, TestCard, ProductInfo, Lot, ImportRetain, RMImportRetain, RMInfo, RMRetain, ExperimentalRetain, RMTestCard, BatchSheet, ReceivingLog, LotWeightAdjustment, LotSOLIStamp, COA, TestResult
+from newqc.models import *
 from django.contrib import admin
 from reversion.admin import VersionAdmin
 
@@ -33,6 +33,10 @@ class ImportRetainAdmin(VersionAdmin):
     search_fields = ['number']
 admin.site.register(ImportRetain, ImportRetainAdmin)
 
+class ScannedDocAdmin(VersionAdmin):
+    search_fields = ['notes']
+admin.site.register(ScannedDoc, ScannedDocAdmin)
+
 class BatchSheetAdmin(VersionAdmin):
     search_fields = ['lot__number']
 admin.site.register(BatchSheet, BatchSheetAdmin)
@@ -40,14 +44,22 @@ admin.site.register(BatchSheet, BatchSheetAdmin)
 class RMTestCardAdmin(VersionAdmin):
     search_fields = ['number']
 admin.site.register(RMTestCard, RMTestCardAdmin)
-    
-#class TestCardAdmin(VersionAdmin):
-#    search_fields = ['retain']
-#admin.site.register(TestCard, TestCardAdmin)
 
-class TestCardRetainFinderAdmin(VersionAdmin):
+class TestcardAdmin(VersionAdmin):
     search_fields = ['retain__retain']
-admin.site.register(TestCard, TestCardRetainFinderAdmin)
+admin.site.register(TestCard, TestcardAdmin)
+
+class OldBatchSheetAdmin(VersionAdmin):
+    search_fields = ['lot__number']
+admin.site.register(OldBatchSheet, OldBatchSheetAdmin)
+
+class OldRMTestCardAdmin(VersionAdmin):
+    search_fields = ['number']
+admin.site.register(OldRMTestCard, OldRMTestCardAdmin)
+
+class OldTestcardAdmin(VersionAdmin):
+    search_fields = ['retain__number']
+admin.site.register(OldTestCard, OldTestcardAdmin)
 
 class ProductInfoAdmin(VersionAdmin):
     search_fields = ['flavor__name','flavor__number','appearance','organoleptic_properties','testing_procedure','notes']
@@ -61,7 +73,7 @@ class LotAdmin(VersionAdmin):
     list_editable = ("status", "amount",)
 admin.site.register(Lot, LotAdmin)
 
-class LotWeightAdjustmentAdmin(VersionAdmin):
+class LotWeightAdjustmentAdmin(admin.ModelAdmin):
     search_fields = ['number', 'flavor__number']
     list_display = ['number','amount', 'flavor',]
     exclude = ('date','sub_lot','status','flavor',)

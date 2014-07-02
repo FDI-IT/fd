@@ -101,14 +101,14 @@ admin.site.register(models.JIList, JIListAdmin)
 
 admin.site.register(models.Customer)
 
-class IngredientDescriptionAdmin(VersionAdmin):
+class IngredientDescriptionAdmin(admin.ModelAdmin):
     list_display = ['id','product_name','comments','description']
     list_editable = ['comments','description']
     def queryset(self,request):
         return self.model.objects.exclude(Q(comments="") & Q(description=""))
 admin.site.register(models.IngredientDescription, IngredientDescriptionAdmin)
 
-class IngredientAllergenFixer(VersionAdmin):
+class IngredientAllergenFixer(admin.ModelAdmin):
     list_display = ['id','product_name','comments','allergen','crustacean',
         'eggs',
         'fish',
@@ -144,7 +144,7 @@ class IngredientAllergenFixer(VersionAdmin):
         return self.model.objects.exclude(allergen__iexact="None").exclude(suppliercode__iexact="FDI").order_by('allergen')
 admin.site.register(models.AllerIngredients, IngredientAllergenFixer)
 
-class PendingFlavorRiskAssessment(VersionAdmin):
+class PendingFlavorRiskAssessment(admin.ModelAdmin):
     list_display = ['number','name','risk_assessment_group','risk_assessment_memo']
     list_editable = ['risk_assessment_group','risk_assessment_memo']
     radio_fields = {'risk_assessment_group':admin.VERTICAL}

@@ -57,3 +57,25 @@
     ALTER TABLE "Raw Materials" ADD COLUMN dusts_mists_ld50 numeric(10,3);   
     
     ALTER TABLE "Raw Materials" RENAME COLUMN "CAS" to "cas";
+    
+    
+    
+# NEWQC SQL STATEMENTS
+
+# delete some of these
+ALTER TABLE newqc_batchsheet ADD COLUMN status varchar(25) DEFAULT '' NOT NULL;
+ALTER TABLE newqc_batchsheet ADD COLUMN create_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+ALTER TABLE newqc_batchsheet ADD COLUMN modified_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+ALTER TABLE newqc_testcard ADD COLUMN create_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+ALTER TABLE newqc_testcard ADD COLUMN modified_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+ALTER TABLE newqc_rmtestcard ADD COLUMN create_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+ALTER TABLE newqc_rmtestcard ADD COLUMN modified_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+ALTER TABLE newqc_generictestcard ADD COLUMN create_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+ALTER TABLE newqc_generictestcard ADD COLUMN modified_time timestamp with time zone DEFAULT '2010-01-01' NOT NULL;
+
+
+ALTER TABLE newqc_scanneddoc ADD COLUMN image_hash varchar(64);
+ALTER TABLE newqc_scanneddoc ADD COLUMN large varchar(100);
+ALTER TABLE newqc_scanneddoc ADD COLUMN thumbnail varchar(100);
+ALTER TABLE newqc_scanneddoc ADD COLUMN notes text;
+ALTER TABLE newqc_scanneddoc ADD COLUMN scan_time timestamp with time zone;

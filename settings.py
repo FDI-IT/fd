@@ -76,7 +76,7 @@ STATICFILES_DIRS = ('/var/www/django/fd/staticmedia',)
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/var/www/django/fd/staticmedia/'
+MEDIA_ROOT = '/var/www/djangomedia/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -120,7 +120,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'reversion.middleware.RevisionMiddleware',
+    #'reversion.middleware.RevisionMiddleware',
     #'history_audit.middleware.MyMiddleware',
 )
 

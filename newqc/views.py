@@ -24,6 +24,8 @@ from reversion import revision
 
 from elaphe import barcode
 
+from pluggable.inheritance_queryset import InheritanceQuerySet
+
 from newqc import controller
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import Flavor, Ingredient, FlavorSpecification
@@ -33,6 +35,8 @@ from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchShee
 from newqc.utils import process_jbg, get_card_file, scan_card
 from newqc.tasks import walk_scans_qccards
 from salesorders.models import SalesOrderNumber, LineItem
+
+from one_off import populate_scanned_docs
 
 def lot_month_list():
     return Lot.objects.all().dates('date', 'month').reverse()
@@ -945,7 +949,8 @@ def testcard_list(request):
             'page_title': "Test Card List",
         })
     )
-    
+
+
 def resolve_testcards_ajax_post(request):
     if request.is_ajax():
         testcard = TestCard.objects.get(pk=request.POST['instance_pk'])
@@ -1216,30 +1221,28 @@ lls = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
 #         }),
 #     )
 def scanned_docs(request, paginate_by='default',):
-    scanned_doc_type = request.GET.get('content_type__id', None)
-    if scanned_doc_type is not None:
-        scanned_docs_qs = ScannedDoc.objects.filter(content_type=scanned_doc_type).select_related()
-    else:
-        scanned_docs_qs = ScannedDoc.objects.all().select_related()
     if (paginate_by != 'default'): #when the user clicks a new pagination value, save the new value into the user's userprofile
         pagination_count = int(paginate_by)
     else:
         pagination_count = 100
         
 
-    scanned_doc_types = ScannedDoc.objects.all().order_by('content_type__name').values('content_type__id', 'content_type__name').distinct()
+    #scanned_doc_types = ScannedDoc.objects.all().order_by('content_type__name').values('content_type__id', 'content_type__name').distinct()
     return list_detail.object_list(
         request,
-        queryset=scanned_docs_qs,
+        queryset=ScannedDoc.objects.all(),
         paginate_by=pagination_count,
         extra_context={
             'page_title': "Scanned Documents",
             'pagination_count': pagination_count,
             'pagination_list': [10, 25, 50, 100, 500, 1000],
-            'scanned_doc_types': scanned_doc_types,
+            #'scanned_doc_types': scanned_doc_types,
         }
     )
 
+def migrate_scanned_docs(request):
+    populate_scanned_docs.execute()
+    return HttpResponseRedirect('/django/qc/scanned_docs/')
 
 #to generate pngs from a pdf file
 # convert -geometry 3000x3000 -density 300x300 -quality 100 test.pdf testdf.png
