@@ -6,7 +6,7 @@
 <script LANGUAGE="JavaScript">
 function getmatch( match_id ) {
 	document.matchform.base_ingredient.value = match_id;
-	jQuery.post('/django/solutionfixer/process_baserm_update', 
+	jQuery.post('/solutionfixer/process_baserm_update', 
 		{
 			solution_id: jQuery('#solution_id').html(),
 			baserm_id: match_id
@@ -18,14 +18,14 @@ function getmatch( match_id ) {
 };
 
 function verify_solution() {
-	jQuery.post('/django/solutionfixer/process_status_update', 
+	jQuery.post('/solutionfixer/process_status_update', 
 		{
 			solution_id: jQuery('#solution_id').html(),
 			status_id: 3
 		},
 		function (data) {
 			if (data.validation_message === undefined) {jQuery("#status-message").html("");
-				window.location = "/django/solutionfixer";
+				window.location = "/solutionfixer";
 			} else {
 				jQuery("#status-message").html("<h1>" + data.validation_message + "</h1>");
 				jQuery("#status-form input[name=status]:eq(0)").attr('checked','checked');
@@ -35,14 +35,14 @@ function verify_solution() {
 };
 	
 function flag_solution(){
-	jQuery.post('/django/solutionfixer/process_status_update', 
+	jQuery.post('/solutionfixer/process_status_update', 
 		{
 			solution_id: jQuery('#solution_id').html(),
 			status_id: 2
 		},
 		function (data) {
 			if (data.validation_message === undefined) {jQuery("#status-message").html("");
-				window.location = "/django/solutionfixer";
+				window.location = "/solutionfixer";
 			} else {
 				jQuery("#status-message").html("<h1>" + data.validation_message + "</h1>");
 				jQuery("#status-form input[name=status]:eq(0)").attr('checked','checked');
@@ -52,14 +52,14 @@ function flag_solution(){
 };
 
 function unlist_solution(){
-	jQuery.post('/django/solutionfixer/process_status_update', 
+	jQuery.post('/solutionfixer/process_status_update', 
 		{
 			solution_id: jQuery('#solution_id').html(),
 			status_id: 4
 		},
 		function (data) {
 			if (data.validation_message === undefined) {jQuery("#status-message").html("");
-				window.location = "/django/solutionfixer";
+				window.location = "/solutionfixer";
 			} else {
 				jQuery("#status-message").html("<h1>" + data.validation_message + "</h1>");
 				jQuery("#status-form input[name=status]:eq(0)").attr('checked','checked');

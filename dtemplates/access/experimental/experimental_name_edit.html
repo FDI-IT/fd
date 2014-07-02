@@ -5,7 +5,7 @@
 <script type="text/javascript">
 window.__admin_media_prefix__ = "{% filter escapejs %}{% admin_media_prefix %}{% endfilter %}";
 </script>
-<script type="text/javascript" src="/django/admin/jsi18n/"></script>
+<script type="text/javascript" src="/admin/jsi18n/"></script>
 <script type="text/javascript" src="/djangoadminmedia/js/core.js"></script>
 <script type="text/javascript" src="/djangomedia/js/experimental_label_edit.js"></script>
 <link rel="stylesheet" type="text/css" href="/djangoadminmedia/css/global.css"/>
@@ -18,7 +18,7 @@ window.__admin_media_prefix__ = "{% filter escapejs %}{% admin_media_prefix %}{%
 
 <div id="content-left-half">
 	
-	<form id="new-experimental-form" action="/django/access/experimental/{{experimental.experimentalnum}}/name_edit/" method="post">
+	<form id="new-experimental-form" action="/access/experimental/{{experimental.experimentalnum}}/name_edit/" method="post">
 		{{ management_form }}
 		{{ experimental_name_form.errors}}
 		{{experimental_name_form.non_field_errors}}

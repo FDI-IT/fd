@@ -22,7 +22,7 @@ class Doc(models.Model):
         return str(self.date.year)[2:5] + "-" + str(self.user)
 
     def get_admin_url(self):
-        return "/django/admin/docvault/doc/%s" % self.pk
+        return "/admin/docvault/doc/%s" % self.pk
     
 class Page(models.Model):
     doc = models.ForeignKey('Doc')

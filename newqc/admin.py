@@ -95,7 +95,7 @@ class RMRetainAdmin(VersionAdmin):
     list_editable = ("status", "notes")
     
     def pin_review_link(self, obj):
-        return '<a href="/django/access/ingredient/pin_review/%s/">%s</a>' % (obj.pin, obj.pin)
+        return '<a href="/access/ingredient/pin_review/%s/">%s</a>' % (obj.pin, obj.pin)
     pin_review_link.allow_tags = True
 admin.site.register(RMRetain, RMRetainAdmin)
 

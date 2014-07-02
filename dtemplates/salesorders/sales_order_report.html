@@ -25,14 +25,14 @@
 		    	{% for li in sales_order.lineitem_set.all %}
 			    	{% if forloop.first %}
 			    	<tr id="{{ sales_order.number }}">
-			    	<td class="main_row"><a href="/django/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.number }}</a></td>
-			    	<td class="main_row"><a href="/django/salesorders/customer/{{sales_order.customer.pk}}/" target="_blank">{{ sales_order.customer }}</a></td>
+			    	<td class="main_row"><a href="/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.number }}</a></td>
+			    	<td class="main_row"><a href="/salesorders/customer/{{sales_order.customer.pk}}/" target="_blank">{{ sales_order.customer }}</a></td>
 			    	{% else %}
 			    	<tr id="{{ sales_order.number }}">
 			    	<td class="sub_row"></td>
 			    	<td class="sub_row"></td>
 			    	{% endif %}
-			    	<td><a href="/django/access/{{ li.flavor.number }}/">{{ li.flavor }}</a></td>
+			    	<td><a href="/access/{{ li.flavor.number }}/">{{ li.flavor }}</a></td>
 			    	<td>{{ li.quantity|floatformat:0 }}</td>
 			    	<td>{{ li.unit_price|floatformat:2 }}</td>
 			    	<td>{{ sales_order.create_date|date:'m-d' }}</td>

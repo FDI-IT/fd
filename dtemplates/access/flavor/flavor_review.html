@@ -21,7 +21,7 @@
 <div class="pricing-memo"><span class="label">Pricing Memo</span>{{flavor.pricing_memo}}</div>
 <div class="content-table">
 	<span id="weight_form">
-		<form id="weightform" action="/django/access/{{ flavor.number }}" method="get">
+		<form id="weightform" action="/access/{{ flavor.number }}" method="get">
 		Adjusted Weight:
 		<input type="text" name="wf" id="adjusted_weight" />
 		<input type="submit" value="Get adjusted formula" style="display:none;"/>
@@ -40,7 +40,7 @@
 
 
 
-<form id="exportform" action="/django/access/table_to_csv" method="post" target="_blank">
+<form id="exportform" action="/access/table_to_csv" method="post" target="_blank">
 <input type="hidden" id="exportdata" name="exportdata" />
 <input type="hidden" id="flavor_number" name="flavor_number" value="{{ flavor.number }}" />
 </form>

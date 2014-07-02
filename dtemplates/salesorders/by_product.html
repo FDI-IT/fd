@@ -22,7 +22,7 @@
 	{% for order in orders %}
 	<tr id="{{ order.0 }}">
 		<td>
-			<a href="/django/access/{{ order.flavor.number }}?wf={{ order.total }}">{{ order.flavor.number }}</a>
+			<a href="/access/{{ order.flavor.number }}?wf={{ order.total }}">{{ order.flavor.number }}</a>
 		</td>
 		<td>
 			{{ order.total }}
@@ -35,7 +35,7 @@
 		</td>
 		<td>	
 		{% for detail in order.details %}
-			<a href="/django/salesorders/{{ detail.salesordernumber.number }}/">{{ detail }};</a>
+			<a href="/salesorders/{{ detail.salesordernumber.number }}/">{{ detail }};</a>
 		{% endfor %}
 		</td>
 	</tr>

@@ -1,4 +1,4 @@
-jQuery.get('/django/solutionfixer/get_match_guesses',
+jQuery.get('/solutionfixer/get_match_guesses',
 		{
 			solution_ids: jQuery('#solution-formset-tbody .solution_id').map(function() {
 									return this.innerHTML

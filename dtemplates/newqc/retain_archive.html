@@ -3,14 +3,14 @@
 {% block content %}
 	<div id="content-right">
 		<ul>
-			<li><a href="/django/qc/retains/">Latest</a></li>
+			<li><a href="/qc/retains/">Latest</a></li>
 		{% for month in month_list %}
-			<li><a href="/django/qc/retains/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+			<li><a href="/qc/retains/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
 		{% endfor %}
 		</ul>
 	</div>
     <div id="content-main">
-    <form name="retain_selections" action="/django/qc/batch_print/" method="post">
+    <form name="retain_selections" action="/qc/batch_print/" method="post">
        <table class="sorttable" width="100%">
 	<tr class="qcheaders">
 		<th width="15px">Select</th>
@@ -26,7 +26,7 @@
 	    <td><input type="checkbox" name="flavor_numbers" value="{{ retain.lot.flavor.pk }}" {% if checkall %}checked{% endif %}></td>
 		<td>{{ retain.retain }}</td>
 		<td><a href="{{ retain.lot.flavor.get_absolute_url }}">{{ retain.lot.flavor }}</a></td>
-		<td><a href="/django/qc/lots/{{ retain.lot.pk }}/">{{ retain.lot.number }}</a></td>
+		<td><a href="/qc/lots/{{ retain.lot.pk }}/">{{ retain.lot.number }}</a></td>
 		<td>{{ retain.date|date:"Y-m-d" }}</td>
 		<td>{{ retain.lot.amount|floatformat:0 }}</td>
 		<td>{{ retain.status }}</td>

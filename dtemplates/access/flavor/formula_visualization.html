@@ -63,7 +63,7 @@ Formula Tree Animation
 		<li>Max depth: {{ max_depth }}</li>
 	</ul>
 	<h4>Tree Layout</h4>
-	<form id="st_layout_form" action="/django/access/{{flavor.number}}/formula_visualization/" method="get">
+	<form id="st_layout_form" action="/access/{{flavor.number}}/formula_visualization/" method="get">
 		{{st_layout_form.as_ul}}
 		<input type="submit" value="Refresh">
 	</form>

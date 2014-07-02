@@ -21,13 +21,13 @@
 	{% for f, fo in flavors_ordered.items %}
 	<tr id="{{ f.number }}">
 		<td>{{ f.prefix }}</td>
-		<td><a href="/django/access/{{ f.number }}" target="_blank">{{ f.number }}</a></td>
-		<td><a href="/django/access/{{ f.number }}" target="_blank">{{ f.natart }}</a></td>
-		<td><a href="/django/access/{{ f.number }}" target="_blank">{{ f.name }}</a></td>
-		<td><a href="/django/access/{{ f.number }}" target="_blank">{{ f.label_type }}</a></td>
-		<td><a href="/django/access/{{ f.number }}" target="_blank">{{ f.lastspdate|date:"Y-m" }}</a></td>
-		<td><a href="/django/access/{{ f.number }}?wf={{ fo.weight }}" target="_blank">{{ fo.weight }}</a></td>
-		<td><a href="/django/access/{{ f.number }}" target="_blank">{{ fo.count }}</td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ f.number }}</a></td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ f.natart }}</a></td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ f.name }}</a></td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ f.label_type }}</a></td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ f.lastspdate|date:"Y-m" }}</a></td>
+		<td><a href="/access/{{ f.number }}?wf={{ fo.weight }}" target="_blank">{{ fo.weight }}</a></td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ fo.count }}</td>
 	</tr>
 	{% endfor %}
     </tbody>

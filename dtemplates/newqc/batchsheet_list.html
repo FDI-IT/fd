@@ -27,7 +27,7 @@
 	</tr>
 	{% for batchsheet in object_list %}
 	    <tr>
-	    <td><a href="/django/qc/batchsheets/{{batchsheet.lot.pk}}/">{{ batchsheet.lot.number }}</a></td>
+	    <td><a href="/qc/batchsheets/{{batchsheet.lot.pk}}/">{{ batchsheet.lot.number }}</a></td>
 		<td><a href="{{ batchsheet.lot.flavor.get_absolute_url }}">{{ batchsheet.lot.flavor }}</a></td>
 		<td>{{ batchsheet.lot.date|date:"Y-m-d" }}</td>
 		<td>{{ batchsheet.lot.amount|floatformat:0 }}</td>

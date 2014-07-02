@@ -7,7 +7,7 @@
 		<ul class="v_list">
 			<li class="rank">{{forloop.counter}}</li>
 			<li><img src="{{player.image_url}}"></li>
-			<li><a href="/django/fdileague/players/{{player.pk}}/">{{ player }}</a></li>
+			<li><a href="/fdileague/players/{{player.pk}}/">{{ player }}</a></li>
 			<li>{{ player.yearscore__score__sum }}</li>
 		</ul>
 	</li>

@@ -13,7 +13,7 @@
 				</span>
 				{% if lot_number %}
 				<span class="section_span" id="titleright">
-					<img src="/django/batchsheet/barcode/{{ lot_number }}/" align="top" />
+					<img src="/batchsheet/barcode/{{ lot_number }}/" align="top" />
 					<span id="lot_number">
 						Lot number<br>
 						{{ lot_number }}
@@ -58,7 +58,7 @@
 							<td class="abbrev">{{ formula_item.ingredient.id }}</td>
 							<td class="abbrev">{{ formula_item.ingredient.art_nati }}</td>
                                                         {% if formula_item.ingredient.sub_flavor %}
-							<td><a href="/django/batchsheet/?flavor_number={{ formula_item.ingredient.sub_flavor.number }}&batch_amount={{ formula_item.amount|floatformat:2 }}" target="_blank">
+							<td><a href="/batchsheet/?flavor_number={{ formula_item.ingredient.sub_flavor.number }}&batch_amount={{ formula_item.amount|floatformat:2 }}" target="_blank">
 								<span class="ingredient-name">{{ formula_item.ingredient.prefix }} {{ formula_item.ingredient.product_name }}</span>
 								<span class="ingredient-name-2">{{ formula_item.ingredient.part_name2 }}</span></a>
 								<span class="sensitive">{{ formula_item.ingredient.microsensitive }}</span>

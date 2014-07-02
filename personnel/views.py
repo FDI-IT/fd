@@ -6,7 +6,7 @@ def force_pwd_change(request, *args, **kwargs):
     response = auth_views.login(request, *args, **kwargs)
     if response.status_code == 302:
         if request.user.get_profile().force_password_change:
-            return redirect('/django/accounts/password_change/')
+            return redirect('/accounts/password_change/')
     return response
 
 def password_change(request,*args,**kwargs):

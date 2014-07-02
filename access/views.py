@@ -118,7 +118,7 @@ def experimental_edit(request, experimental):
         if form.is_valid():
             form.save()
             experimental.process_changes_to_flavor()
-            return redirect('/django/access/experimental/%s/' % experimental.experimentalnum)
+            return redirect('/access/experimental/%s/' % experimental.experimentalnum)
     else:
         form = forms.ExperimentalForm(instance=experimental)
     page_title = "Experimental Edit"
@@ -173,7 +173,7 @@ def experimental_add_formula(request, experimental):
     f.save()
     experimental.flavor = f
     experimental.save()
-    return HttpResponseRedirect('/django/access/experimental/%s/' % experimental.experimentalnum)
+    return HttpResponseRedirect('/access/experimental/%s/' % experimental.experimentalnum)
 
 @experimental_wrapper
 def experimental_review(request, experimental):
@@ -217,7 +217,7 @@ def experimental_review(request, experimental):
            
         context_dict['approve_link'] = experimental.get_approve_link()
         context_dict['status_message'] = status_message
-        context_dict['recalculate_link'] = '/django/access/experimental/%s/recalculate/' % experimental.experimentalnum
+        context_dict['recalculate_link'] = '/access/experimental/%s/recalculate/' % experimental.experimentalnum
         context_dict['experimental_edit_link'] = '#'
         return render_to_response('access/experimental/experimental_review.html',
                                   context_dict,
@@ -279,7 +279,7 @@ def tsr_review(request, tsr_number):
                    'tsr': tsr,
                    'help_link': help_link,
                    'page_title': page_title,
-                   'print_link':'/django/access/purchase/%s/print/' % tsr.number,
+                   'print_link':'/access/purchase/%s/print/' % tsr.number,
                    }   
     return render_to_response('access/tsr/tsr_review.html',
                               context_dict,
@@ -295,7 +295,7 @@ def po_review(request, po):
                    'po': po,
                    'help_link': help_link,
                    'page_title': page_title,
-                   'print_link':'/django/access/purchase/%s/print/' % po.number,
+                   'print_link':'/access/purchase/%s/print/' % po.number,
                    }   
     return render_to_response('access/purchase/po_review.html',
                               context_dict,
@@ -353,7 +353,7 @@ def location_entry(request):
 #                formula_row.save()
 #                
 #            flavor.save()
-#            redirect_path = "/django/access/%s/recalculate/" % (flavor.number)
+#            redirect_path = "/access/%s/recalculate/" % (flavor.number)
 #            return HttpResponseRedirect(redirect_path)
 #    # else:
 #    initial_data, label_rows = forms.build_LocationEntryForm_formset_initial_data(flavor)
@@ -405,7 +405,7 @@ def ingredient_replacer(request):
         if request.method=='POST':
             form = forms.IngredientReplacerForm(request.POST)
             if form.is_valid():
-                return HttpResponseRedirect('/django/access/ingredient_replacer_preview/%s/%s/' 
+                return HttpResponseRedirect('/access/ingredient_replacer_preview/%s/%s/' 
                                         % (form.cleaned_data['original_ingredient'],
                                            form.cleaned_data['new_ingredient']))
         else:
@@ -414,7 +414,7 @@ def ingredient_replacer(request):
                                   {'form':form,},
                                   context_instance=RequestContext(request))
     else:
-        return HttpResponseRedirect('/django/')
+        return HttpResponseRedirect('/')
 
 @flavor_info_wrapper
 def ft_review(request, flavor):
@@ -439,7 +439,7 @@ def ft_review(request, flavor):
                    'weight_factor': weight_factor,
                    'formula_weight': formula_weight,
                    'print_link':'FLAVOR_REVIEW_PRINT_MENU',
-                   'recalculate_link':'/django/access/%s/recalculate/' % flavor.number,
+                   'recalculate_link':'/access/%s/recalculate/' % flavor.number,
                    }   
     return render_to_response('access/flavor/ft_review.html',
                               context_dict,
@@ -507,7 +507,7 @@ def experimental_name_edit(request, experimental):
             form.process_data(experimental)
             experimental.save()
             experimental.process_changes_to_flavor()
-            return redirect('/django/access/experimental/%s/' % experimental.experimentalnum)
+            return redirect('/access/experimental/%s/' % experimental.experimentalnum)
     else:
         form = forms.ExperimentalNameForm(initial=experimental.__dict__)
     page_title = "Experimental Name Edit"
@@ -598,8 +598,8 @@ def ingredient_activate(request, raw_material_code=False, ingredient_id=False):
         
         discontinue_ingredient(old_active_ingredient)
 
-        #redirect_path = "/django/access/%s/recalculate/" % (flavor.number)
-        redirect_path = "/django/access/ingredient/pin_review/%s" % ingredient_id
+        #redirect_path = "/access/%s/recalculate/" % (flavor.number)
+        redirect_path = "/access/ingredient/pin_review/%s" % ingredient_id
         return HttpResponseRedirect(redirect_path)
     
     else: #otherwise, activate the ingredient with the raw material code specified in the url
@@ -984,7 +984,7 @@ def formula_entry(request, flavor, status_message=None):
                 formula_row.save()
                 
             flavor.save()
-            redirect_path = "/django/access/%s/recalculate/" % (flavor.number)
+            redirect_path = "/access/%s/recalculate/" % (flavor.number)
             return HttpResponseRedirect(redirect_path)
         
         else:
@@ -1080,7 +1080,7 @@ def experimental_formula_entry(request, experimental, status_message=None):
             flavor.rawmaterialcost = Decimal(rawmaterialcost / 1000)
             
             flavor.save()
-            redirect_path = "/django/access/experimental/%s/recalculate/" % (experimental.experimentalnum)
+            redirect_path = "/access/experimental/%s/recalculate/" % (experimental.experimentalnum)
             return HttpResponseRedirect(redirect_path)
         else:
             label_rows = forms.build_formularow_formset_label_rows(formset)
@@ -1163,7 +1163,7 @@ def tsr_entry(request, tsr_number):
             #print foo
 
             
-            return HttpResponseRedirect("/django/access/tsr/%s/tsr_entry/" % tsr.number)
+            return HttpResponseRedirect("/access/tsr/%s/tsr_entry/" % tsr.number)
         else:
             return render_to_response('access/tsr/tsr_entry.html', 
                                   {'tsr': tsr,
@@ -1215,7 +1215,7 @@ def po_entry(request, po):
                 poli.raw_material.date_ordered = po.date_ordered
                 poli.raw_material.save()
                 poli.save()
-            return HttpResponseRedirect("/django/access/purchase/%s/po_entry/" % po.number)
+            return HttpResponseRedirect("/access/purchase/%s/po_entry/" % po.number)
         else:
             return render_to_response('access/purchase/poli_entry.html', 
                                   {'po': po,
@@ -1328,7 +1328,7 @@ def new_tsr(request):
     return create_object(request,
                          form_class = TSRForm,
                          template_name="access/tsr/new.html",
-                         post_save_redirect="/django/access/tsr/%(number)s/tsr_entry",)
+                         post_save_redirect="/access/tsr/%(number)s/tsr_entry",)
 
 @login_required
 @revision.create_on_success
@@ -1336,7 +1336,7 @@ def new_po(request):
     return create_object(request, 
                          form_class=forms.PurchaseOrderForm, 
                          template_name="access/purchase/new.html",
-                         post_save_redirect="/django/access/purchase/%(number)s/po_entry/",)
+                         post_save_redirect="/access/purchase/%(number)s/po_entry/",)
 
 
 def jil_object_list(request):
@@ -1454,7 +1454,7 @@ def new_solution_wizard(request):
         try:
             solutions = Solution.objects.filter(my_base=base_ingredient).filter(my_solvent=solvent).filter(percentage=concentration)
             if solutions.count() != 0:
-                return redirect('/django/access/ingredient/pin_review/%s/' % solutions[0].ingredient.id)
+                return redirect('/access/ingredient/pin_review/%s/' % solutions[0].ingredient.id)
         except:
             pass
         new_name = "%s(%s) %s%% in %s" % (base_ingredient.product_name, base_ingredient.id, concentration, SOLVENT_NAMES[solvent.id])
@@ -1561,7 +1561,7 @@ def new_solution_wizard(request):
 #                         percentage=concentration,
 #                         status=SolutionStatus.objects.get(status_name__iexact="verified"))
 #            s.save()
-#            return redirect('/django/access/ingredient/pin_review/%s/' % new_ingredient.id)
+#            return redirect('/access/ingredient/pin_review/%s/' % new_ingredient.id)
 
 
 def allergen_list(request):
@@ -1735,6 +1735,8 @@ def edit_spec(request, flavor_number, spec_id=0):
             
             return HttpResponseRedirect(return_url)
         
+#         else: #for testing purposes
+#             raise forms.ValidationError(form.errors)
                 
     if request.method != 'POST':
         form = FlavorSpecificationForm(initial=initial_data)
@@ -1787,10 +1789,10 @@ def spec_list(request, flavor):
                             flavorspec.save()
                 except:
                     #error
-                    return HttpResponseRedirect("/django/access/%s/spec_list/EXCEPT" % flavor.number)
+                    return HttpResponseRedirect("/access/%s/spec_list/EXCEPT" % flavor.number)
 
             
-            return HttpResponseRedirect("/django/access/%s/spec_list/" % flavor.number)
+            return HttpResponseRedirect("/access/%s/spec_list/" % flavor.number)
         else:
             return render_to_response('access/flavor/spec_list.html', 
                                   {'flavor': flavor,

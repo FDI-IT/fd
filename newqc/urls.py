@@ -17,7 +17,7 @@ urlpatterns = patterns('newqc.views',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    (r'^$', redirect_to, {'url': '/django/qc/retains/'}),
+    (r'^$', redirect_to, {'url': '/qc/retains/'}),
     (r'^review/$', 'review'),
     
     #(r'^new_coa/(?P<lss_pk>\d+)/$', 'new_coa'),

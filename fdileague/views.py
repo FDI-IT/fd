@@ -34,7 +34,7 @@ def prf_player_detail(request, player_url_pref, player_url_slug):
         player = Player.objects.get(url__icontains=player_url_slug)
     except:
         raise Http404
-    return HttpResponseRedirect('/django/admin/fdileague/player/%s/' % player.pk)
+    return HttpResponseRedirect('/admin/fdileague/player/%s/' % player.pk)
 #    try:
 #        player = Player.objects.get(url__icontains=player_url_slug)
 #    except:

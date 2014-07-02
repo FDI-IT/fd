@@ -40,4 +40,4 @@ class Lot(models.Model):
         ordering = ['number']
         
     def get_admin_url(self):
-        return "/django/admin/lot/lot/%s" % self.pk
+        return "/admin/lot/lot/%s" % self.pk

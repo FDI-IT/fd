@@ -3,7 +3,7 @@ jQuery.ajaxSettings.traditional = true;
 var initial_sources = {};
 
 $.fn.getSuggestedResults = function(my_solution_array, my_row_array) {
-	jQuery.post('/django/solutionfixer/post_match_guesses',
+	jQuery.post('/solutionfixer/post_match_guesses',
 		{
 			solution_ids: my_solution_array,
 			row_ids: my_row_array
@@ -29,7 +29,7 @@ $.fn.newElements = function() {
 					 response(initial_sources[my_response_key]);
 				} else {
 					// remote source
-					$.getJSON('/django/solutionfixer/ingredient_autocomplete',
+					$.getJSON('/solutionfixer/ingredient_autocomplete',
 						request, function(data, status, xhr) {
 							response(data);
 					});
@@ -39,7 +39,7 @@ $.fn.newElements = function() {
 			select: function(event,ui) {
 				event.target.value = ui.item.label;
 				jQuery(event.target).siblings('.my_base_hidden').val(ui.item.value)
-				jQuery.post('/django/solutionfixer/process_baserm_bypk_update', 
+				jQuery.post('/solutionfixer/process_baserm_bypk_update', 
 					{
 						solution_id: $(this).siblings('.solution_id').html(),
 						baserm_id: ui.item.value
@@ -56,7 +56,7 @@ $.fn.newElements = function() {
 };
 
 function update_solution_percentage_multiple (solution_id, percentage) {
-	jQuery.post('/django/solutionfixer/process_percentage_update',
+	jQuery.post('/solutionfixer/process_percentage_update',
 		{
 			solution_id: solution_id,
 			percentage: percentage
@@ -72,7 +72,7 @@ function update_solution_percentage_multiple (solution_id, percentage) {
 }
 
 function update_solution_solvent(solution_id, solvent_id) {
-	jQuery.post('/django/solutionfixer/process_solvent_update',
+	jQuery.post('/solutionfixer/process_solvent_update',
 		{
 			solution_id: solution_id,
 			solvent_id: solvent_id
@@ -120,7 +120,7 @@ jQuery(document).ready(function(){
 			my_status_id = 4;
 		}
 
-		jQuery.post('/django/solutionfixer/process_status_update',
+		jQuery.post('/solutionfixer/process_status_update',
 			{
 				solution_id: $this.closest('tr').children('td:nth-child(2)').children('input:first-child').val(),
 				status_id: my_status_id

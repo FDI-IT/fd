@@ -3,6 +3,9 @@ import os
 import sys
 sys.path.append(os.getcwd())
 
+#add the ghs project to access hazard calculator
+sys.path.append('/var/www/django/ghs')
+
 from LOCAL_SECRETS import DATABASES, SECRET_KEY
 
 DEBUG =True 
@@ -30,7 +33,7 @@ ADMINS = (
 
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
 
-LOGIN_URL = '/django/accounts/login/'
+LOGIN_URL = '/accounts/login/'
 
 MANAGERS = ADMINS
 
@@ -52,6 +55,25 @@ SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 # to load the internationalization machinery.
 USE_I18N = True
 
+
+
+
+'''
+added all this stuff so static files are deployed when using runserver/testserver
+i don't know if this interferes with all the 'media' stuff
+
+to create a test server: python manage.py testserver access/fixtures/testdata.json --addrport 0.0.0.0:8000
+
+'''
+STATIC_ROOT = ''
+STATIC_URL = '/djangomedia/'
+STATICFILES_DIRS = ('/var/www/django/fd/staticmedia',)
+
+
+
+
+
+
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
 MEDIA_ROOT = '/var/www/djangomedia/'
@@ -61,6 +83,8 @@ MEDIA_ROOT = '/var/www/djangomedia/'
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/djangomedia/'
 #MEDIA_URL = 'http://localhost:8000/djangomedia/'
+#MEDIA_URL = '/staticmedia/'
+
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
@@ -83,7 +107,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.media',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.request',
+    'django.core.context_processors.static',
 )
+
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.gzip.GZipMiddleware',
@@ -142,6 +168,7 @@ INSTALLED_APPS = (
     'docvault',
     'unified_adapter',
     'reports',
+    'hazard_calculator',
     #'history_audit',
     #'haystack',
 )
@@ -153,7 +180,7 @@ BROKER_TRANSPORT = "redis"
 BROKER_HOST = "localhost"  # Maps to redis host.
 BROKER_PORT = 6379         # Maps to redis port.
 BROKER_VHOST = "0"         # Maps to database number.
-CELERY_RESULT_BACKEND = "redis"
+CELERY_RESULT_BACKEND = "djcelery.backends.database.DatabaseBackend"
 CELERY_REDIS_HOST = "localhost"
 CELERY_REDIS_PORT = 6379
 CELERY_REDIS_DB = 0

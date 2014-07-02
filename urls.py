@@ -1,5 +1,7 @@
 from django.conf.urls.defaults import *
 
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 from django.contrib import databrowse
@@ -45,7 +47,7 @@ urlpatterns = patterns('',
     (r'^accounts/logout/$',
      'django.contrib.auth.views.logout',
      {'template_name': 'homepage/login.html',
-      'next_page':'/django/accounts/login/'}),
+      'next_page':'/accounts/login/'}),
     (r'^databrowse/(.*)', databrowse.site.root),
     #(r'^fdileague/', include ('fdileague.urls')),
     #(r'^players/', include ('fdileague.player_urls')),
@@ -54,6 +56,8 @@ urlpatterns = patterns('',
     (r'^export/', include ('export.urls')),
     (r'^reports/', include ('reports.urls')),
 )
+
+urlpatterns += staticfiles_urlpatterns()
 
 from access.models import Flavor, Ingredient, ExperimentalLog, Formula
 

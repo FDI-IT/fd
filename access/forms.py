@@ -701,7 +701,7 @@ class NewRMWizard(FormWizard):
                          status=SolutionStatus.objects.get(status_name__iexact="verified"))
             s.save()
             i.save()
-        return HttpResponseRedirect('/django/access/ingredient/pin_review/%s/' % i.id)
+        return HttpResponseRedirect('/access/ingredient/pin_review/%s/' % i.id)
     
     
     
@@ -835,7 +835,7 @@ class NewExFormWizard(FormWizard):
         ex.flavor = f
         ex.save()
              
-        return HttpResponseRedirect('/django/access/experimental/%s/' % ex.experimentalnum)
+        return HttpResponseRedirect('/access/experimental/%s/' % ex.experimentalnum)
 
 class ExperimentalNameForm(NewExForm1):
     pass    

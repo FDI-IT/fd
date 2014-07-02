@@ -19,6 +19,10 @@ class SolutionFixer():
           'acid',
                  ]
     
+    
+    '''
+    old hardcoded data that was replaced by a solvents model
+
     solvents = {
                 'pg':Ingredient.objects.filter(id=703).order_by('discontinued')[0],
                 'etoh':Ingredient.objects.filter(id=321).order_by('discontinued')[0],
@@ -29,7 +33,10 @@ class SolutionFixer():
                 'soybeanoil':Ingredient.objects.filter(id=758).order_by('discontinued')[0],
                 'neobee':Ingredient.objects.filter(id=1983).order_by('discontinued')[0],
                 }
-         
+          
+    '''
+    solvents = {}
+
     noise_res = [
                     re.compile(r'#'),
                     re.compile(r''),

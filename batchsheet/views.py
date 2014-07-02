@@ -197,7 +197,7 @@ def batchsheet_print(request, flavor):
                             soli.quantity 
                         ))     
                 bubbles = [
-                        Bubble('<a href="/django/access/%s/" target="_blank">Flavor Info</a>' % flavor.number, [
+                        Bubble('<a href="/access/%s/" target="_blank">Flavor Info</a>' % flavor.number, [
                                 "Flash point: %s" % flavor.flashpoint,
                                 "Yield: %s" % flavor.yield_field,
                                 "Allergens: %s" % flavor.allergen,
@@ -209,7 +209,7 @@ def batchsheet_print(request, flavor):
                                 "Open orders: %s" % LineItem.objects.filter(flavor=flavor).filter(salesordernumber__open=True).count(),
                                 "Total weight: %s" % LineItem.objects.filter(flavor=flavor).filter(salesordernumber__open=True).aggregate(Sum('quantity'))['quantity__sum'],
                             ]),
-                        Bubble('<a href="/django/salesorders/" target="_blank">Open Sales Orders</a>', soli_bubble), 
+                        Bubble('<a href="/salesorders/" target="_blank">Open Sales Orders</a>', soli_bubble), 
                     ]       
                 c = Context({
                     'bubbles':bubbles,
@@ -354,7 +354,7 @@ def lot_update_confirmation(request, lot_list=None): #go straight here if clicki
                 
                 update_lot.save()        
         
-            redirect_path = "/django/qc/lots"
+            redirect_path = "/qc/lots"
             return HttpResponseRedirect(redirect_path)
         
         else:
@@ -378,7 +378,7 @@ def lot_update_confirmation(request, lot_list=None): #go straight here if clicki
             
             update_lot.save()
         
-        redirect_path = "/django/qc/lots"
+        redirect_path = "/qc/lots"
         return HttpResponseRedirect(redirect_path)
         '''
     else:
@@ -520,7 +520,7 @@ def add_lots(request):
                                   context_instance=RequestContext(request))
 
             #transaction.commit()
-            redirect_path = "/django/qc/lots"
+            redirect_path = "/qc/lots"
             return HttpResponseRedirect(redirect_path)
         
         else:

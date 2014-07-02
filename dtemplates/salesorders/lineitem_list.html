@@ -9,7 +9,7 @@
     
 		<ul>
 		{% for month in month_list %}
-			<li><a href="/django/salesorders/lineitem/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+			<li><a href="/salesorders/lineitem/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
 		{% endfor %}
 		</ul>
 	</div>
@@ -30,7 +30,7 @@
 	    </span>
 	</div>
 	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
-    <form name="lineitem_selections" action="/django/salesorders/batch_print/" method="post">
+    <form name="lineitem_selections" action="/salesorders/batch_print/" method="post">
     {% csrf_token %}
     <table class="sorttable" class="retaintable" width="100%">
     	
@@ -50,7 +50,7 @@
 	    <td><!-- <a href="{{ lineitem.get_admin_url }}"> -->{{ lineitem.salesordernumber.number }}</a></td>
 		<td>{{ lineitem.salesordernumber.create_date|date:"m-d" }}</td>
 		<td title="{{lineitem.salesordernumber.customer.companyname}}"><!-- <a href=""> -->{{ lineitem.salesordernumber.customer.companyname|slice:"0:11" }}{% if lineitem.salesordernumber.customer.companyname|length > 11 %}...{% endif %}</a></td>
-		<td title="{{lineitem.flavor}}"><a href="/django/access/{{lineitem.flavor.number}}/">{{ lineitem.flavor.prefix }}-{{ lineitem.flavor.number }} {{ lineitem.flavor.natart }} {{ lineitem.flavor.name|slice:"0:18" }}{% if lineitem.flavor.name|length > 18 %}...{% endif %} {{ lineitem.flavor.label_type }}</a></td>
+		<td title="{{lineitem.flavor}}"><a href="/access/{{lineitem.flavor.number}}/">{{ lineitem.flavor.prefix }}-{{ lineitem.flavor.number }} {{ lineitem.flavor.natart }} {{ lineitem.flavor.name|slice:"0:18" }}{% if lineitem.flavor.name|length > 18 %}...{% endif %} {{ lineitem.flavor.label_type }}</a></td>
 		<td>{{ lineitem.quantity|floatformat:1 }}</td>
 		<td>${{ lineitem.unit_price|floatformat:2 }}</td>
 		<td>{{ lineitem.ship_date|date:"m-d" }}</td>

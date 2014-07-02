@@ -13,7 +13,7 @@
 <div id="content-right">
 	<ul id="sidebar_links">
 		<li id='li_{{ testcard.pk}}'>
-			<a target='_blank' href='/django/admin/newqc/testcard/{{testcard.pk}}'>{{ testcard.retain }}</a> - <a target='_blank' href='/django/admin/newqc/lot/{{testcard.retain.lot.pk}}'>{{testcard.retain.lot.number}}</a> - {{ testcard.retain.lot.flavor}}	
+			<a target='_blank' href='/admin/newqc/testcard/{{testcard.pk}}'>{{ testcard.retain }}</a> - <a target='_blank' href='/admin/newqc/lot/{{testcard.retain.lot.pk}}'>{{testcard.retain.lot.number}}</a> - {{ testcard.retain.lot.flavor}}	
 		</li>
 	</ul>
 </div>

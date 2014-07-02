@@ -8,15 +8,15 @@
 {% block content %}
     <div id="content-right">
     	<ul>
-    		<li><a href="/django/qc/retains/">All statuses</a></li>
+    		<li><a href="/qc/retains/">All statuses</a></li>
 		{% for status in status_list %}
-			<li><a href="/django/qc/retains/{{ status }}/">{{ status }}</a></li>
+			<li><a href="/qc/retains/{{ status }}/">{{ status }}</a></li>
 		{% endfor %}
     	</ul>
 		<ul>
-			<li><a href="/django/qc/retains/">Latest</a></li>
+			<li><a href="/qc/retains/">Latest</a></li>
 		{% for month in month_list %}
-			<li><a href="/django/qc/retains/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+			<li><a href="/qc/retains/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
 		{% endfor %}
 		</ul>
 	</div>
@@ -37,7 +37,7 @@
 	    </span>
 	</div>
 	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
-    <form name="retain_selections" action="/django/qc/batch_print/" method="post">
+    <form name="retain_selections" action="/qc/batch_print/" method="post">
     {% csrf_token %}
     <table class="sorttable" class="retaintable" width="100%">
     	
@@ -58,10 +58,10 @@
 			<a href="{{ retain.get_admin_url }}">{{ retain.retain }}</a>
 			</td>
 		<td><a href="{{ retain.lot.flavor.get_absolute_url }}">{{ retain.lot.flavor }}</a></td>
-		<td><a href="/django/qc/lots/{{ retain.lot.pk }}/">{{ retain.lot.number }}</a></td>
-		<td><a href="/django/qc/retains/{{retain.date|date:'Y'}}/{{retain.date|date:'m'}}/{{retain.date|date:'d'}}/">{{ retain.date|date:"Y-m-d" }}</a></td>
+		<td><a href="/qc/lots/{{ retain.lot.pk }}/">{{ retain.lot.number }}</a></td>
+		<td><a href="/qc/retains/{{retain.date|date:'Y'}}/{{retain.date|date:'m'}}/{{retain.date|date:'d'}}/">{{ retain.date|date:"Y-m-d" }}</a></td>
 		<td>{{ retain.lot.amount|floatformat:0 }}</td>
-		<td><a href="/django/qc/retains/{{retain.status}}/">{{ retain.status }}</a></td>
+		<td><a href="/qc/retains/{{retain.status}}/">{{ retain.status }}</a></td>
 		{% if retain.testcard_set.all.count > 0 %}
 			<td class="tc_present cell_icon"><img src="/djangomedia/images/Icons/16x16/accept.png">
 		{% else %}

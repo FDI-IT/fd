@@ -7,7 +7,7 @@
 <div id="content-solo">
 
 <div>
-	<form action="/django/mysearch/access/new_pin_flavor/" id="mainsearch" method="GET">
+	<form action="/mysearch/access/new_pin_flavor/" id="mainsearch" method="GET">
 		<div id="advanced-search" >
 			<div>{% new_pin_flavor_search %}<input type="submit" value="Filter Results"></div>
 			<ul class="filterselect_list">
@@ -39,7 +39,7 @@
 	    {% for object, fields in rows %}
 	    <tr id="{{ object.pk }}">
 	    	{% for field in fields %}
-			<td><a href="/django/access/new_rm/flavor/{{ object.number }}">{{ field }}</a></td>
+			<td><a href="/access/new_rm/flavor/{{ object.number }}">{{ field }}</a></td>
 			{% endfor %}
 	    </tr>
 	    {% endfor %}

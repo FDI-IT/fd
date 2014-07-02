@@ -21,7 +21,7 @@ function print_experimental_review(experimental_number) {
 	}
 
 
-	newwindow = popup_window('/django/access/experimental/' + experimental_number +'/print_review/');
+	newwindow = popup_window('/access/experimental/' + experimental_number +'/print_review/');
 	newwindow.onload = function (e) {
 		var div_flavor_tabs = newwindow.document.getElementById('flavor-tabs');
 		var new_table = copy_table.clone();
@@ -46,7 +46,7 @@ function print_review(flavor_number) {
 	} else {
 		var copy_table = visible_data;
 	}
-	newwindow = popup_window('/django/access/' + flavor_number +'/print_review/');
+	newwindow = popup_window('/access/' + flavor_number +'/print_review/');
 	newwindow.onload = function (e) {
 		var div_flavor_tabs = newwindow.document.getElementById('flavor-tabs');
 		var new_table = copy_table.clone();
@@ -65,14 +65,14 @@ function print_review(flavor_number) {
 }
 
 function print_qc(flavor_number) {
-	newwindow = popup_window('/django/qc/flavors/' + flavor_number +'/print/');
+	newwindow = popup_window('/qc/flavors/' + flavor_number +'/print/');
 	newwindow.onload = function (e) {
 		newwindow.print();		
 	};
 }
 
 function spec_sheet(flavor_number) {
-	newwindow = popup_window('/django/access/' + flavor_number +'/spec_sheet/');
+	newwindow = popup_window('/access/' + flavor_number +'/spec_sheet/');
 	newwindow.onload = function (e) {
 		newwindow.print();		
 	};
@@ -202,7 +202,7 @@ function consolidate() {
 }
 
 function flat_review_popup(flavor_number) {
-	newwindow = popup_window('/django/access/' + flavor_number +'/batch_sheet/');
+	newwindow = popup_window('/access/' + flavor_number +'/batch_sheet/');
 	newwindow.onload = function (e) {
 		var batch_sheet_tbody = $(newwindow.document.getElementById('formula')).find('tbody')[0];
 		jQuery('#flat-table tr').each( function(index, element) {
@@ -297,7 +297,7 @@ function flat_review_popup(flavor_number) {
 }
 
 function consolidated_review_popup(flavor_number) {
-	newwindow = popup_window('/django/access/' + flavor_number +'/batch_sheet/');
+	newwindow = popup_window('/access/' + flavor_number +'/batch_sheet/');
 	newwindow.onload = function (e) {
 		var batch_sheet_tbody = $(newwindow.document.getElementById('formula')).find('tbody')[0];
 		jQuery('#new_consolidated_table tr').each( function(index, element) {
@@ -388,7 +388,7 @@ function consolidated_review_popup(flavor_number) {
 
 
 function explosion_review_popup(flavor_number) {
-	newwindow = popup_window('/django/access/' + flavor_number +'/batch_sheet/');
+	newwindow = popup_window('/access/' + flavor_number +'/batch_sheet/');
 	accumulator = {};
 	var wf = jQuery('#ft_review_table').find("#adjusted_weight").val() / 1000;
 	var accumulate = function(ingredient_row, $ingredient_row) {
@@ -479,7 +479,7 @@ function explosion_review_popup(flavor_number) {
 
 function flavor_review_popup(flavor_number) {
 	consolidate();
-	newwindow = popup_window('/django/access/' + flavor_number +'/batch_sheet/');
+	newwindow = popup_window('/access/' + flavor_number +'/batch_sheet/');
 	newwindow.onload = function (e) {
 		var batch_sheet_tbody = $(newwindow.document.getElementById('formula')).find('tbody')[0];
 		jQuery('#consolidated tr').each( function(index, element) {

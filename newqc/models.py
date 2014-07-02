@@ -91,7 +91,7 @@ class ProductInfo(models.Model):
         return self.flavor.__unicode__()
 
     def get_admin_url(self):
-        return "/django/admin/newqc/productinfo/%s" % self.pk
+        return "/admin/newqc/productinfo/%s" % self.pk
     
         
 class ScannedDoc(models.Model):
@@ -197,7 +197,7 @@ class RMTestCard(ScannedDoc):
         
     @staticmethod
     def get_absolute_url(self):
-        return "/django/access/ingredient/pin_review/%s/" % self.retain.pin
+        return "/access/ingredient/pin_review/%s/" % self.retain.pin
 
 class BatchSheet(ScannedDoc):
     related_object_name = 'lot'
@@ -308,13 +308,13 @@ class Lot(models.Model):
 
     @staticmethod
     def get_absolute_url(self):
-        return "/django/qc/lots/%s/" % self.pk
+        return "/qc/lots/%s/" % self.pk
 
     class Meta:
         ordering = ['-date']
         
     def get_admin_url(self):
-        return "/django/admin/newqc/lot/%s" % self.pk
+        return "/admin/newqc/lot/%s" % self.pk
     
     def retains_present(self):
         return self.retain_set.all().count() > 0
@@ -390,7 +390,7 @@ class Retain(models.Model):
                              blank=True,
                              default='')
     ir = models.ForeignKey('ImportRetain', blank=True, null=True, default=None, editable=False)
-    browse_url = '/django/qc/retains/'
+    browse_url = '/qc/retains/'
     class Meta:
         ordering = ['-date', '-retain']
 
@@ -401,7 +401,7 @@ class Retain(models.Model):
         return self.testcard_set.all().count() > 0
 
     def get_admin_url(self):
-        return "/django/admin/newqc/retain/%s" % self.pk
+        return "/admin/newqc/retain/%s" % self.pk
     
     def similar_to(self, other):
         if self.date == other.date:
@@ -415,12 +415,12 @@ class Retain(models.Model):
         try:
             last_retain = current_retains[0]
         except:
-            return 0
+            return 1 #start at 1, you get an error if you add a retain with number 0
         return last_retain.retain + 1
     
     @staticmethod
     def get_absolute_url(self):
-        return "/django/qc/lots/%s/" % self.lot.pk
+        return "/qc/lots/%s/" % self.lot.pk
 
 class ImportRetain(models.Model):
     number = models.PositiveSmallIntegerField(blank=True, null=True)
@@ -472,7 +472,7 @@ class RMInfo(models.Model):
         return unicode(self.pin)
 
     def get_admin_url(self):
-        return "/django/admin/newqc/rm_info/%s" % self.pk
+        return "/admin/newqc/rm_info/%s" % self.pk
 
 class RMRetain(models.Model):
     """
@@ -501,12 +501,12 @@ class RMRetain(models.Model):
         
     @staticmethod
     def get_absolute_url(self):
-        return "/django/access/ingredient/pin_review/%s/" % self.pin
+        return "/access/ingredient/pin_review/%s/" % self.pin
 
     def get_admin_url(self):
-        return "/django/admin/newqc/rmretain/%s/" % self.pk
+        return "/admin/newqc/rmretain/%s/" % self.pk
     
-    browse_url = "/django/qc/rm_retains/"
+    browse_url = "/qc/rm_retains/"
 
 class ReceivingLogManager(models.Manager):
     def get_query_set(self):
@@ -548,9 +548,9 @@ class ReceivingLog(models.Model):
         return x
     
     def get_admin_url(self):
-        return "/django/admin/newqc/receivinglog/%s/" % self.pk
+        return "/admin/newqc/receivinglog/%s/" % self.pk
 
-    browse_url = '/django/qc/receiving_log/'
+    browse_url = '/qc/receiving_log/'
 
     @staticmethod
     def get_next_r_number():
@@ -589,7 +589,7 @@ class ExperimentalRetain(models.Model):
         return str(self.date.year)[2:5] + "-" + str(self.retain).zfill(4)
 
     def get_admin_url(self):
-        return "/django/admin/newqc/experimentalretain/%s/" % self.pk
+        return "/admin/newqc/experimentalretain/%s/" % self.pk
 
 ### OLD CODE
 

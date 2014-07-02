@@ -15,11 +15,12 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
-from access.controller import hazard_list, acute_toxicity_list
+
+from hazard_calculator.models import FormulaLineItem, HazardAccumulator, GHSIngredient
+from hazard_calculator.tasks import create_subhazard_dict
+#from access.controller import hazard_list, acute_toxicity_list
 #from access.controller import make_hazard_class, skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict
 
-
-from hazard_calculator.models import HazardFields, HazardousChemical
 
 from pluggable.sets import AncestorSet
 
@@ -257,7 +258,7 @@ class Formula(models.Model):
 
 
 
-class Ingredient(HazardousChemical):
+class Ingredient(models.Model):
     """Raw materials for use in production.
     
     The unique indentifier for this table is 'rawmaterialcode'.
@@ -269,9 +270,9 @@ class Ingredient(HazardousChemical):
     id = models.PositiveIntegerField("PIN", 
                                       db_column='ProductID',
                                       default=get_next_rawmaterialcode)
-#     cas = models.CharField( 
-#             max_length=15,
-#             blank=True)
+    cas = models.CharField( 
+            max_length=15,
+            blank=True)
     rawmaterialcode = models.PositiveIntegerField(
             primary_key=True,
             db_column='RawMaterialCode',
@@ -316,7 +317,7 @@ class Ingredient(HazardousChemical):
     discontinued = models.BooleanField(
             db_column='Discontinued',
             blank=True)
-    experimental = models.BooleanField(blank=True)
+    experimental = models.BooleanField(blank=True) #AKDJFLKJADLFDAFLADFAFKDADFDAfkj
     unitprice = models.DecimalField(
             decimal_places=3,
             max_digits=10,
@@ -496,7 +497,7 @@ class Ingredient(HazardousChemical):
     
     @property
     def url(self):
-        return "/django/access/ingredient/pin_review/%s/" % self.id
+        return "/access/ingredient/pin_review/%s/" % self.id
     
     @property
     def info_slice(self):
@@ -508,9 +509,9 @@ class Ingredient(HazardousChemical):
     
     def get_absolute_url(self):
         if self.discontinued == False:
-            return "/django/access/ingredient/pin_review/%s/" % self.id
+            return "/access/ingredient/pin_review/%s/" % self.id
         else:
-            return "/django/access/ingredient/%s/" % self.rawmaterialcode
+            return "/access/ingredient/%s/" % self.rawmaterialcode
 
     @staticmethod
     def build_kwargs(qdict, default, get_filter_kwargs):
@@ -729,14 +730,14 @@ class Ingredient(HazardousChemical):
         related_links = []
         if self.sub_flavor:
             related_links.append(
-                ('/django/access/%s/' % self.id, 'Flavor Formula')
+                ('/access/%s/' % self.id, 'Flavor Formula')
             )
         
         if self.is_solution_related():
             related_links.append(
-                ('/django/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions')
+                ('/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions')
             )
-        related_links.append(('/django/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'))
+        related_links.append(('/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'))
         return related_links
 
     def resembles(self, ingredient):
@@ -842,10 +843,10 @@ class Ingredient(HazardousChemical):
             return self.id
     
     def get_admin_url(self):
-        return "/django/admin/access/ingredient/%s" % self.rawmaterialcode
+        return "/admin/access/ingredient/%s" % self.rawmaterialcode
     
     def get_review_url(self):
-        return "/django/access/ingredient/pin_review/%s/" % self.id
+        return "/access/ingredient/pin_review/%s/" % self.id
 
     def get_branch(self):
         # this is where the Explode? field would be checke
@@ -972,7 +973,7 @@ class FormulaInfo(models.Model):
     class Meta:
         abstract = True
 
-class Flavor(FormulaInfo, HazardFields):
+class Flavor(FormulaInfo):
     
     #retains = generic.GenericRelation(Retain)
     id = models.PositiveIntegerField(
@@ -1163,7 +1164,7 @@ class Flavor(FormulaInfo, HazardFields):
 #    
     @property
     def url(self):
-        return "/django/access/%s/" % self.number
+        return "/access/%s/" % self.number
     
     @property
     def reconciled(self):
@@ -1235,16 +1236,16 @@ class Flavor(FormulaInfo, HazardFields):
         return "%s %s %s" % (self.natart, self.name, self.label_type)
     
     def get_admin_url(self):
-        return "/django/admin/access/flavor/%s" % self.id
+        return "/admin/access/flavor/%s" % self.id
         
     def get_absolute_url(self):
-        return "/django/access/%s/" % self.number
+        return "/access/%s/" % self.number
     
     def get_specs_url(self):
-        return "/django/access/%s/spec_list" % self.number
+        return "/access/%s/spec_list" % self.number
     
     def get_reconcile_specs_url(self):
-        return "/django/access/%s/reconcile_specs" % self.number
+        return "/access/%s/reconcile_specs" % self.number
     
     @staticmethod
     def get_absolute_url_from_softkey(softkey):
@@ -1333,29 +1334,29 @@ class Flavor(FormulaInfo, HazardFields):
     def get_related_links(self):
         related_links = [
                        ('#flat_review_table','Formula'),
-                       ('/django/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
-                       ('/django/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
-                       ('/django/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
-                       ('/django/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
-                       ('/django/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
-                       ('/django/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
-                       ('/django/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
+                       ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
+                       ('/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
+                       ('/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
+                       ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
+                       ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
+                       ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
+                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
                        ]
         if self.retain_superset().count()>0:
-            related_links.append(('/django/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
-            related_links.append(('/django/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
+            related_links.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
+            related_links.append(('/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
 
         try:
             self.experimentallog
-            related_links.append(('/django/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
+            related_links.append(('/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
         except:
             pass
         try:
             rmr = self.raw_material_record
             if rmr:
-                related_links.append(('/django/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
+                related_links.append(('/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
                 if Formula.objects.filter(ingredient=rmr).count() > 0:
-                    related_links.append(('/django/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
+                    related_links.append(('/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
         except:
             pass
 
@@ -1368,14 +1369,14 @@ class Flavor(FormulaInfo, HazardFields):
         for i in range(len(tokens)):
             try:
                 Flavor.objects.get(number=tokens[i])
-                tokens[i] = '<a href="/django/access/%s/">%s</a>' % (tokens[i], tokens[i])
+                tokens[i] = '<a href="/access/%s/">%s</a>' % (tokens[i], tokens[i])
             except:
                 pass
         return ''.join(tokens)
     
     @property
     def naive_linked_memo(self):
-        return re.sub('(\d{3,})', r'<a href="/django/access/\1/">\1</a>', self.productmemo)
+        return re.sub('(\d{3,})', r'<a href="/access/\1/">\1</a>', self.productmemo)
     
     @property
     def allergen_list(self):
@@ -1913,729 +1914,79 @@ class Flavor(FormulaInfo, HazardFields):
             return None
 
 
-    #the final accumulation function; adds up the weights for each subhazard category
-    def accumulate_hazards(self):
-        
-        #The list of all hazards to keep track of
-        #hazards_to_accumulate = ['skin_corrosion_hazard', 'eye_damage_hazard',]
-        
-        #The KEYS in this dictionary are in the format 'subhazard_category' (eg. 'skin_corrosion_hazard_1A')
-        #The VALUES are the accumulation of ingredient weights that correspond to each hazard
-        hazard_dict = {}
-        
-        #include the total weight and unknown weight of the flavor in the dict
-        hazard_dict['total_weight'] = 0
-        
-        
-        #initialize all unknown_weights for acute hazards to zero
-        #there will be an unknown weight for each hazard; eg. hazard_dict['oral_unknown'], ...
-        for hazard in hazard_list[:5]:
-            hazard_dict[hazard.split('acute_hazard_')[1] + '_unknown'] = 0
-        
-        #initialize all the values to zero
-        for hazard in hazard_list[5:]:  #I do the list splice because I don't want the acute hazards in here
-            for category in Ingredient._meta.get_field(hazard).choices:
-                if category[0] != 'No':     #category[0] and category[1] are always the same
-                    hazard_dict[hazard + '_' + category[0]] = 0
-        
-        '''
-        CALCULATING ACUTE TOXICITY HAZARDS (NOT THE SAME AS CALCULATING OTHER HAZARDS)
-        
-        A BUNCH OF ALGEBRA TO GET THE FINAL FORMULA BELOW 
-        
-        The formula to obtain the ld50 of a flavor is:
-            (100 - unknown_concentration)/flavor_ld50 = Sigma(ingredient_concentration/ingredient_ld50)
-            
-        To calculate the final sum of the Sigma operation, I would originally do something like:
-            
-            for ingredient in ingredients_under_the_ld50_threshold:
-                sigma += (weight/total_weight * 100) / ingredient.ld50
-                
-        However, since I'm calculating the total_weight in the same loop, I do not yet have access
-            to the total weight.  To work around this, I factor our the 100/total_weight from the sigma
-            equation since these remain constant.  I end up with:
-            
-            for ingredient in ingredients_under_the_ld50_threshold:
-                sigma += weight / ingredient.ld50
-                
-        The value 'sigma' above is what I store in the hazard_dict for each acute hazard.        
-                    
-        We know that:
-        
-            LD50_flavor = (100 - unknown_concentration) / (100 * sigma/total_weight),
-            
-            unknown_concentration = (weight_unknown/total_weight) * 100
-            
-        Substitute everything in:
-        
-            LD50_flavor = (100 - 100 * (weight_unknown/total_weight)) / 100 * (sigma/total_weight)
-            
-        Cancel out the 100's: 
-        
-            LD50_flavor = (1 - weight_unknown/total_weight) / (sigma/total_weight),
-        
-        Replace the 1 on the left side with total_weight/total_weight, then cancel the total_weights:
-        
-        FINAL FORMULA ------------------------------------------------------------------------
-                
-            LD50_flavor = (total_weight - weight_unknown) / sigma
-            
-                where sigma = sum(ingredient_weights/ingredient_ld50s)
-            
-        --------------------------------------------------------------------------------------
-    
-        Steps to calculate ld50 of a flavor:
-        1. Store weight_unknown and sigma in the hazard_dictionary
-            -Note: Each acute subhazard (oral, dermal, etc.) needs its own weight_unknown
-        2. In the controller, use the total_weight and the final formula above to find LD50_flavor    
 
-                
+    def get_hazards(self):
+        """
+        Use the imported ghs project to calculate the hazards for a flavor.
+        
+        1. Get the consolidated leafs.
+        2. Convert the list of consolidated leafs to a list of FormulaLineItem objects.
+            -Does the leaf ingredient have a cas number?
+            -Is that cas number in the imported hazard data?
+        3. create_subhazard_dict(formula_list)
+        4. accumulator = HazardAccumulator(subhazard_dict)
+        5. accumulator.get_hazard_dict()
+        6. Save the hazards into the flavor model. SAVE THEM IN SEPARATE FUNCTION?
+        
+        """
+        
+        formula_list = []
+        
+        
+        '''
+        Need to account for two possibilities:
+        
+        1. The ingredient does not have a cas number in our database. 
+            -Create a placeholder GHSIngredient with cas number '00-00-00'
+                and no hazards.  This placeholder ingredient has no hazards.
+            -When an ingredient does not have a cas number, create a FormulaLineItem
+                with cas = '00-00-00' and record its weight.
+            -For each ingredient without a cas number, add its weight to the 'no_cas_total'
+                variable.
+            -When the for loop is complete, create a FormulaLineItem with cas = '00-00-00'
+                and weight = no_cas_total (we are consolidating all the ingredients without cas #s)
+            
+        
+        2. The ingredient cas number is not in the imported data.
+            -Do the same as above (Should I handle this case differently?)
         '''
         
-        #sigma(weight/ld50), explained above
-        for acute_hazard, max_ld50 in acute_toxicity_list:
-            hazard_dict[acute_hazard] = 0
-                
-        #for each base ingredient in the flavor, find any hazards it has and add its weight to each of those
+        
+        no_cas_total = 0
+        
         for ingredient, weight in self.consolidated_leafs.iteritems():
-           
-            hazard_dict['total_weight'] += weight
             
-            for hazard in hazard_list:
-                ingredient_hazard_category = getattr(ingredient, hazard)
-                if ingredient_hazard_category != '':
-                    hazard_dict[hazard + '_' + ingredient_hazard_category] += weight
+            #case 1
+            if ingredient.cas == '':
+                no_cas_total = no_cas_total + weight
             
-            #here I add weight/ld50 for each of the acute hazards
-            for acute_hazard, max_ld50 in acute_toxicity_list:
-                ld50_property = acute_hazard.split('acute_hazard_')[1] + '_ld50'
-                unknown_weight_key = acute_hazard.split('acute_hazard_')[1] + '_unknown'
+            else:
+                #case 2: the cas number is not in the imported ingredients
+                if not GHSIngredient.objects.filter(cas=ingredient.cas).exists():
+                    no_cas_total = no_cas_total + weight
                 
-                ingredient_ld50 = getattr(ingredient, ld50_property)
-                
-                if ingredient_ld50 == None:
-                    #only add the weight to unknown_weight if its concentration is >10%
-                    #here I just assume that the total_weight is 1000 because it would be hard to do this check in the controller
-                    if (weight/1000) * 100 > 10: 
-                        hazard_dict[unknown_weight_key] += weight
-                elif ingredient_ld50 < max_ld50:
-                    hazard_dict[acute_hazard] += weight/getattr(ingredient, ld50_property)
-                
+                else:
+                    fli = FormulaLineItem(cas=ingredient.cas, weight=weight)
+                    formula_list.append(fli)
                     
-        return hazard_dict
-
-            
-    #This function takes the individual hazard dictionaries, creates an instance of a hazard class
-    #    for each hazard, and uses those instances to compute the hazard categories for each hazard
-    def get_hazards_consolidated(self):
-        
-        complete_hazard_dict = {}
-        
-        hazard_accumulators = []
-        
-        for hazard_dict in [skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict]:
-            hazard_class = make_hazard_class(hazard_dict)
-            hazard_accumulators.append(hazard_class())
-        
-        total_weight = 0
-        
-        for leaf in self.consolidated_leafs.iteritems():
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            for accumulator in hazard_accumulators:
-                accumulator.accumulate(ingredient, weight)
+            #add the placeholder if any no cas ingredients exist
+            if no_cas_total != 0:
+                fli = FormulaLineItem(cas='00-00-00', weight=no_cas_total)
+                formula_list.append(fli)
                 
-        for accumulator in hazard_accumulators:
-            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
-            
-        return complete_hazard_dict
-    
-
-    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
-    def get_hazard_dict(self):
-        
-        hazard_dict = {}
-        
-        total_weight = 0
-        
-        #HAZARD CATEGORY TOTALS (for now just do two)
-        #skin damage 
-
-        
-        #the inner function of a closure cannot modify a variable defined in its outer scope  
-        #the only way to get around this is to use a mutable object like a dictionary 
-        skin = {1: 0, 2: 0}
-        
-        #eye damage
-        eye = {1: 0, 2: 0}
-
-        #respiratory damage
-        #blahblah other hazard damage
-               
+        #return formula_list
+             
+        subhazard_dict = create_subhazard_dict(formula_list)
+              
+        accumulator = HazardAccumulator(subhazard_dict)
+          
+        hazard_dict = accumulator.get_hazard_dict()
+          
+        return hazard_dict
          
-        def skin_accumulate(ingredient, weight):
-            
-            #skin hazard requirements
-            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                skin[1] += weight #total ingredient weight will be 100
-                skin[2] += weight * 10   #10 * weight/10  
-                
-            if ingredient.skin_corrosion_hazard == ("2"):
-                skin[2] += weight            
-                
-        def eye_accumulate(ingredient, weight):
-            
-            #eye hazard requirements    
-            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                eye[1] += weight
-                eye[2] += weight * 10 #10 * weight / 10
-            if ingredient.eye_damage_hazard == ("2A" or "2B"):
-                eye[2] += weight               
         
-        for leaf in self.consolidated_leafs.iteritems():
-            
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            skin_accumulate(ingredient, weight)
-            eye_accumulate(ingredient, weight)
-            
-        
-        #skin_hazard(skin1, skin2, total_weight)
-        
-        #Calculate total hazard percentages and determine final categories    
-        
-#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
-#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
-#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
-#             they are equivalent, but i think list comprehension is faster?
-        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
-            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
-        
-        if skin1_percentage >= 5:
-            hazard_dict["skin"] = "Category 1"
-        elif skin2_percentage >= 10:
-            hazard_dict["skin"] = "Category 2"
-        else:
-            hazard_dict["skin"] = "No Hazard"
-            
-                     
-        if eye1_percentage >= 3:
-            hazard_dict["eye"] = "Category 1"
-        elif eye2_percentage >= 10:
-            hazard_dict["eye"] = "Category 2"
-        else:
-            hazard_dict["eye"] = "No Hazard"
-    
-        return hazard_dict
-    
-    
-    #Below I have separate functions for each hazard.  
-    #Each one has to loop through the consolidated_leafs once, where the functions above
-    #    only go through that loop once to compute all hazards
-    
-    def skin_damage_hazard(self):
-        total_weight = 0
-        cat_1_total = 0
-        cat_2_total = 0
-        
-        for leaf in self.consolidated_leafs.iteritems():
-    
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                cat_1_total += weight #total ingredient weight will be 100
-                cat_2_total += weight * 10   #10 * weight/10
-                
-        for accumulator in hazard_accumulators:
-            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
-            
-        return complete_hazard_dict
-    
 
-    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
-    def get_hazard_dict(self):
-        
-        hazard_dict = {}
-        
-        total_weight = 0
-        
-        #HAZARD CATEGORY TOTALS (for now just do two)
-        #skin damage 
-
-        
-        #the inner function of a closure cannot modify a variable defined in its outer scope  
-        #the only way to get around this is to use a mutable object like a dictionary 
-        skin = {1: 0, 2: 0}
-        
-        #eye damage
-        eye = {1: 0, 2: 0}
-
-        #respiratory damage
-        #blahblah other hazard damage
-               
-         
-        def skin_accumulate(ingredient, weight):
-            
-            #skin hazard requirements
-            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                skin[1] += weight #total ingredient weight will be 100
-                skin[2] += weight * 10   #10 * weight/10  
-                
-            if ingredient.skin_corrosion_hazard == ("2"):
-                skin[2] += weight            
-                
-        def eye_accumulate(ingredient, weight):
-            
-            #eye hazard requirements    
-            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                eye[1] += weight
-                eye[2] += weight * 10 #10 * weight / 10
-            if ingredient.eye_damage_hazard == ("2A" or "2B"):
-                eye[2] += weight               
-        
-        for leaf in self.consolidated_leafs.iteritems():
-            
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            skin_accumulate(ingredient, weight)
-            eye_accumulate(ingredient, weight)
-            
-        
-        #skin_hazard(skin1, skin2, total_weight)
-        
-        #Calculate total hazard percentages and determine final categories    
-        
-#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
-#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
-#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
-#             they are equivalent, but i think list comprehension is faster?
-        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
-            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
-        
-        if skin1_percentage >= 5:
-            hazard_dict["skin"] = "Category 1"
-        elif skin2_percentage >= 10:
-            hazard_dict["skin"] = "Category 2"
-        else:
-            hazard_dict["skin"] = "No Hazard"
-            
-                     
-        if eye1_percentage >= 3:
-            hazard_dict["eye"] = "Category 1"
-        elif eye2_percentage >= 10:
-            hazard_dict["eye"] = "Category 2"
-        else:
-            hazard_dict["eye"] = "No Hazard"
-    
-        return hazard_dict
-    
-    
-    #Below I have separate functions for each hazard.  
-    #Each one has to loop through the consolidated_leafs once, where the functions above
-    #    only go through that loop once to compute all hazards
-    
-    
-    
-    
-    def skin_damage_hazard(self):
-        total_weight = 0
-        cat_1_total = 0
-        cat_2_total = 0
-        
-        for leaf in self.consolidated_leafs.iteritems():
-    
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                cat_1_total += weight #total ingredient weight will be 100
-                cat_2_total += weight * 10   #10 * weight/10
-                
-            if ingredient.skin_corrosion_hazard == ("2"):
-                cat_2_total += weight
-                
-        cat_1_percentage = cat_1_total/(total_weight) * 100
-        cat_2_percentage = cat_2_total/(total_weight) * 100                   
-                
-        for accumulator in hazard_accumulators:
-            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
-            
-        return complete_hazard_dict
-    
-
-    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
-    def get_hazard_dict(self):
-        
-        hazard_dict = {}
-        
-        total_weight = 0
-        
-        #HAZARD CATEGORY TOTALS (for now just do two)
-        #skin damage 
-
-        
-        #the inner function of a closure cannot modify a variable defined in its outer scope  
-        #the only way to get around this is to use a mutable object like a dictionary 
-        skin = {1: 0, 2: 0}
-        
-        #eye damage
-        eye = {1: 0, 2: 0}
-
-        #respiratory damage
-        #blahblah other hazard damage
-               
-         
-        def skin_accumulate(ingredient, weight):
-            
-            #skin hazard requirements
-            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                skin[1] += weight #total ingredient weight will be 100
-                skin[2] += weight * 10   #10 * weight/10  
-                
-            if ingredient.skin_corrosion_hazard == ("2"):
-                skin[2] += weight            
-                
-        def eye_accumulate(ingredient, weight):
-            
-            #eye hazard requirements    
-            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                eye[1] += weight
-                eye[2] += weight * 10 #10 * weight / 10
-            if ingredient.eye_damage_hazard == ("2A" or "2B"):
-                eye[2] += weight               
-        
-        for leaf in self.consolidated_leafs.iteritems():
-            
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            skin_accumulate(ingredient, weight)
-            eye_accumulate(ingredient, weight)
-            
-        
-        #skin_hazard(skin1, skin2, total_weight)
-        
-        #Calculate total hazard percentages and determine final categories    
-        
-#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
-#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
-#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
-#             they are equivalent, but i think list comprehension is faster?
-        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
-            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
-        
-        if skin1_percentage >= 5:
-            hazard_dict["skin"] = "Category 1"
-        elif skin2_percentage >= 10:
-            hazard_dict["skin"] = "Category 2"
-        else:
-            hazard_dict["skin"] = "No Hazard"
-            
-                     
-        if eye1_percentage >= 3:
-            hazard_dict["eye"] = "Category 1"
-        elif eye2_percentage >= 10:
-            hazard_dict["eye"] = "Category 2"
-        else:
-            hazard_dict["eye"] = "No Hazard"
-    
-        return hazard_dict
-    
-    
-    #Below I have separate functions for each hazard.  
-    #Each one has to loop through the consolidated_leafs once, where the functions above
-    #    only go through that loop once to compute all hazards
-    
-    def skin_damage_hazard(self):
-        total_weight = 0
-        cat_1_total = 0
-        cat_2_total = 0
-        
-        for leaf in self.consolidated_leafs.iteritems():
-    
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                cat_1_total += weight #total ingredient weight will be 100
-                cat_2_total += weight * 10   #10 * weight/10
-                
-            if ingredient.skin_corrosion_hazard == ("2"):
-                cat_2_total += weight
-                
-        cat_1_percentage = cat_1_total/(total_weight) * 100
-        cat_2_percentage = cat_2_total/(total_weight) * 100                   
-                
-        for accumulator in hazard_accumulators:
-            complete_hazard_dict[accumulator.get_name()] = accumulator.get_category(total_weight)
-            
-        return complete_hazard_dict
-    
-
-    #Here I hardcode a function for each hazard and use those functions in the consolidated_leafs loop 
-    def get_hazard_dict(self):
-        
-        hazard_dict = {}
-        
-        total_weight = 0
-        
-        #HAZARD CATEGORY TOTALS (for now just do two)
-        #skin damage 
-
-        
-        #the inner function of a closure cannot modify a variable defined in its outer scope  
-        #the only way to get around this is to use a mutable object like a dictionary 
-        skin = {1: 0, 2: 0}
-        
-        #eye damage
-        eye = {1: 0, 2: 0}
-
-        #respiratory damage
-        #blahblah other hazard damage
-               
-         
-        def skin_accumulate(ingredient, weight):
-            
-            #skin hazard requirements
-            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                skin[1] += weight #total ingredient weight will be 100
-                skin[2] += weight * 10   #10 * weight/10  
-                
-            if ingredient.skin_corrosion_hazard == ("2"):
-                skin[2] += weight            
-                
-        def eye_accumulate(ingredient, weight):
-            
-            #eye hazard requirements    
-            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                eye[1] += weight
-                eye[2] += weight * 10 #10 * weight / 10
-            if ingredient.eye_damage_hazard == ("2A" or "2B"):
-                eye[2] += weight               
-        
-        for leaf in self.consolidated_leafs.iteritems():
-            
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            skin_accumulate(ingredient, weight)
-            eye_accumulate(ingredient, weight)
-            
-        
-        #skin_hazard(skin1, skin2, total_weight)
-        
-        #Calculate total hazard percentages and determine final categories    
-        
-#         [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
-#             = map(lambda x: x/total_weight * 100, [skin1, skin2, eye1, eye2])
-#         ABOVE USES MAP, BELOW USES LIST COMPREHENSION
-#             they are equivalent, but i think list comprehension is faster?
-        [skin1_percentage, skin2_percentage, eye1_percentage, eye2_percentage] \
-            = [x/total_weight * 100 for x in [skin[1], skin[2], eye[1], eye[2]]]
-        
-        if skin1_percentage >= 5:
-            hazard_dict["skin"] = "Category 1"
-        elif skin2_percentage >= 10:
-            hazard_dict["skin"] = "Category 2"
-        else:
-            hazard_dict["skin"] = "No Hazard"
-            
-                     
-        if eye1_percentage >= 3:
-            hazard_dict["eye"] = "Category 1"
-        elif eye2_percentage >= 10:
-            hazard_dict["eye"] = "Category 2"
-        else:
-            hazard_dict["eye"] = "No Hazard"
-    
-        return hazard_dict
-    
-    
-    #Below I have separate functions for each hazard.  
-    #Each one has to loop through the consolidated_leafs once, where the functions above
-    #    only go through that loop once to compute all hazards
-    
-    def skin_damage_hazard(self):
-        total_weight = 0
-        cat_1_total = 0
-        cat_2_total = 0
-        
-        for leaf in self.consolidated_leafs.iteritems():
-    
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            if ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                cat_1_total += weight #total ingredient weight will be 100
-                cat_2_total += weight * 10   #10 * weight/10
-                
-            if ingredient.skin_corrosion_hazard == ("2"):
-                cat_2_total += weight
-                
-        cat_1_percentage = cat_1_total/(total_weight) * 100
-        cat_2_percentage = cat_2_total/(total_weight) * 100                   
-                
-        if cat_1_percentage >= 5:
-            return "Category 1; Skin Category 1 = %s%%" % cat_1_percentage.quantize(Decimal(10) ** -4)
-        elif cat_2_percentage >= 10:
-            return "Category 2; 10*(Skin Category 1) + Skin Category 2 = %s%%" % cat_2_percentage.quantize(Decimal(10) ** -4)
-        else:
-            return "No Hazard"       
-    
-    
-    def eye_damage_hazard(self):
-        
-        total_weight = 0
-        cat_1_total = 0
-        cat_2_total = 0
-        
-        for leaf in self.consolidated_leafs.iteritems():
-            
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            if ingredient.eye_damage_hazard == "1" or ingredient.skin_corrosion_hazard == ("1A" or "1B" or "1C"):
-                cat_1_total += weight
-                cat_2_total += weight * 10 #10 * weight / 10
-            if ingredient.eye_damage_hazard == ("2A" or "2B"):
-                cat_2_total += weight
-                
-        #ex: cat_1_total = 3, total_weight/10 = 100 -> cat_1_percentage = 3        
-                
-        cat_1_percentage = cat_1_total/(total_weight) * 100
-        cat_2_percentage = cat_2_total/(total_weight) * 100      
-        
-                
-        if cat_1_percentage >= 3:
-            return "Category 1; Eye/Skin Category 1 = %s%%" % cat_1_percentage.quantize(Decimal(10) ** -4)
-        elif cat_2_percentage >= 10:
-            return "Category 2; 10*(Eye/Skin Category 1) + Eye Category 2 = %s%%" % cat_2_percentage.quantize(Decimal(10) ** -4)
-        else:
-            return "No Hazard"
-    
-    def respiratory_sensitation_hazard(self):
-        
-        total_weight = 0
-        cat_1_total = 0
-        cat_2_total = 0
-        
-        for leaf in self.consolidated_leafs.iteritems():
-            
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            if ingredient.respiratory_hazard == ("1" or "1A" or "1B"):
-                cat_1_total += weight
-                
-        cat_1_percentage = cat_1_total/(total_weight) * 100
-        
-        if cat_1_percentage >= Decimal('0.1'):
-            return "Category 1: Respiratory Sensitation = %s%%" % cat_1_percentage.quantize(Decimal(10) ** -4)
-        else:
-            return "No Hazard"
-    
-    def germ_mutagenicity_hazard(self):
-        total_weight = 0
-        cat_1A_total = 0
-        cat_1B_total = 0
-        cat_2_total = 0
-
-        for leaf in self.consolidated_leafs.iteritems():
-            
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            if ingredient.germ_cell_mutagenicity_hazard == ("1A"):
-                cat_1A_total += weight
-            if ingredient.germ_cell_mutagenicity_hazard == ("1B"):
-                cat_1B_total += weight
-            if ingredient.germ_cell_mutagenicity_hazard == ("2"):
-                cat_2_total += weight
-                
-        cat_1A_percentage = cat_1A_total/(total_weight) * 100
-        cat_1B_percentage = cat_1B_total/(total_weight) * 100
-        cat_2_percentage = cat_2_total/(total_weight) * 100
-        
-        if cat_1A_percentage >= Decimal('0.1'):
-            return "Category 1: Respiratory Sensitation = %s%%" % cat_1A_percentage.quantize(Decimal(10) ** -4)
-        elif cat_1B_percentage >= Decimal('0.1'):
-            return "Category 1B"
-        elif cat_2_percentage >= 1:
-            return "Category 2"
-        else:
-            return "No Hazard" 
-                                
-                
-        cat_1_percentage = cat_1_total/(total_weight) * 100
-        
-        if cat_1_percentage >= 0.1:
-            return "Category 1"
-        else:
-            return "No Hazard"
-        
-    def carcinogenicity_hazard(self):
-        total_weight = 0
-        cat_1_total = 0
-        cat_2_total = 0
-
-        for leaf in self.consolidated_leafs.iteritems():
-            
-            ingredient = leaf[0]
-            weight = leaf[1]
-            
-            total_weight += weight
-            
-            if ingredient.germ_cell_mutagenicity_hazard == ("1A" or "1B"):
-                cat_1_total += weight
-            if ingredient.germ_cell_mutagenicity_hazard == ("2"):
-                cat_2_total += weight
-                
-        cat_1_percentage = cat_1_total/(total_weight) * 100
-        cat_2_percentage = cat_2_total/(total_weight) * 100
-        
-        if cat_1_percentage >= Decimal('0.1'):
-            return "Category 1"
-        elif cat_2_percentage >= 1:
-            return "Category 2"
-        else:
-            return "No Hazard" 
-                                
-                
-        cat_1_percentage = cat_1_total/(total_weight) * 100
-        
-        if cat_1_percentage >= 0.1:
-            return "Category 1: Respiratory Sensitation = %s%%" % cat_1_percentage.quantize(Decimal(10) ** -4)
-        else:
-            return "No Hazard"
-
+ 
 class FlavorIterOrder(models.Model):
     flavor = models.ForeignKey(Flavor)
     
@@ -2916,7 +2267,7 @@ class ExperimentalLog(models.Model):
         if self.flavor.approved==True:
             return None
         elif self.flavor.valid == True:
-            return "/django/access/experimental/%s/approve/" % self.experimentalnum
+            return "/access/experimental/%s/approve/" % self.experimentalnum
         else:
             return None
     
@@ -2947,7 +2298,7 @@ class ExperimentalLog(models.Model):
         super(ExperimentalLog, self).save(*args, **kwargs)
     
     def get_absolute_url(self):
-        return '/django/access/experimental/%s/' % self.experimentalnum
+        return '/access/experimental/%s/' % self.experimentalnum
     
 
     @staticmethod
@@ -3000,14 +2351,14 @@ class ExperimentalLog(models.Model):
         related_links = []
         if self.product_number != None and self.product_number != 0:
             related_links.append(
-                ('/django/access/%s/' % self.product_number, 'Flavor Formula')
+                ('/access/%s/' % self.product_number, 'Flavor Formula')
             )
-        related_links.append(('/django/access/experimental/%s/' % self.experimentalnum,'Experimental'))
+        related_links.append(('/access/experimental/%s/' % self.experimentalnum,'Experimental'))
             
         return related_links
 
     def get_admin_url(self):
-        return "/django/admin/access/experimentallog/%s" % self.id
+        return "/admin/access/experimentallog/%s" % self.id
 
     import_order = 3
     
@@ -3568,11 +2919,11 @@ class TSR(models.Model):
         return "%s - %s - %s" % (self.number, self.customer, str(self.date_in))    
     
     def get_related_links(self):
-        related_links = [('/django/access/tsr/%s/tsr_entry/' % self.number, 'Edit Items')]
+        related_links = [('/access/tsr/%s/tsr_entry/' % self.number, 'Edit Items')]
         return related_links
     
     def get_absolute_url(self):
-        return "/django/access/tsr/%s/" % self.number
+        return "/access/tsr/%s/" % self.number
 
     @staticmethod
     def get_object_from_softkey(softkey):
@@ -3656,11 +3007,11 @@ class PurchaseOrder(models.Model):
         ordering=['-date_ordered']
         
     def get_related_links(self):
-        related_links = [('/django/access/purchase/%s/po_entry/' % self.number, 'Edit Items')]
+        related_links = [('/access/purchase/%s/po_entry/' % self.number, 'Edit Items')]
         return related_links
 
     def get_absolute_url(self):
-        return "/django/access/purchase/%s/" % self.number
+        return "/access/purchase/%s/" % self.number
 
     @staticmethod
     def get_absolute_url_from_softkey(softkey):
