@@ -93,7 +93,21 @@ class ProductInfo(models.Model):
     def get_admin_url(self):
         return "/admin/newqc/productinfo/%s" % self.pk
     
-        
+class ScannedSymbol(models.Model):
+    scanned_doc = models.ForeignKey('ScannedDoc')
+    symbol_data = models.TextField()
+    symbol_type = models.CharField(max_length=100)
+    symbol_quality = models.DecimalField(max_digits=3, decimal_places=2)
+    symbol_location = models.CharField(max_length=100)
+    symbol_count = models.PositiveSmallIntegerField()
+    
+    def parse_zbar_symbol(self, zbar_symbol):
+        self.symbol_data = zbar_symbol.data
+        self.symbol_type = unicode(zbar_symbol.type) # zbar.EnumItem type
+        self.symbol_quality = zbar_symbol.quality
+        self.symbol_location = unicode(zbar_symbol.location) # 4x 2-tuples, represent coords of symbol
+        self.symbol_count = zbar_symbol.count
+    
 class ScannedDoc(models.Model):
     related_object_name = None
     
@@ -102,6 +116,7 @@ class ScannedDoc(models.Model):
     thumbnail = models.ImageField(upload_to='scanned_doc_thumbnail')
     notes = models.TextField(blank=True, default="")
     scan_time = models.DateTimeField(blank=True,null=True,auto_now_add=True)
+    import_log = models.TextField(blank=True,default="")
     
     class Meta:
         ordering = ['-id']

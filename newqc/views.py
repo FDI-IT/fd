@@ -33,7 +33,7 @@ from access.views import flavor_info_wrapper
 from newqc.forms import TestResultForm, NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
 from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, LotSOLIStamp, TestResult, ScannedDoc
 from newqc.utils import process_jbg, get_card_file, scan_card
-from newqc.tasks import walk_scans_qccards
+from newqc.tasks import walk_scanned_docs
 from salesorders.models import SalesOrderNumber, LineItem
 
 from one_off import populate_scanned_docs
@@ -534,7 +534,7 @@ def build_rm_checklist_row(pin):
     
 @permission_required('access.view_flavor')
 def scrape_testcards(request):
-    walk_scans_qccards.delay(walk_paths=['/srv/samba/tank/scans/qccards','/srv/samba/tank/scans/batchsheets'])
+    walk_scanned_docs.delay()
     return render_to_response('qc/scrape_testcards.html',
                               {},
                               context_instance=RequestContext(request))

@@ -16,6 +16,7 @@ from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory, inlineformset_factory
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction
+from django.db.models import Count
 from django.views.generic.create_update import create_object
 from django.core.urlresolvers import reverse
 
@@ -2113,6 +2114,24 @@ def experimental_approve_from_form(approve_form, experimental):
         ft.node_flavor.save()
         
     
+def latest_polis_a():
+    return_list = []
+    
+    for i in Ingredient.objects.annotate(num_polis=Count('purchaseorderlineitem')).exclude(num_polis=0):
+        return_list.append(i.purchaseorderlineitem_set.all().latest('po__date_ordered'))
+        
+    return return_list
+
+def latest_polis_b():
+    return_list = []
+    
+    for i in Ingredient.objects.annotate(num_polis=Count('purchaseorderlineitem')).exclude(num_polis__lte=1):
+        return_list.append(i.purchaseorderlineitem_set.all().latest('po__date_ordered'))
+        
+    for i in Ingredient.objects.annotate(num_polis=Count('purchaseorderlineitem')).filter(num_polis=1):
+        return_list.append(i.purchaseorderlineitem_set.all()[0])
+        
+    return return_list
     
     
     
