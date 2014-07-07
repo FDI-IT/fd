@@ -20,9 +20,9 @@ logging.basicConfig(filename=LOG_FILENAME, level=logging.INFO, formatter=LOG_FOR
 @task()
 def walk_scanned_docs(walk_paths=['/srv/samba/tank/scans/qccards','/srv/samba/tank/scans/barcode_docs','/srv/samba/tank/scans/batchsheets']):
     logger = logging.getLogger()
-    for scanned_doc in file_walker(walk_paths):
-        logger.info("Importing %s " % full_file_path)
-        ir = ImportBCDoc(full_file_path)
+    for scanned_doc_path in file_walker(walk_paths):
+        logger.info("Importing %s " % scanned_doc_path)
+        ir = ImportBCDoc(scanned_doc_path)
                     
 def file_walker(walk_paths):
     """Iterates through walk_paths and returns the full file path of any

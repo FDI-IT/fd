@@ -101,12 +101,31 @@ class ScannedSymbol(models.Model):
     symbol_location = models.CharField(max_length=100)
     symbol_count = models.PositiveSmallIntegerField()
     
+    def __init__(self, *args, **kwargs):
+        zbar_symbol = kwargs.pop('zbar_symbol', None)
+        super(ScannedSymbol, self).__init__(*args, **kwargs)
+        if zbar_symbol is not None:
+            self.parse_zbar_symbol(zbar_symbol)
+
     def parse_zbar_symbol(self, zbar_symbol):
         self.symbol_data = zbar_symbol.data
         self.symbol_type = unicode(zbar_symbol.type) # zbar.EnumItem type
         self.symbol_quality = zbar_symbol.quality
         self.symbol_location = unicode(zbar_symbol.location) # 4x 2-tuples, represent coords of symbol
         self.symbol_count = zbar_symbol.count
+        
+    def __unicode__(self):
+        return """DATA: %s | 
+                  TYPE: %s | 
+                  QUALITY: %s | 
+                  LOCATION: %s | 
+                  COUNT %s""" % (
+                self.symbol_data, 
+                self.symbol_type,
+                self.symbol_quality,
+                self.symbol_location,
+                self.symbol_count)
+                
     
 class ScannedDoc(models.Model):
     related_object_name = None
@@ -157,6 +176,14 @@ class ScannedDoc(models.Model):
     @property
     def doc_link(self):
         return self.subclass_object.get_absolute_url()
+    
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        """In this case bc_key is going to be None, that's why we would
+        save a generic ScannedDoc and not a more specific type of object.
+        This method exists so this type can be handled the same as the more
+        specific types."""
+        return ScannedDoc(**document_create_kwargs)
 
         
 class TestCard(ScannedDoc):
