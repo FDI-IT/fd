@@ -230,7 +230,7 @@ class QCCard:
                 testing_procedure = scraped_flavor_info.get('testing_procedure', ''),
                 flash_point = scraped_flavor_info.get('flash_point', None),
                 specific_gravity = scraped_flavor_info.get('specific_gravity', None),
-                notes = scraped_flavor_info.get('notes',''),
+                product_notes = scraped_flavor_info.get('notes',''),
                 original_card = File(open(self.path, 'r')),
             )
             if not created:

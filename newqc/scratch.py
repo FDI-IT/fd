@@ -116,7 +116,7 @@ def flavor_from_card( card,i,log_file ):
         flavor_info.testing_procedure = i.get('testing_procedure', '')
         flavor_info.flash_point = i.get('flash_point', None)
         flavor_info.specific_gravity = i.get('specific_gravity', None)
-        flavor_info.notes = i.get('notes','')
+        flavor_info.product_notes = i.get('notes','')
         flavor_info.original_card = File(open(card.path, 'r'))
     else:
         log_file.write(log_entry % (card.path, "Duplicate product info", flavor.number))

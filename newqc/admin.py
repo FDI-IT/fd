@@ -62,7 +62,7 @@ class OldTestcardAdmin(VersionAdmin):
 admin.site.register(OldTestCard, OldTestcardAdmin)
 
 class ProductInfoAdmin(VersionAdmin):
-    search_fields = ['flavor__name','flavor__number','appearance','organoleptic_properties','testing_procedure','notes']
+    search_fields = ['flavor__name','flavor__number','appearance','organoleptic_properties','testing_procedure','product_notes']
 admin.site.register(ProductInfo, ProductInfoAdmin)
     
 class LotAdmin(VersionAdmin):

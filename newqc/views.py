@@ -864,7 +864,7 @@ def old_lot_detail(request, lot_pk):
         product_info_data = post_data['product_info_form']
         product_info = ProductInfo.objects.get(pk=product_info_data['productinfo_pk'])
         changed = False
-        for attr in ('organoleptic_properties','appearance','notes','testing_procedure'):
+        for attr in ('organoleptic_properties','appearance','product_notes','testing_procedure'):
             if product_info_data[attr] != getattr(product_info, attr):
                 setattr(product_info, attr, product_info_data[attr])
                 changed=True

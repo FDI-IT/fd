@@ -82,7 +82,7 @@ class ProductInfo(models.Model):
     testing_procedure = models.TextField(blank=True)
     flash_point = models.FloatField(blank=True, null=True)
     specific_gravity = models.DecimalField(max_digits=3, decimal_places=2, blank=True, null=True)
-    notes = models.TextField(blank=True)
+    product_notes = models.TextField(blank=True)
     retain_on_file = models.BooleanField(default=False)
     original_card = models.FileField(upload_to='qc_original_cards',blank=True,null=True)
     objects = ProductInfoManager()

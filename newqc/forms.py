@@ -209,7 +209,7 @@ class ProductInfoForm(forms.ModelForm):
         exclude = ('retain_on_file','original_card','flash_point','specific_gravity',)
         widgets = {
             'testing_procedure':forms.TextInput,
-            'notes':forms.TextInput,
+            'product_notes':forms.TextInput,
             'flavor':forms.HiddenInput,
         }
         
