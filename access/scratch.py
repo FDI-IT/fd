@@ -3,6 +3,7 @@ from operator import itemgetter
 from decimal import Decimal, ROUND_HALF_UP
 from collections import deque, defaultdict
 from datetime import datetime, date
+from random import randint
 import copy
 from reversion import revision
 from django.db import transaction
@@ -11,6 +12,9 @@ from django.conf import settings
 from django.db import connection
 import operator
 from access.models import Flavor, Ingredient, Formula, FormulaTree, LeafWeight, Solvent, IndivisibleLeafWeight, FormulaException, DIACETYL_PKS, PG_PKS, SOLVENT_NAMES
+
+from hazard_calculator.models import GHSIngredient
+
 ones = Decimal('1')
 tenths = Decimal('0.0')
 hundredths = Decimal('0.00')
@@ -35,6 +39,113 @@ SD_COST = Decimal('2.60')
 
 all_solvent_list = Solvent.get_id_list()
 
+
+def get_flavors_with_the_most_hazards():
+    
+    max_hazards = 0
+    
+    for f in Flavor.objects.filter(number__in=range(1,51)):
+        haz = 0
+        for val in f.get_hazards().values():
+            if val != 'No':
+                haz += 1
+        
+        if haz >= max_hazards:
+            max_hazards = haz
+            max_flavor = f
+            
+    return max_flavor, max_hazards
+            
+            
+
+def create_hazardous_flavors():
+    
+    Flavor.objects.filter(name__icontains='Hazardous Flavor').delete()
+    Ingredient.objects.filter(product_name__icontains='Hazardous Ingredient').delete()
+    
+    for x in range(1, 51):
+        
+
+#         try:
+#             Flavor.objects.get(number=x).delete()
+#         except:
+#             pass
+        
+        fl = Flavor(number = x,
+                    name = "Hazardous Flavor %s" % x,
+                    prefix = "TF",
+                    natart = "N/A",
+                    spg = 0,
+                    risk_assessment_group = 1,
+                    kosher = "Not Assigned",
+                    yield_field = 100,
+                    )
+        
+        fl.save()
+        
+        print "Creating %s\n" % fl.name
+        
+        total = 0
+        used_ingredients = []
+        
+        while total != 1000:
+            
+            if total <= 900:
+                weight = 1000 - randint(total, 1000)
+            else:
+                weight = 1000 - total 
+            
+            total = total + weight
+            
+            remaining_ings = GHSIngredient.objects.exclude(pk__in=used_ingredients)
+            
+            ghs_index = randint(0, remaining_ings.count() - 1) 
+            
+            ghs_ingredient = remaining_ings[ghs_index]
+            
+            used_ingredients.append(ghs_ingredient.pk)
+            
+            try:
+                ing = Ingredient.objects.get(cas = ghs_ingredient.cas)
+                
+                print "Using ingredient %s" % ing.product_name
+                
+            except:
+                ing = Ingredient(cas = ghs_ingredient.cas,
+                                 product_name = "Hazardous Ingredient %s" % ghs_index,
+                                 unitprice = Decimal('10.00'),
+                                 sulfites_ppm = 0,
+                                 package_size = Decimal('0.00'),
+                                 minimum_quantity = Decimal('0.00')
+                                 )
+                ing.save()
+                
+                print "Created ingredient %s" % ing.product_name
+                
+            formula = Formula(flavor = fl,
+                              ingredient = ing,
+                              amount = weight
+                              )
+            
+            formula.save()
+            
+            print "Created formula object, Ingredient: %s, Weight: %s\n" % (ing.product_name, weight)
+        
+        fl.save()
+        recalculate_guts(fl)
+        
+        print "Recalculate_guts for flavor %s complete\n" % fl.name
+        
+       
+        
+            
+                
+            
+            
+            
+            
+        
+        
 
 def find_usage(ingredient_pk, gazinta_lists, flavor_valid):
     ingredient = Ingredient.objects.get(pk=ingredient_pk)
