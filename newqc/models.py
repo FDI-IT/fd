@@ -163,7 +163,7 @@ class ScannedDoc(models.Model):
     
     @property
     def related_object(self):
-        return self.subclass_object.related_object
+        return self.subclass_object
         
     @property
     def subclass_object_repr(self):
