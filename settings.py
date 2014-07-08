@@ -31,7 +31,12 @@ ADMINS = (
     ('Stephan Stachurski', 'steves@flavordynamics.com'),
 )
 
-CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
 
 LOGIN_URL = '/accounts/login/'
 
@@ -184,3 +189,12 @@ CELERY_RESULT_BACKEND = "djcelery.backends.database.DatabaseBackend"
 CELERY_REDIS_HOST = "localhost"
 CELERY_REDIS_PORT = 6379
 CELERY_REDIS_DB = 0
+
+from datetime import timedelta
+CELERYBEAT_SCHEDULE = {
+    "walk_scanned_docs-every-30-seconds": {
+        "task": "newqc.tasks.walk_scanned_docs",
+        "schedule": timedelta(seconds=5),
+        "args": ()
+    },
+}

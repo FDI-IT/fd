@@ -12,6 +12,7 @@ import re
 
 from access.models import Flavor
 from newqc.models import Retain, RMRetain, TestCard, Lot, ReceivingLog, ProductInfo, STATUS_CHOICES, UNITS_CHOICES, COA, TestResult
+from newqc import controller
 
 class AddObjectsBatch(forms.Form):
     number_of_objects = forms.IntegerField(label="Number of objects", min_value=1)
@@ -175,23 +176,41 @@ class ResolveLotForm(forms.ModelForm):
         model = Lot
         exclude = ('date', 'number', 'sub_lot', 'amount', 'flavor')
     
+
 class ResolveTestCardForm(forms.ModelForm):
     class Meta:
         model = TestCard
-        exclude = ('large', 'preview', 'image_hash', 'thumbnail')
+        exclude = ('large', 'preview', 'image_hash', 'thumbnail', 'import_log')
         widgets = {
             'notes':forms.TextInput,
             'retain':forms.HiddenInput,
             'status':forms.Select,
         }
+        
+class SimpleResolveTestCardForm(ResolveTestCardForm):
+    class Meta(ResolveTestCardForm.Meta):
+        pass
+    
+    def save(self, commit=True):
+        instance = super(SimpleResolveTestCardForm, self).save(commit=False)
+        if commit:
+            instance.retain.status = instance.status
+            instance.retain.notes = " ".join((instance.retain.notes, instance.notes))
+            instance.retain.save()
+            instance.retain.lot.status = instance.status
+            instance.retain.lot.save() 
+            instance.save()
+        return instance
+        
 
 class ProductInfoForm(forms.ModelForm):
     class Meta:
         model = ProductInfo
-        exclude = ('flavor','retain_on_file','original_card','flash_point','specific_gravity',)
+        exclude = ('retain_on_file','original_card','flash_point','specific_gravity',)
         widgets = {
             'testing_procedure':forms.TextInput,
             'notes':forms.TextInput,
+            'flavor':forms.HiddenInput,
         }
         
 class RetainStatusForm(forms.ModelForm):

@@ -30,7 +30,7 @@ from newqc import controller
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import Flavor, Ingredient, FlavorSpecification
 from access.views import flavor_info_wrapper
-from newqc.forms import TestResultForm, NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
+from newqc.forms import TestResultForm, NewFlavorRetainForm, SimpleResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
 from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, LotSOLIStamp, TestResult, ScannedDoc
 from newqc.utils import process_jbg, get_card_file, scan_card
 from newqc.tasks import walk_scanned_docs
@@ -603,7 +603,7 @@ def flavor_history_print(request, flavor):
     
 def resolve_retains_any(request):
     try:
-        tcs = TestCard.objects.exclude(retain=None).filter(status='Not Passed...')
+        tcs = TestCard.objects.exclude(retain=None).filter(status__in=('Not Passed...',"Under Review"))
         testcard = tcs[0]
         testcard_ondeck = tcs[1]
     except:
@@ -950,19 +950,18 @@ def testcard_list(request):
         })
     )
 
-
 def resolve_testcards_ajax_post(request):
     if request.is_ajax():
         testcard = TestCard.objects.get(pk=request.POST['instance_pk'])
         productinfo = ProductInfo.objects.get(pk=request.POST['productinfo_pk'])
-        f = ResolveTestCardForm(request.POST, instance=testcard)
+        f = SimpleResolveTestCardForm(request.POST, instance=testcard)
         product_info_form = ProductInfoForm(request.POST, prefix="product_info", instance=productinfo)
         if f.is_valid():
             f.save()
             product_info_form.save()
             #testcard = TestCard.objects.filter(status='Pending')[1]
             testcard = TestCard.objects.exclude(retain=None).filter(status='Not Passed...')[1]
-            testcard_form = ResolveTestCardForm(instance=testcard)
+            testcard_form = SimpleResolveTestCardForm(instance=testcard)
             productinfo,created = ProductInfo.objects.get_or_create(flavor=testcard.retain.lot.flavor)
             productinfo_form = ProductInfoForm(prefix="product_info",instance=productinfo)
             return render_to_response(
@@ -973,21 +972,60 @@ def resolve_testcards_ajax_post(request):
                 context_instance=RequestContext(request),                 
             )
     
-    
 
+@revision.create_on_success
 @permission_required('access.view_flavor')
 def resolve_testcards_any(request):
-    try:
-        tcs = TestCard.objects.exclude(retain=None).filter(status='Not Passed...').annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1)
-        testcard = tcs[0]
-        testcard_ondeck = tcs[1]
-    except:
-        return HttpResponseRedirect('/qc/no_testcards_left/')
-    return render_to_response('qc/testcards/resolve.html', 
+    if request.method == 'POST':
+        testcard = TestCard.objects.get(pk=request.POST['testcard_pk'])
+        testcard_form = SimpleResolveTestCardForm(request.POST,instance=testcard)
+        productinfo = ProductInfo.objects.get(pk=request.POST['productinfo_pk'])
+        productinfo_form = ProductInfoForm(request.POST,instance=productinfo)
+        if testcard_form.is_valid() and productinfo_form.is_valid():
+            revision.comment = "Updated through resolve testcards view."
+            revision.user = request.user
+            testcard_form.save()
+            productinfo_form.save()
+        else:
+            return render_to_response('qc/testcards/resolve.html', 
+                              {'testcard_form':testcard_form,'productinfo_form':productinfo_form,'testcard':testcard_form.instance,'page_title': 'Resolve Test Card',},
+                              context_instance=RequestContext(request))
+            
+    if 'testcard_pk' not in request.GET:
+        try:
+            tcs = TestCard.objects.exclude(retain=None).filter(status__in=('Not Passed...',"Under Review")).annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1).order_by('-retain__date')
+            testcard = tcs[0]
+            remaining = tcs.count()-1
+        except:
+            testcard = None
+        try:
+            next_tc_pk = tcs[1].pk
+        except:
+            next_tc_pk=None
+        if next_tc_pk is not None:
+            return HttpResponseRedirect('/qc/resolve_testcards/?testcard_pk={0}&remaining={1}&next_tc_pk={2}'.format(testcard.pk, remaining, next_tc_pk))
+        elif testcard is not None:
+            return HttpResponseRedirect('/qc/resolve_testcards/?testcard_pk={0}&remaining={1}'.format(testcard.pk, remaining))
+        else:
+            return HttpResponseRedirect('/qc/no_testcards_left/')
+    else:
+        remaining = request.GET.get('remaining',0)
+        next_tc_pk = request.GET.get('next_tc_pk', None)
+        if next_tc_pk is not None:
+            next_tc = TestCard.objects.get(pk=next_tc_pk)
+        else:
+            next_tc = None
+        testcard = TestCard.objects.get(pk=request.GET.get('testcard_pk'))
+        testcard_form = SimpleResolveTestCardForm(instance=testcard)
+        productinfo_form = ProductInfoForm(instance=testcard.retain.lot.flavor.productinfo)
+        return render_to_response('qc/testcards/resolve.html', 
                               {
+                               'next_tc':next_tc,
+                               'testcard_form':testcard_form,
+                               'productinfo_form':productinfo_form,
                                'testcard':testcard,
-                               'testcard_ondeck':testcard_ondeck,
                                'page_title': 'Resolve Test Card',
+                               'remaining':remaining
                                },
                               context_instance=RequestContext(request))
     
@@ -1050,7 +1088,7 @@ def passed_finder(request):
                 controller.testcard_simple_status_to_under_review(tc)
 
     
-    testcards = TestCard.objects.filter(status="Pending").annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1)[0:10]
+    testcards = TestCard.objects.filter(status__in=("Pending","Pending QC")).annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1)[0:10]
     return render_to_response('qc/testcards/passed_finder.html',
                               {
                                'form_action_url':'/qc/passed_finder/',

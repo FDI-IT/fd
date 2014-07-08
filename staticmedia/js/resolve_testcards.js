@@ -84,11 +84,6 @@ jQuery(document).ready(function() {
 	jQuery('.testcard_form_container').delegate('.hidden_image', "click", function() {
 		$(this).removeClass('click_to_zoom');
 	});
-	jQuery('#resolve_testcard_submit_button').click( function() {
-		//post the form
-		
-		ajax_post();
-		return false;
-	});
+
 	jQuery('#lot_detail_submit').click( lot_detail_submit );
 });

@@ -115,11 +115,7 @@ class ScannedSymbol(models.Model):
         self.symbol_count = zbar_symbol.count
         
     def __unicode__(self):
-        return """DATA: %s | 
-                  TYPE: %s | 
-                  QUALITY: %s | 
-                  LOCATION: %s | 
-                  COUNT %s""" % (
+        return """DATA: %s | TYPE: %s | QUALITY: %s | LOCATION: %s | COUNT %s""" % (
                 self.symbol_data, 
                 self.symbol_type,
                 self.symbol_quality,

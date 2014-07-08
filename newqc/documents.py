@@ -24,10 +24,7 @@ type_map = {
 # set up logging
 LOG_PATH = '/var/log/django/'
 LOG_FORMATTER = logging.Formatter(
-    """%(asctime)s - 
-    %(name)s - 
-    %(levelname)s - 
-    %(message)s""")
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 try:
     os.makedirs(LOG_PATH)
 except OSError as e:
@@ -36,10 +33,9 @@ except OSError as e:
     else:
         raise
 LOG_FILENAME = '/var/log/django/scan_docs.log'
-logging.basicConfig(
-     filename=LOG_FILENAME, 
-     level=logging.INFO, 
-     formatter=LOG_FORMATTER)
+LOG_FILE_HANDLER = logging.FileHandler(LOG_FILENAME)
+LOG_FILE_HANDLER.setLevel(logging.INFO)
+LOG_FILE_HANDLER.setFormatter(LOG_FORMATTER)
 
 # configure the barcode scanner
 scanner = zbar.ImageScanner()
@@ -48,7 +44,8 @@ scanner.parse_config('enable')
 # configure file destination directories
 EXC_DIRECTORY = '/srv/samba/tank/scans/exc/'
 COMPLETE_PATH = '/srv/samba/tank/scans/imported_barcode_docs/'
-for MY_DESTINATION_DIR in (EXC_DIRECTORY, COMPLETE_PATH):
+HASH_EXISTS_DIRECTORY = '/srv/samba/tank/scans/hash_exists/'
+for MY_DESTINATION_DIR in (EXC_DIRECTORY, COMPLETE_PATH, HASH_EXISTS_DIRECTORY):
     try:
         os.makedirs(MY_DESTINATION_DIR)
     except OSError as e:
@@ -82,6 +79,7 @@ class ImportBCDoc():
         self.setup_logging()
         
         self.path = img_path
+        self.logger.info("Importing %s" % self.path)
         
         try:
             self.hash = sha_hash(img_path)
@@ -90,14 +88,14 @@ class ImportBCDoc():
             kinds of exceptions the sha_hash function can
             raise.
             """
-            self.process_error("%s has no hash!" % self.path)
-            return
-        
-        if self.hash is None:
             self.process_error("%s: %s -- Unable to hash %s" % (
                 type(e), repr(e), self.path))
             return
         
+        if self.hash is None:
+            self.process_error("%s has no hash!" % self.path)
+            return
+            
         if ScannedDoc.objects.filter(image_hash=self.hash).exists():
             self.process_hash_exists()
             return
@@ -108,38 +106,40 @@ class ImportBCDoc():
             self.process_error("%s Unable to Image.open('%s') -- %s" % (
                 type(e), self.path, repr(e)))
             return
-
-        self.sd_create_kwargs = self.generate_scanneddoc_kwargs()
         
+        # this could possibly raise some exceptions that I haven't
+        # though of yet -- potentially unsafe section
         self.symbol_list = self.zbar_scan()
         
         try:
             self.bc_type, self.bc_key = self.get_barcode_target()
+            ReferredObjectType, DocumentType = type_map[self.bc_type]
         except NoSymbolTargetException as e:
+            # the finally block depends on these values
+            self.bc_type = None
+            self.bc_key = None
             ReferredObjectType = None
             DocumentType = ScannedDoc
-        else:    
-            # get the django ORM types from the type_map
-            ReferredObjectType, DocumentType = type_map[self.bc_type]
-            # we need this method specifically because the name of the 
-            # referred object attribute is not standard between the 
-            # document type classes (retain, rmretain, lot, etc)
         finally:
+            self.sd_create_kwargs = self.generate_scanneddoc_kwargs()
+           
             self.my_doc = DocumentType.create_from_referred_object_from_bc_key(
                 self.bc_key, self.sd_create_kwargs)
-            self.my_doc.import_log = self.flush_import_log()
             self.my_doc.save()
+            self.move_scanned_image()
+            # now that my_doc is saved we need to save the associated
+            # ScannedSymbol objects that were created earlier
+            for s in self.symbol_list:
+                s.scanned_doc = self.my_doc
+                s.save()
             self.logger.info("Saved %s:%s from %s" % (
                 str(DocumentType), self.my_doc.pk, self.path))
-            self.move_scanned_image()
+            
 
     def move_scanned_image(self):
-        my_name, my_extension = os.path.splitext(self.path)
-        my_move_name = "%s%s" % (self.hash, my_extension)
-        move_complete_path = os.path.join(COMPLETE_PATH, my_move_name)
-        shutil.move(self.path, move_complete_path)
+        self.dst = move_no_overwrite(self.path, COMPLETE_PATH)
         self.logger.info("Moved scanned file %s to %s" % (
-            self.path, move_complete_path))
+            self.path, self.dst))
 
     def process_error(self, error_message):
         self.logger.error(error_message)
@@ -153,32 +153,35 @@ class ImportBCDoc():
         my_name, my_extension = os.path.splitext(self.path)
         my_move_name = "%s%s" % (self.hash, my_extension)
         move_path = os.path.join(HASH_EXISTS_DIRECTORY, my_move_name)
-        move_no_overwrite(self.path, move_path)
+        self.dst = move_no_overwrite(self.path, move_path)
         self.logger.warn("Existing hash found, moving %s to %s" % (
-            self.path, move_path))
+            self.path, self.dst))
         
     def setup_logging(self):
         self.logger = logging.getLogger()
+        self.logger.setLevel(logging.INFO)
+        self.logger.addHandler(LOG_FILE_HANDLER)
         self.log_stream = cStringIO.StringIO()
-        self.log_handler = logging.StreamHandler(self.log_stream)
-        self.log_handler.setLevel(logging.INFO)
-        self.log_handler.setFormatter(LOG_FORMATTER)
-        self.logger.addHandler(self.log_handler)
+        self.stream_handler = logging.StreamHandler(self.log_stream)
+        self.stream_handler.setLevel(logging.INFO)
+        self.stream_handler.setFormatter(LOG_FORMATTER)
+        self.logger.addHandler(self.stream_handler)
         
-    @property            
     def flush_import_log(self):
-        self.log_handler.flush()
+        self.stream_handler.flush()
         import_log = self.log_stream.getvalue()
-        self.logger.removeHandler(self.log_handler)
+        self.logger.removeHandler(self.stream_handler)
         return import_log
 
     def generate_scanneddoc_kwargs(self):
         self.thumbnail = self.generate_thumbnail()
         self.large_file = File(open(self.path,'r'))
+        self.import_log = self.flush_import_log()
         return {
                 'thumbnail':self.thumbnail,
                 'image_hash':self.hash,
                 'large':self.large_file,
+                'import_log':self.import_log,
             }
 
     def create_generic_document(self):
@@ -195,6 +198,7 @@ class ImportBCDoc():
             tn = self.image.resize((380,490), Image.ANTIALIAS)
         tn_path = os.path.join(
                 '/tmp',
+    
                 '%s-tn.png' % self.hash)
         tn.save(tn_path)
         thumbnail_file = File(open(tn_path,'r'))
