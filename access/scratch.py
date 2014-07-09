@@ -136,7 +136,7 @@ def build_tree(root_flavor):
     # we get the whole ingredient list first, so that it can be sliced
     # when passed to get_num_children.
     # formula_traversal() is a model instance method that does all of the
-    # recursive queries to analyze a formula. it returns a tuple that 
+    # recursive queries to analyze a formula. it yields a tuple that 
     # represents one line item of a formula. 
     ingredient_list = []
     for ingredient in root_flavor.complete_formula_traversal():
@@ -265,26 +265,28 @@ def test_slice():
 
         
 def synchronize_price(f, verbose=False):
+    """This depends on all gazintas being up to date.
+    """
     if verbose:
         print f
     rmc = 0
     lastspdate = datetime(1990,1,1)
-    for leaf in f.leaf_weights.all():
-        sub_flavor = leaf.ingredient.sub_flavor
-        cost_diff = leaf.weight * leaf.ingredient.unitprice
+    for formula_line_item in f.formula_set.all():
+        cost_diff = formula_line_item.amount * formula_line_item.ingredient.unitprice
         rmc += cost_diff
-        if verbose:
-            print '"%s","%s","%s"' % (leaf.ingredient.id, leaf.ingredient.product_name, cost_diff)
-        ing_ppu = leaf.ingredient.purchase_price_update
+        ing_ppu = formula_line_item.ingredient.purchase_price_update
         if lastspdate < ing_ppu:
             lastspdate = ing_ppu
     
-    # print adjustment
-    if f.spraydried:
-        f.rawmaterialcost = rmc / 1000 + SD_COST
-    else:
-        f.rawmaterialcost = rmc / 1000 
+    
     f.lastspdate = lastspdate
+    f.rawmaterialcost = rmc / 1000
+    f.rawmaterialcost = f.yield_adjusted_rmc
+    
+    if f.spraydried:
+        f.rawmaterialcost = f.rawmaterialcost + SD_COST
+
+    f.rawmaterialcost = f.rawmaterialcost.quantize(THOUSANDTHS, rounding=ROUND_HALF_UP)        
     f.save()
     
     for g in f.gazinta.all():
@@ -903,7 +905,6 @@ def build_experimental_tree(root_experimental):
     formula_root.save()
     transaction.commit()
     
-
 @revision.create_on_success
 def recalculate_guts(flavor):
     old_flavor_dict = copy.copy(flavor.__dict__)
@@ -997,15 +998,15 @@ def recalculate_guts(flavor):
             sorted_solvent_string_list.append("%s %s%%" % (Solvent.get_name_from_name(solvent_number), relative_solvent_amount))
     solvent_string = "; ".join(sorted_solvent_string_list)
     flavor.solvent = solvent_string[:50]
-        
+    flavor.save()
+      
     synchronize_price(flavor)
-    flavor.rawmaterialcost = flavor.rawmaterialcost.quantize(thousandths)
+    
     revision.comment = "Recalculated"
-    flavor.save()    
     
     old_new_attrs = [
                      
-            ('Raw Material Cost',old_flavor_dict['rawmaterialcost'],flavor.rawmaterialcost),
+            ('Raw Material Cost',old_flavor_dict['rawmaterialcost'],flavor.rawmaterialcost.quantize(THOUSANDTHS,ROUND_HALF_UP)),
             ('Sulfites PPM',old_flavor_dict['sulfites_ppm'],flavor.sulfites_ppm),
             ('Allergen',old_flavor_dict['allergen'],flavor.allergen),
             ('Solvent',old_flavor_dict['solvent'],flavor.solvent),    
@@ -1014,8 +1015,31 @@ def recalculate_guts(flavor):
             ('NO PG',old_flavor_dict['no_pg'],flavor.no_pg),
             ('Valid',old_flavor_dict['valid'],flavor.valid)          
         ]
-    return (old_new_attrs,flavor)
+    return {
+            'old_new_attrs':old_new_attrs,
+            'flavor':flavor,
+        }
+
+@revision.create_on_success
+def recalculate_flavor(flavor):
+    # the following list is a bottom up list of gazintas in a flavor
+    gazinta_list_bottom_up = list(flavor.gazintas())
+    gazinta_list_bottom_up.reverse()
     
+    gazinta_results_list = []
+    seen_set = set() # since we only need to touch each unique g once
+    for g in gazinta_list_bottom_up:
+        if g not in seen_set:
+            gazinta_results_list.append(recalculate_guts(g))
+            seen_set.add(g)
+            
+    flavor_results = recalculate_guts(flavor)
+    
+    return {
+        'flavor_results':flavor_results,
+        'gazinta_results_list':gazinta_results_list,
+    }
+        
 """
 ALTER TABLE "ExperimentalLog" ADD COLUMN flavor_id integer;
 ALTER TABLE "ExperimentalLog ADD CONSTRAINT "ExperimentalLog_flavor_id_fkey" FOREIGN KEY (flavor_id) REFERENCES access_integratedproduct(id) DEFERRABLE INITIALLY DEFERRED;

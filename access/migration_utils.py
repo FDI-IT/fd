@@ -593,7 +593,7 @@ def set_hot_packed():
     transaction.commit()
     
 @transaction.commit_manually
-def set_spray_dried():
+def set_spraydried():
     for f in Flavor.objects.filter(spraydried=True):
         print f
         f.risk_assessment_group = 6
@@ -625,6 +625,6 @@ def reset_risk_assessment_group():
     set_bacteriostatic()
     set_antimicrobial()
     set_hot_packed()
-    set_spray_dried()
+    set_spraydried()
     set_regularly_monitored_list()
     set_intermediate_only()

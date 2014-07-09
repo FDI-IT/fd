@@ -948,18 +948,25 @@ class FormulaInfo(models.Model):
     lupines = models.BooleanField(blank=True)
     yellow_5 = models.BooleanField(blank=True)
     
-    organic = models.BooleanField(default=False)
-    diacetyl = models.BooleanField("No Diacetyl", default=True)
     indivisible = models.BooleanField(blank=True)
     
+    diacetyl = models.BooleanField("No Diacetyl", default=True)
     no_pg = models.BooleanField("No PG", 
         blank=True,
         default=False)
+    
+    liquid = models.BooleanField(default=False,blank=True)
+    dry = models.BooleanField(default=False,blank=True)
     spraydried = models.BooleanField("Spray Dried",
         blank=True,
         default=False)
+    flavorcoat = models.BooleanField(u"Flavorcoat®",blank=True,default=False)
+    
+    concentrate = models.BooleanField(default=False,blank=True)
+    oilsoluble = models.BooleanField("Oil soluble",default=False,blank=True)
     
     flashpoint = models.PositiveIntegerField("Flash Point", default=0)
+    spg = models.DecimalField(decimal_places=3,max_digits=4,default=0)
     solubility = models.CharField(max_length=25,blank=True, default="")
     stability = models.CharField(max_length=25, blank=True, default="")
     allergen = models.CharField("Allergens", max_length=50, blank=True, default="")
@@ -969,6 +976,11 @@ class FormulaInfo(models.Model):
     prop_65 = models.CharField("Prop 65", max_length=50,blank=True, default="") # Field renamed to remove spaces.lc
     gmo = models.CharField("GMO", max_length=50, blank=True, default="")
     prop65 = models.BooleanField(default=False)
+
+    organic = models.BooleanField(default=False)
+    wonf = models.BooleanField("Natural WONF", default=False,blank=True)
+    natural_type = models.BooleanField("Natural Type", blank=True, default=False)
+    
     
     class Meta:
         abstract = True
@@ -1011,7 +1023,6 @@ class Flavor(FormulaInfo):
     color = models.CharField(max_length=50,blank=True)
     organoleptics = models.CharField(max_length=50,blank=True)
     pricing_memo = models.TextField(blank=True)
-    spg = models.DecimalField(decimal_places=3,max_digits=4,default=0)
     
     entered = models.DateTimeField(auto_now_add=True)
     supportive_potential = models.BooleanField(blank=True)
@@ -1099,7 +1110,6 @@ class Flavor(FormulaInfo):
     ingredient_statement = models.TextField(blank=True)
     shelf_life = models.TextField(blank=True)
     shipping_storage = models.TextField(blank=True)
-    
     
     
     def save(self, *args, **kwargs):
@@ -2032,7 +2042,7 @@ class ExperimentalLog(models.Model):
      
     liquid = models.BooleanField(db_column='Liquid')
     dry = models.BooleanField(db_column='Dry')
-    spray_dried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
+    spraydried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
     flavorcoat = models.BooleanField(u"Flavorcoat®", db_column="Flavor Coat", default=False)
     concentrate = models.BooleanField(db_column='Concentrate', default=False)
     oilsoluble = models.BooleanField("Oil soluble", db_column='OilSoluble')
@@ -2042,7 +2052,7 @@ class ExperimentalLog(models.Model):
     artificial = models.BooleanField(blank=True,default=False)
     nfi = models.BooleanField("NFI", blank=True,default=False)
     organic = models.BooleanField("Organic Compliant", db_column='Organic',blank=True,default=False)
-    wonf = models.BooleanField("Natural WONF",db_column='WONF', default=False)
+    wonf = models.BooleanField("Natural WONF",db_column='WONF', default=False, blank=True)
     natural_type = models.BooleanField("Natural Type", blank=True, default=False)
     
     duplication = models.BooleanField(db_column='Duplication',blank=True)
@@ -2107,7 +2117,7 @@ class ExperimentalLog(models.Model):
         'organic',
         'liquid',
         'dry',
-        'spray_dried',
+        'spraydried',
         'concentrate',
         'oilsoluble',
         'flavorcoat', # ®
@@ -2124,16 +2134,16 @@ class ExperimentalLog(models.Model):
         ),
         'liquid':(
             'dry',
-            'spray_dried',
+            'spraydried',
         ),
-        'spray_dried':(
+        'spraydried':(
             'oilsoluble',
             'dry',
         ),
         'flavorcoat':(
             'liquid',
             'dry',
-            'spray_dried',
+            'spraydried',
             'concentrate',
             'oilsoluble',
         ),
@@ -2161,7 +2171,7 @@ class ExperimentalLog(models.Model):
     }
     mandatory_categories = (
         ('na','natural','artificial','nfi'),
-        ('liquid','dry','spray_dried','flavorcoat'),
+        ('liquid','dry','spraydried','flavorcoat'),
     )
     
     def clean_incompatible_categories(self):
@@ -2214,7 +2224,7 @@ class ExperimentalLog(models.Model):
                     label_tokens.append(self._meta.get_field_by_name(token)[0].verbose_name)
 
         label_tokens = [];
-        tokens = ('dry','spray_dried','oilsoluble','natural_type')
+        tokens = ('dry','spraydried','oilsoluble','natural_type')
         
         check_tail_indices(tokens, label_tokens)        
         
@@ -2325,8 +2335,8 @@ class ExperimentalLog(models.Model):
                         string_kwargs['liquid__in'] = [True]
                     elif my_arg == 'dry':
                         string_kwargs['dry__in'] = [True]
-                    elif my_arg == 'spray_dried':
-                        string_kwargs['spray_dried__in'] = [True]
+                    elif my_arg == 'spraydried':
+                        string_kwargs['spraydried__in'] = [True]
                     elif my_arg == 'oilsoluble':
                         string_kwargs['oilsoluble__in'] = [True]
                     elif my_arg == 'concentrate':

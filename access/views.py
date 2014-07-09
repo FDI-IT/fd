@@ -30,7 +30,7 @@ from access.my_profile import profile
 from access.templatetags.review_table import review_table as legacy_explosion
 from access.templatetags.ft_review_table import consolidated, consolidated_indivisible, explosion, spec_sheet, customer_info, production_lots, retains, raw_material_pin, gzl_ajax, revision_history
 from access import forms
-from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_guts
+from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_flavor
 from access.tasks import ingredient_replacer_guts
 from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form #, FlavorSpecificationForm
 from access.formula_filters import ArtNatiFilter, AllergenExcludeFilter, MiscFilter
@@ -154,9 +154,25 @@ def approve_experimental(request,experimental):
                               context_instance=RequestContext(request))
     experimental.flavor.prefix = ""
     experimental.flavor.number = ""
-    experimental.flavor.mixing_instructions = experimental.mixing_instructions
-    experimental.flavor.color = experimental.color
-    experimental.flavor.organoleptics = experimental.organoleptics
+    attr_list = (
+            'mixing_instructions',
+            'color',
+            'organoleptics',
+            'natart',
+            'organic',
+            'liquid',
+            'dry',
+            'spraydried',
+            'natural_type',
+            'wonf',
+            'flavorcoat',
+            'concentrate',
+            'oilsoluble',
+            'label_type',
+        )
+    for attr in attr_list:
+        setattr(experimental.flavor, attr, getattr(experimental,attr))
+    # this doesn't fit in the above loop because names of attrs differ
     experimental.flavor.productmemo = experimental.memo
     f = forms.ApproveForm(instance=experimental.flavor)
     return render_to_response('access/experimental/approve.html',
@@ -450,18 +466,14 @@ def ft_review(request, flavor):
 @flavor_info_wrapper
 @login_required
 @transaction.commit_on_success
-def recalculate_flavor(request,flavor):
-    old_new_attrs, flavor = recalculate_guts(flavor)
-    gazinta_recalculations = []
-    for gazinta in set(flavor.gazintas()):
-        gazinta_recalculations.append(recalculate_guts(gazinta)) 
+def recalculate_flavor_view(request,flavor):
+    results = recalculate_flavor(flavor)
     context_dict = {
                    'window_title': flavor.__unicode__(),
                    'page_title': "Recalculate Flavor Properties",
                    'flavor': flavor,
                    'weight_factor':1000,
-                   'old_new_attrs':old_new_attrs,
-                   'gazinta_recalculations':gazinta_recalculations,
+                   'results':results,
                    }   
     return render_to_response('access/flavor/recalculate.html',
                               context_dict,
@@ -475,14 +487,14 @@ def recalculate_flavor(request,flavor):
 @transaction.commit_on_success
 def recalculate_experimental(request,experimental):
     flavor=experimental.flavor
-    old_new_attrs, flavor = recalculate_guts(flavor)
+    results = recalculate_flavor(flavor)
     context_dict = {
                     'experimental':experimental,
                    'window_title': flavor.__unicode__(),
                    'page_title': "Recalculate Flavor Properties",
                    'flavor': flavor,
                    'weight_factor':1000,
-                   'old_new_attrs':old_new_attrs,
+                   'results':results
                    }   
     return render_to_response('access/experimental/recalculate.html',
                               context_dict,

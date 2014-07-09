@@ -1437,7 +1437,7 @@ class ExperimentalLog(models.Model):
     # END FOREIGN KEY
     
     concentrate = models.BooleanField(db_column='Concentrate', default=False)
-    spray_dried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
+    spraydried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
     promotable = models.BooleanField(db_column='Promotable', default=False)
     holiday = models.BooleanField(db_column='Holiday', default=False)
     coffee = models.BooleanField(db_column='Coffee', default=False)

@@ -18,7 +18,7 @@ def search(apple_flakes_pin):
 #@revision.create_on_success       
 def revalidate_flavorcoat_properties(e):
     e.dry = False
-    e.spray_dried = False
+    e.spraydried = False
     e.liquid = False
     e.oilsoluble = False
     e.concentrate = False

@@ -136,7 +136,7 @@ class ExperimentalForm(ModelForm, FieldsetMixin):
                    'promotable', 'product_number',   'retain_number', 'retain_present','flavor',
                    'label_type','liquid',
                        'dry',
-                       'spray_dried',
+                       'spraydried',
                        'oilsoluble',
                        'concentrate',
                        'flavorcoat',
@@ -219,6 +219,15 @@ class ApproveForm(ModelForm):
                   'natart',
                   'name',
                   'label_type',
+                  'organic',
+                  'natural_type',
+                  'wonf',
+                  'liquid',
+                  'dry',
+                  'spraydried',
+                  'flavorcoat',
+                  'concentrate',
+                  'oilsoluble',
                   'unitprice',
                   'approved',
                   'organoleptics',
@@ -227,11 +236,11 @@ class ApproveForm(ModelForm):
                   'productmemo',
                   'pricing_memo',
                   'mixing_instructions',
+                  
                   )
 
 class FlavorSearch(forms.Form):
     search_string = forms.CharField(label="Search", required=False)
-
 
 class IngredientReplacerForm(forms.Form):
     original_ingredient = IngredientField()
@@ -492,7 +501,7 @@ class ExperimentalFilterSelectForm(forms.Form):
         choices=(
             ('liquid', "Liquid"),
             ('dry', "Dry"),
-            ('spray_dried', "Spray Dried"),
+            ('spraydried', "Spray Dried"),
             ('oilsoluble', "Oil Soluble"),
             ('concentrate', "Concentrate"),
     ))
@@ -722,7 +731,7 @@ class NewExForm1(FormRequiredFields, FieldsetMixin):
                               }
         }),  
         ('Physical Properties',{
-             'fields': ('liquid','dry','spray_dried','flavorcoat'),
+             'fields': ('liquid','dry','spraydried','flavorcoat'),
              'extra_content':{
                               'divid':'physical_fields',
                               'legend':'Physical Properties - Required'
@@ -758,7 +767,7 @@ class NewExForm1(FormRequiredFields, FieldsetMixin):
     flavorcoat = forms.BooleanField(label="Flavorcoat", required=False)
     liquid = forms.BooleanField(required=False)
     dry = forms.BooleanField(required=False)
-    spray_dried = forms.BooleanField(required=False)
+    spraydried = forms.BooleanField(required=False)
     concentrate = forms.BooleanField(required=False)
     oilsoluble = forms.BooleanField(label="Oil Soluble", required=False)
     label_type = forms.CharField(max_length=50,required=False)
