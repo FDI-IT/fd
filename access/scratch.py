@@ -31,7 +31,7 @@ TEN = Decimal('10')
 ONE_HUNDRED = Decimal('100')
 ONE_THOUSAND = Decimal('1000')
 ZERO = Decimal('0')
-SD_COST = Decimal('2.60')
+SD_COST = Decimal('3.50')
 
 all_solvent_list = Solvent.get_id_list()
 
