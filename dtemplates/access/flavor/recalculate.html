@@ -16,8 +16,6 @@
 </div>
 <div class="product-memo"><span class="label">Memo</span>{{flavor.productmemo}}</div>
 <div class="content-table">
-	
-	
 	<table>
 		<thead>
 			<tr>
@@ -35,7 +33,22 @@
 			</tr>
 			{% endfor %}
 		</tbody>
-	</tabel>
+	</table>
+	<h2>Gazintas</h2>
+	{% for gazinta_recalculation in gazinta_recalculations %}
+	<h3>{{ gazinta_recalculation.1}}</h3>
+		<table>
+		<tbody>
+			{% for attr in gazinta_recalculation.0 %}
+			<tr>
+				<td>{{ attr.0 }}</td>
+				<td>{{ attr.1 }}</td>
+				<td>{{ attr.2 }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		</table>
+	{% endfor %}
 </div>
 </div>
 

@@ -1018,7 +1018,8 @@ def resolve_testcards_any(request):
         testcard = TestCard.objects.get(pk=request.GET.get('testcard_pk'))
         testcard.status="Passed"
         testcard_form = SimpleResolveTestCardForm(instance=testcard)
-        productinfo_form = ProductInfoForm(instance=testcard.retain.lot.flavor.productinfo)
+        productinfo,created = ProductInfo.objects.get_or_create(flavor=testcard.retain.lot.flavor)
+        productinfo_form = ProductInfoForm(instance=productinfo)
         return render_to_response('qc/testcards/resolve.html', 
                               {
                                'next_tc':next_tc,

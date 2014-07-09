@@ -452,12 +452,16 @@ def ft_review(request, flavor):
 @transaction.commit_on_success
 def recalculate_flavor(request,flavor):
     old_new_attrs, flavor = recalculate_guts(flavor)
+    gazinta_recalculations = []
+    for gazinta in set(flavor.gazintas()):
+        gazinta_recalculations.append(recalculate_guts(gazinta)) 
     context_dict = {
                    'window_title': flavor.__unicode__(),
                    'page_title': "Recalculate Flavor Properties",
                    'flavor': flavor,
                    'weight_factor':1000,
                    'old_new_attrs':old_new_attrs,
+                   'gazinta_recalculations':gazinta_recalculations,
                    }   
     return render_to_response('access/flavor/recalculate.html',
                               context_dict,
