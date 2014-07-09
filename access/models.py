@@ -1913,7 +1913,15 @@ class Flavor(FormulaInfo):
         except:
             return None
 
-
+    def get_hazard_amount(self):
+        
+        total = 0
+                
+        for val in self.get_hazards().values():
+            if val != 'No':
+                total = total + 1
+                
+        return total
 
     def get_hazards(self):
         """
