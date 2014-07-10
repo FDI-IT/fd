@@ -138,3 +138,66 @@ class HttpResponseTest(TestCase):
         
         #make sure the flavor has number 1000
         self.assertEqual(response.context['flavor'].number, 8851)
+
+
+        
+       
+        
+# #MIXTURE EXAMPLE 1 - from GHS packet   
+# class HazardTest1(TestCase):
+#     fixtures = ['testdata.json']
+#     
+#     def setUp(self):
+#         self.count = Flavor.objects.count()
+#         self.flavor = Flavor.objects.get(number=1000)
+#         self.accumulator = HazardAccumulator(self.flavor)
+#         self.subhazard_dict = self.accumulator.subhazard_dict
+#         self.hazard_dict = self.accumulator.get_hazard_dict()
+#     
+#     #ensure that there is only one flavor in the testdata fixture    
+#     def test_count(self): 
+#         self.assertEqual(self.count, 1)
+#         
+# 
+#     #testing various properties to ensure the hazardaccumulator is working correctly  
+#     def test_ld50s(self): 
+#         self.assertEqual(round(self.subhazard_dict['dermal_ld50']), 24286)
+#         
+#     def test_eye_category(self):
+#         self.assertEqual(self.hazard_dict['eye_damage_hazard'], '2A')
+#         
+#         
+# class HazardTest2(TestCase): 
+#     fixtures = ['testdata2.json']
+#     
+#     def setUp(self):
+#         self.count = Flavor.objects.count()
+#         self.flavor = Flavor.objects.get(number=1001)
+#         self.accumulator = HazardAccumulator(self.flavor)
+#         self.subhazard_dict = self.accumulator.subhazard_dict
+#         self.hazard_dict = self.accumulator.get_hazard_dict()
+#         
+#     def test_count(self):
+#         self.assertEqual(self.count, 1)
+#         
+#     def test_ld50s(self):
+#         self.assertEqual(round(self.subhazard_dict['oral_ld50']), 81)
+#         self.assertEqual(round(self.subhazard_dict['dermal_ld50']), 1035)
+#         
+#     def test_hazards(self):
+#         self.assertEqual(self.hazard_dict['acute_hazard_dermal'], '4')
+#         self.assertEqual(self.hazard_dict['acute_hazard_oral'], '3')
+#         self.assertEqual(self.hazard_dict['eye_damage_hazard'], '1')
+#         self.assertEqual(self.hazard_dict['skin_corrosion_hazard'], '2')
+#         self.assertEqual(self.hazard_dict['skin_sensitization_hazard'], '1B')
+
+        
+
+        
+    
+        
+        
+    
+    
+        
+        
