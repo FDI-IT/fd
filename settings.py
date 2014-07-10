@@ -5,6 +5,11 @@ sys.path.append(os.getcwd())
 
 #add the ghs project to access hazard calculator
 sys.path.append('/var/www/django/ghs')
+sys.path.append('/var/www/django/')
+
+
+# Set the DJANGO_SETTINGS_MODULE environment variable.
+os.environ['DJANGO_SETTINGS_MODULE'] = "fd.settings"
 
 from LOCAL_SECRETS import DATABASES, SECRET_KEY
 

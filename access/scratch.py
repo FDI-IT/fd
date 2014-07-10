@@ -120,9 +120,8 @@ def show_flavor_hazards(flavor_list = Flavor.objects.filter(valid=True)):
         
 
 
-def create_hazardous_flavors(flavornum_list, failed_flavors, failed_dict):
+def create_hazardous_flavors(flavornum_list, failed_dict=defaultdict(int), min_hazards = 4):
     
-#     failed_flavors = 0
 #     failed_dict = {0:0, 1:0, 2:0, 3:0, 4:0}
     
     Flavor.objects.filter(name__icontains='Hazardous Flavor').delete()
@@ -132,7 +131,7 @@ def create_hazardous_flavors(flavornum_list, failed_flavors, failed_dict):
         
         hazard_count = 0
         
-        while hazard_count < 5:
+        while hazard_count < min_hazards:
 
             try:
                 #first iteration; flavor does not exist yet so will jump to except
@@ -213,8 +212,6 @@ def create_hazardous_flavors(flavornum_list, failed_flavors, failed_dict):
             
             if hazard_count < 5:
                 print "Hazards: %s  Recreating flavor.\n" % hazard_count
-                
-                failed_flavors += 1
                 failed_dict[hazard_count] += 1
                 
         
