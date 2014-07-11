@@ -1,11 +1,26 @@
 from access.models import Ingredient, Flavor, Formula
 from hazard_calculator.models import GHSIngredient
+from hazard_calculator.utils import hazard_list
 from access.scratch import recalculate_guts
+from random import randint
 
 from pluggable.csv_unicode_wrappers import UnicodeWriter
 
 from collections import defaultdict
 from decimal import Decimal
+from itertools import product
+
+import pickle
+
+
+def dump_pickle_sds_list():
+    
+    sds_list = []
+    for fl in Flavor.objects.all():
+        sds_list.append(fl.get_hazards)
+        
+    pickle.dump(sds_list, open("sds_list.p", "wb"))
+    
 
 
 def get_ghs_only_ingredients(path_to_destination=None):
@@ -125,19 +140,21 @@ def show_flavor_hazards(flavor_list = Flavor.objects.filter(valid=True)):
         
 
 
-def create_hazardous_flavors(flavornum_list, failed_dict=defaultdict(int), min_hazards = 4):
+def create_hazardous_flavors(flavornum_list, min_hazards = 4, failed_dict=defaultdict(int)):
     
 #     failed_dict = {0:0, 1:0, 2:0, 3:0, 4:0}
     
-    Flavor.objects.filter(name__icontains='Hazardous Flavor').delete()
-    Ingredient.objects.filter(product_name__icontains='Hazardous Ingredient').delete()
+#     Flavor.objects.filter(name__icontains='Hazardous Flavor').delete()
+#     Ingredient.objects.filter(product_name__icontains='Hazardous Ingredient').delete()
+    
+    Flavor.objects.filter(number__in=flavornum_list).delete()
     
     for x in flavornum_list:
         
         hazard_count = 0
         
-        while hazard_count < min_hazards:
-
+        while True:
+       
             try:
                 #first iteration; flavor does not exist yet so will jump to except
                 Flavor.objects.get(number=x).ingredients.all().delete() #dont really have to do this
@@ -215,20 +232,69 @@ def create_hazardous_flavors(flavornum_list, failed_dict=defaultdict(int), min_h
                 
             hazard_count = hcount
             
-            if hazard_count < 5:
+            if hazard_count < min_hazards:
                 print "Hazards: %s  Recreating flavor.\n" % hazard_count
                 failed_dict[hazard_count] += 1
+                
+            else:
+                break
                 
         
         print "Flavor %s complete\n" % fl.name
         
-       
+test_hazard_list = ['acute_hazard_oral', 'respiratory_hazard']
+    
+def create_sds_identifier_dictionary(test_hazard_list = test_hazard_list):
+    
+    
+    
+    #get a list of all combination of hazard categories
+    #this list only contains all possible category combinations, but does not contain hazard names
+    sds_list = []
+    
+    #if you replace the two hazards with all hazards, it will create a list of length 105 million and take forever    
+    for i in product(*[zip(*GHSIngredient._meta.get_field(h).choices)[0] for h in test_hazard_list]):
+        sds_list.append(i)
+
+    
+    #to turn that list into a dictionary where the key is a unique identifier and the value is an actual sds dict with hazard names
+    
+    sds_identifier_dict = {}
+    index = 1
+    
+    for sds in sds_list:
+        sds_identifier_dict[index] = dict((test_hazard_list[index], sds[index]) for index in range(0, len(test_hazard_list)))
+        index += 1
         
+    return sds_identifier_dict
+    
             
                 
-            
-            
-            
+def create_small_sds_identifier_dictionary(flavor_list, test_hazard_list):
+    '''
+    Attempt to create an sds identifier dict that only contains SDS's that match flavors exactly.
+    Each Flavor in the flavor_list will have exactly one SDS that matches it exactly.
+    Each SDS in the resulting list will have at least one flavor that matches it exactly
+        (more than one if two flavors have the same hazards).
+        
+    This dictionary depends mostly on existing flavors.
+    '''
+    #list of sds's with hazard names, but no identifier
+    sds_list = []
+    
+    for fl in flavor_list:
+        flavor_hazards = fl.get_hazards()
+        
+        sds_list.append(dict((hazard, )))
+        
+    
+    
+    
+    
+    
+    
+    
+
             
         
         

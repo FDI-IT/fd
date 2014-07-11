@@ -3,7 +3,7 @@ from operator import itemgetter
 from decimal import Decimal, ROUND_HALF_UP
 from collections import deque, defaultdict
 from datetime import datetime, date
-from random import randint
+
 import copy
 from reversion import revision
 from django.db import transaction
@@ -41,56 +41,7 @@ SD_COST = Decimal('3.50')
 all_solvent_list = Solvent.get_id_list()
 
     
-    
-# def ghs_ingredient_comparison(path_to_destination=None, fdi_only=False, ghs_only=False):
-#     
-#     ghs_only = []
-#     fdi_only = []
-#     
-#     for ghsing in GHSIngredient.objects.all():
-#         try:
-#             Ingredient.objects.filter(cas = ghsing.cas)[0]
-#         except:
-#             ghs_only.append((ghsing.cas, ghsing.name))
-# 
-#     for ing in Ingredient.objects.all():
-#         try:
-#             GHSIngredient.objects.get(cas = ing.cas)
-#         except:
-#             fdi_only.append((ing.cas, ing.id, ing.product_name))
-# 
-#     fdi_only_with_cas = []
-#     for cas, pin, name in fdi_only:
-#         if cas != u'':
-#             fdi_only_with_cas.append((cas, pin, name))
-#     
-#     if path_to_destination == None:
-#         return ghs_only, fdi_only_with_cas
-#     
-#     else:
-#         with open(path_to_destination + 'ghs_exclusive_report.csv', 'w+') as ghs_exclusive_report:
-#             csv_writer = UnicodeWriter(ghs_exclusive_report)
-#             
-#             csv_writer.writerow([u'CAS Number', u'Ingredient Name'])
-#             
-#             for cas, name in ghs_only:
-#                 csv_writer.writerow([cas, name])
-#         
-#         with open(path_to_destination + 'fdi_exclusive.csv', 'w+') as fdi_exclusive_report:
-#             csv_writer = UnicodeWriter(fdi_exclusive_report)
-#             
-#             csv_writer.writerow([u'CAS Number', u'Ingredient PIN', u'Ingredient Name'])
-#             
-# #             for cas, pin, name in fdi_only:
-# #                 if cas != u'':
-# #                     csv_writer.writerow([cas, pin, name])
-#                     
-#             for cas, pin, name in fdi_only_with_cas:
-#                 csv_writer.writerow([cas, pin, name])
-     
-
-
-
+ 
 def find_usage(ingredient_pk, gazinta_lists, flavor_valid):
     ingredient = Ingredient.objects.get(pk=ingredient_pk)
     # edge_check = set()
