@@ -32,12 +32,15 @@ from access.templatetags.ft_review_table import consolidated, consolidated_indiv
 from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_flavor
 from access.tasks import ingredient_replacer_guts
-from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form #, FlavorSpecificationForm
+from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form, GHSReportForm #, FlavorSpecificationForm
 from access.formula_filters import ArtNatiFilter, AllergenExcludeFilter, MiscFilter
+from access.ghs_analysis import get_ghs_only_ingredients, get_fdi_only_ingredients, write_ghs_report, write_fdi_report
 
 from solutionfixer.models import Solution, SolutionStatus
 from one_off.mtf import *
 from salesorders.controller import delete_specification, create_new_spec, update_spec
+from pluggable.csv_unicode_wrappers import UnicodeWriter
+
 
 ones = Decimal('1')
 tenths = Decimal('0.0')
@@ -2149,7 +2152,37 @@ def latest_polis_b():
         
     return return_list
     
+def ingredient_comparison_reports(request):
+
+    if request.method == 'POST':
+        form = GHSReportForm(request.POST)
+        
+        if form.is_valid():
+            report_to_download = form.cleaned_data['report_to_download']
+            
+            response = HttpResponse(mimetype='text/csv')
+            response['Content-Disposition'] = "attachment; filename=%s.csv" % report_to_download
+            csv_writer = UnicodeWriter(response)
+            
+            if report_to_download == 'GHS_Exclusive_Ingredients':
+                
+                ghs_only = get_ghs_only_ingredients()
+                write_ghs_report(csv_writer, ghs_only)
+                
     
+            elif report_to_download == 'FDI_Exclusive_Ingredients':
+                
+                fdi_only = get_fdi_only_ingredients()
+                write_fdi_report(csv_writer, fdi_only)
+                
+            return response
+    
+    else:
+        form = GHSReportForm()
+    
+    return render_to_response('access/get_ingredient_comparison_reports.html', {'form': form,})
+    
+
     
     
     
