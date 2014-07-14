@@ -17,11 +17,14 @@ def dump_pickle_sds_list():
     
     sds_list = []
     for fl in Flavor.objects.all():
-        sds_list.append(fl.get_hazards)
+        sds_list.append(fl.get_hazards())
         
     pickle.dump(sds_list, open("sds_list.p", "wb"))
     
-
+def load_sds_list():
+    
+    sds_list = pickle.load(open('sds_list.p','rb'))
+    return sds_list
 
 def get_ghs_only_ingredients(path_to_destination=None):
     ghs_only = []

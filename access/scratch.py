@@ -40,7 +40,9 @@ SD_COST = Decimal('3.50')
 
 all_solvent_list = Solvent.get_id_list()
 
-    
+
+
+
  
 def find_usage(ingredient_pk, gazinta_lists, flavor_valid):
     ingredient = Ingredient.objects.get(pk=ingredient_pk)

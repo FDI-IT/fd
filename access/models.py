@@ -16,7 +16,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
 
-from hazard_calculator.models import FormulaLineItem, HazardAccumulator, GHSIngredient
+from hazard_calculator.models import FormulaLineItem, HazardAccumulator, GHSIngredient, NoLeafWeightError
 from hazard_calculator.tasks import create_subhazard_dict, calculate_flavor_hazards
 #from access.controller import hazard_list, acute_toxicity_list
 #from access.controller import make_hazard_class, skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict
@@ -1999,10 +1999,15 @@ class Flavor(FormulaInfo):
 #         accumulator = HazardAccumulator(subhazard_dict)
 #           
 #         hazard_dict = accumulator.get_hazard_dict()
-          
-        hazard_dict = calculate_flavor_hazards(formula_list)
-          
-        return hazard_dict
+        
+        try:
+            hazard_dict = calculate_flavor_hazards(formula_list)
+            return hazard_dict
+        except NoLeafWeightError:
+            raise NoLeafWeightError(self.number)
+            
+        
+
          
         
 
