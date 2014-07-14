@@ -932,3 +932,13 @@ class ReconciledSpecForm(forms.Form):
     name = forms.CharField(max_length=48, required=True, widget = forms.TextInput(attrs={'readonly':'readonly'}))
     specification = forms.CharField(max_length=48, required=True)
 
+class GHSReportForm(forms.Form):
+    
+    REPORT_CHOICES = [('GHS_Exclusive_Ingredients', 'GHS Exclusive Ingredients'),
+                      ('FDI_Exclusive_Ingredients', 'FDI Exclusive Ingredients')]
+    
+    report_to_download = forms.ChoiceField(required=True, choices=REPORT_CHOICES, widget=forms.RadioSelect())
+    
+
+                                                                   
+
