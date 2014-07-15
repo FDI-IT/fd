@@ -16,7 +16,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
 
-from hazard_calculator.models import FormulaLineItem, HazardAccumulator, GHSIngredient, NoLeafWeightError
+from hazard_calculator.models import FormulaLineItem, HazardAccumulator, GHSIngredient
 from hazard_calculator.tasks import create_subhazard_dict, calculate_flavor_hazards
 #from access.controller import hazard_list, acute_toxicity_list
 #from access.controller import make_hazard_class, skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict
@@ -1949,7 +1949,7 @@ class Flavor(FormulaInfo):
         """
         
         formula_list = []
-        
+        no_cas_total = 0
         
         '''
         Need to account for two possibilities:
@@ -1970,9 +1970,18 @@ class Flavor(FormulaInfo):
         '''
         
         
-        no_cas_total = 0
+#         if self.consolidated_leafs == {}:
+#             raise NoLeafWeightError(self.number)
         
-        for ingredient, weight in self.consolidated_leafs.iteritems():
+        lws = LeafWeight.objects.filter(root_flavor=self)
+        if lws == []:
+            raise NoLeafWeightError(self.number)
+        
+#         for ingredient, weight in self.consolidated_leafs.iteritems():
+
+        for lw in lws:
+            ingredient = lw.ingredient
+            weight = lw.weight
             
             #case 1
             if ingredient.cas == '':
@@ -1992,21 +2001,21 @@ class Flavor(FormulaInfo):
                 fli = FormulaLineItem(cas='00-00-00', weight=no_cas_total)
                 formula_list.append(fli)
                 
-        #return formula_list
-#              
-#         subhazard_dict = create_subhazard_dict(formula_list)
-#               
-#         accumulator = HazardAccumulator(subhazard_dict)
-#           
-#         hazard_dict = accumulator.get_hazard_dict()
-        
-        try:
-            hazard_dict = calculate_flavor_hazards(formula_list)
-            return hazard_dict
-        except NoLeafWeightError:
-            raise NoLeafWeightError(self.number)
+       
+
+        hazard_dict = calculate_flavor_hazards(formula_list)
+        return hazard_dict
+
+
             
-        
+class NoLeafWeightError(Exception):
+    #this is used above and is raised when a flavor has no consolidated leaves
+    def __init__(self, num=None):
+        self.num = num
+            
+    def __str__(self):
+        if self.num:
+            return "Flavor %s has no leaf weights; cannot calculate hazards (try recalculate_guts)" % self.num
 
          
         
