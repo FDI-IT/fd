@@ -80,7 +80,10 @@ DIACETYL_PKS = [262,]
 PG_PKS = [670,6717]
 
 def get_next_flavorid():
-    return Flavor.objects.all().order_by('-id')[0].id+1
+    try:
+        return Flavor.objects.all().order_by('-id')[0].id+1
+    except:
+        return 1
 
 def get_next_rawmaterialcode():
     try:
@@ -1974,8 +1977,14 @@ class Flavor(FormulaInfo):
 #             raise NoLeafWeightError(self.number)
         
         lws = LeafWeight.objects.filter(root_flavor=self)
-        if lws == []:
-            raise NoLeafWeightError(self.number)
+        if not lws.exists():
+                                           
+            if self.formula_set.exists():
+                from access.scratch import recalculate_guts
+                recalculate_guts(self) 
+               
+            else:
+                raise NoFormulaError(self.number)
         
 #         for ingredient, weight in self.consolidated_leafs.iteritems():
 
@@ -2008,14 +2017,14 @@ class Flavor(FormulaInfo):
 
 
             
-class NoLeafWeightError(Exception):
+class NoFormulaError(Exception):
     #this is used above and is raised when a flavor has no consolidated leaves
     def __init__(self, num=None):
         self.num = num
             
     def __str__(self):
         if self.num:
-            return "Flavor %s has no leaf weights; cannot calculate hazards (try recalculate_guts)" % self.num
+            return "Flavor %s has no formula; cannot calculate hazards" % self.num
 
          
         
@@ -3474,5 +3483,5 @@ def update_prices_and_get_updated_flavors(old_ingredient, new_ingredient):
     return updated_flavors
 
         
-        
+
 

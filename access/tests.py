@@ -2,10 +2,13 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.test.client import Client, RequestFactory
 
-
-from access.models import Flavor
+from access.models import Flavor, Ingredient, Formula
 from access.controller import HazardAccumulator
 from access.views import *
+
+from access.scratch import recalculate_guts
+
+from hazard_calculator.models import GHSIngredient
 
 # class FlavorTest(TestCase):
 #     fixtures = ['access.json']
@@ -141,7 +144,95 @@ class HttpResponseTest(TestCase):
 
 
         
-       
+class HazardTest2(TestCase):
+    
+    fixtures = ['hazard_data.json']
+    
+    def setUp(self):
+        self.testflavor = Flavor.objects.create(number = 9999,
+                        name = "Test Flavor 2",
+                        prefix = "TF",
+                        natart = "N/A",
+                        spg = 0,
+                        risk_assessment_group = 1,
+                        kosher = "Not Assigned",
+                        yield_field = 100,
+                        )
+            
+        ghs_component1 = GHSIngredient.objects.create(
+                            cas = '00-00-01',
+                            oral_ld50 = 5000,
+                            tost_single_hazard = '3-NE, 3-RI')
+        ghs_component2 = GHSIngredient.objects.create(
+                            cas = '00-00-02',
+                            oral_ld50 = 500,
+                            dermal_ld50 = 1500,
+                            eye_damage_hazard = '1',
+                            skin_corrosion_hazard = '1A',
+                            skin_sensitization_hazard = '1B',
+                            aspiration_hazard = '1',)
+        ghs_component3 = GHSIngredient.objects.create(
+                            cas = '00-00-03',
+                            oral_ld50 = 75,
+                            dermal_ld50 = 1000)
+        ghs_component4 = GHSIngredient.objects.create(
+                            cas = '00-00-04',
+                            tost_single_hazard = '3-RI',
+                            aspiration_hazard = '1',)
+        
+        
+        ing_component1 = Ingredient.objects.create(cas = '00-00-01',
+                             product_name = "Test Ingredient 1",
+                             unitprice = Decimal('10.00'),
+                             sulfites_ppm = 0,
+                             package_size = Decimal('0.00'),
+                             minimum_quantity = Decimal('0.00')
+                             )
+        ing_component2 = Ingredient.objects.create(cas = '00-00-02',
+                             product_name = "Test Ingredient 2",
+                             unitprice = Decimal('10.00'),
+                             sulfites_ppm = 0,
+                             package_size = Decimal('0.00'),
+                             minimum_quantity = Decimal('0.00')
+                             )
+        ing_component3 = Ingredient.objects.create(cas = '00-00-03',
+                             product_name = "Test Ingredient 3",
+                             unitprice = Decimal('10.00'),
+                             sulfites_ppm = 0,
+                             package_size = Decimal('0.00'),
+                             minimum_quantity = Decimal('0.00')
+                             )
+        ing_component4 = Ingredient.objects.create(cas = '00-00-04',
+                             product_name = "Test Ingredient 4",
+                             unitprice = Decimal('10.00'),
+                             sulfites_ppm = 0,
+                             package_size = Decimal('0.00'),
+                             minimum_quantity = Decimal('0.00')
+                             )
+        
+        formula1 = Formula.objects.create(flavor = self.testflavor,
+                  ingredient = ing_component1,
+                  amount = 5
+                  )
+        formula2 = Formula.objects.create(flavor = self.testflavor,
+                  ingredient = ing_component2,
+                  amount = 40
+                  )
+        formula3 = Formula.objects.create(flavor = self.testflavor,
+                  ingredient = ing_component3,
+                  amount = 500
+                  )
+        formula4 = Formula.objects.create(flavor = self.testflavor,
+                  ingredient = ing_component4,
+                  amount = 455
+                  )
+        
+        recalculate_guts(self.testflavor)
+        
+        self.hazards = self.testflavor.get_hazards()
+        
+    def test_ld50s(self):
+        self.assertEqual(round(self.hazards['oral_ld50']), 81)
         
 # #MIXTURE EXAMPLE 1 - from GHS packet   
 # class HazardTest1(TestCase):
