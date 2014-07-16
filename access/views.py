@@ -32,9 +32,9 @@ from access.templatetags.ft_review_table import consolidated, consolidated_indiv
 from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_flavor
 from access.tasks import ingredient_replacer_guts
-from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form, GHSReportForm #, FlavorSpecificationForm
-from access.formula_filters import ArtNatiFilter, AllergenExcludeFilter, MiscFilter
+from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form, GHSReportForm, CasFemaSpreadsheetFileForm
 from access.ghs_analysis import get_ghs_only_ingredients, get_fdi_only_ingredients, write_ghs_report, write_fdi_report
+from access.fema_cas import check_femas, create_CAS_FEMA_dict
 
 from solutionfixer.models import Solution, SolutionStatus
 from one_off.mtf import *
@@ -2181,10 +2181,17 @@ def ingredient_comparison_reports(request):
         form = GHSReportForm()
     
     return render_to_response('access/get_ingredient_comparison_reports.html', {'form': form,})
-    
 
     
-    
+def upload_cas_fema(request):
+    if request.method == 'POST':
+        form = CasFemaSpreadsheetFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            parse_orders(request.FILES['file'])
+            return HttpResponseRedirect('/access/fema_cas')
+    else:
+        form = CasFemaSpreadsheetFileForm()
+    return render_to_response('access/upload_cas_fema.html', {'form': form})
     
 
     

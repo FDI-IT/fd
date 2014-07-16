@@ -940,5 +940,7 @@ class GHSReportForm(forms.Form):
     report_to_download = forms.ChoiceField(required=True, choices=REPORT_CHOICES, widget=forms.RadioSelect())
     
 
+class CasFemaSpreadsheetFileForm(forms.Form):
+    file = forms.FileField()
                                                                    
 
