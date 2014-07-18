@@ -72,5 +72,7 @@ urlpatterns = patterns('access.views',
     (r'^rm_allergen_list/$', 'rm_allergen_list'),
     (r'^angularjs_test/$', 'angularjs_test'),
     (r'^ingredient_comparison_reports/$', 'ingredient_comparison_reports'),
-    (r'^upload_femaCas/$', 'upload_cas_fema'),
+    (r'^upload_cas_fema/$', 'upload_cas_fema'),
+    (r'^preview_cas_fema/$', 'preview_cas_fema'),
 )
+

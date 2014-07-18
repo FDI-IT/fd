@@ -942,5 +942,10 @@ class GHSReportForm(forms.Form):
 
 class CasFemaSpreadsheetFileForm(forms.Form):
     file = forms.FileField()
-                                                                   
+                                        
+class IngredientCasFemaPreviewForm(forms.Form):
+    change = forms.BooleanField()
+    ing_pk = forms.IntegerField(initial=0, widget=forms.HiddenInput)  
+    fema = forms.CharField(max_length=10)
+    cas = forms.CharField(max_length=10)                 
 

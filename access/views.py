@@ -32,9 +32,9 @@ from access.templatetags.ft_review_table import consolidated, consolidated_indiv
 from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_flavor
 from access.tasks import ingredient_replacer_guts
-from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form, GHSReportForm, CasFemaSpreadsheetFileForm
+from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form, GHSReportForm, IngredientCasFemaPreviewForm, CasFemaSpreadsheetFileForm
 from access.ghs_analysis import get_ghs_only_ingredients, get_fdi_only_ingredients, write_ghs_report, write_fdi_report
-from access.fema_cas import check_femas, create_CAS_FEMA_dict
+from access.fema_cas import find_fema_changes, create_CAS_FEMA_dict, find_pending_changes_from_cas_fema_file
 
 from solutionfixer.models import Solution, SolutionStatus
 from one_off.mtf import *
@@ -2187,11 +2187,43 @@ def upload_cas_fema(request):
     if request.method == 'POST':
         form = CasFemaSpreadsheetFileForm(request.POST, request.FILES)
         if form.is_valid():
-            parse_orders(request.FILES['file'])
-            return HttpResponseRedirect('/access/fema_cas')
+            # to see how to process a file first check django docs, then see where parse_orders is used in this project
+            pending_changes = find_pending_changes_from_cas_fema_file(request.FILES['file'])
+            request.session['pending_changes'] = pending_changes
+            ##this is where we'll save the pending changes in the request session
+            return HttpResponseRedirect('/access/preview_cas_fema')
     else:
         form = CasFemaSpreadsheetFileForm()
     return render_to_response('access/upload_cas_fema.html', {'form': form})
-    
 
+def preview_cas_fema(request):
+    #pending_changes = request.session['pending_changes']
+    CasFemaFormSet = formset_factory(IngredientCasFemaPreviewForm)
+   # return render_to_response('access/preview_cas_fema.html', {'pending_changes':pending_changes})
+    if request.method == 'POST':
+        #CasFemaFormSet = formset_factory(IngredientCasFemaPreviewForm)  ##request.POST????
+        formset=CasFemaFormSet(request.POST)
+        if formset.is_valid():
+            process_formset(formset)
+            return HttpResponseRedirect('/access/success_cas_fema')
+    else:
+        pending_changes = request.session['pending_changes']
+        #find some way to stuff the pending changes into the below formset
+        #CasFemaFormSet = formset_factory(IngredientCasFemaPreviewForm)
+        initialFormData=[]
+        for ing in pending_changes:
+            initialFormData.append({
+                                    'change':False,
+                                    'ing_pk' : ing.pk,
+                                    'fema' : ing.fema,
+                                    'cas' : ing.cas,
+            })
+        formset = CasFemaFormSet(initial=initialFormData)                         ##request.POST????
+       # for ing in pending_changes:
+       # formset.clean()
+    return render_to_response('access/preview_cas_fema.html', {'formset': formset, 'pending_changes':pending_changes})
+
+#def success_cas_fema(request):
+    
+    
     
