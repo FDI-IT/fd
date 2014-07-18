@@ -1,25 +1,91 @@
 {% extends "base.html" %}
 {% load flat_review_table %}
 {% load blades %}
-{% load related_links %}
+{% load product_tabs %}
 {% block content %}
 
 <script type="text/javascript" src="/djangomedia/js/flavor_review.js?v=25"></script>
 <script>
 jQuery(document).ready(function(){	
 	
-	$( "#flavor-tabs" ).tabs({ 
-		cache: true,
-		active: 0,
-		spinner: '',
-		ajaxOptions: {
-			error: function(xhr, status, index, anchor) {
-				$( anchor.hash ).html(
-					"Failed to load tab."
-				);
-			}
-		}
-	});
+	
+            var tabs,
+                tabEvent = false,
+                initialTab = 'flat_review_table',
+                navSelector = '#product_tabs .ui-tabs-nav',
+                navFilter = function(el) {
+                    return $(el).attr('href').replace(/^#/, '');
+                },
+                panelSelector = '#product_tabs .ui-tabs-panel',
+                panelFilter = function() {
+                    $(panelSelector + ' a').filter(function() {
+                        return $(navSelector + ' a[title=' + $(this).attr('title') + ']').size() != 0;
+                    }).each(function(event) {
+                 
+
+       $(this).attr('href', '#' + $(this).attr('title').replace(/ /g, '_'));
+                    });
+                };
+            
+            // Initializes plugin features
+            $.address.strict(false).wrap(true);
+            
+            if ($.address.value() == '') {
+                $.address.history(false).value(initialTab).history(true);
+            }
+            
+            // Address handler
+            $.address.init(function(event) {
+
+                // Adds the ID in a lazy manner to prevent scrolling
+                $(panelSelector).attr('id', initialTab);
+
+                // Enables the plugin for all the content links
+                $(panelSelector + ' a').address(function() {
+                    return navFilter(this);
+                });
+                
+                panelFilter();
+
+                // Tabs setup
+                tabs = $('#product_tabs')
+                    .tabs({
+                        load: function(event, ui) {
+                            // Filters the content and applies the plugin if needed
+                            $(ui.panel).html($(panelSelector, ui.panel).html());
+                            panelFilter();
+                        },
+                        fx: {
+                            opacity: 'toggle', 
+                            duration: 'fast'
+                        }
+                    })
+                    .css('display', 'block');
+
+                // Enables the plugin for all the tabs
+                $(navSelector + ' a').click(function(event) {
+                	tabEvent = true;
+                    $.address.value(navFilter(event.target));
+                    tabEvent = false;
+                    return false;
+                });
+            
+            }).change(function(event) {
+
+                var current = $('a[href=#' + event.value + ']:first');
+                
+                // Sets the page title
+                $.address.title($.address.title().split(' | ')[0] + ' | ' + current.text());
+
+                // Selects the proper tab
+                if (!tabEvent) {
+                    tabs.tabs('select', current.attr('href'));
+                }
+                
+            });
+
+            // Hides the tabs during initialization
+            //document.write('<style type="text/css"> #product_tabs { display: none; } </style>');
 
 	$( "#flat-table" ).tablesorter({
 			headers: {
@@ -74,8 +140,8 @@ jQuery(document).ready(function(){
 <div class="product-memo"><span class="label">Memo</span>{{flavor.mixing_instructions}}</div>
 <div class="product-memo"><span class="label">Pricing Memo</span>{{flavor.pricing_memo}}</div>
 
-<div id="flavor-tabs">
-	{% related_links flavor %}
+<div id="product_tabs">
+	{% product_tabs flavor %}
 	
 	<input type="hidden" id="actual_adjusted_weight" value="1000">
 

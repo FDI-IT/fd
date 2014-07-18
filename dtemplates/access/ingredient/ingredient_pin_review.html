@@ -2,11 +2,29 @@
 {% load blades %}
 {% load related_links %}
 {% load rm_history %}
-{% block content %}
 {% block htmlhead %}
     {% include "htmlhead.html" %}
     <script type="text/javascript" src="/djangomedia/js/update_raw_materials.js"></script>
+    <script>
+	jQuery(document).ready(function(){	
+		
+		$( "#product_tabs" ).tabs({ 
+			cache: true,
+			active: 0,
+			spinner: '',
+			ajaxOptions: {
+				error: function(xhr, status, index, anchor) {
+					$( anchor.hash ).html(
+						"Failed to load tab."
+					);
+				}
+			}
+		});
+	});
+		</script>
 {% endblock %}
+{% block content %}
+
 
 <div id="content-right">
 	{% blades highlighted_ingredient %}
@@ -16,12 +34,12 @@
 	<div id="title-left">
 		<span id="name">{{highlighted_ingredient.id}} - {{highlighted_ingredient.art_nati}} {{ highlighted_ingredient.prefix }} {{ highlighted_ingredient.product_name }} {{ highlighted_ingredient.part_name2 }}</span>
 	</div>
-	{% related_links highlighted_ingredient %}
+	
 	
 	<div class="product-memo"><span class="label">Memo</span>{{highlighted_ingredient.memo}}</div>
+	
 	<div id="rm_id" style="display:none">{{ highlighted_ingredient.id }}</div>
-	<div id="ingredient-detail">
-		{% if updated_flavors %}
+	{% if updated_flavors %}
 		<div id="flavor-price-delta" >
 		<table width="100%" class="sorttable">
 			<caption>Flavor price changes</caption>
@@ -57,7 +75,14 @@
 			</tbody>
 		</table>
 		</div>
-		{% endif %}
+	{% endif %}
+	
+	<div id="product_tabs">
+		{% related_links highlighted_ingredient %}
+	</div>
+	
+	<div id="ingredient-detail">
+		
 
 		<form id="ingredient-pin-price-update" action="/access/ingredient/pin_review/{{ highlighted_ingredient.id }}/" method="post">
 			{{icu.as_p}}

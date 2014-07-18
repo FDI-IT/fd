@@ -1242,7 +1242,7 @@ class Flavor(FormulaInfo):
     
     @property
     def table_name(self):
-        return " ".join(self.name, self.label_type)
+        return " ".join((self.name, self.label_type))
     
     @property
     def natart_name_with_type(self):
@@ -1344,7 +1344,11 @@ class Flavor(FormulaInfo):
                 string_kwargs[keyword] = arg_list
         return string_kwargs
     
+    
     def get_related_links(self):
+        """This is going to be replaced by get_product_tabs and might
+        be able to be removed. Leaving it in for now, just in case.
+        """
         related_links = [
                        ('#flat_review_table','Formula'),
                        ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
@@ -1374,6 +1378,38 @@ class Flavor(FormulaInfo):
             pass
 
         return related_links
+    
+    def get_product_tabs(self):
+        product_tabs = [
+                       ('#flat_review_table','Formula'),
+                       ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
+                       ('/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
+                       ('/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
+                       ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
+                       ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
+                       ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
+                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
+                       ]
+        if self.retain_superset().count()>0:
+            product_tabs.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
+            product_tabs.append(('/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
+
+        try:
+            self.experimentallog
+            product_tabs.append(('/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
+        except:
+            pass
+        try:
+            rmr = self.raw_material_record
+            if rmr:
+                product_tabs.append(('/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
+                if Formula.objects.filter(ingredient=rmr).count() > 0:
+                    product_tabs.append(('/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
+        except:
+            pass
+
+        return product_tabs
+
  
     @property
     def linked_memo(self):
