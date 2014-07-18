@@ -5,23 +5,6 @@
 {% block htmlhead %}
     {% include "htmlhead.html" %}
     <script type="text/javascript" src="/djangomedia/js/update_raw_materials.js"></script>
-    <script>
-	jQuery(document).ready(function(){	
-		
-		$( "#product_tabs" ).tabs({ 
-			cache: true,
-			active: 0,
-			spinner: '',
-			ajaxOptions: {
-				error: function(xhr, status, index, anchor) {
-					$( anchor.hash ).html(
-						"Failed to load tab."
-					);
-				}
-			}
-		});
-	});
-		</script>
 {% endblock %}
 {% block content %}
 
