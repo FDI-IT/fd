@@ -4,7 +4,7 @@ import sys
 sys.path.append(os.getcwd())
 
 #add the ghs project to access hazard calculator
-sys.path.append('/var/www/django/ghs')
+#sys.path.append('/var/www/django/ghs')
 sys.path.append('/var/www/django/')
 
 
