@@ -2513,6 +2513,9 @@ class Supplier(models.Model):
         
     def __unicode__(self):
         return self.suppliername   
+    
+    def get_absolute_url(self):
+        return "/access/purchase/supplier/%s/" % self.pk
  
     def save(self, *args, **kwargs):
         if self.suppliercode != "":

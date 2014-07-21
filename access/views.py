@@ -2183,8 +2183,23 @@ def ingredient_comparison_reports(request):
     return render_to_response('access/get_ingredient_comparison_reports.html', {'form': form,})
     
 
+def recent_purchases_per_ingredient(request):
+    poli_pks = []
+    for i in Ingredient.objects.annotate(poli_count=Count('purchaseorderlineitem')).exclude(poli_count=0).select_related():
+        poli_pks.append(i.purchaseorderlineitem_set.latest('po__date_ordered').pk)
+    polis = PurchaseOrderLineItem.objects.filter(pk__in=poli_pks).order_by('-po__number')
+    return list_detail.object_list(
+        request,
+        paginate_by=100,
+        queryset=polis,
+        template_name="access/purchase/recent_purchases_per_ingredient.html",
+        extra_context= {
+                'page_title': "Recent Purchase Per Ingredient",
+            },
+    )
     
-    
-    
-
-    
+def supplier_review(request,supplier_pk):
+    #supplier_pk = int(supplier_pk)
+    supplier = get_object_or_404(Supplier, pk=supplier_pk)
+    return render_to_response('access/purchase/supplier_review.html',
+                              {'supplier':supplier},)
