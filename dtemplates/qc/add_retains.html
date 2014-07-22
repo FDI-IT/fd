@@ -12,6 +12,7 @@
 		
 	</script>
     <form action="" method="POST">
+    {% csrf_token %}
 	{{ formset.management_form }}
 	
 	<table id="retain-rows" width="100%">

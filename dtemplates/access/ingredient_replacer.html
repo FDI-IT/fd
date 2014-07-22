@@ -2,6 +2,7 @@
 
 {% block content %}
 <form id="ingredient_replacer" action="/access/ingredient_replacer/" method="post">
+	{% csrf_token %}
 {{ form.as_p }}
 <input type="submit" value="Preview Ingredient Replacement">
 </form>

@@ -29,6 +29,7 @@
 	<img src="{{ next_tc.thumbnail.url }}" style="display:none;">
 			<h2>{{productinfo_form.instance.flavor}}</h2>
 		<form action="/qc/resolve_testcards/" method="post" >
+		{% csrf_token %}
 		<fieldset>
 		<legend>Test Card Fields</legend>
 		{{testcard_form.non_field_errors}}

@@ -15,6 +15,7 @@
 
 <div>
 	<form method="post" action="{{ form_action_url }}">
+	{% csrf_token %}
 	<div id="testcard_gallery">
 		{% for tc in testcards %}
 		<div id="testcard{{ forloop.counter}}" class="image_select">

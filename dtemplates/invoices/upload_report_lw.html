@@ -17,6 +17,8 @@
 
 <div id="content-main">
 <form enctype="multipart/form-data" action="/invoices/upload_report_lw/" method="post">
+	
+    	{% csrf_token %}
 {{form.as_p}}
 <input type="submit" value="Submit" />
 </form>

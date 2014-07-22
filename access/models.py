@@ -275,7 +275,8 @@ class Ingredient(models.Model):
                                       default=get_next_rawmaterialcode)
     cas = models.CharField( 
             max_length=15,
-            blank=True)
+            blank=True,
+            db_column="CAS")
     rawmaterialcode = models.PositiveIntegerField(
             primary_key=True,
             db_column='RawMaterialCode',
@@ -742,6 +743,46 @@ class Ingredient(models.Model):
             )
         related_links.append(('/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'))
         return related_links
+    
+    def get_product_tabs(self):
+        product_tabs = [
+                ('moo','Details by Code'),
+                ('moo','Retain History'),
+                ('/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions'),
+                ('/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'),
+            ]
+
+        return product_tabs
+    
+#     product_tabs = [
+#                        ('#flat_review_table','Formula'),
+#                        ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
+#                        ('/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
+#                        ('/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
+#                        ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
+#                        ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
+#                        ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
+#                        ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
+#                        ]
+#         if self.retain_superset().count()>0:
+#             product_tabs.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
+#             product_tabs.append(('/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
+# 
+#         try:
+#             self.experimentallog
+#             product_tabs.append(('/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
+#         except:
+#             pass
+#         try:
+#             rmr = self.raw_material_record
+#             if rmr:
+#                 product_tabs.append(('/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
+#                 if Formula.objects.filter(ingredient=rmr).count() > 0:
+#                     product_tabs.append(('/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
+#         except:
+#             pass
+# 
+#         return product_tabs
 
     def resembles(self, ingredient):
         if self.id != ingredient.id:

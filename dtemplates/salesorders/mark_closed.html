@@ -17,6 +17,7 @@
 
 <div id="content-main">
 <form action="/salesorders/mark_closed/clear/" method="post">
+{% csrf_token %}
 	<input type="submit" value="Mark" />
 </form>
 </div>

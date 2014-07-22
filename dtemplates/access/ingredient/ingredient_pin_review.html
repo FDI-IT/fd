@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load blades %}
-{% load related_links %}
+{% load product_tabs %}
 {% load rm_history %}
 {% block htmlhead %}
     {% include "htmlhead.html" %}
@@ -57,17 +57,17 @@
 				{% endfor %}
 			</tbody>
 		</table>
-		</div>
+		</div>related_links
 	{% endif %}
 	
 	<div id="product_tabs">
-		{% related_links highlighted_ingredient %}
+		{% product_tabs highlighted_ingredient %}
 	</div>
-	
 	<div id="ingredient-detail">
 		
 
 		<form id="ingredient-pin-price-update" action="/access/ingredient/pin_review/{{ highlighted_ingredient.id }}/" method="post">
+			{% csrf_token %}
 			{{icu.as_p}}
 			<input type="submit" value="Update unit price">
 		</form>
@@ -139,7 +139,7 @@
 					<tr>
 						<th>Flavor</th>
 						<th>Raw Material Amount</th>
-					</tr>
+				product_tabs	</tr>
 				</thead>
 				
 				<tbody>

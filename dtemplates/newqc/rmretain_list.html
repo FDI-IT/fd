@@ -33,6 +33,7 @@
 	</div>
 	
     <form name="retain_selections" action="/qc/batch_print/" method="post">
+    {% csrf_token %}
     <table class="sorttable" class="retaintable" width="100%">
     <caption><a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a></caption>	
 	<tr class="qcheaders">

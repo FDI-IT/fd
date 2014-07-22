@@ -3,6 +3,7 @@
 {% block content %}
     <div id="content-main">
 	<form method="POST" action="/qc/">
+	{% csrf_token %}
 	{{ formset.management_form }}
 
 	    <table class="sortable" width="700px">

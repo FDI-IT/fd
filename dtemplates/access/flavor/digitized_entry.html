@@ -10,6 +10,7 @@
 		<h1>{{ status_message }}</h1>
 		{% endif %}
 		<form id="DigitizedFormulaPasteForm" action="" method="POST">
+			{% csrf_token %}
 			{{ form }}
 			<input id="DigitizedFormulaPasteForm-preview-button" type="submit" value="Check Results" />
 		</form>

@@ -12,6 +12,7 @@
 <div id="content-main">
 	
     <form action="" method="POST">
+    	{% csrf_token %}
 	{{ formset.management_form }}
 	
 	<table width="100%" class="sorttable">

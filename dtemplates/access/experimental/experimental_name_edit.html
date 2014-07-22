@@ -19,6 +19,7 @@ window.__admin_media_prefix__ = "{% filter escapejs %}{% admin_media_prefix %}{%
 <div id="content-left-half">
 	
 	<form id="new-experimental-form" action="/access/experimental/{{experimental.experimentalnum}}/name_edit/" method="post">
+		{% csrf_token %}
 		{{ management_form }}
 		{{ experimental_name_form.errors}}
 		{{experimental_name_form.non_field_errors}}
