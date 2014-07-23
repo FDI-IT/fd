@@ -1,6 +1,7 @@
 <fieldset id="poli">
 <legend>TSR Products</legend>
 	<form action="" method="POST">
+		{% csrf_token %}
 	{{ management_form }}
 	<table id="tsr-rows" width="100%">
 		<thead>

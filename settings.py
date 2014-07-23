@@ -106,12 +106,12 @@ MEDIA_URL = '/djangomedia/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
     
     #loads templates from Python eggs rather than from the filesystem
     #can now use templates from hazard_calculator
-    'django.template.loaders.eggs.load_template_source', 
+    'django.template.loaders.eggs.Loader', 
 )
 
 
@@ -130,8 +130,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.gzip.GZipMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.csrf.middleware.CsrfMiddleware', 
-    'django.contrib.csrf.middleware.CsrfViewMiddleware', 
+    'django.middleware.csrf.CsrfViewMiddleware', 
     'django.middleware.transaction.TransactionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -186,6 +185,7 @@ INSTALLED_APPS = (
     'unified_adapter',
     'reports',
     'hazard_calculator',
+    'south',
     #'history_audit',
     #'haystack',
 )

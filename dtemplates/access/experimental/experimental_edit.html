@@ -12,6 +12,7 @@
 		<h1>{{ status_message }}</h1>
 		{% endif %}
 	<form id="new-experimental-form" action="/access/experimental/{{experimentalform.instance.experimentalnum}}/edit/" method="post">
+		{% csrf_token %}
 		{{ management_form }}
 		{{ experimentalform.errors}}
 		{{experimentalform.non_field_errors}}

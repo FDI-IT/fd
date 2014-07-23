@@ -23,7 +23,7 @@ function print_experimental_review(experimental_number) {
 
 	newwindow = popup_window('/access/experimental/' + experimental_number +'/print_review/');
 	newwindow.onload = function (e) {
-		var div_flavor_tabs = newwindow.document.getElementById('flavor-tabs');
+		var div_flavor_tabs = newwindow.document.getElementById('product_tabs');
 		var new_table = copy_table.clone();
 		var batch_weight = jQuery('#adjusted_weight').val();
 		if (batch_weight == "") {
@@ -48,7 +48,7 @@ function print_review(flavor_number) {
 	}
 	newwindow = popup_window('/access/' + flavor_number +'/print_review/');
 	newwindow.onload = function (e) {
-		var div_flavor_tabs = newwindow.document.getElementById('flavor-tabs');
+		var div_flavor_tabs = newwindow.document.getElementById('product_tabs');
 		var new_table = copy_table.clone();
 		var batch_weight = jQuery('#adjusted_weight').val();
 		if (batch_weight == "") {

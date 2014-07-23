@@ -20,6 +20,7 @@
 <div id="object-list">
 	<h3>Details</h3>
 	<form action="/reports/experimental_log_exclude/" method="post">
+	{% csrf_token %}
 	<table id="reports_experimental_log_details">
 		<thead>
 			<tr>

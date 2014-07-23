@@ -17,6 +17,7 @@ display:none;
 		<h1>{{ status_message }}</h1>
 		{% endif %}
 	<form id="new-experimental-form" action="/access/new_experimental/" method="post">
+		{% csrf_token %}
 		{{ management_form }}
 		<div id="special-info">
 			<fieldset>

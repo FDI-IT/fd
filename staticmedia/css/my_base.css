@@ -372,20 +372,10 @@ div.content-table{
 	padding-top:10px;
 	padding-bottom:10px
 }
-#flavor-tabs {
+#product_tabs {
 clear:both;
 }
-/*
-#flavor-tabs > div{
-	position:relative;
-	margin:0px 10px 20px 0px;
-	float:left;
-	background-color:#f2f2f3;
-	width:730px;
-	padding-top:10px;
-	padding-bottom:10px
-}
-*/
+
 span.table_action_links{
 	padding:0px 0px 0px 10px;
 }

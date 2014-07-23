@@ -49,6 +49,7 @@
 
 
 <form id="exportform" action="/access/table_to_csv" method="post" target="_blank">
+	{% csrf_token %}
 <input type="hidden" id="exportdata" name="exportdata" />
 <input type="hidden" id="flavor_number" name="flavor_number" value="{{ flavor.number }}" />
 </form>

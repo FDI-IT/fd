@@ -1,6 +1,7 @@
 <fieldset id="poli">
 <legend>Purchase Order Line Items</legend>
 	<form action="" method="POST">
+		{% csrf_token %}
 	{{ management_form }}
 	<table id="poli-rows" width="100%">
 		<thead>
