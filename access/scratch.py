@@ -3,6 +3,7 @@ from operator import itemgetter
 from decimal import Decimal, ROUND_HALF_UP
 from collections import deque, defaultdict
 from datetime import datetime, date
+
 import copy
 from reversion import revision
 from django.db import transaction
@@ -11,6 +12,10 @@ from django.conf import settings
 from django.db import connection
 import operator
 from access.models import Flavor, Ingredient, Formula, FormulaTree, LeafWeight, Solvent, IndivisibleLeafWeight, FormulaException, DIACETYL_PKS, PG_PKS, SOLVENT_NAMES
+from access.mylogger import logger
+
+
+
 ones = Decimal('1')
 tenths = Decimal('0.0')
 hundredths = Decimal('0.00')
@@ -31,11 +36,14 @@ TEN = Decimal('10')
 ONE_HUNDRED = Decimal('100')
 ONE_THOUSAND = Decimal('1000')
 ZERO = Decimal('0')
-SD_COST = Decimal('2.60')
+SD_COST = Decimal('3.50')
 
 all_solvent_list = Solvent.get_id_list()
 
 
+
+
+ 
 def find_usage(ingredient_pk, gazinta_lists, flavor_valid):
     ingredient = Ingredient.objects.get(pk=ingredient_pk)
     # edge_check = set()
@@ -105,7 +113,7 @@ def get_num_children(ingredient_list, parent_id):
     
     return num_children
 
-@transaction.commit_manually
+#@transaction.commit_manually
 def build_tree(root_flavor):
     """Given a root_flavor model instance, construct a more sane tree-like
     representation of the formula of root_flavor. In order to see the formula
@@ -136,7 +144,7 @@ def build_tree(root_flavor):
     # we get the whole ingredient list first, so that it can be sliced
     # when passed to get_num_children.
     # formula_traversal() is a model instance method that does all of the
-    # recursive queries to analyze a formula. it returns a tuple that 
+    # recursive queries to analyze a formula. it yields a tuple that 
     # represents one line item of a formula. 
     ingredient_list = []
     for ingredient in root_flavor.complete_formula_traversal():
@@ -211,7 +219,7 @@ def build_tree(root_flavor):
         
     formula_root.rgt = i
     formula_root.save()
-    transaction.commit()
+#    transaction.commit()
     
 def build_trees(flavors, start, end):
     x = start
@@ -265,46 +273,33 @@ def test_slice():
 
         
 def synchronize_price(f, verbose=False):
+    """This depends on all gazintas being up to date.
+    """
     if verbose:
         print f
     rmc = 0
     lastspdate = datetime(1990,1,1)
-    for leaf in f.leaf_weights.all():
-        sub_flavor = leaf.ingredient.sub_flavor
-        adjustment = 1
-        if sub_flavor is not None:
-            y = ONE_HUNDRED.__copy__()
-            y = sub_flavor.yield_field
-            
-            if y == 0:
-                y = 100
-            
-            adjustment = y/ONE_HUNDRED
-            if adjustment == ZERO:
-                adjustment = 1
-        
-        cost_diff = leaf.weight * leaf.ingredient.unitprice / adjustment
+    for formula_line_item in f.formula_set.all():
+        cost_diff = formula_line_item.amount * formula_line_item.ingredient.unitprice
         rmc += cost_diff
-        if verbose:
-            print '"%s","%s","%s"' % (leaf.ingredient.id, leaf.ingredient.product_name, cost_diff)
-        ing_ppu = leaf.ingredient.purchase_price_update
+        ing_ppu = formula_line_item.ingredient.purchase_price_update
         if lastspdate < ing_ppu:
             lastspdate = ing_ppu
     
-    y = ONE_HUNDRED.__copy__()
     
-    y = f.yield_field
-    
-    adjustment = y/ONE_HUNDRED
-    if adjustment == ZERO:
-        adjustment = 1
-    # print adjustment
-    if f.spraydried:
-        f.rawmaterialcost = rmc / 1000 / adjustment + SD_COST
-    else:
-        f.rawmaterialcost = rmc / 1000 / adjustment
     f.lastspdate = lastspdate
+    f.rawmaterialcost = rmc / 1000
+    f.rawmaterialcost = f.yield_adjusted_rmc
+    
+    if f.spraydried:
+        f.rawmaterialcost = f.rawmaterialcost + SD_COST
+
+    f.rawmaterialcost = f.rawmaterialcost.quantize(THOUSANDTHS, rounding=ROUND_HALF_UP)        
     f.save()
+    
+    for g in f.gazinta.all():
+        g.unitprice = f.rawmaterialcost
+        g.save()
         
 def synchronize_all_prices():
     sd_price = Decimal('2.90')
@@ -918,7 +913,6 @@ def build_experimental_tree(root_experimental):
     formula_root.save()
     transaction.commit()
     
-
 @revision.create_on_success
 def recalculate_guts(flavor):
     old_flavor_dict = copy.copy(flavor.__dict__)
@@ -949,7 +943,7 @@ def recalculate_guts(flavor):
     my_leaf_weights = LeafWeight.objects.filter(root_flavor=flavor).select_related()
     
     sulfites = Decimal('0')
-    allergens = {}
+    allergens = set()
     my_prop_65 = False
     my_diacetyl = False
     my_pg = False
@@ -964,7 +958,7 @@ def recalculate_guts(flavor):
         
         for allergen in Ingredient.aller_attrs:
             if getattr(lw.ingredient, allergen):
-                allergens[allergen]=1
+                allergens.add(allergen)
                 
         if lw.ingredient.prop65 == True:
             my_prop_65 = True
@@ -979,18 +973,26 @@ def recalculate_guts(flavor):
     flavor.sulfites_ppm = sulfites.quantize(tenths)
     if sulfites > 10:
         flavor.sulfites = True
-        flavor.sulfites_usage_threshold = ONE_HUNDRED / (sulfites / TEN)    
+        flavor.sulfites_usage_threshold = ONE_HUNDRED / (sulfites / TEN)
     else:
         flavor.sulfites = False
         flavor.sulfites_usage_threshold = 0
-        
-    allergens = allergens.keys()
+    
+    # defaults    
+    flavor.allergen = "None"
+    flavor.ccp2 = False
+    flavor.ccp4 = False
+    
+    # change defaults if needed
     if len(allergens) > 0:
+        if flavor.sulfites == True:
+            allergens.add('sulfites')
         flavor.allergen = "Yes: %s" % ','.join(allergens)
         flavor.ccp2 = True
         flavor.ccp4 = True
-    else:
-        flavor.allergen = "None"
+    elif flavor.sulfites == True:
+        flavor.allergen = "Yes: sulfites"
+        flavor.ccp4 = True
 
     flavor.prop_65 = my_prop_65
     flavor.diacetyl = not my_diacetyl
@@ -1004,15 +1006,15 @@ def recalculate_guts(flavor):
             sorted_solvent_string_list.append("%s %s%%" % (Solvent.get_name_from_name(solvent_number), relative_solvent_amount))
     solvent_string = "; ".join(sorted_solvent_string_list)
     flavor.solvent = solvent_string[:50]
-        
+    flavor.save()
+      
     synchronize_price(flavor)
-    flavor.rawmaterialcost = flavor.rawmaterialcost.quantize(thousandths)
+    
     revision.comment = "Recalculated"
-    flavor.save()    
     
     old_new_attrs = [
                      
-            ('Raw Material Cost',old_flavor_dict['rawmaterialcost'],flavor.rawmaterialcost),
+            ('Raw Material Cost',old_flavor_dict['rawmaterialcost'],flavor.rawmaterialcost.quantize(THOUSANDTHS,ROUND_HALF_UP)),
             ('Sulfites PPM',old_flavor_dict['sulfites_ppm'],flavor.sulfites_ppm),
             ('Allergen',old_flavor_dict['allergen'],flavor.allergen),
             ('Solvent',old_flavor_dict['solvent'],flavor.solvent),    
@@ -1021,8 +1023,31 @@ def recalculate_guts(flavor):
             ('NO PG',old_flavor_dict['no_pg'],flavor.no_pg),
             ('Valid',old_flavor_dict['valid'],flavor.valid)          
         ]
-    return (old_new_attrs,flavor)
+    return {
+            'old_new_attrs':old_new_attrs,
+            'flavor':flavor,
+        }
+
+@revision.create_on_success
+def recalculate_flavor(flavor):
+    # the following list is a bottom up list of gazintas in a flavor
+    gazinta_list_bottom_up = list(flavor.gazintas())
+    gazinta_list_bottom_up.reverse()
     
+    gazinta_results_list = []
+    seen_set = set() # since we only need to touch each unique g once
+    for g in gazinta_list_bottom_up:
+        if g not in seen_set:
+            gazinta_results_list.append(recalculate_guts(g))
+            seen_set.add(g)
+            
+    flavor_results = recalculate_guts(flavor)
+    
+    return {
+        'flavor_results':flavor_results,
+        'gazinta_results_list':gazinta_results_list,
+    }
+        
 """
 ALTER TABLE "ExperimentalLog" ADD COLUMN flavor_id integer;
 ALTER TABLE "ExperimentalLog ADD CONSTRAINT "ExperimentalLog_flavor_id_fkey" FOREIGN KEY (flavor_id) REFERENCES access_integratedproduct(id) DEFERRABLE INITIALLY DEFERRED;

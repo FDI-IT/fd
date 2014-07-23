@@ -4,13 +4,13 @@
 <div id="content-right">
 		<ul>
 		{% for status in status_list %}
-			<li><a href="/django/qc/lots/{{ status }}/">{{ status }}</a></li>
+			<li><a href="/qc/lots/{{ status }}/">{{ status }}</a></li>
 		{% endfor %}
 		</ul>
 		<ul>
-			<li><a href="/django/qc/lots/">Latest</a></li>
+			<li><a href="/qc/lots/">Latest</a></li>
 		{% for month in month_list %}
-			<li><a href="/django/qc/lots/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+			<li><a href="/qc/lots/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
 		{% endfor %}
 		</ul>
 </div>
@@ -30,7 +30,8 @@
 	        {% endif %}
 	    </span>
 	</div>
-    <form name="lot_selections" action="/django/qc/batch_print/" method="post">
+    <form name="lot_selections" action="/qc/batch_print/" method="post">
+    {% csrf_token %}
     <table class="sorttable" width="100%">
 	<tr class="qcheaders">
 		<th width="15px">Select</th>
@@ -43,7 +44,7 @@
 	{% for lot in object_list %}
 	    <tr>
 	    <td><input type="checkbox" name="flavor_numbers" value="{{ lot.number }}" {% if checkall %}checked{% endif %}></td>
-		<td><a class="lot-history-link" href="/django/qc/lots/{{ lot.pk }}/">{{ lot.number }}</a></td>
+		<td><a class="lot-history-link" href="/qc/lots/{{ lot.pk }}/">{{ lot.number }}</a></td>
 		<td><a href="{{ lot.flavor.get_absolute_url }}">{{ lot.flavor }}</a></td>
 		<td>{{ lot.date|date:"Y-m-d" }}</td>
 		<td>{{ lot.amount|floatformat:0 }}</td>

@@ -12,6 +12,7 @@ import re
 
 from access.models import Flavor
 from newqc.models import Retain, RMRetain, TestCard, Lot, ReceivingLog, ProductInfo, STATUS_CHOICES, UNITS_CHOICES, COA, TestResult
+from newqc import controller
 
 class AddObjectsBatch(forms.Form):
     number_of_objects = forms.IntegerField(label="Number of objects", min_value=1)
@@ -23,12 +24,12 @@ def validate_flavor_number(num):
     
 def validate_lot_number(num):
 #     if Lot.objects.filter(number = num).exists() == False:
-#         raise ValidationError(mark_safe("<a href='/django/qc/lots/'>Please enter a valid lot number."))
+#         raise ValidationError(mark_safe("<a href='/qc/lots/'>Please enter a valid lot number."))
     if num.isdigit() == False:
         raise ValidationError("Lot number must be an integer.")
     if Lot.objects.filter(number = num).count() > 1:
         num = str(num)
-        raise ValidationError(mark_safe("<a href='/django/admin/newqc/lot/?q=%s'>Multiple lots exist with this lot number." % escape(num)))
+        raise ValidationError(mark_safe("<a href='/admin/newqc/lot/?q=%s'>Multiple lots exist with this lot number." % escape(num)))
 
         
 class FlavorNumberField(forms.IntegerField):
@@ -50,7 +51,12 @@ class NewFlavorRetainForm(forms.Form):
         cleaned_data = self.cleaned_data
         flavor_number = cleaned_data.get("flavor_number")
         lot_number = cleaned_data.get("lot_number")
-        lot_pk = Lot.objects.get(number=lot_number).pk
+        
+        try:
+            lot_pk = Lot.objects.get(number=lot_number).pk
+        except Lot.DoesNotExist:
+            raise ValidationError(mark_safe("A lot with that number does not exist. <a href='/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a>"))
+        
         
         if flavor_number and lot_number: #only do this if both fields are valid so far
             raise_error = True
@@ -60,9 +66,9 @@ class NewFlavorRetainForm(forms.Form):
                     if lot.flavor.number == flavor_number:
                         raise_error = False
                 if raise_error == True:
-                    raise ValidationError(mark_safe("The given lot number does not correspond to the given flavor number. <a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/django/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))
+                    raise ValidationError(mark_safe("The given lot number does not correspond to the given flavor number. <a href='/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))
             else:
-                raise ValidationError(mark_safe("<a href='/django/access/%s/#ui-tabs-6' style='color: #330066'>Invalid lot number." % escape(str(flavor_number))))
+                raise ValidationError(mark_safe("<a href='/access/%s/#ui-tabs-6' style='color: #330066'>Invalid lot number." % escape(str(flavor_number))))
         
         return cleaned_data
 
@@ -163,30 +169,48 @@ class NewRMRetainForm(forms.Form):
 class ResolveRetainForm(forms.ModelForm):
     class Meta:
         model = Retain
-        exclude = ('date', 'retain', 'lot', 'sub_lot', 'amount', 'content_type', 'object_id', 'product')
+        exclude = ('retain', 'lot', 'sub_lot', 'amount', 'content_type', 'object_id', 'product')
 
 class ResolveLotForm(forms.ModelForm):
     class Meta:
         model = Lot
         exclude = ('date', 'number', 'sub_lot', 'amount', 'flavor')
     
+
 class ResolveTestCardForm(forms.ModelForm):
     class Meta:
         model = TestCard
-        exclude = ('large', 'preview', 'image_hash', 'thumbnail')
+        exclude = ('large', 'preview', 'image_hash', 'thumbnail', 'import_log')
         widgets = {
             'notes':forms.TextInput,
             'retain':forms.HiddenInput,
             'status':forms.Select,
         }
+        
+class SimpleResolveTestCardForm(ResolveTestCardForm):
+    class Meta(ResolveTestCardForm.Meta):
+        pass
+    
+    def save(self, commit=True):
+        instance = super(SimpleResolveTestCardForm, self).save(commit=False)
+        if commit:
+            instance.retain.status = instance.status
+            instance.retain.notes = " ".join((instance.retain.notes, instance.notes))
+            instance.retain.save()
+            instance.retain.lot.status = instance.status
+            instance.retain.lot.save() 
+            instance.save()
+        return instance
+        
 
 class ProductInfoForm(forms.ModelForm):
     class Meta:
         model = ProductInfo
-        exclude = ('flavor','retain_on_file','original_card','flash_point','specific_gravity',)
+        exclude = ('retain_on_file','original_card','flash_point','specific_gravity',)
         widgets = {
             'testing_procedure':forms.TextInput,
-            'notes':forms.TextInput,
+            'product_notes':forms.TextInput,
+            'flavor':forms.HiddenInput,
         }
         
 class RetainStatusForm(forms.ModelForm):

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load ingredient_gzl_table %}
+{% block content %}
+<div id="content-right">
+	
+</div>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{ingredient}}</span>
+</div>
+<div id="related-links">
+<ul>
+	{% for formlink, formtitle in ingredientforms %}
+        <li><a href="{{ formlink }}">{{ formtitle }}</a> |</li>
+    {% endfor %}
+</ul>
+</div>
+
+<div class="product-memo"><span class="label">Memo</span>An ingredient memo would go here</div>
+<div class="content-table">
+	<span id="exploded-table">
+		{% ingredient_gzl_table ingredient %}
+	</span>
+	
+</div>
+</div>
+
+{% endblock %}
+

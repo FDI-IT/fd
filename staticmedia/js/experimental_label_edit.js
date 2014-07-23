@@ -58,7 +58,7 @@ EXPERIMENTAL_LABEL_EDIT.category_name_map = {
 	'organic':2,
 	'liquid':3,
 	'dry':4,
-	'spray_dried':5,
+	'spraydried':5,
 	'concentrate':6,
 	'oilsoluble':7,
 	'flavorcoat':8,

@@ -14,7 +14,7 @@ from access.models import Ingredient, DigitizedFormula, ExperimentalLog
 
 experimental_re = re.compile('\d+')
 
-def test(path="/usr/local/django/dump/sample_data/digitized_formulas"):
+def test(path="/var/www/django/dump/sample_data/digitized_formulas"):
     os.chdir(path)
     LOG_FILENAME = 'digitized_import.log'
     logging.basicConfig(filename=LOG_FILENAME, level=logging.WARNING)
@@ -51,7 +51,7 @@ class DigitizedWB:
                       "Amt",]
     experimental_headers = ["Text77",]
     
-    def __init__(self, path="/usr/local/django/dump/digitizedsample.xls"):
+    def __init__(self, path="/var/www/django/dump/digitizedsample.xls"):
         self.rm_id_column = None
         self.amount_column = None
         self.experimental_column = None

@@ -253,7 +253,7 @@ class Experimentallog(models.Model):
     usagelevel = models.DecimalField(decimal_places=4, max_digits=5, db_column='UsageLevel') # Field name made lowercase.
     productnumber = models.IntegerField(db_column='ProductNumber') # Field name made lowercase.
     concentrate = models.BooleanField(db_column='Concentrate') # Field name made lowercase.
-    spray_dried = models.BooleanField(db_column='Spray Dried') # Field renamed to remove spaces. Field name made lowercase.
+    spraydried = models.BooleanField(db_column='Spray Dried') # Field renamed to remove spaces. Field name made lowercase.
     promotable = models.BooleanField(db_column='Promotable') # Field name made lowercase.
     holiday = models.BooleanField(db_column='Holiday') # Field name made lowercase.
     coffee = models.BooleanField(db_column='Coffee') # Field name made lowercase.

@@ -197,7 +197,7 @@ def batchsheet_print(request, flavor):
                             soli.quantity 
                         ))     
                 bubbles = [
-                        Bubble('<a href="/django/access/%s/" target="_blank">Flavor Info</a>' % flavor.number, [
+                        Bubble('<a href="/access/%s/" target="_blank">Flavor Info</a>' % flavor.number, [
                                 "Flash point: %s" % flavor.flashpoint,
                                 "Yield: %s" % flavor.yield_field,
                                 "Allergens: %s" % flavor.allergen,
@@ -209,7 +209,7 @@ def batchsheet_print(request, flavor):
                                 "Open orders: %s" % LineItem.objects.filter(flavor=flavor).filter(salesordernumber__open=True).count(),
                                 "Total weight: %s" % LineItem.objects.filter(flavor=flavor).filter(salesordernumber__open=True).aggregate(Sum('quantity'))['quantity__sum'],
                             ]),
-                        Bubble('<a href="/django/salesorders/" target="_blank">Open Sales Orders</a>', soli_bubble), 
+                        Bubble('<a href="/salesorders/" target="_blank">Open Sales Orders</a>', soli_bubble), 
                     ]       
                 c = Context({
                     'bubbles':bubbles,
@@ -354,7 +354,7 @@ def lot_update_confirmation(request, lot_list=None): #go straight here if clicki
                 
                 update_lot.save()        
         
-            redirect_path = "/django/qc/lots"
+            redirect_path = "/qc/lots"
             return HttpResponseRedirect(redirect_path)
         
         else:
@@ -378,7 +378,7 @@ def lot_update_confirmation(request, lot_list=None): #go straight here if clicki
             
             update_lot.save()
         
-        redirect_path = "/django/qc/lots"
+        redirect_path = "/qc/lots"
         return HttpResponseRedirect(redirect_path)
         '''
     else:
@@ -412,15 +412,18 @@ def lot_update_confirmation(request, lot_list=None): #go straight here if clicki
                                      'confirm': confirm},
                                     context_instance = RequestContext(request))
             
-@revision.create_on_success
+                
 def batchsheet_batch_print(request):
     if request.method == 'POST':
         lot_pks = request.POST.getlist('lot_pks')
+        
+        test = []
         
         for lot_pk in lot_pks:
             lot = Lot.objects.get(pk = lot_pk)
             lot.status = 'Batchsheet Printed'
             lot.save()
+            test.append((lot_pk, lot.status))
                 
         return render_to_response('batchsheet/batchsheet_batch_print.html', 
                       {
@@ -428,27 +431,7 @@ def batchsheet_batch_print(request):
                        },
                       context_instance=RequestContext(request))
         
-        
-@revision.create_on_success
-@flavor_info_wrapper
-def explosion_print(request, flavor):
-    ## POST instead of GET
-    ftpks = request.GET.getlist('ftpk_to_expand[]')
-    batch_amount = Decimal(request.GET.get('batch_amount'))
-    
-    ## create a lot instead of just selecting one
-    lot = Lot.objects.get(id=45700)
-    lot.amount = batch_amount
-    
-    ##REDIRECT on success
-    return render_to_response('batchsheet/explosion_print_main.html',
-                              {
-                               'lot':lot,
-                               'flavor':lot.flavor,
-                               'batch_amount':batch_amount,
-                               'ftpks':ftpks,
-                               }
-                              )
+
 def lot_notebook(request):
     pass
 
@@ -537,7 +520,7 @@ def add_lots(request):
                                   context_instance=RequestContext(request))
 
             #transaction.commit()
-            redirect_path = "/django/qc/lots"
+            redirect_path = "/qc/lots"
             return HttpResponseRedirect(redirect_path)
         
         else:

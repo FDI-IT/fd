@@ -17,7 +17,7 @@ urlpatterns = patterns('newqc.views',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    (r'^$', redirect_to, {'url': '/django/qc/retains/'}),
+    (r'^$', redirect_to, {'url': '/qc/retains/'}),
     (r'^review/$', 'review'),
     
     #(r'^new_coa/(?P<lss_pk>\d+)/$', 'new_coa'),
@@ -66,18 +66,24 @@ urlpatterns = patterns('newqc.views',
     
 
     (r'^flavors/(?P<flavor_number>\d+)/print/$', 'flavor_history_print'),
+    
     (r'^resolve_retains/$', 'resolve_retains_any'),
-    (r'^resolve_lot/(?P<lot_pk>\d+)/$', 'resolve_lot'),
+    #(r'^resolve_retains/(?P<retain_pk>\d+)/$', 'resolve_retains_specific'),
+    
     (r'^resolve_testcards/$', 'resolve_testcards_any'),
     (r'^resolve_testcards_ajax_post/$', 'resolve_testcards_ajax_post'),
     (r'^resolve_testcards/(?P<testcard_pk>\d+)/$', 'resolve_testcards_specific'),
     (r'^testcard_list/$', 'testcard_list'),
     (r'^passed_finder/$', 'passed_finder'),
-    (r'^rm_passed_finder/$', 'rm_passed_finder'),
     (r'^no_testcards_left/$', direct_to_template, {'template':'qc/no_testcards_left.html'}),
     
     
     (r'^receiving_log/$', list_detail.object_list, receiving_log_list_info),
     (r'^receiving_log_print/$', 'receiving_log_print'),
     (r'^add_receiving_log/$', 'add_receiving_log'),
+    
+    (r'^scanned_docs/$', 'scanned_docs'),
+    (r'^scanned_docs/paginate(?P<paginate_by>\d+)/$', 'scanned_docs'),
+    
+    (r'^migrate_scanned_docs/$', 'migrate_scanned_docs'),
 )

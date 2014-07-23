@@ -1,11 +1,12 @@
 from datetime import date
-from PIL import Image
 
 from django.db.models import Q, F
 from django.db import models
 from django.db.models import Count
-#from django.contrib.contenttypes.models import ContentType
-#from django.contrib.contenttypes import generic
+
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
+
 
 from access.models import Flavor, Ingredient, ExperimentalLog, FlavorSpecification, Customer
 
@@ -81,7 +82,7 @@ class ProductInfo(models.Model):
     testing_procedure = models.TextField(blank=True)
     flash_point = models.FloatField(blank=True, null=True)
     specific_gravity = models.DecimalField(max_digits=3, decimal_places=2, blank=True, null=True)
-    notes = models.TextField(blank=True)
+    product_notes = models.TextField(blank=True)
     retain_on_file = models.BooleanField(default=False)
     original_card = models.FileField(upload_to='qc_original_cards',blank=True,null=True)
     objects = ProductInfoManager()
@@ -90,46 +91,180 @@ class ProductInfo(models.Model):
         return self.flavor.__unicode__()
 
     def get_admin_url(self):
-        return "/django/admin/newqc/productinfo/%s" % self.pk
+        return "/admin/newqc/productinfo/%s" % self.pk
+    
+class ScannedSymbol(models.Model):
+    scanned_doc = models.ForeignKey('ScannedDoc')
+    symbol_data = models.TextField()
+    symbol_type = models.CharField(max_length=100)
+    symbol_quality = models.DecimalField(max_digits=3, decimal_places=2)
+    symbol_location = models.CharField(max_length=100)
+    symbol_count = models.PositiveSmallIntegerField()
+    
+    def __init__(self, *args, **kwargs):
+        zbar_symbol = kwargs.pop('zbar_symbol', None)
+        super(ScannedSymbol, self).__init__(*args, **kwargs)
+        if zbar_symbol is not None:
+            self.parse_zbar_symbol(zbar_symbol)
+
+    def parse_zbar_symbol(self, zbar_symbol):
+        self.symbol_data = zbar_symbol.data
+        self.symbol_type = unicode(zbar_symbol.type) # zbar.EnumItem type
+        self.symbol_quality = zbar_symbol.quality
+        self.symbol_location = unicode(zbar_symbol.location) # 4x 2-tuples, represent coords of symbol
+        self.symbol_count = zbar_symbol.count
         
-class TestCard(models.Model):
-    retain = models.ForeignKey('Retain', null=True)
-    image_hash = models.CharField(max_length=64)
-    large = models.ImageField(upload_to="testcards")
-    thumbnail = models.ImageField(upload_to="testcards_thumbnail")
-    notes = models.TextField(blank=True, default="")
-    status = models.CharField(max_length=25,choices=STATUS_CHOICES,default="Pending")
-
     def __unicode__(self):
-        return "%s" % (self.retain)
-
-class RMTestCard(models.Model):
-    retain = models.ForeignKey('RMRetain', null=True)
-    image_hash = models.CharField(max_length=64)
-    large = models.ImageField(upload_to="rmtestcards")
-    thumbnail = models.ImageField(upload_to="rmtestcards_thumbnail")
+        return """DATA: %s | TYPE: %s | QUALITY: %s | LOCATION: %s | COUNT %s""" % (
+                self.symbol_data, 
+                self.symbol_type,
+                self.symbol_quality,
+                self.symbol_location,
+                self.symbol_count)
+                
+    
+class ScannedDoc(models.Model):
+    related_object_name = None
+    
+    image_hash = models.CharField(max_length=64, blank=True)
+    large = models.ImageField(upload_to='scanned_doc_large')
+    thumbnail = models.ImageField(upload_to='scanned_doc_thumbnail')
     notes = models.TextField(blank=True, default="")
-    status = models.CharField(max_length=25,choices=STATUS_CHOICES,default="Pending")
-
-    def __unicode__(self):
-        return "%s" % (self.retain)
-
-class BatchSheet(models.Model):
-    lot = models.ForeignKey('Lot', null=True)
-    image_hash = models.CharField(max_length=64)
-    large = models.ImageField(upload_to="batchsheets")
-    thumbnail = models.ImageField(upload_to="batchsheets_thumbnail")
-    notes = models.TextField(blank=True, default="")
+    scan_time = models.DateTimeField(blank=True,null=True,auto_now_add=True)
+    import_log = models.TextField(blank=True,default="")
     
     class Meta:
         ordering = ['-id']
+        
+    @property
+    def subclass_object(self):
+        if hasattr(self, "_related_object"):
+            return self._related_object
+         
+        try:
+            self._related_object = self.batchsheet
+            return self._related_object
+        except BatchSheet.DoesNotExist:
+            pass
+          
+        try:
+            self._related_object = self.testcard
+            return self._related_object
+        except TestCard.DoesNotExist:
+            pass
+          
+        try:
+            self._related_object = self.rmtestcard
+            return self._related_object
+        except RMTestCard.DoesNotExist:
+            pass
 
-class GenericTestCard(models.Model):
-    image_hash = models.CharField(max_length=64)
-    large = models.ImageField(upload_to="generctestcards")
-    thumbnail = models.ImageField(upload_to="generictestcards_thumbnail")
-    notes = models.TextField(blank=True, default="")
-    status = models.CharField(max_length=25,choices=STATUS_CHOICES,default="Pending")
+        return self
+    
+    @property
+    def related_object(self):
+        return self.subclass_object
+        
+    @property
+    def subclass_object_repr(self):
+        return repr(self.related_object)
+        
+    @property
+    def doc_link(self):
+        return self.subclass_object.get_absolute_url()
+    
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        """In this case bc_key is going to be None, that's why we would
+        save a generic ScannedDoc and not a more specific type of object.
+        This method exists so this type can be handled the same as the more
+        specific types."""
+        return ScannedDoc(**document_create_kwargs)
+
+        
+class TestCard(ScannedDoc):
+    related_object_name = 'retain'
+    
+    retain = models.ForeignKey('Retain', null=True)
+    status = models.CharField(max_length=25,choices=STATUS_CHOICES,default='Pending QC')
+    
+    @property
+    def related_object(self):
+        return self.retain
+    
+    def __unicode__(self):
+        return "%s" % (self.retain)
+    
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            r = Retain.objects.get(pk=bc_key)
+        except Retain.DoesNotExist:
+            r = None
+        return TestCard(
+                    retain=r,
+                    **document_create_kwargs)
+    
+    #@property
+    def get_absolute_url(self):
+        return self.retain.get_absolute_url()
+
+
+class RMTestCard(ScannedDoc):
+    related_object_name = 'retain'
+    
+    retain = models.ForeignKey('RMRetain', null=True)
+    status = models.CharField(max_length=25,choices=RM_STATUS_CHOICES,default='Pending QC')
+    
+    @property
+    def related_object(self):
+        return self.retain
+    
+    def __unicode__(self):
+        return "%s" % (self.retain)
+    
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            r = RMRetain.objects.get(pk=bc_key)
+        except RMRetain.DoesNotExist:
+            r = None
+        return RMTestCard(
+                    retain=r,
+                    **document_create_kwargs)
+        
+    @staticmethod
+    def get_absolute_url(self):
+        return "/access/ingredient/pin_review/%s/" % self.retain.pin
+
+class BatchSheet(ScannedDoc):
+    related_object_name = 'lot'
+    
+    lot = models.ForeignKey('Lot', null=True)
+    status = models.CharField(max_length=25, default='')
+    
+    @property
+    def related_object(self):
+        return self.lot
+    
+    class Meta:
+        ordering = ['-id']
+        
+    def __unicode__(self):
+        if self.lot is None:
+            return "Invalid"
+        return "%s" % (self.lot.number)
+
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            l = Lot.objects.get(number=bc_key)
+        except Lot.DoesNotExist:
+            l = None
+        return BatchSheet(
+                    lot=l,
+                    **document_create_kwargs)
+
 
 def get_next_lot_number():
     today = date.today()
@@ -165,7 +300,6 @@ class Lot(models.Model):
     status = models.CharField(max_length=25, choices=STATUS_CHOICES, default="Created")
     amount = models.DecimalField(max_digits=6, decimal_places=1, blank=True, null=True) 
     flavor = models.ForeignKey(Flavor)
-   # ftpks = models.TextField(blank=True)
     
     @staticmethod
     def get_object_from_softkey(softkey):
@@ -212,14 +346,13 @@ class Lot(models.Model):
 
     @staticmethod
     def get_absolute_url(self):
-        return "/django/qc/lots/%s/" % self.pk
+        return "/qc/lots/%s/" % self.pk
 
     class Meta:
         ordering = ['-date']
         
     def get_admin_url(self):
-        return "/django/admin/newqc/lot/%s" % self.pk
-    
+        return "/admin/newqc/lot/%s" % self.pk
     
     def retains_present(self):
         return self.retain_set.all().count() > 0
@@ -295,7 +428,7 @@ class Retain(models.Model):
                              blank=True,
                              default='')
     ir = models.ForeignKey('ImportRetain', blank=True, null=True, default=None, editable=False)
-    browse_url = '/django/qc/retains/'
+    browse_url = '/qc/retains/'
     class Meta:
         ordering = ['-date', '-retain']
 
@@ -306,7 +439,7 @@ class Retain(models.Model):
         return self.testcard_set.all().count() > 0
 
     def get_admin_url(self):
-        return "/django/admin/newqc/retain/%s" % self.pk
+        return "/admin/newqc/retain/%s" % self.pk
     
     def similar_to(self, other):
         if self.date == other.date:
@@ -320,8 +453,12 @@ class Retain(models.Model):
         try:
             last_retain = current_retains[0]
         except:
-            return 0
+            return 1 #start at 1, you get an error if you add a retain with number 0
         return last_retain.retain + 1
+    
+    @staticmethod
+    def get_absolute_url(self):
+        return "/qc/lots/%s/" % self.lot.pk
 
 class ImportRetain(models.Model):
     number = models.PositiveSmallIntegerField(blank=True, null=True)
@@ -373,7 +510,7 @@ class RMInfo(models.Model):
         return unicode(self.pin)
 
     def get_admin_url(self):
-        return "/django/admin/newqc/rm_info/%s" % self.pk
+        return "/admin/newqc/rm_info/%s" % self.pk
 
 class RMRetain(models.Model):
     """
@@ -399,10 +536,15 @@ class RMRetain(models.Model):
     def __unicode__(self):
         return u"PIN: " + str(self.pin) + " " + str(self.date.year)[2:5] + "-R" + str(self.r_number).zfill(3)
 
+        
+    @staticmethod
+    def get_absolute_url(self):
+        return "/access/ingredient/pin_review/%s/" % self.pin
+
     def get_admin_url(self):
-        return "/django/admin/newqc/rmretain/%s/" % self.pk
+        return "/admin/newqc/rmretain/%s/" % self.pk
     
-    browse_url = "/django/qc/rm_retains/"
+    browse_url = "/qc/rm_retains/"
 
 class ReceivingLogManager(models.Manager):
     def get_query_set(self):
@@ -444,9 +586,9 @@ class ReceivingLog(models.Model):
         return x
     
     def get_admin_url(self):
-        return "/django/admin/newqc/receivinglog/%s/" % self.pk
+        return "/admin/newqc/receivinglog/%s/" % self.pk
 
-    browse_url = '/django/qc/receiving_log/'
+    browse_url = '/qc/receiving_log/'
 
     @staticmethod
     def get_next_r_number():
@@ -485,4 +627,157 @@ class ExperimentalRetain(models.Model):
         return str(self.date.year)[2:5] + "-" + str(self.retain).zfill(4)
 
     def get_admin_url(self):
-        return "/django/admin/newqc/experimentalretain/%s/" % self.pk
+        return "/admin/newqc/experimentalretain/%s/" % self.pk
+
+### OLD CODE
+
+    
+class OldScannedDoc(models.Model):
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('content_type','object_id')
+    
+    image_hash = models.CharField(max_length=64, blank=True)
+    large = models.ImageField(upload_to='scanned_doc_large')
+    thumbnail = models.ImageField(upload_to='scanned_doc_thumbnail')
+    notes = models.TextField(blank=True, default="")
+    scan_time = models.DateTimeField(blank=True,null=True)
+    
+    class Meta:
+        ordering = ['-id']
+
+class AbstractScannedDoc(models.Model):
+    class Meta:
+        abstract = True
+    
+    related_object_name = None
+        
+    def get_my_large_upload_path(self):
+        pass
+    
+    def get_my_thumbnail_upload_path(self):
+        pass
+
+    @property
+    def related_object(self):
+        if self.related_object_name is None:
+            return None
+        else:
+            return getattr(self, self.related_object_name)
+
+    image_hash = models.CharField(max_length=64)
+    large = models.ImageField(upload_to=get_my_large_upload_path)
+    thumbnail = models.ImageField(upload_to=get_my_thumbnail_upload_path)
+    notes = models.TextField(blank=True, default="")
+    create_time = models.DateTimeField()
+    modified_time = models.DateTimeField(auto_now=True)
+    
+class OldTestCard(AbstractScannedDoc):
+    """
+    Old format model that represents a scanned test card.
+    
+    In order to accommodate the new format, the name of the model has been
+    changed as well as db_table.
+    """
+    related_object_name = 'retain'
+    
+    def get_my_large_upload_path(self):
+        return 'testcards'
+    
+    def get_my_thumbnail_upload_path(self):
+        return 'testcards_thumbnail'
+
+    retain = models.ForeignKey('Retain', null=True)
+    status = models.CharField(max_length=25,choices=STATUS_CHOICES,default='Pending QC')
+    
+    def __unicode__(self):
+        return "%s" % (self.retain)
+    
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            r = Retain.objects.get(pk=bc_key)
+        except Retain.DoesNotExist:
+            r = None
+        return OldTestCard(
+                    retain=r,
+                    **document_create_kwargs)
+
+
+class OldRMTestCard(AbstractScannedDoc):
+
+    related_object_name = 'retain'
+    
+    def get_my_large_upload_path(self):
+        return 'rmtestcards'
+    
+    def get_my_thumbnail_upload_path(self):
+        return 'rmtestcards_thumbnail'
+    
+    retain = models.ForeignKey('RMRetain', null=True)
+    status = models.CharField(max_length=25,choices=RM_STATUS_CHOICES,default='Pending QC')
+    
+    def __unicode__(self):
+        return "%s" % (self.retain)
+    
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            r = RMRetain.objects.get(pk=bc_key)
+        except RMRetain.DoesNotExist:
+            r = None
+        return RMTestCard(
+                    retain=r,
+                    **document_create_kwargs)
+        
+    @staticmethod
+    def get_absolute_url(self):
+        return "/django/access/ingredient/pin_review/%s/" % self.retain.pin
+
+class OldBatchSheet(AbstractScannedDoc):
+
+    related_object_name = 'lot'
+    
+    def get_my_large_upload_path(self):
+        return 'batchsheets'
+    
+    def get_my_thumbnail_upload_path(self):
+        return 'batchsheets_thumbnail'
+    
+    lot = models.ForeignKey('Lot', null=True)
+    status = models.CharField(max_length=25, default='')
+
+    class Meta:
+        ordering = ['-id']
+        
+    def __unicode__(self):
+        if self.lot is None:
+            return "Invalid"
+        return "%s" % (self.lot.number)
+
+    @staticmethod
+    def create_from_referred_object_from_bc_key(bc_key, document_create_kwargs):
+        try:
+            l = Lot.objects.get(number=bc_key)
+        except Lot.DoesNotExist:
+            l = None
+        return OldBatchSheet(
+                    lot=l,
+                    **document_create_kwargs)
+
+class OldGenericTestCard(AbstractScannedDoc):
+
+    def get_related_object(self):
+        return None
+    
+    def get_my_large_upload_path(self):
+        return 'generctestcards'
+    
+    def get_my_thumbnail_upload_path(self):
+        return 'generictestcards_thumbnail'
+    
+    def get_my_status_choices(self):
+        return STATUS_CHOICES
+    
+    def get_my_status_default(self):
+        return 'Pending QC'

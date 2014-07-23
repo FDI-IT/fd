@@ -31,12 +31,12 @@
 {% for lineitem in line_items %}
 		<tr>
 			<td>{{ lineitem.flavor.prefix }}</td>
-			<td><a href="/django/access/{{ lineitem.flavor.number }}">{{ lineitem.flavor.number }}</a></td>
+			<td><a href="/access/{{ lineitem.flavor.number }}">{{ lineitem.flavor.number }}</a></td>
 			<td>{{ lineitem.flavor.natart }}</td>
 			<td>{{ lineitem.flavor.name }}</td>
 			<td>{{ lineitem.flavor.label_type }}</td>
 			<td>{{ lineitem.flavor.lastspdate|date:"Y-m" }}</td>
-			<td><a href="/django/access/{{ lineitem.flavor.number }}?wf={{ lineitem.quantity }}">{{ lineitem.quantity }}</a></td>
+			<td><a href="/access/{{ lineitem.flavor.number }}?wf={{ lineitem.quantity }}">{{ lineitem.quantity }}</a></td>
 			<td>{{ lineitem.unit_price }}</td>
 			<td>{{ lineitem.rmc }}</td>
 			<td>{{ lineitem.profitmargin }}</td>

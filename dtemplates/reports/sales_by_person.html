@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block htmlhead %}
+{{ block.super }}
+{{date_range_form.media}}
+<script type="text/javascript" src="/djangomedia/js/reports_experimental_log.js?v=25"></script>
+{% endblock %}
+{% block content %}
+
+<div id="content-solo">
+	<h2>Summary</h2>
+<table>
+	<thead>
+		<tr>
+			<th>Initials</th>
+			<th>Sales</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for initials, sales in sales_per_person.iteritems %}
+		<tr>
+			<td>{{initials}}</td>
+			<td>${{sales|intcomma}}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+	<h2>Summary with partial credit</h2>
+<table>
+	<thead>
+		<tr>
+			<th>Initials</th>
+			<th>Sales</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for initials, sales in sales_per_person_with_partials.iteritems %}
+		<tr>
+			<td>{{initials}}</td>
+			<td>${{sales|intcomma}}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% for initials, partial_sales in partial_sales_per_person.iteritems %}
+<h2>Partial credit - {{ initials }}</h2>
+<table>
+	<thead>
+		<tr>
+			<th>Flavor number</th>
+			<th>Sales</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for flavor, sales in partial_sales.iteritems %}
+		<tr>
+			<td>{{flavor}}</td>
+			<Td>${{sales|intcomma}}</Td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endfor %}
+<h2>Full Credit</h2>
+<table>
+	<thead>
+		<tr>
+			<th>Flavor number</th>
+			<th>Total</th>
+			<th>Initials</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for flavor_number, details in sales_per_flavor.iteritems %}
+		<tr>
+			<td>{{flavor_number}}</td>
+			<td>${{details.0|intcomma}}</td>
+			<td>{{details.1}}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+</div>
+{% endblock %}

@@ -40,17 +40,17 @@
 			<tbody>
 		    {% for flavor in list_items.object_list %}
 		    <tr id="{{ flavor.number }}">
-		    	<td><a href="/django/access/{{ flavor.number }}">{{ flavor.prefix }}</a></td>
-		    	<td><a href="/django/access/{{ flavor.number }}">{{ flavor.number }}</a></td>
-		    	<td><a href="/django/access/{{ flavor.number }}">{{ flavor.natart }}</a></td>
-		    	<td><a href="/django/access/{{ flavor.number }}">{{ flavor.name }}</a></td>
-		    	<td><a href="/django/access/{{ flavor.number }}">{{ flavor.label_type }}</a></td>
-		    	<td><a href="/django/access/{{ flavor.number }}">{{ flavor.rawmaterialcost }}</a></td>
-		    	<td><a href="/django/access/{{ flavor.number }}">{{ flavor.lastspdate|date:"Y-m" }}</a></td>
-		    	<td><a href="/django/access/{{ flavor.number }}">{{ flavor.solvent }}</a></td>
-		    	<td><a href="/django/access/{{ flavor.number }}">{% if flavor.valid %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</a></td>
-		    	<td><a href="/django/access/{{ flavor.number }}">{% if flavor.approved %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</a></td>
-		    	<td><a href="/django/access/{{ flavor.number }}">{% if flavor.sold %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{{ flavor.prefix }}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{{ flavor.number }}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{{ flavor.natart }}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{{ flavor.name }}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{{ flavor.label_type }}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{{ flavor.rawmaterialcost }}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{{ flavor.lastspdate|date:"Y-m" }}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{{ flavor.solvent }}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{% if flavor.valid %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{% if flavor.approved %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{% if flavor.sold %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</a></td>
 		    </tr>
 		    {% endfor %}
 		    </tbody>

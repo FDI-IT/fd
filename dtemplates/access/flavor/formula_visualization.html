@@ -8,10 +8,10 @@
 <link href="/djangomedia/css/formula_visualization.css?v=25" type="text/css" rel="stylesheet" >
 
 <!-- JIT Library File -->
-<script  type="text/javascript" src="/djangomedia/js/jit_yc.js"></script>
-<script  type="text/javascript" src="/djangomedia/js/jquery-1.7.1.min.js"></script>
-<script  type="text/javascript" src="/djangomedia/js/json2html.js"></script>
-<script  type="text/javascript" src="/djangomedia/js/jquery.json2html.js"></script>
+<script  type="text/javascript" src="/djangomedia/js/lib/jit_yc.js"></script>
+<script  type="text/javascript" src="/djangomedia/js/lib/jquery-1.7.1.min.js"></script>
+<script  type="text/javascript" src="/djangomedia/js/lib/json2html.js"></script>
+<script  type="text/javascript" src="/djangomedia/js/lib/jquery.json2html.js"></script>
 
 <script type="text/javascript">
 	{% autoescape off %}
@@ -63,7 +63,7 @@ Formula Tree Animation
 		<li>Max depth: {{ max_depth }}</li>
 	</ul>
 	<h4>Tree Layout</h4>
-	<form id="st_layout_form" action="/django/access/{{flavor.number}}/formula_visualization/" method="get">
+	<form id="st_layout_form" action="/access/{{flavor.number}}/formula_visualization/" method="get">
 		{{st_layout_form.as_ul}}
 		<input type="submit" value="Refresh">
 	</form>

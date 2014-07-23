@@ -7,8 +7,8 @@ from access.models import Flavor, Ingredient, PurchaseOrder, ExperimentalLog
 register = template.Library()
 
 default_flavor_blade_list = (
-    'selling_price', 'formula_weight', 'pin', 'experimental_link', 'profit_ratio', 'flagged', 'last_updated', 'oldest_price_date', 'raw_material_cost', 'customer_list', 'location_code', 
-    'keywords', 'solvent', 'flashpoint', 'kosher', 'allergen', 'sulfites', 'flavor_yield', 'diacetyl', 'pg', 
+    'selling_price', 'formula_weight', 'pin', 'experimental_link', 'profit_ratio', 'flagged', 'last_updated', 'oldest_price_date', 'raw_material_cost', 'flavor_yield', 'spraydried', 'customer_list', 'location_code', 
+    'keywords', 'solvent', 'flashpoint', 'kosher', 'allergen', 'sulfites', 'diacetyl', 'pg', 
     'new_usage', 'application_list')
 
 print_flavor_blade_list = (
@@ -44,7 +44,7 @@ class FlavorBlades(ObjectBlades):
     
     @property
     def pin(self):
-        return ("PIN", '<a href="/django/access/ingredient/pin_review/%s/">%s</a>'% (self.flavor.pinnumber, self.flavor.pinnumber))
+        return ("PIN", '<a href="/access/ingredient/pin_review/%s/">%s</a>'% (self.flavor.pinnumber, self.flavor.pinnumber))
     
     @property
     def profit_ratio(self):
@@ -53,6 +53,11 @@ class FlavorBlades(ObjectBlades):
         except:
             pr = "Undefined"
         return ("Profit ratio", pr)
+    
+    @property
+    def spraydried(self):
+        sd = self.flavor.spraydried
+        return ("Spray dried", sd)
     
     @property
     def flagged(self):
@@ -214,7 +219,7 @@ class FlavorBlades(ObjectBlades):
     
     @property
     def new_usage(self):
-        return ("Add New Usage", '<a href="/django/flavor_usage/%s/new_usage/">Click Here</a>' % self.flavor.number)
+        return ("Add New Usage", '<a href="/flavor_usage/%s/new_usage/">Click Here</a>' % self.flavor.number)
 
     @property
     def application_list(self):

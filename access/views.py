@@ -14,30 +14,33 @@ from django.utils.functional import wraps
 from django.template import RequestContext
 from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory, inlineformset_factory
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db import transaction
+from django.db.models import Count
 from django.views.generic.create_update import create_object
 from django.core.urlresolvers import reverse
 
 from reversion import revision
 
-from access.controller import reconcile_flavor, discontinue_ingredient, activate_ingredient, replace_ingredient_foreignkeys, update_prices_and_get_updated_flavors, experimental_approve_from_form
-from access.formatter import formulatree_to_jsinfovis
+from access.controller import reconcile_flavor, reconcile_update, discontinue_ingredient, activate_ingredient
+#from access.formatter import formulatree_to_jsinfovis
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
 from access.my_profile import profile
 from access.templatetags.review_table import review_table as legacy_explosion
 from access.templatetags.ft_review_table import consolidated, consolidated_indivisible, explosion, spec_sheet, customer_info, production_lots, retains, raw_material_pin, gzl_ajax, revision_history
 from access import forms
-from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_guts
+from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_flavor
 from access.tasks import ingredient_replacer_guts
-from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form #, FlavorSpecificationForm
+from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form, GHSReportForm #, FlavorSpecificationForm
 from access.formula_filters import ArtNatiFilter, AllergenExcludeFilter, MiscFilter
+from access.ghs_analysis import get_ghs_only_ingredients, get_fdi_only_ingredients, write_ghs_report, write_fdi_report
 
-from django.contrib.auth.decorators import login_required
 from solutionfixer.models import Solution, SolutionStatus
 from one_off.mtf import *
 from salesorders.controller import delete_specification, create_new_spec, update_spec
+from pluggable.csv_unicode_wrappers import UnicodeWriter
+
 
 ones = Decimal('1')
 tenths = Decimal('0.0')
@@ -113,14 +116,13 @@ def experimental_wrapper(view):
     return inner     
 
 @experimental_wrapper
-@permission_required('access.view_flavor')
 def experimental_edit(request, experimental):
     if request.method == 'POST':
         form = forms.ExperimentalForm(request.POST, instance=experimental)
         if form.is_valid():
             form.save()
             experimental.process_changes_to_flavor()
-            return redirect('/django/access/experimental/%s/' % experimental.experimentalnum)
+            return redirect('/access/experimental/%s/' % experimental.experimentalnum)
     else:
         form = forms.ExperimentalForm(instance=experimental)
     page_title = "Experimental Edit"
@@ -155,9 +157,25 @@ def approve_experimental(request,experimental):
                               context_instance=RequestContext(request))
     experimental.flavor.prefix = ""
     experimental.flavor.number = ""
-    experimental.flavor.mixing_instructions = experimental.mixing_instructions
-    experimental.flavor.color = experimental.color
-    experimental.flavor.organoleptics = experimental.organoleptics
+    attr_list = (
+            'mixing_instructions',
+            'color',
+            'organoleptics',
+            'natart',
+            'organic',
+            'liquid',
+            'dry',
+            'spraydried',
+            'natural_type',
+            'wonf',
+            'flavorcoat',
+            'concentrate',
+            'oilsoluble',
+            'label_type',
+        )
+    for attr in attr_list:
+        setattr(experimental.flavor, attr, getattr(experimental,attr))
+    # this doesn't fit in the above loop because names of attrs differ
     experimental.flavor.productmemo = experimental.memo
     f = forms.ApproveForm(instance=experimental.flavor)
     return render_to_response('access/experimental/approve.html',
@@ -175,7 +193,7 @@ def experimental_add_formula(request, experimental):
     f.save()
     experimental.flavor = f
     experimental.save()
-    return HttpResponseRedirect('/django/access/experimental/%s/' % experimental.experimentalnum)
+    return HttpResponseRedirect('/access/experimental/%s/' % experimental.experimentalnum)
 
 @experimental_wrapper
 def experimental_review(request, experimental):
@@ -219,7 +237,7 @@ def experimental_review(request, experimental):
            
         context_dict['approve_link'] = experimental.get_approve_link()
         context_dict['status_message'] = status_message
-        context_dict['recalculate_link'] = '/django/access/experimental/%s/recalculate/' % experimental.experimentalnum
+        context_dict['recalculate_link'] = '/access/experimental/%s/recalculate/' % experimental.experimentalnum
         context_dict['experimental_edit_link'] = '#'
         return render_to_response('access/experimental/experimental_review.html',
                                   context_dict,
@@ -266,13 +284,12 @@ def flavor_review(request, flavor):
                    'page_title': page_title,
                    'weight_factor': weight_factor,
                    'formula_weight': formula_weight,
-                   'flavor_edit_link': '#',
                    }   
     return render_to_response('access/flavor/flavor_review.html',
                               context_dict,
                               context_instance=RequestContext(request))
 
-@permission_required('access.view_flavor')
+@login_required
 def tsr_review(request, tsr_number):
     tsr = TSR.objects.get(number=tsr_number)
     page_title = "TSR Review"
@@ -282,13 +299,13 @@ def tsr_review(request, tsr_number):
                    'tsr': tsr,
                    'help_link': help_link,
                    'page_title': page_title,
-                   'print_link':'/django/access/purchase/%s/print/' % tsr.number,
+                   'print_link':'/access/purchase/%s/print/' % tsr.number,
                    }   
     return render_to_response('access/tsr/tsr_review.html',
                               context_dict,
                               context_instance=RequestContext(request))
 
-@permission_required('access.view_flavor')
+@login_required
 @po_info_wrapper
 def po_review(request, po):
     page_title = "Purchase Order Review"
@@ -298,13 +315,13 @@ def po_review(request, po):
                    'po': po,
                    'help_link': help_link,
                    'page_title': page_title,
-                   'print_link':'/django/access/purchase/%s/print/' % po.number,
+                   'print_link':'/access/purchase/%s/print/' % po.number,
                    }   
     return render_to_response('access/purchase/po_review.html',
                               context_dict,
                               context_instance=RequestContext(request))
     
-@permission_required('access.view_flavor')
+@login_required
 @po_info_wrapper
 def po_review_print(request, po):
     polis = []
@@ -356,7 +373,7 @@ def location_entry(request):
 #                formula_row.save()
 #                
 #            flavor.save()
-#            redirect_path = "/django/access/%s/recalculate/" % (flavor.number)
+#            redirect_path = "/access/%s/recalculate/" % (flavor.number)
 #            return HttpResponseRedirect(redirect_path)
 #    # else:
 #    initial_data, label_rows = forms.build_LocationEntryForm_formset_initial_data(flavor)
@@ -402,13 +419,13 @@ def ingredient_replacer_preview(request, old_ingredient_id, new_ingredient_id):
                                'old_ingredient_gzl':old_ingredient_gzl,},
                               context_instance=RequestContext(request))
 
-@permission_required('access.view_flavor')
+@login_required
 def ingredient_replacer(request):
     if request.user.is_superuser:
         if request.method=='POST':
             form = forms.IngredientReplacerForm(request.POST)
             if form.is_valid():
-                return HttpResponseRedirect('/django/access/ingredient_replacer_preview/%s/%s/' 
+                return HttpResponseRedirect('/access/ingredient_replacer_preview/%s/%s/' 
                                         % (form.cleaned_data['original_ingredient'],
                                            form.cleaned_data['new_ingredient']))
         else:
@@ -417,7 +434,7 @@ def ingredient_replacer(request):
                                   {'form':form,},
                                   context_instance=RequestContext(request))
     else:
-        return HttpResponseRedirect('/django/')
+        return HttpResponseRedirect('/')
 
 @flavor_info_wrapper
 def ft_review(request, flavor):
@@ -442,8 +459,7 @@ def ft_review(request, flavor):
                    'weight_factor': weight_factor,
                    'formula_weight': formula_weight,
                    'print_link':'FLAVOR_REVIEW_PRINT_MENU',
-                   'recalculate_link':'/django/access/%s/recalculate/' % flavor.number,
-#                    'flavor_edit_link':'#', dont need this now that there is a spec sheet tab
+                   'recalculate_link':'/access/%s/recalculate/' % flavor.number,
                    }   
     return render_to_response('access/flavor/ft_review.html',
                               context_dict,
@@ -451,16 +467,16 @@ def ft_review(request, flavor):
 
 
 @flavor_info_wrapper
-@permission_required('access.view_flavor')
+@login_required
 @transaction.commit_on_success
-def recalculate_flavor(request,flavor):
-    old_new_attrs, flavor = recalculate_guts(flavor)
+def recalculate_flavor_view(request,flavor):
+    results = recalculate_flavor(flavor)
     context_dict = {
                    'window_title': flavor.__unicode__(),
                    'page_title': "Recalculate Flavor Properties",
                    'flavor': flavor,
                    'weight_factor':1000,
-                   'old_new_attrs':old_new_attrs,
+                   'results':results,
                    }   
     return render_to_response('access/flavor/recalculate.html',
                               context_dict,
@@ -470,115 +486,18 @@ def recalculate_flavor(request,flavor):
     
     
 @experimental_wrapper
-@permission_required('access.view_flavor')
+@login_required
 @transaction.commit_on_success
 def recalculate_experimental(request,experimental):
     flavor=experimental.flavor
-    old_flavor_dict = copy.copy(flavor.__dict__)
-    
-    FormulaTree.objects.filter(root_flavor=flavor).delete()
-    LeafWeight.objects.filter(root_flavor=flavor).delete()
-    
-    my_valid = True
-    my_amount = 0
-    for fr in flavor.formula_set.all():
-        my_amount += fr.amount
-        gazinta = fr.ingredient.gazinta()
-        if gazinta is None:
-            continue
-        if gazinta.valid == False:
-            my_valid = False
-            break
-    if my_amount != Decimal(1000):
-        my_valid=False
-    flavor.valid = my_valid
-    
-    build_tree(flavor)
-    build_leaf_weights(flavor)
-    my_leaf_weights = LeafWeight.objects.filter(root_flavor=flavor).select_related()
-    
-    sulfites = Decimal('0')
-    allergens = {}
-    my_prop_65 = False
-    my_diacetyl = False
-    my_pg = False
-    my_solvents = {}
-    sorted_solvent_string_list = []
-    
-    solvent_list = Solvent.get_id_list()
-    
-    for lw in my_leaf_weights:
-        
-        sulfites += lw.ingredient.sulfites_ppm * lw.weight / ONE_THOUSAND
-        
-        for allergen in Ingredient.aller_attrs:
-            if getattr(flavor, allergen):
-                allergens[allergen]=1
-                
-        if lw.ingredient.prop65 == True:
-            my_prop_65 = True
-        if lw.ingredient.pk in DIACETYL_PKS:
-            my_diacetyl = True
-        if lw.ingredient.pk in PG_PKS:
-            my_pg = True
-            
-        if lw.ingredient.id in SOLVENT_NAMES:
-            my_solvents[lw.ingredient.id] = lw.weight
-        
-    flavor.sulfites_ppm = sulfites.quantize(tenths)
-    if sulfites > 10:
-        flavor.sulfites = True
-        flavor.sulfites_usage_threshold = ONE_HUNDRED / (sulfites / TEN)    
-    else:
-        flavor.sulfites = False
-        flavor.sulfites_usage_threshold = 0
-        
-    allergens = allergens.keys()
-    if len(allergens) > 0:
-        flavor.allergen = "Yes: %s" % ','.join(allergens)
-        flavor.ccp2 = True
-        flavor.ccp4 = True
-    else:
-        flavor.allergen = "None"
-
-    flavor.prop_65 = my_prop_65
-    flavor.prop65 = my_prop_65
-    flavor.diacetyl = not my_diacetyl
-    flavor.no_pg = not my_pg
-
-    solvents_by_weight = sorted(my_solvents.iteritems(), key=operator.itemgetter(1))
-    solvents_by_weight.reverse()
-    for solvent_number, solvent_amount in solvents_by_weight:
-        if solvent_amount > 0:
-            relative_solvent_amount = (solvent_amount / 10).quantize(ones)
-            sorted_solvent_string_list.append("%s %s%%" % (SOLVENT_NAMES[solvent_number], relative_solvent_amount))
-    solvent_string = "; ".join(sorted_solvent_string_list)
-    flavor.solvent = solvent_string[:50]
-        
-    synchronize_price(flavor)
-    flavor.rawmaterialcost = flavor.rawmaterialcost.quantize(thousandths)
-    flavor.save()    
-    
-    old_new_attrs = [
-            ('Raw Material Cost',old_flavor_dict['rawmaterialcost'],flavor.rawmaterialcost),
-            ('Sulfites PPM',old_flavor_dict['sulfites_ppm'],flavor.sulfites_ppm),
-            ('Allergen',old_flavor_dict['allergen'],flavor.allergen),
-            ('Solvent',old_flavor_dict['solvent'],flavor.solvent),    
-            ('Prop 65',old_flavor_dict['prop_65'],flavor.prop65),
-            ('NO Diacetyl',old_flavor_dict['diacetyl'],flavor.diacetyl),
-            ('NO PG',old_flavor_dict['no_pg'],flavor.no_pg),   
-            ('Valid',old_flavor_dict['valid'],flavor.valid),           
-        ]
-        
-    
-    
+    results = recalculate_flavor(flavor)
     context_dict = {
                     'experimental':experimental,
                    'window_title': flavor.__unicode__(),
                    'page_title': "Recalculate Flavor Properties",
                    'flavor': flavor,
                    'weight_factor':1000,
-                   'old_new_attrs':old_new_attrs,
+                   'results':results
                    }   
     return render_to_response('access/experimental/recalculate.html',
                               context_dict,
@@ -597,7 +516,7 @@ def print_review(request,flavor):
                               context_instance=RequestContext(request))
 
 @experimental_wrapper
-@permission_required('access.view_flavor')
+@login_required
 def experimental_name_edit(request, experimental):
     """
     This view uses a lot of logic in javascript.
@@ -608,7 +527,7 @@ def experimental_name_edit(request, experimental):
             form.process_data(experimental)
             experimental.save()
             experimental.process_changes_to_flavor()
-            return redirect('/django/access/experimental/%s/' % experimental.experimentalnum)
+            return redirect('/access/experimental/%s/' % experimental.experimentalnum)
     else:
         form = forms.ExperimentalNameForm(initial=experimental.__dict__)
     page_title = "Experimental Name Edit"
@@ -698,10 +617,9 @@ def ingredient_activate(request, raw_material_code=False, ingredient_id=False):
                 break 
         
         discontinue_ingredient(old_active_ingredient)
-        revision.comment = "Old Active Ingredient: %s, New Active Ingredient: None (ALL DISCONTINUED)" % old_active_ingredient.name
 
-        #redirect_path = "/django/access/%s/recalculate/" % (flavor.number)
-        redirect_path = "/django/access/ingredient/pin_review/%s" % ingredient_id
+        #redirect_path = "/access/%s/recalculate/" % (flavor.number)
+        redirect_path = "/access/ingredient/pin_review/%s" % ingredient_id
         return HttpResponseRedirect(redirect_path)
     
     else: #otherwise, activate the ingredient with the raw material code specified in the url
@@ -746,7 +664,7 @@ def ingredient_activate(request, raw_material_code=False, ingredient_id=False):
                                             
                 updated_flavors = update_prices_and_get_updated_flavors(old_active_ingredient, new_active_ingredient)
                 
-                revision.comment = "Old Active Ingredient: %s, New Active Ingredient: %s" % (old_ingredient.name, new_ingredient.name)
+                revision.comment = "Old Active Ingredient: %s, New Active Ingredient: %s" % (old_active_ingredient.name, new_active_ingredient.name)
 
             
         else: #if all ingredients were previously discontinued, activate the single ingredient
@@ -1021,6 +939,9 @@ def process_cell_update(request):
     response_dict = {}
     try:
         ingredient = Ingredient.get_formula_ingredient(number)
+    except:
+        ingredient = None
+    if ingredient is not None:
         response_dict['name'] = ingredient.long_name
         response_dict["pk"] = ingredient.pk
         try:
@@ -1032,7 +953,7 @@ def process_cell_update(request):
                 response_dict['cost'] = str(Decimal(ingredient.unitprice * Decimal(amount) / 1000).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
         except:
             response_dict['cost'] = ''
-    except:
+    else:
         if number == '':
             response_dict['name'] = ''
         else:
@@ -1083,7 +1004,7 @@ def formula_entry(request, flavor, status_message=None):
                 formula_row.save()
                 
             flavor.save()
-            redirect_path = "/django/access/%s/recalculate/" % (flavor.number)
+            redirect_path = "/access/%s/recalculate/" % (flavor.number)
             return HttpResponseRedirect(redirect_path)
         
         else:
@@ -1129,17 +1050,19 @@ def formula_entry(request, flavor, status_message=None):
                                    'management_form': formset.management_form,
                                    },
                                    context_instance=RequestContext(request))
-    
-@permission_required('access.view_flavor')
+
 @experimental_wrapper
 @revision.create_on_success
 @transaction.commit_on_success
 def experimental_formula_entry(request, experimental, status_message=None):
     page_title = "Experimental Formula Entry"
     status_message = ""
-    if request.user.get_profile().initials == experimental.initials or request.user.is_superuser:
-        pass
-    else:
+    try:
+        if request.user.get_profile().initials == experimental.initials or request.user.is_superuser:
+            pass
+        else:
+            return render_to_response('access/experimental/experimental_edit_permission.html',context_instance=RequestContext(request))
+    except:
         return render_to_response('access/experimental/experimental_edit_permission.html',context_instance=RequestContext(request))
     flavor = experimental.flavor
     if request.method == 'POST':
@@ -1177,7 +1100,7 @@ def experimental_formula_entry(request, experimental, status_message=None):
             flavor.rawmaterialcost = Decimal(rawmaterialcost / 1000)
             
             flavor.save()
-            redirect_path = "/django/access/experimental/%s/recalculate/" % (experimental.experimentalnum)
+            redirect_path = "/access/experimental/%s/recalculate/" % (experimental.experimentalnum)
             return HttpResponseRedirect(redirect_path)
         else:
             label_rows = forms.build_formularow_formset_label_rows(formset)
@@ -1228,7 +1151,10 @@ def experimental_formula_entry(request, experimental, status_message=None):
                                    },
                                    context_instance=RequestContext(request))
     
-@permission_required('access.view_flavor')
+    
+    
+
+@login_required
 #@revision.create_on_success
 #@transaction.commit_on_success
 def tsr_entry(request, tsr_number):
@@ -1257,7 +1183,7 @@ def tsr_entry(request, tsr_number):
             #print foo
 
             
-            return HttpResponseRedirect("/django/access/tsr/%s/tsr_entry/" % tsr.number)
+            return HttpResponseRedirect("/access/tsr/%s/tsr_entry/" % tsr.number)
         else:
             return render_to_response('access/tsr/tsr_entry.html', 
                                   {'tsr': tsr,
@@ -1291,8 +1217,9 @@ def tsr_entry(request, tsr_number):
                                    context_instance=RequestContext(request))    
     
     
+    
 
-@permission_required('access.view_flavor')
+@login_required
 @po_info_wrapper
 #@revision.create_on_success
 #@transaction.commit_on_success
@@ -1308,7 +1235,7 @@ def po_entry(request, po):
                 poli.raw_material.date_ordered = po.date_ordered
                 poli.raw_material.save()
                 poli.save()
-            return HttpResponseRedirect("/django/access/purchase/%s/po_entry/" % po.number)
+            return HttpResponseRedirect("/access/purchase/%s/po_entry/" % po.number)
         else:
             return render_to_response('access/purchase/poli_entry.html', 
                                   {'po': po,
@@ -1394,7 +1321,7 @@ def get_barcode(request, flavor_number):
 
 
 # TODO : fix these; just placeholder
-@permission_required('access.view_flavor')
+@login_required
 @revision.create_on_success
 def db_ops(request):
     return render_to_response('access/flavor/db_ops.html', {})
@@ -1406,13 +1333,13 @@ def process_digitized_paste(request):
     return HttpResponse(simplejson.dumps(response_dict), content_type='application/json; charset=utf-8')
 
 
-@permission_required('access.view_flavor')
+@login_required
 @revision.create_on_success
 def digitized_entry(request):
     form = forms.DigitizedFormulaPasteForm()
     return render_to_response('access/flavor/digitized_entry.html', {'form': form})
 
-@permission_required('access.view_flavor')
+@login_required
 @revision.create_on_success
 def new_tsr(request):
     
@@ -1421,15 +1348,15 @@ def new_tsr(request):
     return create_object(request,
                          form_class = TSRForm,
                          template_name="access/tsr/new.html",
-                         post_save_redirect="/django/access/tsr/%(number)s/tsr_entry",)
+                         post_save_redirect="/access/tsr/%(number)s/tsr_entry",)
 
-@permission_required('access.view_flavor')
+@login_required
 @revision.create_on_success
 def new_po(request):
     return create_object(request, 
                          form_class=forms.PurchaseOrderForm, 
                          template_name="access/purchase/new.html",
-                         post_save_redirect="/django/access/purchase/%(number)s/po_entry/",)
+                         post_save_redirect="/access/purchase/%(number)s/po_entry/",)
 
 
 def jil_object_list(request):
@@ -1443,11 +1370,12 @@ def jil_object_list(request):
                 },
         )
 
-@permission_required('access.view_flavor')
+@login_required
 def new_rm_wizard(request):
     return forms.NewRMWizard([forms.NewRMForm1, forms.NewRMForm11, forms.NewRMForm2, forms.NewRMForm3, forms.NewRMForm4, forms.NewRMForm5])(request)
 
 
+@login_required
 @permission_required('access.change_formula')  
 @flavor_info_wrapper
 def formula_info_merge(request, flavor):
@@ -1457,7 +1385,7 @@ def formula_info_merge(request, flavor):
     
     
 
-@permission_required('access.view_flavor')
+@login_required
 @flavor_info_wrapper
 def new_rm_wizard_flavor(request, flavor):
     ingredients = Ingredient.objects.filter(sub_flavor=flavor)
@@ -1531,9 +1459,10 @@ SOLVENT_NAMES = {
     25:'Iso Amyl Alcohol',
     758:'Soybean Oil',
     6403:'Safflower Oil',
+    1478:'Dextrose',
 }
 
-@permission_required('access.view_flavor')
+@login_required
 def new_solution_wizard(request):
     if request.method == "POST":
         return forms.NewRMWizard([forms.NewRMForm1, forms.NewRMForm2, forms.NewRMForm3, forms.NewRMForm4, forms.NewRMForm5], initial=request.session['new_solution_wizard_initial'])(request)
@@ -1545,7 +1474,7 @@ def new_solution_wizard(request):
         try:
             solutions = Solution.objects.filter(my_base=base_ingredient).filter(my_solvent=solvent).filter(percentage=concentration)
             if solutions.count() != 0:
-                return redirect('/django/access/ingredient/pin_review/%s/' % solutions[0].ingredient.id)
+                return redirect('/access/ingredient/pin_review/%s/' % solutions[0].ingredient.id)
         except:
             pass
         new_name = "%s(%s) %s%% in %s" % (base_ingredient.product_name, base_ingredient.id, concentration, SOLVENT_NAMES[solvent.id])
@@ -1652,7 +1581,7 @@ def new_solution_wizard(request):
 #                         percentage=concentration,
 #                         status=SolutionStatus.objects.get(status_name__iexact="verified"))
 #            s.save()
-#            return redirect('/django/access/ingredient/pin_review/%s/' % new_ingredient.id)
+#            return redirect('/access/ingredient/pin_review/%s/' % new_ingredient.id)
 
 
 def allergen_list(request):
@@ -1667,16 +1596,17 @@ def rm_allergen_list(request):
                               {'rms':Ingredient.objects.exclude(allergen__iexact="None")}
                               )
 
-@permission_required('access.view_flavor')
+@login_required
 def new_rm_wizard_launcher(request):
     return render_to_response('access/new_rm_wizard_launcher.html')
 
 
+@login_required
 @permission_required('access.add_experimentallog')
 def new_ex_wizard(request):
     return forms.NewExFormWizard([forms.NewExForm1,forms.NewExForm2,forms.NewExForm3])(request)
 
-@permission_required('access.view_flavor')
+@login_required
 def new_rm_wizard_rm(request, ingredient_pk):
     i = Ingredient.objects.get(pk=ingredient_pk)
     allers = []
@@ -1716,6 +1646,7 @@ def new_rm_wizard_rm(request, ingredient_pk):
                 },
     }
     return forms.NewRMWizard([forms.NewRMForm1, forms.NewRMForm2, forms.NewRMForm3, forms.NewRMForm4, forms.NewRMForm5], initial=initial)(request)
+
 
 @flavor_info_wrapper
 def formula_visualization(request, flavor):
@@ -1824,6 +1755,8 @@ def edit_spec(request, flavor_number, spec_id=0):
             
             return HttpResponseRedirect(return_url)
         
+#         else: #for testing purposes
+#             raise forms.ValidationError(form.errors)
                 
     if request.method != 'POST':
         form = FlavorSpecificationForm(initial=initial_data)
@@ -1876,10 +1809,10 @@ def spec_list(request, flavor):
                             flavorspec.save()
                 except:
                     #error
-                    return HttpResponseRedirect("/django/access/%s/spec_list/EXCEPT" % flavor.number)
+                    return HttpResponseRedirect("/access/%s/spec_list/EXCEPT" % flavor.number)
 
             
-            return HttpResponseRedirect("/django/access/%s/spec_list/" % flavor.number)
+            return HttpResponseRedirect("/access/%s/spec_list/" % flavor.number)
         else:
             return render_to_response('access/flavor/spec_list.html', 
                                   {'flavor': flavor,
@@ -2073,7 +2006,7 @@ def get_mtf_vals(flavor_list, spec_search_term_list):
     
     for flavor in flavor_list:
         
-        path = "/home/matta/Master Template Files/%s.xls" % flavor.number
+        path = "/srv/samba/tank/Share folders by role/CENTER/My Documents/FDI Paperwork/Master Template Files/%s.xls" % flavor.number
 #         mtf_list.append((path, fl.number))
         
         try:
@@ -2166,12 +2099,107 @@ def guessed_reconciled_vals(mtf_vals, db_vals):
     
     return reconciled_names
 
+def angularjs_test(request):
+    all_flavors = Flavor.objects.all()
+    flavor_list = []
+    
+    for fl in all_flavors:
+        flavor_list.append({"number":fl.number, "name":str(fl.name)})
+    
+    return render_to_response('access/angularjs_test.html',
+                                {'flavors': flavor_list,
+                                 'page_title': "Testing AngularJS"})
 
+
+# TODO this was in the controller, had to move it back because it 
+# uses a bare call to Ingredient and controller shouldn't import models...
+# or should it...
+def experimental_approve_from_form(approve_form, experimental):
+    approve_form.save()
+    new_flavor = approve_form.instance
+    experimental.product_number = new_flavor.number
+    experimental.save()
+    gazintas = Ingredient.objects.filter(sub_flavor=new_flavor)
+    if gazintas.count() > 1:
+        # hack job. this will raise exception because get() expects 1
+        Ingredient.objects.get(sub_flavor=new_flavor)
+    if gazintas.count() == 1:
+        gazinta = gazintas[0]
+        gazinta.prefix = "%s-%s" % (new_flavor.prefix, new_flavor.number)
+        gazinta.flavornum = new_flavor.number
+        gazinta.save()
+    for ft in FormulaTree.objects.filter(root_flavor=new_flavor).exclude(node_flavor=None).exclude(node_flavor=new_flavor).filter(node_flavor__prefix="EX"):
+        ft.node_flavor.prefix="GZ"
+        ft.node_flavor.save()
+        
     
+def latest_polis_a():
+    return_list = []
     
+    for i in Ingredient.objects.annotate(num_polis=Count('purchaseorderlineitem')).exclude(num_polis=0):
+        return_list.append(i.purchaseorderlineitem_set.all().latest('po__date_ordered'))
+        
+    return return_list
+
+def latest_polis_b():
+    return_list = []
     
+    for i in Ingredient.objects.annotate(num_polis=Count('purchaseorderlineitem')).exclude(num_polis__lte=1):
+        return_list.append(i.purchaseorderlineitem_set.all().latest('po__date_ordered'))
+        
+    for i in Ingredient.objects.annotate(num_polis=Count('purchaseorderlineitem')).filter(num_polis=1):
+        return_list.append(i.purchaseorderlineitem_set.all()[0])
+        
+    return return_list
     
+def ingredient_comparison_reports(request):
+
+    if request.method == 'POST':
+        form = GHSReportForm(request.POST)
+        
+        if form.is_valid():
+            report_to_download = form.cleaned_data['report_to_download']
+            
+            response = HttpResponse(mimetype='text/csv')
+            response['Content-Disposition'] = "attachment; filename=%s.csv" % report_to_download
+            csv_writer = UnicodeWriter(response)
+            
+            if report_to_download == 'GHS_Exclusive_Ingredients':
+                
+                ghs_only = get_ghs_only_ingredients()
+                write_ghs_report(csv_writer, ghs_only)
+                
     
+            elif report_to_download == 'FDI_Exclusive_Ingredients':
+                
+                fdi_only = get_fdi_only_ingredients()
+                write_fdi_report(csv_writer, fdi_only)
+                
+            return response
+    
+    else:
+        form = GHSReportForm()
+    
+    return render_to_response('access/get_ingredient_comparison_reports.html', {'form': form,})
     
 
+def recent_purchases_per_ingredient(request):
+    poli_pks = []
+    for i in Ingredient.objects.annotate(poli_count=Count('purchaseorderlineitem')).exclude(poli_count=0).select_related():
+        poli_pks.append(i.purchaseorderlineitem_set.latest('po__date_ordered').pk)
+    polis = PurchaseOrderLineItem.objects.filter(pk__in=poli_pks).order_by('-po__number')
+    return list_detail.object_list(
+        request,
+        paginate_by=100,
+        queryset=polis,
+        template_name="access/purchase/recent_purchases_per_ingredient.html",
+        extra_context= {
+                'page_title': "Recent Purchase Per Ingredient",
+            },
+    )
     
+def supplier_review(request,supplier_pk):
+    #supplier_pk = int(supplier_pk)
+    supplier = get_object_or_404(Supplier, pk=supplier_pk)
+    return render_to_response('access/purchase/supplier_review.html',
+                              {'supplier':supplier},)

@@ -7,8 +7,8 @@
 
     {# this part includes some javascript, css, etc #}
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="text/javascript" src="/djangomedia/js/jquery-1.4.2.min.js"></script> 
-	<script type="text/javascript" src="/djangomedia/js/jquery.tablesorter.min.js"></script>
+	<script type="text/javascript" src="/djangomedia/js/lib/jquery-1.4.2.min.js"></script> 
+	<script type="text/javascript" src="/djangomedia/js/lib/jquery.tablesorter.min.js"></script>
     <link href="/djangomedia/css/batch_screen.css?v=25" type="text/css" rel="stylesheet"{# media="screen" #}>
 	{# <link href="/djangomedia/css/batch_print.css?v=25" type="text/css" rel="stylesheet" media="print"> #}
 
@@ -23,7 +23,7 @@
 				<th>
 					<span id="titleleft">{{ flavor }}</span>
 					<span id="titlecenter">{{ todays_date|date:"D d-M-y" }}</span>
-					<span id="titleright">Lot number: xxxxxxxx <img src="/django/access/{{ flavor.number }}/barcode" align="top" /></span></th>
+					<span id="titleright">Lot number: xxxxxxxx <img src="/access/{{ flavor.number }}/barcode" align="top" /></span></th>
 			</tr>
 		</thead>
 		<tfoot>

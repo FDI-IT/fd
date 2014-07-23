@@ -230,7 +230,7 @@ class QCCard:
                 testing_procedure = scraped_flavor_info.get('testing_procedure', ''),
                 flash_point = scraped_flavor_info.get('flash_point', None),
                 specific_gravity = scraped_flavor_info.get('specific_gravity', None),
-                notes = scraped_flavor_info.get('notes',''),
+                product_notes = scraped_flavor_info.get('notes',''),
                 original_card = File(open(self.path, 'r')),
             )
             if not created:
@@ -418,13 +418,13 @@ def fix_lot_statuses():
 def import_flavor_cards():
     delete_all_cards()
     
-    filename = '/usr/local/django/dump/qc_flavor_import%s.csv' % datetime.datetime.now()
+    filename = '/var/www/django/dump/qc_flavor_import%s.csv' % datetime.datetime.now()
     log_file = open(filename, 'w')
     log_headers = "filename,error,additional_info\n"
     log_file.write(log_headers)
     
     
-    os.chdir("/usr/local/django/dump/sample_data/qc")
+    os.chdir("/var/www/django/dump/sample_data/qc")
     card_path_list = glob.glob(u"*.[Xx][Ll][Ss]")
     card_list = []
     for card_path in card_path_list:
@@ -450,7 +450,7 @@ def import_flavor_cards():
 def find_common_lots(multi_lot_files):
     """Returns a list of lot numbers shared by the cards at path a and b.
     """
-    filename = '/usr/local/django/dump/lot_dupes-%s.csv' % datetime.datetime.now()
+    filename = '/var/www/django/dump/lot_dupes-%s.csv' % datetime.datetime.now()
     log_file = codecs.open(filename, 'w', 'UTF-8')
     log_file.write("num_common;f1;f2;set\n")
     mlf_retains_cache = {}
@@ -486,10 +486,10 @@ def find_common_lots(multi_lot_files):
     log_file.close()
 
 
-def test(qc_path="/usr/local/django/dump/sample_data/qc"):
+def test(qc_path="/var/www/django/dump/sample_data/qc"):
     delete_all_cards()
     
-#    filename = '/usr/local/django/dump/qc_flavor_import%s.csv' % datetime.datetime.now()
+#    filename = '/var/www/django/dump/qc_flavor_import%s.csv' % datetime.datetime.now()
 #    log_file = open(filename, 'w')
 #    log_headers = "filename,error,additional_info\n"
 #    log_file.write(log_headers)

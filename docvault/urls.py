@@ -24,7 +24,7 @@ urlpatterns = patterns('newqc.views',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    (r'^$', redirect_to, {'url': '/django/docvault/docs/'}),
+    (r'^$', redirect_to, {'url': '/docvault/docs/'}),
     (r'^docs/$', list_detail.object_list, doc_list_info),
     
 )

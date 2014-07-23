@@ -32,9 +32,9 @@
 		
 		
 		
-		<td><a href="/django/salesorders/{{ lineitem.salesordernumber.number }}/">{{ lineitem.salesordernumber.number }}</a></td>
-		<td><a href="/django/salesorders/customer/{{lineitem.salesordernumber.customer.pk}}/" target="_blank">{{ lineitem.salesordernumber.customer }}</a></td>
-		<td><a href="/django/access/{{ lineitem.flavor.number }}">{{ lineitem.flavor.number }}</a></td>
+		<td><a href="/salesorders/{{ lineitem.salesordernumber.number }}/">{{ lineitem.salesordernumber.number }}</a></td>
+		<td><a href="/salesorders/customer/{{lineitem.salesordernumber.customer.pk}}/" target="_blank">{{ lineitem.salesordernumber.customer }}</a></td>
+		<td><a href="/access/{{ lineitem.flavor.number }}">{{ lineitem.flavor.number }}</a></td>
 		<td>{{ lineitem.quantity|floatformat:0 }}</td>
 		<td>{{ lineitem.unit_price|floatformat:2 }}</td>
     	<td>{{ lineitem.salesordernumber.create_date|date:'m-d' }}</td>

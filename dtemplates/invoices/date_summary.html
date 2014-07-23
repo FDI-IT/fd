@@ -27,7 +27,7 @@
 	</thead>
 	{% for date_line in date_data %}
 	<tr>
-		<td><a href='/django/invoices/{{date_line.qb_date|date:"Y/m/d"}}/'>{{date_line.qb_date}}</a></td>
+		<td><a href='/invoices/{{date_line.qb_date|date:"Y/m/d"}}/'>{{date_line.qb_date}}</a></td>
 		<td>${{date_line.lineitem__quantity_cost__sum|floatformat:2 }}</td>
 	</tr>
 	{% endfor %}

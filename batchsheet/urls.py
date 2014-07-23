@@ -29,7 +29,6 @@ urlpatterns = patterns('batchsheet.views',
     (r'^batchsheet_batch_print/$', 'batchsheet_batch_print'),
     (r'^check_lot_number/$', 'check_lot_number'),
     (r'^get_discontinued_orders/$', 'get_discontinued_orders'),
-    (r'^explosion_print/(?P<flavor_number>\d+)/$', 'explosion_print'),
     (r'^(?P<lot_pk>\d+)/$', 'batchsheet_single'),
 
 )

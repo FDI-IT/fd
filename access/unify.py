@@ -35,7 +35,7 @@ app_types = [
              ["Non-food Fragrance",62,63],
              ]
 
-def import_applications(spreadsheet_path="/usr/local/django/dump/sample_data/flavors.xls"):
+def import_applications(spreadsheet_path="/var/www/django/dump/sample_data/flavors.xls"):
     re_init()
     wb = open_workbook(spreadsheet_path)
     sheet = wb.sheets()[0]

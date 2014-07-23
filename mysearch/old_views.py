@@ -107,7 +107,7 @@ def print_search(request):
         search_string = ms.cleaned_data['search_string']
         search_space = ms.cleaned_data['search_space']
     else:
-        return HttpResponseRedirect('/django/')
+        return HttpResponseRedirect('/')
     
     process_request(search_space, search_string)
         
@@ -131,7 +131,7 @@ def search(request):
         search_string = ms.cleaned_data['search_string']
         search_space = ms.cleaned_data['search_space']
     else:
-        return HttpResponseRedirect('/django/')
+        return HttpResponseRedirect('/')
     
     
     

@@ -6,7 +6,7 @@
 
 <div id="content-main">
 <div id="title-left">
-	<span id="name">{{experimental}} -- <a href="/django/access/experimental/{{experimental.experimentalnum}}/edit/">edit</a></span>
+	<span id="name">{{experimental}} -- <a href="/access/experimental/{{experimental.experimentalnum}}/edit/">edit</a></span>
 </div>
 
 {% if status_message %}
@@ -17,7 +17,8 @@
 <div class="product-memo"><span class="label">Mixing Instructions</span>{{ experimental.mixing_instructions }}</div>
 
 <p>
-	<form action="/django/access/experimental/{{experimental.experimentalnum}}/add_formula/" method="POST">
+	<form action="/access/experimental/{{experimental.experimentalnum}}/add_formula/" method="POST">
+		{% csrf_token %}
 	<input type="submit" value="Add Formula">
 	</form>
 </p>
@@ -70,7 +71,7 @@
 			<legend>Type</legend>
 			<input name="liquid" type="checkbox" onclick="return false" {% if experimental.liquid %}checked{% endif %}>Liquid<br>
 			<input name="dry" type="checkbox" onclick="return false" {% if experimental.dry %}checked{% endif %}>Dry<br>
-			<input name="spray_dried" type="checkbox" onclick="return false" {% if experimental.spray_dried %}checked{% endif %}>Spray Dried<br>
+			<input name="spraydried" type="checkbox" onclick="return false" {% if experimental.spraydried %}checked{% endif %}>Spray Dried<br>
 			<input name="concentrate" type="checkbox" onclick="return false" {% if experimental.concentrate %}checked{% endif %}>Concentrate<br>
 			<input name="oilsoluble" type="checkbox" onclick="return false" {% if experimental.oilsoluble %}checked{% endif %}>Oil Soluble<br>
 		</fieldset>

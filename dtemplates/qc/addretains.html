@@ -4,6 +4,7 @@
     {{ formset.non_form_errors }}
 
     <form action="" method="POST">
+    {% csrf_token %}
 	{{ formset.management_form }}
 	<table align="center" width="100%">
 	    {% for form in formset.forms %}

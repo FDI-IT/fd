@@ -4,14 +4,14 @@
 		<div id="header-logob"></div>
 		<div id="header-logol"></div>
 	 	<div id="header-logor">
-	 		<form action="/django/mysearch/" id="mainsearch" method="GET">
+	 		<form action="/mysearch/" id="mainsearch" method="GET">
 	 			<div>{% mainsearch %}</div>	 			
 			</form>
 			<p>
 			    {% if request.user.is_authenticated %}
-			    {{ request.user}} <a href="/django/accounts/logout/?next={{request.get_full_path}}">Logout</a>
+			    {{ request.user}} <a href="/accounts/logout/?next={{request.get_full_path}}">Logout</a>
 			    {% else %}
-				<a href="/django/accounts/login/?next={{request.get_full_path}}">Login</a>
+				<a href="/accounts/login/?next={{request.get_full_path}}">Login</a>
 				{% endif %}
 			</p>
 		</div>
@@ -20,68 +20,69 @@
   <div id="menubar">
    	<div id="myslidemenu" class="jqueryslidemenu">
       	<ul>
-        <li><a href="/django/mysearch/?search_space=flavor&search_string=">Flavors</a>
+        <li><a href="/mysearch/?search_space=flavor&search_string=">Flavors</a>
         	<ul>
-        		<li><a href="/django/mysearch/?search_space=flavor&search_string=">Flavors (Products)</a></li>
-        		<li><a href="/django/mysearch/?search_space=ingredient&search_string=">Raw Materials</a></li>
-        		<li><a href="/django/mysearch/?search_space=experimental&search_string=">Experimentals</a></li>
-        		<li><a href="/django/mysearch/?search_space=unified&search_string=">Flavors & Experimentals</a></li>
+        		<li><a href="/mysearch/?search_space=flavor&search_string=">Flavors (Products)</a></li>
+        		<li><a href="/mysearch/?search_space=ingredient&search_string=">Raw Materials</a></li>
+        		<li><a href="/mysearch/?search_space=experimental&search_string=">Experimentals</a></li>
+        		<li><a href="/mysearch/?search_space=unified&search_string=">Flavors & Experimentals</a></li>
         		
         	</ul>
         </li>
         <li><a href="/">Lab</a>
         	<ul>
-        		<li><a href="/django/access/new_rm/">New Raw Material</a></li>
-        		<li><a href="/django/access/new_ex/">New Experimental</a></li>
-        		<li><a href="/django/access/new_rm/solution/">New Solution</a></li>
-        		<li><a href="/django/access/ingredient_replacer/">Ingredient Replacer</a></li>
-				<!--<li><a href="/django/solutionfixer/">Solution Details</a></li>
-				<li><a href="/django/solutionfixer/flagged">Solution Details - flagged</a></li>
-				<li><a href="/django/solutionfixer/solution_summary">Solution Summary</a></li>
-				<li><a href="/django/solutionfixer/flagged_summary">Flagged Summary</a></li>-->
-        		<li><a href="/django/lab/finished_product_labels/">Finished Product Labels</a></li>
-        		<li><a href="/django/lab/experimental_labels/">Experimental Labels</a></li>
-        		<li><a href="/django/lab/rm_labels/">Raw Material Labels</a></li>
-        		<li><a href="/django/lab/inventory/">Sample Inventory</a></li>
-        		<li><a href="/django/lab/experimentals_by_customer/">Experimentals By Customer</a></li>
+        		<li><a href="/access/new_rm/">New Raw Material</a></li>
+        		<li><a href="/access/new_ex/">New Experimental</a></li>
+        		<li><a href="/access/new_rm/solution/">New Solution</a></li>
+        		<li><a href="/access/ingredient_replacer/">Ingredient Replacer</a></li>
+				<!--<li><a href="/solutionfixer/">Solution Details</a></li>
+				<li><a href="/solutionfixer/flagged">Solution Details - flagged</a></li>
+				<li><a href="/solutionfixer/solution_summary">Solution Summary</a></li>
+				<li><a href="/solutionfixer/flagged_summary">Flagged Summary</a></li>-->
+        		<li><a href="/lab/finished_product_labels/">Finished Product Labels</a></li>
+        		<li><a href="/lab/experimental_labels/">Experimental Labels</a></li>
+        		<li><a href="/lab/rm_labels/">Raw Material Labels</a></li>
+        		<li><a href="/lab/inventory/">Sample Inventory</a></li>
+        		<li><a href="/lab/experimentals_by_customer/">Experimentals By Customer</a></li>
         	</ul>
         </li>
-		<li><a href="/django/qc/">QC</a>
+		<li><a href="/qc/">QC</a>
         	<ul>
-        		<li><a href="/django/qc/retains">Product Retains</a></li>
-				<li><a href="/django/qc/lots">Product Lots</a></li>
-        		<li><a href="/django/qc/rm_retains">RM Retains</a></li>
-        		<li><a href="/django/qc/review/">Review</a></li>
+        		<li><a href="/qc/retains">Product Retains</a></li>
+				<li><a href="/qc/lots">Product Lots</a></li>
+        		<li><a href="/qc/rm_retains">RM Retains</a></li>
+        		<li><a href="/qc/review/">Review</a></li>
         	</ul>
         </li>
-		<li><a href="/django/salesorders/">Sales Orders</a>
+		<li><a href="/salesorders/">Sales Orders</a>
         	<ul>
-        		<li><a href="/django/salesorders/">Overview</a></li>
-				<li><a href="/django/salesorders/product/">By Product</a></li>
-				<li><a href="/django/salesorders/lineitem/">By Line Item</a></li>
-				<li><a href="/django/salesorders/upload_report/">Upload Report</a></li>
+        		<li><a href="/salesorders/">Overview</a></li>
+				<li><a href="/salesorders/product/">By Product</a></li>
+				<li><a href="/salesorders/lineitem/">By Line Item</a></li>
+				<li><a href="/salesorders/upload_report/">Upload Report</a></li>
         	</ul>
         </li>
-		<li><a href="/django/mysearch/?search_space=purchase_order&search_string=">Purchase Orders</a>
+		<li><a href="/mysearch/?search_space=purchase_order&search_string=">Purchase Orders</a>
         	<ul>
-        		<li><a href="/django/access/purchase/new/">New PO</a></li>
+        		<li><a href="/access/purchase/new/">New PO</a></li>
+        		<li><a href="/access/purchase/recent_purchases_per_ingredient/">Recent Purchase Per Ingredient</a></li>
         	</ul>
         </li>
-		<li><a href="/django/invoices/">Invoices</a>
+		<li><a href="/invoices/">Invoices</a>
         	<ul>
-        		<li><a href="/django/invoices/">Summary</a></li>
-        		<li><a href="/django/invoices/upload_report/">Upload Report</a></li>
-        		<li><a href="/django/invoices/upload_report_lw/">Upload Report New Version</a></li>
+        		<li><a href="/invoices/">Summary</a></li>
+        		<li><a href="/invoices/upload_report/">Upload Report</a></li>
+        		<li><a href="/invoices/upload_report_lw/">Upload Report New Version</a></li>
         	</ul>
         </li>
-        <li><a href="/django/batchsheet/" target="_blank">Production</a>
+        <li><a href="/batchsheet/" target="_blank">Production</a>
         	<ul>
-        		<li><a href="/django/batchsheet/" target="_blank">Batchsheets</a></li>
-        		<li><a href="/django/qc/lots/">Lots</a></li>
-       			<li><a href="/django/batchsheet/sales_orders/">Sales Orders - Production</a></li>
+        		<li><a href="/batchsheet/" target="_blank">Batchsheets</a></li>
+        		<li><a href="/qc/lots/">Lots</a></li>
+       			<li><a href="/batchsheet/sales_orders/">Sales Orders - Production</a></li>
         	</ul>
         </li>
-        <li><a href="/django/haccp">HACCP</a></li>
+        <li><a href="/haccp">HACCP</a></li>
 		<li><a href="/rt">Request Tracker</a></li>
 		{% if experimental %}
 			<li><a href="{{ experimental.get_admin_url }}">Admin</a></li>
@@ -102,9 +103,9 @@
 		{% else %}{% if lot_list_admin %}
 			<li><a href="{{ lot_list_admin }}">Admin</a></li>
 		{% else %}
-			<li><a href="/django/admin">Admin</a></li>
+			<li><a href="/admin">Admin</a></li>
 		{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
-        <li><a href="/wiki">Wiki</a></li>
+        <li><a href="http://fdiwiki.flavordynamics.lan/wiki/">Wiki</a></li>
 		</ul>
       	<br style="clear: left" />
     	</div>

@@ -28,7 +28,7 @@ var salesorder_selections_submit = function() {
 
 <div id="content-main">
 	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
-	<form name="salesorder_selections" action="/django/batchsheet/add_lots/" method="get">
+	<form name="salesorder_selections" action="/batchsheet/add_lots/" method="get">
 	    {% csrf_token %}
 	
 	<table id="sales_order-rows" width="100%" class="sorttable">
@@ -57,7 +57,7 @@ var salesorder_selections_submit = function() {
 				}]"{% if checkall %}checked{% endif %}>
 			</td>
 			<td class="number-cell">
-				<a class="darkblue" href="/django/access/{{ order.flavor.number }}?wf={{ order.total }}">{{ order.flavor.number }}</a>
+				<a class="darkblue" href="/access/{{ order.flavor.number }}?wf={{ order.total }}">{{ order.flavor.number }}</a>
 			</td>
 			<td>
 				{{ order.total }}
@@ -70,7 +70,7 @@ var salesorder_selections_submit = function() {
 			</td>
 			<td>	
 			{% for detail in order.details %}
-				<a class="darkblue" href="/django/salesorders/{{ detail.salesordernumber.number }}/">{{ detail }};</a>
+				<a class="darkblue" href="/salesorders/{{ detail.salesordernumber.number }}/">{{ detail }};</a>
 			{% endfor %}
 			</td>
 		</tr>

@@ -11,22 +11,46 @@
 {% block content %}
 
 <div id="content-right">
-	<ul id="sidebar_links">
-		<li id='li_{{ testcard.pk}}'>
-			<a target='_blank' href='/django/admin/newqc/testcard/{{testcard.pk}}'>{{ testcard.retain }}</a> - <a target='_blank' href='/django/admin/newqc/lot/{{testcard.retain.lot.pk}}'>{{testcard.retain.lot.number}}</a> - {{ testcard.retain.lot.flavor}}	
-		</li>
-	</ul>
+	<h3>Remaining: {{remaining}}</h3>
 </div>
 
 <div id="content-main">
 <div id="title-left">
 	<span id="name">Resolve Test Cards</span>
 </div>
+
 <div class="testcard_form_container">
-{% testcard_form testcard "current_loaded" %}
-{% testcard_form testcard_ondeck "ondeck" %}
+
+<div class="{{divclass}}" id="div_{{testcard.pk}}">
+
+	<img src="{{ testcard_form.instance.thumbnail.url }}" align="right" class="testcard_resolve_image" >
+	<img src="{{ testcard.large.url }}" class="hidden_image">
+	<img src="{{ next_tc.large.url }}" style="display:none;">
+	<img src="{{ next_tc.thumbnail.url }}" style="display:none;">
+			<h2>{{productinfo_form.instance.flavor}}</h2>
+		<form action="/qc/resolve_testcards/" method="post" >
+		{% csrf_token %}
+		<fieldset>
+		<legend>Test Card Fields</legend>
+		{{testcard_form.non_field_errors}}
+		{{testcard_form.errors}}
+		{{ testcard_form.as_p }}
+		</fieldset>
+		<fieldset>
+		<legend>Product Info Fields</legend>
+		{{productinfo_form.non_field_errors}}
+		{{productinfo_form.errors}}
+		{{ productinfo_form.as_p }}
+		</fieldset>
+		<input type="hidden" name="testcard_pk" value="{{testcard.pk}}">
+		<input type="hidden" name="productinfo_pk" value="{{ productinfo_form.instance.pk }}">
+		<input type="submit" name="submit" value="Submit" id="resolve_testcard_submit_button">
+</form>
 </div>
-<input type="submit" name="submit" value="Submit" id="resolve_testcard_submit_button">
+
+
+</div>
+
 </div>
 
 {% endblock %}

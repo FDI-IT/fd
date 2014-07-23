@@ -1,4 +1,5 @@
 from datetime import date
+import os,errno
 import tempfile, shlex, subprocess, codecs
 import csv
 from decimal import Decimal
@@ -13,6 +14,15 @@ from pluggable.unicode_to_ascii import unicode_to_ascii
 
 hundredths = Decimal('0.00')
 
+LABEL_PATH = "/var/www/django/dump/labels/"
+try:
+    os.makedirs(LABEL_PATH)
+except OSError as e:
+    if e.errno == errno.EEXIST and os.path.isdir(LABEL_PATH):
+        pass
+    else:
+        raise
+
 def label_data_to_csv(label_data):
     ascii_data = []
     for element in label_data:
@@ -21,27 +31,27 @@ def label_data_to_csv(label_data):
             u = u"-"
         ascii_data.append(u)
         
-    input_file = codecs.open("/usr/local/django/dump/labels/label.csv", 'w', 'utf-8')
+    input_file = codecs.open("/var/www/django/dump/labels/label.csv", 'w', 'utf-8')
     input_csv = csv.writer(input_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL)
     
     input_csv.writerow(ascii_data)
     input_file.close()
 
 def solution_print():
-    command_line = "lpr -d QL-570 /usr/local/django/dump/labels/label.pdf"
+    command_line = "lpr -d QL-570 /var/www/django/dump/labels/label.pdf"
     args = shlex.split(command_line)
     p = subprocess.Popen(args).wait()
     return True
 
 def solution_preview(pdf_file):
-    preview_file = '/usr/local/django/preview.png'
+    preview_file = '/var/www/django/preview.png'
     
     i = Image(pdf_file)
     i.rotate(90)
     i.write(preview_file)
 
 def rm_sample_label(receiving_log):
-    template_path = '/usr/local/django/fd/lab/rm_sample.glabels'
+    template_path = '/var/www/django/fd/lab/rm_sample.glabels'
     label_data = []
     label_data.append(u"%s" % (receiving_log.r_number))
     label_data.append(u"%s" % (receiving_log.pin))
@@ -50,9 +60,9 @@ def rm_sample_label(receiving_log):
     label_data.append(u"%s" % (receiving_log.lot))
     label_data.append(u"%s" % (receiving_log.date))
     label_data_to_csv(label_data)
-    output_file = "/usr/local/django/dump/labels/label.pdf"
-    command_line = "glabels-batch -o %s -i %s %s" % (output_file,
-                                                     "/usr/local/django/dump/labels/label.csv",
+    output_file = "/var/www/django/dump/labels/label.pdf"
+    command_line = "glabels-3-batch -o %s -i %s %s" % (output_file,
+                                                     "/var/www/django/dump/labels/label.csv",
                                                      template_path)
     args = shlex.split(command_line)
     p = subprocess.Popen(args).wait()
@@ -64,7 +74,7 @@ def solution_label(request):
     # compose command line using template_path and tempfile
     # return path of output file
     
-    template_path = '/usr/local/django/fd/lab/solution_continuous.glabels'
+    template_path = '/var/www/django/fd/lab/solution_continuous.glabels'
     label_data = []
     label_data.append(request.GET['pin'])
     label_data.append(request.GET['nat_art'])
@@ -77,10 +87,10 @@ def solution_label(request):
     
     label_data_to_csv(label_data)
     
-    output_file = "/usr/local/django/dump/labels/label.pdf"
+    output_file = "/var/www/django/dump/labels/label.pdf"
     
-    command_line = "glabels-batch -o %s -i %s %s" % (output_file,
-                                                     "/usr/local/django/dump/labels/label.csv",
+    command_line = "glabels-3-batch -o %s -i %s %s" % (output_file,
+                                                     "/var/www/django/dump/labels/label.csv",
                                                      template_path)
     args = shlex.split(command_line)
     p = subprocess.Popen(args).wait()
@@ -94,7 +104,7 @@ def rm_label(number):
     # compose command line using template_path and tempfile
     # return path of output file
     rm = Ingredient.get_obj_from_softkey(number)
-    template_path = '/usr/local/django/fd/lab/rm_product_continuous.glabels'
+    template_path = '/var/www/django/fd/lab/rm_product_continuous.glabels'
     label_data = []
     label_data.append(u"%s" % rm.id)
     label_data.append(u"%s" % (rm.short_prefixed_name))
@@ -113,10 +123,10 @@ def rm_label(number):
     
     label_data_to_csv(label_data)
     
-    output_file = "/usr/local/django/dump/labels/label.pdf"
+    output_file = "/var/www/django/dump/labels/label.pdf"
     
-    command_line = "glabels-batch -o %s -i %s %s" % (output_file,
-                                                    "/usr/local/django/dump/labels/label.csv",
+    command_line = "glabels-3-batch -o %s -i %s %s" % (output_file,
+                                                    "/var/www/django/dump/labels/label.csv",
                                                      template_path)
     args = shlex.split(command_line)
     p = subprocess.Popen(args).wait()
@@ -130,7 +140,7 @@ def finished_product_label(number):
     # return path of output file
     flavor = Flavor.objects.get(number=number)
     
-    template_path = '/usr/local/django/fd/lab/finished_product_continuous.glabels'
+    template_path = '/var/www/django/fd/lab/finished_product_continuous.glabels'
     label_data = []
     label_data.append(u"%s" % flavor.pinnumber)
     label_data.append(u"%s-%s" % (flavor.prefix, flavor.number))
@@ -149,13 +159,14 @@ def finished_product_label(number):
     
     label_data_to_csv(label_data)
     
-    output_file = "/usr/local/django/dump/labels/label.pdf"
+    output_file = "/var/www/django/dump/labels/label.pdf"
     
-    command_line = "glabels-batch -o %s -i %s %s" % (output_file,
-                                                     "/usr/local/django/dump/labels/label.csv",
+    command_line = "glabels-3-batch -o %s -i %s %s" % (output_file,
+                                                     "/var/www/django/dump/labels/label.csv",
                                                      template_path)
     args = shlex.split(command_line)
-    p = subprocess.Popen(args).wait()
+    p = subprocess.Popen(args)
+    p.wait()
     solution_preview(output_file)
     return output_file
 
@@ -164,7 +175,7 @@ def experimental_label(number):
     # create tempfile with the csv values set from values array
     # compose command line using template_path and tempfile
     # return path of output file
-    template_path = '/usr/local/django/fd/lab/experimental_product_continuous.glabels'
+    template_path = '/var/www/django/fd/lab/experimental_product_continuous.glabels'
     experimental = ExperimentalLog.objects.get(experimentalnum=number)
     label_data = []
     label_data.append(u"%s-%s" % (experimental.experimentalnum, experimental.initials))
@@ -183,10 +194,10 @@ def experimental_label(number):
         label_data.append(u"%s" % flavor.location_code)
     
     label_data_to_csv(label_data)
-    output_file = "/usr/local/django/dump/labels/label.pdf"
+    output_file = "/var/www/django/dump/labels/label.pdf"
     
-    command_line = "glabels-batch -o %s -i %s %s" % (output_file,
-                                                     "/usr/local/django/dump/labels/label.csv",
+    command_line = "glabels-3-batch -o %s -i %s %s" % (output_file,
+                                                     "/var/www/django/dump/labels/label.csv",
                                                      template_path)
     args = shlex.split(command_line)
     

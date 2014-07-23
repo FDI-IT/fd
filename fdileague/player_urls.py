@@ -16,7 +16,7 @@ urlpatterns = patterns('fdileague.views',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    #(r'^$', redirect_to, {'url': '/django/qc/retains/'}),
+    #(r'^$', redirect_to, {'url': '/qc/retains/'}),
 
     (r'(?P<player_url_pref>\w+)/(?P<player_url_slug>\w+)\.htm$','prf_player_detail'),
 

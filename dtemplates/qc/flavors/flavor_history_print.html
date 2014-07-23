@@ -3,7 +3,7 @@
 
 <div class="float-container">
 	<div class="title-right">
-		<img class="padtest" src="/django/qc/barcode/{{retain_pk}}">
+		<img class="padtest" src="/qc/barcode/{{retain_pk}}">
 	</div>
 	<div class="title-left" class="jqtextfill">
 		<div class="name">{{flavor.prefix}}-{{flavor.number}}<br>{{flavor.natart}} {{flavor.name}} {{flavor.label_type}}</div>
@@ -18,7 +18,7 @@
 		</div>
 		<div>
 			<div class="label">QC Notes</div>
-			<div>{{flavor.productinfo.notes}}</div>
+			<div>{{flavor.productinfo.product_notes}}</div>
 		</div>
 		<div>
 			<div class="label">Organoleptic Properties</div>

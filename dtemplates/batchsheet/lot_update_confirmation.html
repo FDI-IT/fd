@@ -12,6 +12,7 @@
 <div id="content-main">
 	
     <form action="" method="POST">
+    	{% csrf_token %}
 	{{ formset.management_form }}
 	
 	<table width="100%" class="sorttable">
@@ -39,11 +40,11 @@
 				<td style="display:none"> {{ form.flavor_number }} </td>
 				<td style="display:none"> {{ form.amount }} </td>
 				<td>
-					<a href="/django/qc//lots/{{ lot_number }}">{{ display_info.lot_number }}</a>
+					<a href="/qc//lots/{{ lot_number }}">{{ display_info.lot_number }}</a>
 				</td>
 
 				<td>
-					<a href="/django/access/{{ lot.flavor.number }}">{{ display_info.flavor_number }}</a>
+					<a href="/access/{{ lot.flavor.number }}">{{ display_info.flavor_number }}</a>
 				</td>
 				<td>{{ display_info.old_amount }}</td>
 				<td>{{ display_info.old_status }}</td>

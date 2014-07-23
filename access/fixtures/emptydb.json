@@ -1,0 +1,145 @@
+[
+    {
+        "pk": 1, 
+        "model": "auth.group", 
+        "fields": {
+            "name": "Lab", 
+            "permissions": []
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "auth.group", 
+        "fields": {
+            "name": "FDI Employees", 
+            "permissions": []
+        }
+    }, 
+
+  {
+        "pk": 31, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "matta", 
+            "first_name": "Matt", 
+            "last_name": "Araneta", 
+            "is_active": true, 
+            "is_superuser": true, 
+            "is_staff": true, 
+            "last_login": "2014-06-20 14:27:56", 
+            "groups": [
+                1, 
+                2
+            ], 
+            "user_permissions": [], 
+            "password": "sha1$1f6ac$923413fd8c3c5aee2f8ead7f679c588dab591f39", 
+            "email": "matta@flavordynamics.com", 
+            "date_joined": "2013-08-07 11:00:48"
+        }
+   },
+   
+    {
+        "pk": 1, 
+        "model": "personnel.userprofile", 
+        "fields": {
+            "sort_user_columns": "", 
+            "user_columns": "", 
+            "user": 31, 
+            "lot_paginate_by": 25, 
+            "force_password_change": false, 
+            "initials": "MA"
+        }
+    },
+    
+   {
+        "pk": 1717, 
+        "model": "access.flavor", 
+        "fields": {
+            "categoryid": 7, 
+            "no_pg": false, 
+            "code": "", 
+            "flammability": "", 
+            "soybeans": false, 
+            "fish": false, 
+            "ccp3": false, 
+            "number": 8851, 
+            "stability": "", 
+            "keywords": "Creme", 
+            "prefix": "FL", 
+            "pinnumber": 2141, 
+            "prop65": false, 
+            "reactionextraction": false, 
+            "wheat": false, 
+            "lastprice": "1.970", 
+            "reorderlevel": 0, 
+            "milk": false, 
+            "spg": "0.000", 
+            "supplierid": 0, 
+            "sulfites_ppm": "0.0", 
+            "label_type": "Flavor", 
+            "gmo": "none detected", 
+            "batfno": "", 
+            "sunflower": false, 
+            "organoleptics": "", 
+            "yellow_5": false, 
+            "natart": "N/A", 
+            "quantityperunit": 0, 
+            "sulfites": false, 
+            "celery": false, 
+            "productmemo": "sollicitudin metus sodales Nam", 
+            "valid": true, 
+            "shipping_storage": "", 
+            "kosher_id": "BWP-LPLD", 
+            "peanuts": false, 
+            "entered": "2012-04-13 18:25:46", 
+            "shelf_life": "", 
+            "label_check": true, 
+            "diacetyl": true, 
+            "yield_field": 100, 
+            "supportive_potential": false, 
+            "risk_assessment_memo": "", 
+            "solvent": "PG 78%", 
+            "mustard": false, 
+            "ingredient_statement": "", 
+            "treenuts": false, 
+            "haccp": 108, 
+            "eggs": false, 
+            "risk_assessment_group": 1, 
+            "flashpoint": 184, 
+            "lastspdate": "2013-07-22 12:31:34", 
+            "sulfites_usage_threshold": "0.000", 
+            "unitsinstock": 0, 
+            "solubility": "", 
+            "allergen": "Yes: crustacean", 
+            "sold": true, 
+            "kosher": "Pareve", 
+            "approved": true, 
+            "color": "", 
+            "name": "sollicitudin metus", 
+            "location_code_old": "SL- 80091", 
+            "ccp5": false, 
+            "organic": false, 
+            "indivisible": false, 
+            "mollusks": false, 
+            "microtest": "No", 
+            "rawmaterialcost": "17.519", 
+            "ccp2": true, 
+            "pricing_memo": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum erat erat, faucibus quis enim id, consectetur varius leo. Ut vulputate ligula venenatis, hendrerit massa eu, laoreet dui. Integer molestie, lectus sit amet lacinia vestibulum, mauris velit posuere dui, at tristique risus turpis vitae lectus. Morbi erat diam, pellentesque at ultrices a, auctor quis erat. Sed at dapibus est, eu dignissim quam. ", 
+            "spraydried": false, 
+            "sesame": false, 
+            "crustacean": false, 
+            "unitsonorder": 0, 
+            "mixing_instructions": "", 
+            "prop_65": "False", 
+            "vaporpressure": "0.90", 
+            "ccp6": false, 
+            "lupines": false, 
+            "ccp4": true, 
+            "nutri_on_file": false, 
+            "unitprice": "11.750", 
+            "discontinued": false, 
+            "experimental": "", 
+            "ccp1": false
+        }
+	}
+]

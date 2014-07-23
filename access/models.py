@@ -15,6 +15,13 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
+
+from hazard_calculator.models import FormulaLineItem, HazardAccumulator, GHSIngredient
+from hazard_calculator.tasks import create_subhazard_dict, calculate_flavor_hazards
+#from access.controller import hazard_list, acute_toxicity_list
+#from access.controller import make_hazard_class, skin_hazard_dict, eye_hazard_dict, respiratory_hazard_dict, germ_mutagenicity_dict
+
+
 from pluggable.sets import AncestorSet
 
 one_hundred = Decimal('100')
@@ -70,10 +77,13 @@ RISK_ASSESSMENT_CHOICES = (  #NEW
 )
 
 DIACETYL_PKS = [262,]
-PG_PKS = [670]
+PG_PKS = [670,6717]
 
 def get_next_flavorid():
-    return Flavor.objects.all().order_by('-id')[0].id+1
+    try:
+        return Flavor.objects.all().order_by('-id')[0].id+1
+    except:
+        return 1
 
 def get_next_rawmaterialcode():
     try:
@@ -135,9 +145,6 @@ class FormulaTree(models.Model):
     @property
     def relative_cost(self):
         return self.get_exploded_cost()
-    
-    def batch_adjusted_weight(self, batch_weight):
-        return self.weight * batch_weight / one_thousand
 
     def __unicode__(self):
         return "%s: l%s r%s parent%s" % (self.root_flavor.__unicode__(), self.lft, self.rgt, self.parent_id)
@@ -237,8 +244,12 @@ class Formula(models.Model):
             return Decimal('0')
     
     @property
-    def relative_cost(self):
-        return self.get_exploded_cost()
+    def relative_cost(self, weight_factor=1):
+        rmc = self.ingredient.unitprice
+        try:
+            return self.amount * weight_factor * rmc / Decimal('1000')
+        except TypeError:
+            return Decimal('0')
     
     def gazinta(self):
         try:
@@ -246,6 +257,8 @@ class Formula(models.Model):
         except:
             raise FormulaException("%s contains an invalid formula row trying to point to flavor number: %s" %
                                   (self.flavor, self.ingredient.flavornum))
+
+
 
 
 class Ingredient(models.Model):
@@ -256,10 +269,14 @@ class Ingredient(models.Model):
     productid; this represents equivalent raw materials from alternate
     suppliers.
     """
-    # This is the formula identifier. there may be multiple but only one active
+
     id = models.PositiveIntegerField("PIN", 
-                                     db_column='ProductID',
-                                     default=get_next_rawmaterialcode)
+                                      db_column='ProductID',
+                                      default=get_next_rawmaterialcode)
+    cas = models.CharField( 
+            max_length=15,
+            blank=True,
+            db_column="CAS")
     rawmaterialcode = models.PositiveIntegerField(
             primary_key=True,
             db_column='RawMaterialCode',
@@ -304,7 +321,7 @@ class Ingredient(models.Model):
     discontinued = models.BooleanField(
             db_column='Discontinued',
             blank=True)
-    experimental = models.BooleanField(blank=True)
+    experimental = models.BooleanField(blank=True) #AKDJFLKJADLFDAFLADFAFKDADFDAfkj
     unitprice = models.DecimalField(
             decimal_places=3,
             max_digits=10,
@@ -348,10 +365,7 @@ class Ingredient(models.Model):
             max_length=10,
             db_column='SOLVENT',
             blank=True)
-    cas = models.CharField(
-            max_length=15,
-            db_column='CAS',
-            blank=True)
+
     fema = models.CharField(
             max_length=15,
             db_column='FEMA',
@@ -449,211 +463,9 @@ class Ingredient(models.Model):
         'yellow_5',
     ]
     
-    ACUTE_TOXICITY_CHOICES = (
-        ('No','No'),
-        ('1','1'),
-        ('2','2'),
-        ('3','3'),
-        ('4','4'),
-        ('5','5'),)
-    SKIN_CORROSION_CHOICES = (
-        ('No','No'),
-        ('1A','1A'),
-        ('1B','1B'),
-        ('1C','1C'),
-        ('2','2'),
-        ('3','3'),)
-    EYE_DAMAGE_CHOICES = (
-        ('No','No'),
-        ('1','1'),
-        ('2A','2A'),
-        ('2B','2B'),)
-    RESPIRATORY_SENSITIZATION_CHOICES = (
-        ('No','No'),
-        ('1','1'),
-        ('1A','1A'),
-        ('1B','1B'),)
-    GERM_CELL_MUTAGENICITY_CHOICES = (
-        ('No','No'),
-        ('1A','1A'),
-        ('1B','1B'),
-        ('2','2'),)
-    CARCINOGENICTY_CHOICES = (
-        ('No','No'),
-        ('1A','1A'),
-        ('1B','1B'),
-        ('2','2'),)
-    REPRODUCTIVE_CHOICES = (
-        ('No','No'),
-        ('1A','1A'),
-        ('1B','1B'),
-        ('2','2'),
-        ('3','3'))
-    TOST_SINGLE_EXPOSURE_CHOICES = (
-         ('No','No'),
-        ('1','1'),
-        ('2','2'),
-        ('3','3'),)
-    TOST_REPEAT_EXPOSURE_CHOICES = (
-        ('No','No'),
-        ('1','1'),
-        ('2','2'), )
-    ASPIRATION_CHOICES = (
-        ('No','No'),
-        ('1','1'),
-        ('2','2'),)
-    ASPHYXIANT_CHOICES = (
-        ('No','No'),
-        ('Single Category','Single Category'),)
-    acute_hazard_not_specified = models.CharField("Acute Toxicity - Type Not Specified", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    acute_hazard_oral = models.CharField("Acute Toxicity - Oral", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    acute_hazard_dermal = models.CharField("Acute Toxicity - Dermal", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    acute_hazard_gases = models.CharField("Acute Toxicity - Gases", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    acute_hazard_vapors = models.CharField("Acute Toxicity - Vapors", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    acute_hazard_dusts_mists = models.CharField("Acute Toxicity - Dust & Mists", max_length=50,blank=True,
-                               choices=ACUTE_TOXICITY_CHOICES)
-    skin_corrosion_hazard = models.CharField("Skin Corrosion/Irritation", max_length=50,blank=True,
-                               choices=SKIN_CORROSION_CHOICES)
-    eye_damage_hazard = models.CharField("Serious Eye Damage/Eye Irritation", max_length=50,blank=True,
-                               choices=EYE_DAMAGE_CHOICES)
-    respiratory_hazard = models.CharField("Respiratory or Skin Sensitization", max_length=50,blank=True,
-                               choices=RESPIRATORY_SENSITIZATION_CHOICES)
-    germ_cell_mutagenicity_hazard = models.CharField("Germ Cell Mutagenicity",max_length=50,blank=True,
-                                choices=GERM_CELL_MUTAGENICITY_CHOICES)
-    carcinogenicty_hazard = models.CharField("Carcinogenicty",max_length=50,blank=True,
-                                choices=CARCINOGENICTY_CHOICES)
-    reproductive_hazard = models.CharField("Reproductive Toxicity",max_length=50,blank=True,
-                                choices=REPRODUCTIVE_CHOICES)
-    tost_single_hazard = models.CharField("TOST Single Exposure",max_length=50,blank=True,
-                                choices=TOST_SINGLE_EXPOSURE_CHOICES)
-    tost_repeat_hazard = models.CharField("TOST Repeated Exposure",max_length=50,blank=True,
-                                choices=TOST_REPEAT_EXPOSURE_CHOICES) 
-    
-    aspiration_hazard = models.CharField("Aspiration", max_length=50,blank=True,
-                               choices=ASPIRATION_CHOICES)
-    asphyxiation_hazard = models.CharField("Simple Asphyxiants", max_length=50,blank=True,
-                               choices=ASPHYXIANT_CHOICES)
-
-    """
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_not_specified varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_oral varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_dermal varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_gases varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_vapors varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN acute_hazard_dusts_mists varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN germ_cell_mutagenicity_hazard  varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN  carcinogenicty_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN  reproductive_hazard varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN TOST_single_hazard  varchar(50) DEFAULT '' NOT NULL;
-    ALTER TABLE "Raw Materials" ADD COLUMN  TOST_repeat_hazard varchar(50) DEFAULT '' NOT NULL;
-    """
-
-    FLAMMABLE_LIQUID_CHOICES = (
-                ('No','No'),
-                ('1','1'),
-                ('2','2'),
-                ('3','3'),
-                ('4','4'),)
-    FLAMMABLE_SOLID_CHOICES = (
-                ('No','No'),
-                ('1','1'),
-                ('2','2'),)
-    SELF_REACTIVE_CHOICES = (
-                ('No','No'),
-                ('Type A','Type A'),
-                ('Type B','Type B'),
-                ('Type C','Type C'),
-                ('Type D','Type D'),
-                ('Type E','Type E'),
-                ('Type F','Type F'),
-                ('Type G','Type G'),)
-    EMIT_FLAMMABLE_GAS_CHOICES = (
-                ('No','No'),
-                ('1','1'),
-                ('2','2'),
-                ('3','3'),)
-    OXIDIZING_LIQUID_CHOICES = (
-                ('No','No'),
-                ('1','1'),
-                ('2','2'),
-                ('3','3'),)
-    OXIDIZING_SOLID_CHOICES = (
-                ('No','No'),
-                ('1','1'),
-                ('2','2'),
-                ('3','3'),)
-    ORGANIC_PEROXIDE_CHOICES = (
-                ('No','No'),
-                ('Type A','Type A'),
-                ('Type B','Type B'),
-                ('Type C','Type C'),
-                ('Type D','Type D'),
-                ('Type E','Type E'),
-                ('Type F','Type F'),
-                ('Type G','Type G'),)
-    CORROSIVE_TO_METAL_CHOICES = (
-                ('No','No'),
-                ('1','1'),)
-    flammable_liquid_hazard = models.CharField("Flammable Liquids", max_length=50,blank=True,
-                               choices=FLAMMABLE_LIQUID_CHOICES)
-    flamamble_solid_hazard = models.CharField("Flammable Solids", max_length=50,blank=True,
-                               choices=FLAMMABLE_SOLID_CHOICES)
-    self_reactive_hazard = models.CharField("Self-Reactive Chemicals", max_length=50,blank=True,
-                               choices=SELF_REACTIVE_CHOICES)
-    emit_flammable_hazard = models.CharField("Chemicals, which in contact with water, emit flammable gas", max_length=50,blank=True,
-                               choices=EMIT_FLAMMABLE_GAS_CHOICES)
-    oxidizing_liquid_hazard = models.CharField("Oxidizing Liquids", max_length=50,blank=True,
-                               choices=OXIDIZING_LIQUID_CHOICES)
-    oxidizing_solid_hazard = models.CharField("Oxidizing Solids", max_length=50,blank=True,
-                               choices=OXIDIZING_SOLID_CHOICES)
-    organic_peroxide_hazard = models.CharField("Organic Peroxides", max_length=50,blank=True,
-                               choices=ORGANIC_PEROXIDE_CHOICES)
-    metal_corrosifve_hazard = models.CharField("Corrosive to Metals", max_length=50,blank=True,
-                               choices=CORROSIVE_TO_METAL_CHOICES)
-    
     #ing
-    location_code_n = generic.GenericRelation('LocationCode')
-    
-#    GERM_CELL_MUTAGENICITY_CHOICES = (
-#        ('No','No'),
-#        ('1A','1A'),
-#        ('1B','1B'),
-#        ('2','2'),)
-#    CARCINOGENICITY_CHOICES = (
-#        ('No','No'),
-#        ('1A','1A'),
-#        ('1B','1B'),
-#        ('2','2'),)
-#    REPRODUCTIVE_CHOICES = (
-#        ('No','No'),
-#        ('1A','1A'),
-#        ('1B','1B'),
-#        ('2','2'),
-#        ('Lactation','Lactation'),)
-#    STOT_SINGLE_CHOICES = (
-#        ('No','No'),
-#        ('1','1'),
-#        ('2','2'),
-#        ('3','3'),)
-#    STOT_REPEAT_CHOICES = (
-#        ('No','No'),
-#        ('1','1'),
-#        ('2','2'),)   
-#    germ_cell_hazard = models.CharField("Germ Cell Mutagenicity", max_length=50,blank=True,
-#                               choices=GERM_CELL_MUTAGENICITY_CHOICES)
-#    carcinogenicity_hazard = models.CharField("Carcinogenicity", max_length=50,blank=True,
-#                               choices=CARCINOGENICITY_CHOICES)
-#    reproductive_hazard = models.CharField("Reproductive Toxicity", max_length=50,blank=True,
-#                               choices=REPRODUCTIVE_CHOICES)
-#    stot_single_hazard = models.CharField("STOT Single Exposure", max_length=50,blank=True,
-#                               choices=STOT_SINGLE_CHOICES)
-#    stot_repeat_hazard = models.CharField("STOT Repeated Exposure", max_length=50,blank=True,
-#                               choices=STOT_REPEAT_CHOICES)
+    location_code_n = generic.GenericRelation('LocationCode')    
+
     
     @staticmethod
     def anonymize():
@@ -689,7 +501,7 @@ class Ingredient(models.Model):
     
     @property
     def url(self):
-        return "/django/access/ingredient/pin_review/%s/" % self.id
+        return "/access/ingredient/pin_review/%s/" % self.id
     
     @property
     def info_slice(self):
@@ -701,9 +513,9 @@ class Ingredient(models.Model):
     
     def get_absolute_url(self):
         if self.discontinued == False:
-            return "/django/access/ingredient/pin_review/%s/" % self.id
+            return "/access/ingredient/pin_review/%s/" % self.id
         else:
-            return "/django/access/ingredient/%s/" % self.rawmaterialcode
+            return "/access/ingredient/%s/" % self.rawmaterialcode
 
     @staticmethod
     def build_kwargs(qdict, default, get_filter_kwargs):
@@ -804,13 +616,14 @@ class Ingredient(models.Model):
         else:
             return self.product_name
         
-    def short_prefixed_name(self, trim_length=18):
-        if len(self.prefixed_name) > trim_length:
+    @property
+    def short_prefixed_name(self):
+        if len(self.prefixed_name) > 18:
             if self.prefix != "":
                 s = u"%s %s" % (self.prefix, self.product_name)
-                return u"%s..." % s[:trim_length]
+                return u"%s..." % s[:18]
             else:
-                return "%s..." % self.product_name[:trim_length]
+                return "%s..." % self.product_name[:18]
         else:
             return self.prefixed_name
         
@@ -830,10 +643,12 @@ class Ingredient(models.Model):
     def long_name(self):
         if self.sub_flavor:
             my_name = "%s %s %s" % (self.art_nati, self.sub_flavor.table_name, self.sub_flavor.label_type)
-        elif self.discontinued:
-            my_name = "DISCONTINUED: %s %s %s" % (self.art_nati, self.product_name, self.part_name2)
         else:
-            my_name = "%s %s %s" % (self.art_nati, self.product_name, self.part_name2)
+            my_name = " ".join((self.art_nati, self.prefix, self.product_name, self.part_name2))
+
+        if self.discontinued:
+            my_name = "DISCONTINUED: %s" % my_name
+
         return my_name.strip()
     
     @property
@@ -919,15 +734,55 @@ class Ingredient(models.Model):
         related_links = []
         if self.sub_flavor:
             related_links.append(
-                ('/django/access/%s/' % self.id, 'Flavor Formula')
+                ('/access/%s/' % self.id, 'Flavor Formula')
             )
         
         if self.is_solution_related():
             related_links.append(
-                ('/django/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions')
+                ('/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions')
             )
-        related_links.append(('/django/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'))
+        related_links.append(('/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'))
         return related_links
+    
+    def get_product_tabs(self):
+        product_tabs = [
+                ('moo','Details by Code'),
+                ('moo','Retain History'),
+                ('/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions'),
+                ('/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'),
+            ]
+
+        return product_tabs
+    
+#     product_tabs = [
+#                        ('#flat_review_table','Formula'),
+#                        ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
+#                        ('/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
+#                        ('/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
+#                        ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
+#                        ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
+#                        ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
+#                        ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
+#                        ]
+#         if self.retain_superset().count()>0:
+#             product_tabs.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
+#             product_tabs.append(('/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
+# 
+#         try:
+#             self.experimentallog
+#             product_tabs.append(('/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
+#         except:
+#             pass
+#         try:
+#             rmr = self.raw_material_record
+#             if rmr:
+#                 product_tabs.append(('/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
+#                 if Formula.objects.filter(ingredient=rmr).count() > 0:
+#                     product_tabs.append(('/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
+#         except:
+#             pass
+# 
+#         return product_tabs
 
     def resembles(self, ingredient):
         if self.id != ingredient.id:
@@ -1032,10 +887,10 @@ class Ingredient(models.Model):
             return self.id
     
     def get_admin_url(self):
-        return "/django/admin/access/ingredient/%s" % self.rawmaterialcode
+        return "/admin/access/ingredient/%s" % self.rawmaterialcode
     
     def get_review_url(self):
-        return "/django/access/ingredient/pin_review/%s/" % self.id
+        return "/access/ingredient/pin_review/%s/" % self.id
 
     def get_branch(self):
         # this is where the Explode? field would be checke
@@ -1137,18 +992,25 @@ class FormulaInfo(models.Model):
     lupines = models.BooleanField(blank=True)
     yellow_5 = models.BooleanField(blank=True)
     
-    organic = models.BooleanField(default=False)
-    diacetyl = models.BooleanField("No Diacetyl", default=True)
     indivisible = models.BooleanField(blank=True)
     
+    diacetyl = models.BooleanField("No Diacetyl", default=True)
     no_pg = models.BooleanField("No PG", 
         blank=True,
         default=False)
+    
+    liquid = models.BooleanField(default=False,blank=True)
+    dry = models.BooleanField(default=False,blank=True)
     spraydried = models.BooleanField("Spray Dried",
         blank=True,
         default=False)
+    flavorcoat = models.BooleanField(u"Flavorcoat®",blank=True,default=False)
+    
+    concentrate = models.BooleanField(default=False,blank=True)
+    oilsoluble = models.BooleanField("Oil soluble",default=False,blank=True)
     
     flashpoint = models.PositiveIntegerField("Flash Point", default=0)
+    spg = models.DecimalField(decimal_places=3,max_digits=4,default=0)
     solubility = models.CharField(max_length=25,blank=True, default="")
     stability = models.CharField(max_length=25, blank=True, default="")
     allergen = models.CharField("Allergens", max_length=50, blank=True, default="")
@@ -1158,15 +1020,16 @@ class FormulaInfo(models.Model):
     prop_65 = models.CharField("Prop 65", max_length=50,blank=True, default="") # Field renamed to remove spaces.lc
     gmo = models.CharField("GMO", max_length=50, blank=True, default="")
     prop65 = models.BooleanField(default=False)
+
+    organic = models.BooleanField(default=False)
+    wonf = models.BooleanField("Natural WONF", default=False,blank=True)
+    natural_type = models.BooleanField("Natural Type", blank=True, default=False)
+    
     
     class Meta:
         abstract = True
 
 class Flavor(FormulaInfo):
-    """
-    ALTER TABLE access_integratedproduct
-    ADD COLUMN keywords text DEFAULT '' NOT NULL; 
-    """
     
     #retains = generic.GenericRelation(Retain)
     id = models.PositiveIntegerField(
@@ -1204,7 +1067,6 @@ class Flavor(FormulaInfo):
     color = models.CharField(max_length=50,blank=True)
     organoleptics = models.CharField(max_length=50,blank=True)
     pricing_memo = models.TextField(blank=True)
-    spg = models.DecimalField(decimal_places=3,max_digits=4,default=0)
     
     entered = models.DateTimeField(auto_now_add=True)
     supportive_potential = models.BooleanField(blank=True)
@@ -1262,6 +1124,7 @@ class Flavor(FormulaInfo):
     batfno = models.CharField("BATFNO", max_length=50,blank=True, default="")
     microtest = models.CharField("Micro Test", max_length=4,default="", blank=True)
 
+
     
     quantityperunit = models.PositiveIntegerField(
             blank=True,
@@ -1293,12 +1156,13 @@ class Flavor(FormulaInfo):
     shipping_storage = models.TextField(blank=True)
     
     
-    
     def save(self, *args, **kwargs):
         try:
             self.prefix = self.prefix.upper()
         except:
             pass
+        
+        super(Flavor, self).save(*args, **kwargs)
         
         if not self.flavorspecification_set.filter(name='Specific Gravity').exists():
             flavorspec = FlavorSpecification(
@@ -1317,8 +1181,6 @@ class Flavor(FormulaInfo):
                                                  )
                 flavorspec.save()
 
-        super(Flavor, self).save(*args, **kwargs)
-        
 
         
   
@@ -1356,14 +1218,14 @@ class Flavor(FormulaInfo):
 #    
     @property
     def url(self):
-        return "/django/access/%s/" % self.number
+        return "/access/%s/" % self.number
     
     @property
-    def contains_discontinued_ingredients(self):
-        for lw in self.leaf_weights.all():
-            if lw.ingredient.discontinued == True:
-                return True
-        return False
+    def reconciled(self):
+        if ReconciledFlavor.objects.filter(flavor=self,reconciled='True').exists():
+            return True
+        else:
+            return False
     
     @property
     def status(self):
@@ -1375,8 +1237,8 @@ class Flavor(FormulaInfo):
         if len(dci) != 0:
             message.append("Contains the following discontinued ingredients: %s" % ", ".join(dci))
             
-        if not self.reconciled:
-            message.append("Does not have a proper reconciled specification sheet.")
+#         if not self.reconciled:
+#             message.append("Does not have a proper reconciled specification sheet.")
             
         if len(message) != 0:
             return "\n\n".join(message)
@@ -1421,23 +1283,23 @@ class Flavor(FormulaInfo):
     
     @property
     def table_name(self):
-        return "%s %s" % (self.name, self.label_type)
+        return " ".join((self.name, self.label_type))
     
     @property
     def natart_name_with_type(self):
         return "%s %s %s" % (self.natart, self.name, self.label_type)
     
     def get_admin_url(self):
-        return "/django/admin/access/flavor/%s" % self.id
+        return "/admin/access/flavor/%s" % self.id
         
     def get_absolute_url(self):
-        return "/django/access/%s/" % self.number
+        return "/access/%s/" % self.number
     
     def get_specs_url(self):
-        return "/django/access/%s/spec_list" % self.number
+        return "/access/%s/spec_list" % self.number
     
     def get_reconcile_specs_url(self):
-        return "/django/access/%s/reconcile_specs" % self.number
+        return "/access/%s/reconcile_specs" % self.number
     
     @staticmethod
     def get_absolute_url_from_softkey(softkey):
@@ -1523,36 +1385,72 @@ class Flavor(FormulaInfo):
                 string_kwargs[keyword] = arg_list
         return string_kwargs
     
+    
     def get_related_links(self):
+        """This is going to be replaced by get_product_tabs and might
+        be able to be removed. Leaving it in for now, just in case.
+        """
         related_links = [
                        ('#flat_review_table','Formula'),
-                       ('/django/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
-                       ('/django/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
-                       ('/django/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
-                       ('/django/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
-                       ('/django/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
-                       ('/django/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
-                       ('/django/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
+                       ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
+                       ('/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
+                       ('/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
+                       ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
+                       ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
+                       ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
+                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
                        ]
         if self.retain_superset().count()>0:
-            related_links.append(('/django/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
-            related_links.append(('/django/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
+            related_links.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
+            related_links.append(('/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
 
         try:
             self.experimentallog
-            related_links.append(('/django/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
+            related_links.append(('/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
         except:
             pass
         try:
             rmr = self.raw_material_record
             if rmr:
-                related_links.append(('/django/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
+                related_links.append(('/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
                 if Formula.objects.filter(ingredient=rmr).count() > 0:
-                    related_links.append(('/django/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
+                    related_links.append(('/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
         except:
             pass
 
         return related_links
+    
+    def get_product_tabs(self):
+        product_tabs = [
+                       ('#flat_review_table','Formula'),
+                       ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
+                       ('/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
+                       ('/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
+                       ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
+                       ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
+                       ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
+                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
+                       ]
+        if self.retain_superset().count()>0:
+            product_tabs.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
+            product_tabs.append(('/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
+
+        try:
+            self.experimentallog
+            product_tabs.append(('/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
+        except:
+            pass
+        try:
+            rmr = self.raw_material_record
+            if rmr:
+                product_tabs.append(('/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
+                if Formula.objects.filter(ingredient=rmr).count() > 0:
+                    product_tabs.append(('/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
+        except:
+            pass
+
+        return product_tabs
+
  
     @property
     def linked_memo(self):
@@ -1561,14 +1459,14 @@ class Flavor(FormulaInfo):
         for i in range(len(tokens)):
             try:
                 Flavor.objects.get(number=tokens[i])
-                tokens[i] = '<a href="/django/access/%s/">%s</a>' % (tokens[i], tokens[i])
+                tokens[i] = '<a href="/access/%s/">%s</a>' % (tokens[i], tokens[i])
             except:
                 pass
         return ''.join(tokens)
     
     @property
     def naive_linked_memo(self):
-        return re.sub('(\d{3,})', r'<a href="/django/access/\1/">\1</a>', self.productmemo)
+        return re.sub('(\d{3,})', r'<a href="/access/\1/">\1</a>', self.productmemo)
     
     @property
     def allergen_list(self):
@@ -2104,9 +2002,111 @@ class Flavor(FormulaInfo):
             return self.gazinta.all()[0]
         except:
             return None
-    
-    
 
+    def get_hazard_amount(self):
+        
+        total = 0
+                
+        for val in self.get_hazards().values():
+            if val != 'No':
+                total = total + 1
+                
+        return total
+
+    def get_hazards(self):
+        """
+        Use the imported ghs project to calculate the hazards for a flavor.
+        
+        1. Get the consolidated leafs.
+        2. Convert the list of consolidated leafs to a list of FormulaLineItem objects.
+            -Does the leaf ingredient have a cas number?
+            -Is that cas number in the imported hazard data?
+        3. create_subhazard_dict(formula_list)
+        4. accumulator = HazardAccumulator(subhazard_dict)
+        5. accumulator.get_hazard_dict()
+        6. Save the hazards into the flavor model. SAVE THEM IN SEPARATE FUNCTION?
+        
+        """
+        
+        formula_list = []
+        no_cas_total = 0
+        
+        '''
+        Need to account for two possibilities:
+        
+        1. The ingredient does not have a cas number in our database. 
+            -Create a placeholder GHSIngredient with cas number '00-00-00'
+                and no hazards.  This placeholder ingredient has no hazards.
+            -When an ingredient does not have a cas number, create a FormulaLineItem
+                with cas = '00-00-00' and record its weight.
+            -For each ingredient without a cas number, add its weight to the 'no_cas_total'
+                variable.
+            -When the for loop is complete, create a FormulaLineItem with cas = '00-00-00'
+                and weight = no_cas_total (we are consolidating all the ingredients without cas #s)
+            
+        
+        2. The ingredient cas number is not in the imported data.
+            -Do the same as above (Should I handle this case differently?)
+        '''
+        
+        
+#         if self.consolidated_leafs == {}:
+#             raise NoLeafWeightError(self.number)
+        
+        lws = LeafWeight.objects.filter(root_flavor=self)
+        if not lws.exists():
+                                           
+            if self.formula_set.exists():
+                from access.scratch import recalculate_guts
+                recalculate_guts(self) 
+               
+            else:
+                raise NoFormulaError(self.number)
+        
+#         for ingredient, weight in self.consolidated_leafs.iteritems():
+
+        for lw in lws:
+            ingredient = lw.ingredient
+            weight = lw.weight
+            
+            #case 1
+            if ingredient.cas == '':
+                no_cas_total = no_cas_total + weight
+            
+            else:
+                #case 2: the cas number is not in the imported ingredients
+                if not GHSIngredient.objects.filter(cas=ingredient.cas).exists():
+                    no_cas_total = no_cas_total + weight
+                
+                else:
+                    fli = FormulaLineItem(cas=ingredient.cas, weight=weight)
+                    formula_list.append(fli)
+                    
+            #add the placeholder if any no cas ingredients exist
+            if no_cas_total != 0:
+                fli = FormulaLineItem(cas='00-00-00', weight=no_cas_total)
+                formula_list.append(fli)
+                
+       
+
+        hazard_dict = calculate_flavor_hazards(formula_list)
+        return hazard_dict
+
+
+            
+class NoFormulaError(Exception):
+    #this is used above and is raised when a flavor has no consolidated leaves
+    def __init__(self, num=None):
+        self.num = num
+            
+    def __str__(self):
+        if self.num:
+            return "Flavor %s has no formula; cannot calculate hazards" % self.num
+
+         
+        
+
+ 
 class FlavorIterOrder(models.Model):
     flavor = models.ForeignKey(Flavor)
     
@@ -2152,7 +2152,7 @@ class ExperimentalLog(models.Model):
      
     liquid = models.BooleanField(db_column='Liquid')
     dry = models.BooleanField(db_column='Dry')
-    spray_dried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
+    spraydried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
     flavorcoat = models.BooleanField(u"Flavorcoat®", db_column="Flavor Coat", default=False)
     concentrate = models.BooleanField(db_column='Concentrate', default=False)
     oilsoluble = models.BooleanField("Oil soluble", db_column='OilSoluble')
@@ -2162,7 +2162,7 @@ class ExperimentalLog(models.Model):
     artificial = models.BooleanField(blank=True,default=False)
     nfi = models.BooleanField("NFI", blank=True,default=False)
     organic = models.BooleanField("Organic Compliant", db_column='Organic',blank=True,default=False)
-    wonf = models.BooleanField("Natural WONF",db_column='WONF', default=False)
+    wonf = models.BooleanField("Natural WONF",db_column='WONF', default=False, blank=True)
     natural_type = models.BooleanField("Natural Type", blank=True, default=False)
     
     duplication = models.BooleanField(db_column='Duplication',blank=True)
@@ -2200,23 +2200,23 @@ class ExperimentalLog(models.Model):
     fruit = models.BooleanField(db_column='Fruit', default=False)
     sweet = models.BooleanField(db_column='Sweet', default=False)
     nutraceutical = models.BooleanField(db_column='Nutraceutical', default=False)
-    personal_care = models.BooleanField(db_column='Personal Care', default=False) # Field renamed to remove spaces.lc
-    meat_and_savory = models.BooleanField(db_column='Meat and Savory', default=False) # Field renamed to remove spaces.lc
+    personal_care = models.BooleanField(db_column='Personal Care', default=False)  # Field renamed to remove spaces.lc
+    meat_and_savory = models.BooleanField(db_column='Meat and Savory', default=False)  # Field renamed to remove spaces.lc
     beverage = models.BooleanField(db_column='Beverage', default=False)
     chai = models.BooleanField(db_column='Chai', default=False)
-    baked_goods = models.BooleanField(db_column='Baked Goods', default=False) # Field renamed to remove spaces.lc
+    baked_goods = models.BooleanField(db_column='Baked Goods', default=False)  # Field renamed to remove spaces.lc
     dairy = models.BooleanField(db_column='Dairy', default=False)
     pet = models.BooleanField(db_column='Pet', default=False)
     snacks = models.BooleanField(db_column='Snacks', default=False)
     tobacco = models.BooleanField(db_column='Tobacco', default=False)
-    non_food = models.BooleanField(db_column='Non-Food', default=False) # Field renamed to remove dashes.lc
+    non_food = models.BooleanField(db_column='Non-Food', default=False)  # Field renamed to remove dashes.lc
     
-    retain_number = models.PositiveIntegerField(db_column='RetainNumber',null=True,blank=True)
-    retain_present = models.BooleanField(db_column='RetainPresent',default=False)
+    retain_number = models.PositiveIntegerField(db_column='RetainNumber', null=True, blank=True)
+    retain_present = models.BooleanField(db_column='RetainPresent', default=False)
     
-    flavor = models.ForeignKey('Flavor',related_name='experimental_log',blank=True,null=True)
-    location_code_old = models.CharField(blank=True, default="",max_length=20)
-    
+    flavor = models.ForeignKey('Flavor', related_name='experimental_log', blank=True, null=True)
+    location_code_old = models.CharField(blank=True, default="", max_length=20)
+    exclude_from_reporting = models.BooleanField(default=False)
     def __unicode__(self):
         return "%s-%s %s %s %s %s" % (self.experimentalnum, self.initials,
                                 self.natart, self.product_name, self.label_type, self.datesent_short)
@@ -2227,7 +2227,7 @@ class ExperimentalLog(models.Model):
         'organic',
         'liquid',
         'dry',
-        'spray_dried',
+        'spraydried',
         'concentrate',
         'oilsoluble',
         'flavorcoat', # ®
@@ -2244,16 +2244,16 @@ class ExperimentalLog(models.Model):
         ),
         'liquid':(
             'dry',
-            'spray_dried',
+            'spraydried',
         ),
-        'spray_dried':(
+        'spraydried':(
             'oilsoluble',
             'dry',
         ),
         'flavorcoat':(
             'liquid',
             'dry',
-            'spray_dried',
+            'spraydried',
             'concentrate',
             'oilsoluble',
         ),
@@ -2281,7 +2281,7 @@ class ExperimentalLog(models.Model):
     }
     mandatory_categories = (
         ('na','natural','artificial','nfi'),
-        ('liquid','dry','spray_dried','flavorcoat'),
+        ('liquid','dry','spraydried','flavorcoat'),
     )
     
     def clean_incompatible_categories(self):
@@ -2334,7 +2334,7 @@ class ExperimentalLog(models.Model):
                     label_tokens.append(self._meta.get_field_by_name(token)[0].verbose_name)
 
         label_tokens = [];
-        tokens = ('dry','spray_dried','oilsoluble','natural_type')
+        tokens = ('dry','spraydried','oilsoluble','natural_type')
         
         check_tail_indices(tokens, label_tokens)        
         
@@ -2387,7 +2387,7 @@ class ExperimentalLog(models.Model):
         if self.flavor.approved==True:
             return None
         elif self.flavor.valid == True:
-            return "/django/access/experimental/%s/approve/" % self.experimentalnum
+            return "/access/experimental/%s/approve/" % self.experimentalnum
         else:
             return None
     
@@ -2418,7 +2418,7 @@ class ExperimentalLog(models.Model):
         super(ExperimentalLog, self).save(*args, **kwargs)
     
     def get_absolute_url(self):
-        return '/django/access/experimental/%s/' % self.experimentalnum
+        return '/access/experimental/%s/' % self.experimentalnum
     
 
     @staticmethod
@@ -2445,8 +2445,8 @@ class ExperimentalLog(models.Model):
                         string_kwargs['liquid__in'] = [True]
                     elif my_arg == 'dry':
                         string_kwargs['dry__in'] = [True]
-                    elif my_arg == 'spray_dried':
-                        string_kwargs['spray_dried__in'] = [True]
+                    elif my_arg == 'spraydried':
+                        string_kwargs['spraydried__in'] = [True]
                     elif my_arg == 'oilsoluble':
                         string_kwargs['oilsoluble__in'] = [True]
                     elif my_arg == 'concentrate':
@@ -2471,14 +2471,14 @@ class ExperimentalLog(models.Model):
         related_links = []
         if self.product_number != None and self.product_number != 0:
             related_links.append(
-                ('/django/access/%s/' % self.product_number, 'Flavor Formula')
+                ('/access/%s/' % self.product_number, 'Flavor Formula')
             )
-        related_links.append(('/django/access/experimental/%s/' % self.experimentalnum,'Experimental'))
+        related_links.append(('/access/experimental/%s/' % self.experimentalnum,'Experimental'))
             
         return related_links
 
     def get_admin_url(self):
-        return "/django/admin/access/experimentallog/%s" % self.id
+        return "/admin/access/experimentallog/%s" % self.id
 
     import_order = 3
     
@@ -2590,6 +2590,9 @@ class Supplier(models.Model):
         
     def __unicode__(self):
         return self.suppliername   
+    
+    def get_absolute_url(self):
+        return "/access/purchase/supplier/%s/" % self.pk
  
     def save(self, *args, **kwargs):
         if self.suppliercode != "":
@@ -3039,11 +3042,11 @@ class TSR(models.Model):
         return "%s - %s - %s" % (self.number, self.customer, str(self.date_in))    
     
     def get_related_links(self):
-        related_links = [('/django/access/tsr/%s/tsr_entry/' % self.number, 'Edit Items')]
+        related_links = [('/access/tsr/%s/tsr_entry/' % self.number, 'Edit Items')]
         return related_links
     
     def get_absolute_url(self):
-        return "/django/access/tsr/%s/" % self.number
+        return "/access/tsr/%s/" % self.number
 
     @staticmethod
     def get_object_from_softkey(softkey):
@@ -3127,11 +3130,11 @@ class PurchaseOrder(models.Model):
         ordering=['-date_ordered']
         
     def get_related_links(self):
-        related_links = [('/django/access/purchase/%s/po_entry/' % self.number, 'Edit Items')]
+        related_links = [('/access/purchase/%s/po_entry/' % self.number, 'Edit Items')]
         return related_links
 
     def get_absolute_url(self):
-        return "/django/access/purchase/%s/" % self.number
+        return "/access/purchase/%s/" % self.number
 
     @staticmethod
     def get_absolute_url_from_softkey(softkey):
@@ -3292,7 +3295,7 @@ class LegacyPurchase(models.Model):
 
 
 def get_lorem_queue():
-    loremfile = open('/usr/local/django/fd/loremipsum.txt', 'r')
+    loremfile = open('/var/www/django/fd/loremipsum.txt', 'r')
     lorems = loremfile.read().split(',')
     q = Queue.Queue()
     for word in lorems[0:len(lorems)-1]:
@@ -3455,6 +3458,10 @@ class MagentoFlavor(models.Model):
     
         
         
+        
+        
+        
+        
 
 class FlavorSpecification(models.Model):
     flavor = models.ForeignKey('Flavor')
@@ -3472,13 +3479,89 @@ class FlavorSpecification(models.Model):
 class ReconciledFlavor(models.Model):
     flavor = models.ForeignKey('Flavor')
     reconciled = models.BooleanField(default=False)
-    scraped_data = models.CharField(max_length=1000)
+    scraped_data = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
     reconciled_by = models.ForeignKey(User)
     
     def __unicode__(self):
         return 'Flavor: %s, Reconciled By: %s' % (self.flavor, self.reconciled_by.username)
-    
-    
 
+
+
+
+# def accumulate_hazards(flavor):
+#     
+#     hazards_to_accumulate = ['skin_corrosion_hazard', 'eye_damage_hazard',]
+#     
+#     #The KEYS in this dictionary are in the format 'hazard_category' (eg. 'skin_corrosion_hazard_1A')
+#     #The VALUES are the accumulation of ingredient weights that correspond to each hazard
+#     hazard_dict = {}
+#     
+#     #include the total weight of the flavor in the dict
+#     hazard_dict['total_weight'] = 0
+#     
+#     #initialize all the values to zero
+#     for hazard in hazards_to_accumulate:
+#         for category in Ingredient._meta.get_field(hazard).choices:
+#             if category[0] != 'No':     #category[0] and category[1] are always the same
+#                 hazard_dict[hazard + '_' + category[0]] = 0
+#                 
+#     
+#     #for each base ingredient in the flavor, find any hazards it has and add its weight to each of those
+#     for leaf in flavor.consolidated_leafs.iteritems():
+#         ingredient = leaf[0]
+#         weight = leaf[1]
+#         
+#         hazard_dict['total_weight'] += weight
+#         
+#         for hazard in hazards_to_accumulate:
+#             ingredient_hazard_category = getattr(ingredient, hazard)
+#             if ingredient_hazard_category != '':
+#                 hazard_dict[hazard + '_' + ingredient_hazard_category] += weight
+#                 
+#     return hazard_dict
+                
+        
+
+def replace_ingredient_foreignkeys(new_ingredient):
     
+    for lw in LeafWeight.objects.filter(ingredient__id=new_ingredient.id):
+        lw.ingredient = new_ingredient
+        lw.save()
+        
+    for formula in Formula.objects.filter(ingredient__id=new_ingredient.id):
+        formula.ingredient=new_ingredient
+        formula.save()
+        
+    for ft in FormulaTree.objects.filter(node_ingredient__id=new_ingredient.id):
+        ft.node_ingredient=new_ingredient
+        ft.save()  
+
+
+def update_prices_and_get_updated_flavors(old_ingredient, new_ingredient): 
+    
+    
+    #find all flavors that contain the raw material
+    updated_flavors = []
+    for lw in LeafWeight.objects.filter(ingredient=new_ingredient):
+        
+        
+        root_flavor = lw.root_flavor
+        old_total = root_flavor.rawmaterialcost
+        
+        
+        #new_total = old_total - old_unit_price * weight/1000 + new_unit_price * weight/1000
+        new_total = old_total + lw.weight/1000 * (new_ingredient.unitprice - old_ingredient.unitprice)
+        root_flavor.rawmaterialcost = new_total  #overwrite and save the new total rawmaterialcost
+        root_flavor.save()
+        
+        price_change = new_total - old_total
+        
+               
+        updated_flavors.append((root_flavor, lw.weight, old_total, new_total, price_change))
+
+    return updated_flavors
+
+        
+
+

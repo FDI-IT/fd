@@ -16,7 +16,8 @@
 </div>
 
 <div id="content-main">
-<form action="/django/salesorders/mark_closed/clear/" method="post">
+<form action="/salesorders/mark_closed/clear/" method="post">
+{% csrf_token %}
 	<input type="submit" value="Mark" />
 </form>
 </div>

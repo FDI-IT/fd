@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form id="ingredient_replacer_preview" action="/django/access/ingredient_replacer_preview/{{old_ingredient.id}}/{{new_ingredient.id}}/" method="post">
+<form id="ingredient_replacer_preview" action="/access/ingredient_replacer_preview/{{old_ingredient.id}}/{{new_ingredient.id}}/" method="post">
+	{% csrf_token %}
 {% if page_title == "Replacement in process" %}{% else %}
 <input type="submit" value="Replace Ingredient">
 {% endif %}

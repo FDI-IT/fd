@@ -58,4 +58,4 @@ def draw_graph(flavor):
  
     pgz = nx.to_agraph(g)
     pgz.layout(prog='dot')
-    pgz.draw("/usr/local/django/fd/%s.svg" % (flavor.number)) 
+    pgz.draw("/var/www/django/fd/%s.svg" % (flavor.number)) 

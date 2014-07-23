@@ -27,9 +27,9 @@
 			<tbody>
 			{% for solution in related_solutions %}
 				<tr>
-					<td><a href="/django/access/ingredient/pin_review/{{ solution.ingredient.id }}/">{{ solution.ingredient.id }}</a></td>
-					<td><a href="/django/access/ingredient/pin_review/{{ solution.my_base.id }}/">{{ solution.my_base }}</a></td>
-					<td><a href="/django/access/ingredient/pin_review/{{ solution.my_solvent.id }}/">{{ solution.my_solvent }}</a></td>
+					<td><a href="/access/ingredient/pin_review/{{ solution.ingredient.id }}/">{{ solution.ingredient.id }}</a></td>
+					<td><a href="/access/ingredient/pin_review/{{ solution.my_base.id }}/">{{ solution.my_base }}</a></td>
+					<td><a href="/access/ingredient/pin_review/{{ solution.my_solvent.id }}/">{{ solution.my_solvent }}</a></td>
 					<td>{{ solution.percentage }}</td>
 					<td>{{ solution.status }}</td>
 					<td>{{ solution.ingredient.unitprice }}</td>

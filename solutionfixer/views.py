@@ -182,7 +182,7 @@ def solution_review(request):
             solution.status = SolutionStatus.objects.get(id=status_form.cleaned_data['status'])
             solution.save()
             next_page = page+1
-            return redirect('/django/solutionfixer/?page=%s' % next_page)
+            return redirect('/solutionfixer/?page=%s' % next_page)
 
     try:
         solvent_form = forms.SolventForm(initial={'solvent': str(solution.my_solvent.id)})
@@ -244,7 +244,7 @@ def flagged_review(request):
             solution.status = SolutionStatus.objects.get(id=status_form.cleaned_data['status'])
             solution.save()
             next_page = page+1
-            return redirect('/django/solutionfixer/?page=%s' % next_page)
+            return redirect('/solutionfixer/?page=%s' % next_page)
 
     try:
         solvent_form = forms.SolventForm(initial={'solvent': str(solution.my_solvent.id)})

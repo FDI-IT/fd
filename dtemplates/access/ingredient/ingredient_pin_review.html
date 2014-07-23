@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% load blades %}
-{% load related_links %}
+{% load product_tabs %}
 {% load rm_history %}
-{% block content %}
 {% block htmlhead %}
     {% include "htmlhead.html" %}
     <script type="text/javascript" src="/djangomedia/js/update_raw_materials.js"></script>
 {% endblock %}
+{% block content %}
+
 
 <div id="content-right">
 	{% blades highlighted_ingredient %}
@@ -16,12 +17,12 @@
 	<div id="title-left">
 		<span id="name">{{highlighted_ingredient.id}} - {{highlighted_ingredient.art_nati}} {{ highlighted_ingredient.prefix }} {{ highlighted_ingredient.product_name }} {{ highlighted_ingredient.part_name2 }}</span>
 	</div>
-	{% related_links highlighted_ingredient %}
+	
 	
 	<div class="product-memo"><span class="label">Memo</span>{{highlighted_ingredient.memo}}</div>
+	
 	<div id="rm_id" style="display:none">{{ highlighted_ingredient.id }}</div>
-	<div id="ingredient-detail">
-		{% if updated_flavors %}
+	{% if updated_flavors %}
 		<div id="flavor-price-delta" >
 		<table width="100%" class="sorttable">
 			<caption>Flavor price changes</caption>
@@ -43,7 +44,7 @@
 				{% for f, prices in updated_flavors.items %}
 				<tr>
 					<td>{{ f.prefix }}</td>
-					<td><a href="/django/access/{{ f.number }}/">{{ f.number }}</a></td>
+					<td><a href="/access/{{ f.number }}/">{{ f.number }}</a></td>
 					<td>{{ f.natart }}</td>
 					<td>{{ f.name }}</td>
 					<td>{{ f.label_type }}</td>
@@ -56,10 +57,17 @@
 				{% endfor %}
 			</tbody>
 		</table>
-		</div>
-		{% endif %}
+		</div>related_links
+	{% endif %}
+	
+	<div id="product_tabs">
+		{% product_tabs highlighted_ingredient %}
+	</div>
+	<div id="ingredient-detail">
+		
 
-		<form id="ingredient-pin-price-update" action="/django/access/ingredient/pin_review/{{ highlighted_ingredient.id }}/" method="post">
+		<form id="ingredient-pin-price-update" action="/access/ingredient/pin_review/{{ highlighted_ingredient.id }}/" method="post">
+			{% csrf_token %}
 			{{icu.as_p}}
 			<input type="submit" value="Update unit price">
 		</form>
@@ -68,7 +76,7 @@
 			<caption>
 				<p style="text-align:left;">
 					Raw Material Details by Raw Material Code
-					<!-- <span style="float:right;"><a href="/django/access/ingredient/pin_review/{{ highlighted_ingredient.id }}/update_raw_materials/"> Discontinue/Activate Raw Materials </a></span> -->
+					<!-- <span style="float:right;"><a href="/access/ingredient/pin_review/{{ highlighted_ingredient.id }}/update_raw_materials/"> Discontinue/Activate Raw Materials </a></span> -->
 				</p>
 			</caption>
 			
@@ -86,7 +94,7 @@
 				{% else %}
 				<tr class="active">
 				{% endif %}
-					<td class="rm_code"><a href="/django/access/ingredient/{{ ingredient.rawmaterialcode }}/">{{ ingredient.rawmaterialcode }}</a></td>
+					<td class="rm_code"><a href="/access/ingredient/{{ ingredient.rawmaterialcode }}/">{{ ingredient.rawmaterialcode }}</a></td>
 					<td>{{ ingredient.art_nati }}</td>
 					<td>{{ ingredient.prefix }} {{ ingredient.product_name }} {{ ingredient.part_name2 }}</td>
 					<td>{{ ingredient.description }}</td>
@@ -131,13 +139,13 @@
 					<tr>
 						<th>Flavor</th>
 						<th>Raw Material Amount</th>
-					</tr>
+				product_tabs	</tr>
 				</thead>
 				
 				<tbody>
 					{% for flavor, weight in discontinued_flavors %}
 					<tr align="center" >
-						<td><a href="/django/access/{{ flavor.number }}/">{{ flavor }}</a></td>
+						<td><a href="/access/{{ flavor.number }}/">{{ flavor }}</a></td>
 						<td>{{ weight }}</td>
 					</tr>
 					{% endfor %}

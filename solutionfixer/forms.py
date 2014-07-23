@@ -86,7 +86,7 @@ class SolutionModelForm(ModelForm):
 #        if hidden:
 #            html_bits.append(u'<tr id="%s" style="display: none"><td>%s</td>' % (self.prefix,self.instance.__unicode__()))
 #        else:
-        html_bits.append(u'<tr id="%s" class="%s"><td><a href="/django/access/ingredient/pin_review/%s/">%s</a></td>' % (self.prefix,
+        html_bits.append(u'<tr id="%s" class="%s"><td><a href="/access/ingredient/pin_review/%s/">%s</a></td>' % (self.prefix,
                                                                   self.instance.status.status_name,
                                                                   self.instance.ingredient.id,
                                                                   self.instance.__unicode__()))

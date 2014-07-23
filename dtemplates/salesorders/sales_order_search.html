@@ -27,9 +27,9 @@
 			<tbody>
 		    {% for sales_order in orders %}
 		    <tr id="{{ sales_order.number }}">
-		    	<td><a href="/django/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.number }}</a></td>
-		    	<td><a href="/django/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.create_date }}</a></td>
-		    	<td><a href="/django/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.customer }}</a></td>
+		    	<td><a href="/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.number }}</a></td>
+		    	<td><a href="/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.create_date }}</a></td>
+		    	<td><a href="/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.customer }}</a></td>
 		    	<td>{% if sales_order.open %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</td>
 		    </tr>
 		    {% endfor %}

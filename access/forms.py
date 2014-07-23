@@ -136,7 +136,7 @@ class ExperimentalForm(ModelForm, FieldsetMixin):
                    'promotable', 'product_number',   'retain_number', 'retain_present','flavor',
                    'label_type','liquid',
                        'dry',
-                       'spray_dried',
+                       'spraydried',
                        'oilsoluble',
                        'concentrate',
                        'flavorcoat',
@@ -147,6 +147,7 @@ class ExperimentalForm(ModelForm, FieldsetMixin):
                        'artificial',
                        'nfi',
                        'natural_type',
+                       'exclude_from_reporting',
                        ),
             'extra_content':{'divid':'hidden',
                              'legend':'Hidden'}
@@ -218,6 +219,15 @@ class ApproveForm(ModelForm):
                   'natart',
                   'name',
                   'label_type',
+                  'organic',
+                  'natural_type',
+                  'wonf',
+                  'liquid',
+                  'dry',
+                  'spraydried',
+                  'flavorcoat',
+                  'concentrate',
+                  'oilsoluble',
                   'unitprice',
                   'approved',
                   'organoleptics',
@@ -226,11 +236,11 @@ class ApproveForm(ModelForm):
                   'productmemo',
                   'pricing_memo',
                   'mixing_instructions',
+                  
                   )
 
 class FlavorSearch(forms.Form):
     search_string = forms.CharField(label="Search", required=False)
-
 
 class IngredientReplacerForm(forms.Form):
     original_ingredient = IngredientField()
@@ -491,7 +501,7 @@ class ExperimentalFilterSelectForm(forms.Form):
         choices=(
             ('liquid', "Liquid"),
             ('dry', "Dry"),
-            ('spray_dried', "Spray Dried"),
+            ('spraydried', "Spray Dried"),
             ('oilsoluble', "Oil Soluble"),
             ('concentrate', "Concentrate"),
     ))
@@ -700,7 +710,7 @@ class NewRMWizard(FormWizard):
                          status=SolutionStatus.objects.get(status_name__iexact="verified"))
             s.save()
             i.save()
-        return HttpResponseRedirect('/django/access/ingredient/pin_review/%s/' % i.id)
+        return HttpResponseRedirect('/access/ingredient/pin_review/%s/' % i.id)
     
     
     
@@ -721,7 +731,7 @@ class NewExForm1(FormRequiredFields, FieldsetMixin):
                               }
         }),  
         ('Physical Properties',{
-             'fields': ('liquid','dry','spray_dried','flavorcoat'),
+             'fields': ('liquid','dry','spraydried','flavorcoat'),
              'extra_content':{
                               'divid':'physical_fields',
                               'legend':'Physical Properties - Required'
@@ -757,7 +767,7 @@ class NewExForm1(FormRequiredFields, FieldsetMixin):
     flavorcoat = forms.BooleanField(label="Flavorcoat", required=False)
     liquid = forms.BooleanField(required=False)
     dry = forms.BooleanField(required=False)
-    spray_dried = forms.BooleanField(required=False)
+    spraydried = forms.BooleanField(required=False)
     concentrate = forms.BooleanField(required=False)
     oilsoluble = forms.BooleanField(label="Oil Soluble", required=False)
     label_type = forms.CharField(max_length=50,required=False)
@@ -834,7 +844,7 @@ class NewExFormWizard(FormWizard):
         ex.flavor = f
         ex.save()
              
-        return HttpResponseRedirect('/django/access/experimental/%s/' % ex.experimentalnum)
+        return HttpResponseRedirect('/access/experimental/%s/' % ex.experimentalnum)
 
 class ExperimentalNameForm(NewExForm1):
     pass    
@@ -858,6 +868,7 @@ class NewSolutionForm(forms.Form):
                                  ('50%','50%'),
                                  ))
     solvent = forms.ModelChoiceField(queryset=Solvent.objects.all())
+
     
 
 # def validate_spec_name(name):
@@ -920,3 +931,14 @@ def make_customerspec_form(flavor):
 class ReconciledSpecForm(forms.Form):
     name = forms.CharField(max_length=48, required=True, widget = forms.TextInput(attrs={'readonly':'readonly'}))
     specification = forms.CharField(max_length=48, required=True)
+
+class GHSReportForm(forms.Form):
+    
+    REPORT_CHOICES = [('GHS_Exclusive_Ingredients', 'GHS Exclusive Ingredients'),
+                      ('FDI_Exclusive_Ingredients', 'FDI Exclusive Ingredients')]
+    
+    report_to_download = forms.ChoiceField(required=True, choices=REPORT_CHOICES, widget=forms.RadioSelect())
+    
+
+                                                                   
+

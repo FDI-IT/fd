@@ -25,7 +25,7 @@ var lot_detail_submit = function(index, element) {
 var ajax_post = function() {
 	var old_instance_pk = jQuery('div.current_loaded input[name="instance_pk"]').val();
 	jQuery("div.current_loaded").fadeOut();
-	var x = jQuery.post('/django/qc/resolve_testcards_ajax_post/', 
+	var x = jQuery.post('/qc/resolve_testcards_ajax_post/', 
 		jQuery('div.current_loaded form').serialize(),
 		function (data) {
 			jQuery("div.current_loaded").removeClass('current_loaded').fadeOut( function() {
@@ -84,11 +84,6 @@ jQuery(document).ready(function() {
 	jQuery('.testcard_form_container').delegate('.hidden_image', "click", function() {
 		$(this).removeClass('click_to_zoom');
 	});
-	jQuery('#resolve_testcard_submit_button').click( function() {
-		//post the form
-		
-		ajax_post();
-		return false;
-	});
+
 	jQuery('#lot_detail_submit').click( lot_detail_submit );
 });

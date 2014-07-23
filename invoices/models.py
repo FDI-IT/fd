@@ -21,7 +21,7 @@ class Invoice(models.Model):
         ordering = ["-number"]
     
     def get_url(self):
-        return "/django/invoice/%s/" % self.id
+        return "/invoice/%s/" % self.id
         
     def __unicode__(self):
         return u"%s - %s %s" % (self.number, 

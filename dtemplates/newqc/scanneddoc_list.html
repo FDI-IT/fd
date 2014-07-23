@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load qstring %}
+
+{% block content %}    
+<div id="content-right">
+	<h2>Document Types</h2>
+	<ul>
+		<li><a href="?content_type=ALL&{% sparse_qstring %}">All</a></th></li>
+		{% for scanned_doc_type in scanned_doc_types %}
+		<li><a href="?content_type__id={{scanned_doc_type.content_type__id}}&{% sparse_qstring %}">{{ scanned_doc_type.content_type__name }}</a></li>
+		{% endfor %}
+	</ul>
+	<h2>Date Ranges</h2>
+	<ul>
+		<li>June 2014</li>
+		<li>May 2014</li>
+		<li>etc</li>
+	</ul>
+</div>
+<div id="content-main">
+	
+	{% if pagination_count %}
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	        
+	        
+	        <div class="paginate_by" align="right">
+	        	Paginate By:
+	        	{% for count in pagination_list %}
+	        		{% if pagination_count == count %}
+	        			<b>{{ count }}</b>
+	        		{% else %}
+	        			<a href="/qc/scanned_docs/paginate{{count}}"> {{count}} </a>
+	        		{% endif %}
+	        	{% endfor %}
+	        </div>
+	    </span>
+	</div>
+	{% endif %}
+	<!-- Still the old script from the original copy-paste. We might not even need this.
+	<script>
+	
+		$(document.forms["lot_selections"]).submit(function(){
+			alert("HI");
+			if(validate() == true) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		});
+	
+		function validate()
+		{
+			var printedIds = [];
+			
+			$("#lot_list :checked").closest('tr').each(function() {
+				if ($(this).children('.status').text() == 'Batchsheet Printed') {
+					printedIds.push($(this).children('.lot_number').text());
+				}
+			});
+			
+			if(printedIds.length > 0) {
+				var lotstring = printedIds.join(", ");
+				var message = "Lots " + lotstring + " have been printed before.  Would you still like to print?";
+				if(confirm(message)) {
+
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+			
+		}
+	
+	</script>
+	-->
+	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
+	<form onsubmit="return validate()" id="form" name="lot_selections" method="post" action="/batchsheet/batchsheet_batch_print/" >
+	    {% csrf_token %}
+	
+    <table class="sorttable" width="100%">
+	<tr class="lotheaders">
+		<th title="Select Box">Select</th>
+		<th>Image</th>
+		<th>Scan Time</th>
+		<th>Doc Link</th>
+		<th>Doc Status</th>
+		<th>Doc Notes</th>
+		<th>Related Status</th>
+	</tr>
+	{% for scanned_doc in object_list %}
+	    <tr>
+	    <td>
+			<input type="checkbox" name="scanned_doc_pks" value="{{scanned_doc.pk}}"{% if checkall %}checked{% endif %}>
+		</td>
+	    <td><a href="/djangomedia/{{scanned_doc.large}}"><img class="scanned_doc_thumbnail" src="/djangomedia/{{scanned_doc.thumbnail}}"></a></td>
+	    <td>{{scanned_doc.scan_time}}</td>	
+	    <td><a href="{{scanned_doc.doc_link}}">{{ scanned_doc.subclass_object_repr }}</a></td>
+	    <td>{{scanned_doc.related_object.status}}</td>
+	    <td>{{scanned_doc.notes}}</td>
+	    <td>{{scanned_doc.related_object.status}}</td>
+	    </tr>
+	{% endfor %}
+    </table>
+    </form>
+    
+    {% if pagination_count %}
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+	{% endif %}
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

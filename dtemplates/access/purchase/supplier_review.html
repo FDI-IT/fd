@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="content-right">
+</div>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{supplier}}</span>
+</div>
+<table width="100%">
+<tr>
+    <th>Number</th>
+    <th width="60px">Number Products Ordered</th>
+    <th>Due Date</th>
+    <th>Date Ordered</th>
+    <th>Shipper</th>
+    <th>Receive Date</th>
+    <th>QC Date</th>
+</tr>
+{% for po in supplier.purchaseorder_set.all %}
+<tr>
+    <td><a href="{{po.get_absolute_url}}">{{ po.number }}</a></td>
+    <td>{{ po.purchaseorderlineitem_set.count }}</td>
+    <td>{{ po.due_date }}</td>
+    <td>{{ po.date_ordered }}</td>
+    <td>{{ po.shipper }}</td>
+    <td>{{ po.receive_date }}</td>
+    <td>{{ po.qc_date }}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+{% endblock %}
+

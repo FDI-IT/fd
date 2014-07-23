@@ -89,7 +89,8 @@ def search_guts(request, context_dict, paginate_by=None):
     last_search_space = request.session.get('last_space', None)
     my_order_by = None
     if last_search_space != search_space:
-        request.session.flush()
+        request.session['last_order_by'] = None
+        request.session['search_request_GET'] = None
         request.session['last_space'] = search_space
         my_order_by = None
     else:
@@ -138,7 +139,7 @@ def search(request):
     context_dict = {}
     context_dict['ms'] = MainSearch(request.GET)
     if not context_dict['ms'].is_valid():
-        return HttpResponseRedirect('/django/')
+        return HttpResponseRedirect('/')
     # this is stupid. if i have a redirect type, i redirect
     # if i dont, then i reset results to the results[1] because
     # i know longer care about rediret type that was in results[0]
@@ -167,7 +168,7 @@ def print_search(request):
     context_dict = {}
     context_dict['ms'] = MainSearch(request.GET)
     if not context_dict['ms'].is_valid():
-        return HttpResponseRedirect('/django/')
+        return HttpResponseRedirect('/')
     
     # this is stupid. if i have a redirect type, i redirect
     # if i dont, then i reset results to the results[1] because
@@ -206,7 +207,7 @@ def alternate_rm(request):
     # this function mutates context_dict!
     results = search_guts(request, context_dict, paginate_by=40)
     if results[0] != 'results':
-        return redirect('/django/access/new_rm/rm/%s/' % results[1].rawmaterialcode)
+        return redirect('/access/new_rm/rm/%s/' % results[1].rawmaterialcode)
         #return ('redirect', HttpResponseRedirect(resultant_objects[0].get_absolute_url()))
     
     context_dict['page_title'] = "Alternate Supplier For Raw Material Search -- %s" % context_dict['search_string']
@@ -241,8 +242,8 @@ def new_pin_flavor(request):
     if results[0] != 'results':
         flavor = results[1]
         if flavor.gazinta.count() != 0:
-            return redirect('/django/access/ingredient/pin_review/%s/' % flavor.gazinta.all()[0].id)
-        return redirect('/django/access/new_rm/flavor/%s/' % results[1].number)
+            return redirect('/access/ingredient/pin_review/%s/' % flavor.gazinta.all()[0].id)
+        return redirect('/access/new_rm/flavor/%s/' % results[1].number)
         #return ('redirect', HttpResponseRedirect(resultant_objects[0].get_absolute_url()))
     
     context_dict['page_title'] = "Register RM PIN for Flavor -- %s" % context_dict['search_string']
@@ -257,3 +258,7 @@ def new_pin_flavor(request):
         context_dict,
         context_instance=RequestContext(request)
     )
+    
+#last_space
+#search_request_GET
+#last_order_by

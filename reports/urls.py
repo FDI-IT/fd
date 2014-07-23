@@ -17,7 +17,12 @@ urlpatterns = patterns('reports.views',
     # Uncomment the next line to enable the admin:
    # (r'^$', 'reports_home'),
     (r'^lot_summary/$', 'lot_summary'),
+    (r'^lots_by_person/$', 'lots_by_person'),
+    (r'^experimental_log/$', 'experimental_log'),
+    (r'^experimental_log_exclude/$', 'experimental_log_exclude'),
+    (r'^conversions_by_person/$', 'conversions_by_person'),
     (r'^formula_usage_summary/$', 'formula_usage_summary'),
+    (r'^sales_by_person/$', 'sales_by_person'),
     
 
 )

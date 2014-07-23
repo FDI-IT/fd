@@ -5,7 +5,7 @@ var t;
 
 
 function update_solution_percentage () {
-	jQuery.post('/django/solutionfixer/process_percentage_update',
+	jQuery.post('/solutionfixer/process_percentage_update',
 		{
 			solution_id: jQuery('#solution_id').html(),
 			percentage: jQuery('#matchform input[name=percentage]')[0].value
@@ -40,19 +40,15 @@ function adjust_weight_explosion(f) {
 
 
 function hideftrow(elem) {
-	jQuery(elem).parent().parent().next().toggleClass('hidden');
+	jQuery(elem).parent().parent().next().toggle();
 }
 
 function ft_collapse_all() {
-	jQuery('div.ft-spacer').addClass('hidden');
-}
-
-function ft_collapse_stock_items() {
-	jQuery('div.ft-spacer-stock').addClass('hidden');
+	jQuery('div.ft-spacer').hide();
 }
 
 function ft_expand_all() {
-	jQuery('div.ft-spacer').removeClass('hidden');
+	jQuery('div.ft-spacer').show();
 }
 
 
@@ -79,7 +75,7 @@ function getParameterByName(url, name) {
 }
 
 function search_results_popup() {
-	newwindow = popup_window('/django/mysearch/print/' + window.location.search);
+	newwindow = popup_window('/mysearch/print/' + window.location.search);
 	newwindow.onload = function (e) {
 		newwindow.print();
 	}
@@ -132,7 +128,7 @@ function ajax_retain_status_change( new_status ) {
 	jQuery('form[name="retain_selections"]').find(':checked').each( function(i,e) {
 		value_list.push(e.value)
 	});
-	jQuery.post('/django/qc/ajax_retain_status_change/',
+	jQuery.post('/qc/ajax_retain_status_change/',
 			{
 				new_status: new_status,
 				retain_list: value_list.join("|"),
@@ -141,7 +137,7 @@ function ajax_retain_status_change( new_status ) {
 			function () {
 				for (var i=value_list.length-1;i>=0; --i) {
 					var mycells = jQuery('input[value="'+value_list[i]+'"]').parent().parent().children().addClass('highlight');
-					jQuery(mycells[STATUS_INDEX]).html('<a href="/django/qc/rm_retains/' + new_status+ '/">' + new_status + '</a>');
+					jQuery(mycells[STATUS_INDEX]).html('<a href="/qc/rm_retains/' + new_status+ '/">' + new_status + '</a>');
 				}
 		}, 'json');
 }
@@ -158,7 +154,7 @@ function update_label_preview () {
 	var product_name_two = jQuery("#id_product_name_two").val();
 	var concentration = jQuery("#id_concentration").val();
 	var solvent = jQuery("#id_solvent").val();
-	jQuery.get('/django/lab/solution',
+	jQuery.get('/lab/solution',
 		{
 			preview:true,
 			pin:pin,
@@ -177,6 +173,51 @@ function update_label_preview () {
 };
 
 jQuery(document).ready(function(){	
+
+   flag = true;
+   var $product_tabs = $('#product_tabs');
+   $product_tabs.tabs({
+    cache:true,
+    spinner: '',
+    ajaxOptions: {
+        error: function(xhr, status, index, anchor) {
+            $( anchor.hash ).html("Failed to load tab.");
+        }
+    },
+	activate: function(event, ui)
+	{
+	    if(!event.originalEvent)
+	        return;
+		window.location.hash = '#t=' + ui.newTab.find('span').text();
+	}
+	});
+	var $product_tabs_list = $('#product_tabs_list');
+	var find_tab_index_by_text = function(tab_text) {
+		return $product_tabs_list.find('span').filter(function() {
+		    return $(this).text() == tab_text;
+		}).closest('li').index();
+	};
+	$.address.change(function(event)    {
+		if(!flag)   {
+		    flag = true;
+		    return;
+		}
+		var param = '';
+		param = window.location.hash;
+		if(param.indexOf('t=') > 0)
+		{
+		    var regexp = /#t=(.+)/i;
+		    var hash = param.match(regexp);
+		    if(hash.length > 0)
+		    {
+		        hash = hash[1];
+		        var tab_index = find_tab_index_by_text(hash);
+		        $product_tabs.tabs("option", "active", tab_index);
+		    }
+		} else {
+		    $product_tabs.tabs("option", "active", 0);
+		}
+	});
 
 	$('table.sorttable').tablesorter();
 	
@@ -240,7 +281,7 @@ jQuery(document).ready(function(){
 	
 	jQuery("#coloractivationform input").change( function(){
 		var color = jQuery('#coloractivationform input:checkbox').attr('checked');
-		jQuery.get('/django/salesorders/coloractivation', {
+		jQuery.get('/salesorders/coloractivation', {
 			"color": color
 		}, function(data){
 		});
@@ -338,7 +379,7 @@ jQuery(document).ready(function(){
 		var $this = $(this);
 		var row = $this.closest("tr");
 		$this.autocomplete({
-			source: '/django/access/ingredient_autocomplete',
+			source: '/access/ingredient_autocomplete',
 			minLength: 1,
 			select: function( event, ui ) {
 				// ui.item.value is the item of interest
@@ -350,7 +391,7 @@ jQuery(document).ready(function(){
 	
 	
 	function update_poli_row (row) {
-		jQuery.get('/django/access/process_cell_update/', 
+		jQuery.get('/access/process_cell_update/', 
   			{number: row.find('.pin-cell input').val(), amount: row.find('.quantity-cell input').val()},
   			function (data) {
   				row.children('.name-cell').html(data.name).end().children('.price-cell').html(data.cost);
@@ -394,7 +435,7 @@ jQuery(document).ready(function(){
 		if ($this.value == '') {
 			return;
 		}
-		jQuery.post('/django/solutionfixer/process_solvent_update',
+		jQuery.post('/solutionfixer/process_solvent_update',
 			{
 				solution_id: jQuery('#solution_id').html(),
 				solvent_id: $this.value

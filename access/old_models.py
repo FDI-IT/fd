@@ -395,15 +395,15 @@ class Ingredient(models.Model):
     @property
     def url(self):
         if self.discontinued == False:
-            return "/django/access/ingredient/pin_review/%s/" % self.id
+            return "/access/ingredient/pin_review/%s/" % self.id
         else:
-            return "/django/access/ingredient/%s/" % self.rawmaterialcode
+            return "/access/ingredient/%s/" % self.rawmaterialcode
     
     def get_absolute_url(self):
         if self.discontinued == False:
-            return "/django/access/ingredient/pin_review/%s/" % self.id
+            return "/access/ingredient/pin_review/%s/" % self.id
         else:
-            return "/django/access/ingredient/%s/" % self.rawmaterialcode
+            return "/access/ingredient/%s/" % self.rawmaterialcode
 
     @staticmethod
     def build_kwargs(qdict, default, get_filter_kwargs):
@@ -529,12 +529,12 @@ class Ingredient(models.Model):
         related_links = []
         if self.sub_flavor:
             related_links.append(
-                ('/django/access/%s/' % self.id, 'Flavor Formula')
+                ('/access/%s/' % self.id, 'Flavor Formula')
             )
         
         if self.is_solution_related():
             related_links.append(
-                ('/django/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions')
+                ('/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions')
             )
         return related_links
 
@@ -638,10 +638,10 @@ class Ingredient(models.Model):
             return self.id
     
     def get_admin_url(self):
-        return "/django/admin/access/ingredient/%s" % self.rawmaterialcode
+        return "/admin/access/ingredient/%s" % self.rawmaterialcode
     
     def get_review_url(self):
-        return "/django/access/ingredient/pin_review/%s/" % self.id
+        return "/access/ingredient/pin_review/%s/" % self.id
 
     def get_branch(self):
         # this is where the Explode? field would be checke
@@ -814,14 +814,14 @@ class Flavor(models.Model):
         for i in range(len(tokens)):
             try:
                 Flavor.objects.get(number=tokens[i])
-                tokens[i] = '<a href="/django/access/%s/">%s</a>' % (tokens[i], tokens[i])
+                tokens[i] = '<a href="/access/%s/">%s</a>' % (tokens[i], tokens[i])
             except:
                 pass
         return ''.join(tokens)
     
     @property
     def naive_linked_memo(self):
-        return re.sub('(\d{3,})', r'<a href="/django/access/\1/">\1</a>', self.productmemo)
+        return re.sub('(\d{3,})', r'<a href="/access/\1/">\1</a>', self.productmemo)
     
     def lot_superset(self):
         examined_flavors = set()
@@ -970,10 +970,10 @@ class Flavor(models.Model):
     
     @property
     def url(self):
-        return "/django/access/%s/" % self.number
+        return "/access/%s/" % self.number
     
     def get_absolute_url(self):
-        return "/django/access/%s/" % self.number
+        return "/access/%s/" % self.number
     
     @staticmethod
     def build_kwargs(qdict, default, get_filter_kwargs):
@@ -1023,25 +1023,25 @@ class Flavor(models.Model):
     def get_related_links(self):
         related_links = [
                        ('#flat_review_table','Formula'),
-                       ('/django/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
-                       ('/django/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
-                       ('/django/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
+                       ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
+                       ('/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
+                       ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
                        ]
         if self.retain_superset().count()>0:
-            related_links.append(('/django/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
-            related_links.append(('/django/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
+            related_links.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
+            related_links.append(('/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
 
         try:
             self.experimentallog
-            related_links.append(('/django/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
+            related_links.append(('/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
         except:
             pass
         try:
             rmr = self.raw_material_record
             if rmr:
-                related_links.append(('/django/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
+                related_links.append(('/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
                 if Formula.objects.filter(ingredient=rmr).count() > 0:
-                    related_links.append(('/django/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
+                    related_links.append(('/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
         except:
             pass
 
@@ -1072,7 +1072,7 @@ class Flavor(models.Model):
         return "%s-%s" % (self.prefix, self.number)
     
     def get_admin_url(self):
-        return "/django/admin/access/flavor/%s" % self.id
+        return "/admin/access/flavor/%s" % self.id
         
     def __unicode__(self):
         return u"%s-%s %s %s %s" % (self.prefix,
@@ -1437,7 +1437,7 @@ class ExperimentalLog(models.Model):
     # END FOREIGN KEY
     
     concentrate = models.BooleanField(db_column='Concentrate', default=False)
-    spray_dried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
+    spraydried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
     promotable = models.BooleanField(db_column='Promotable', default=False)
     holiday = models.BooleanField(db_column='Holiday', default=False)
     coffee = models.BooleanField(db_column='Coffee', default=False)
@@ -1492,7 +1492,7 @@ class ExperimentalLog(models.Model):
         super(ExperimentalLog, self).save(*args, **kwargs)
     
     def get_absolute_url(self):
-        return '/django/access/experimental/%s/' % self.experimentalnum
+        return '/access/experimental/%s/' % self.experimentalnum
     
 
     @staticmethod
@@ -1518,14 +1518,14 @@ class ExperimentalLog(models.Model):
         related_links = []
         if self.flavor:
             related_links.append(
-                ('/django/access/%s/' % self.flavor.number, 'Flavor Formula')
+                ('/access/%s/' % self.flavor.number, 'Flavor Formula')
             )
-        related_links.append(('/django/access/experimental/%s/' % self.experimentalnum,'Experimental'))
+        related_links.append(('/access/experimental/%s/' % self.experimentalnum,'Experimental'))
             
         return related_links
 
     def get_admin_url(self):
-        return "/django/admin/access/experimentallog/%s" % self.id
+        return "/admin/access/experimentallog/%s" % self.id
 
     import_order = 3
     
@@ -1995,7 +1995,7 @@ class ProductSpecialInformation(models.Model):
     import_order = 4
     
     def get_admin_url(self):
-        return "/django/admin/access/productspecialinformation/%s" % self.flavornumber
+        return "/admin/access/productspecialinformation/%s" % self.flavornumber
     
     class Meta:
         db_table = u'Products - Special Information'
@@ -2050,11 +2050,11 @@ class PurchaseOrder(models.Model):
         ordering=['date_ordered']
         
     def get_related_links(self):
-        related_links = [('/django/access/purchase/%s/po_entry/' % self.number, 'Edit Items')]
+        related_links = [('/access/purchase/%s/po_entry/' % self.number, 'Edit Items')]
         return related_links
 
     def get_absolute_url(self):
-        return "/django/access/purchase/%s/" % self.number
+        return "/access/purchase/%s/" % self.number
 
     @staticmethod
     def get_absolute_url_from_softkey(softkey):

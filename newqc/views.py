@@ -24,15 +24,19 @@ from reversion import revision
 
 from elaphe import barcode
 
+from pluggable.inheritance_queryset import InheritanceQuerySet
+
 from newqc import controller
 from access.barcode import barcodeImg, codeBCFromString
 from access.models import Flavor, Ingredient, FlavorSpecification
 from access.views import flavor_info_wrapper
-from newqc.forms import TestResultForm, NewFlavorRetainForm, ResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
-from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, COA, TestResult, LotSOLIStamp
+from newqc.forms import TestResultForm, NewFlavorRetainForm, SimpleResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
+from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, LotSOLIStamp, TestResult, ScannedDoc
 from newqc.utils import process_jbg, get_card_file, scan_card
-from newqc.tasks import walk_scans_qccards
+from newqc.tasks import walk_scanned_docs
 from salesorders.models import SalesOrderNumber, LineItem
+
+from one_off import populate_scanned_docs
 
 def lot_month_list():
     return Lot.objects.all().dates('date', 'month').reverse()
@@ -42,6 +46,9 @@ def batchsheet_month_list():
 
 def retain_month_list():
     return Retain.objects.all().dates('date', 'month').reverse()
+
+def retain_status_list():
+    return Retain.objects.values_list('status',flat=True).order_by().distinct()
 
 def rm_retain_month_list():
     return RMRetain.objects.all().dates('date', 'month').reverse()
@@ -90,7 +97,8 @@ retain_list_info =  {
         'page_title': 'QC Retains',
         'print_link': 'javascript:document.forms["retain_selections"].submit()',
         'month_list': retain_month_list,
-        'admin_link': "/django/admin/newqc/retain/",
+        'admin_link': "/admin/newqc/retain/",
+        'status_list': retain_status_list,
     }, **STATUS_BUTTONS),
 }
 rm_retain_list_info =  {
@@ -100,7 +108,7 @@ rm_retain_list_info =  {
         'page_title': 'RM Retains',
         'print_link': 'javascript:document.forms["retain_selections"].submit()',
         'month_list': rm_retain_month_list,
-        'admin_link': "/django/admin/newqc/rmretain/",
+        'admin_link': "/admin/newqc/rmretain/",
     }, **STATUS_BUTTONS),
 }
 
@@ -110,7 +118,7 @@ receiving_log_list_info = {
     'extra_context': dict({
         'page_title': 'Receiving Log',
         'month_list': receiving_log_month_list,
-        'admin_link': "/django/admin/newqc/receivinglog/",
+        'admin_link': "/admin/newqc/receivinglog/",
     }),                    
 }
 
@@ -155,7 +163,7 @@ def lot_list(request, paginate_by = 'default', queryset = 'default'):
             'user': request.user.get_full_name(),
             'pagination_list': [10, 25, 50, 100, 500, 1000],
             'pagination_count': pagination_count,
-            'lot_list_admin': "/django/admin/newqc/lot/"
+            'lot_list_admin': "/admin/newqc/lot/"
             # fix this javascript...
         }),
     )
@@ -526,7 +534,7 @@ def build_rm_checklist_row(pin):
     
 @permission_required('access.view_flavor')
 def scrape_testcards(request):
-    walk_scans_qccards.delay(walk_paths=['/srv/samba/tank/scans/qccards','/srv/samba/tank/scans/batchsheets'])
+    walk_scanned_docs.delay()
     return render_to_response('qc/scrape_testcards.html',
                               {},
                               context_instance=RequestContext(request))
@@ -581,7 +589,7 @@ def flavor_history_print(request, flavor):
 #    try:
 #        retain = Retain.objects.filter(status='Pending')[0]
 #    except:
-#        return HttpResponseRedirect('/django/qc/pending_retains/')
+#        return HttpResponseRedirect('/qc/pending_retains/')
 #    request.session['retainpk'] = retain.pk
 #    f = ResolveRetainForm(instance=retain)
 #    # preview_image = get_thumbnail(test_card.large.file, '800')
@@ -595,11 +603,11 @@ def flavor_history_print(request, flavor):
     
 def resolve_retains_any(request):
     try:
-        tcs = TestCard.objects.exclude(retain=None).filter(status='Not Passed...')
+        tcs = TestCard.objects.exclude(retain=None).filter(status__in=('Not Passed...',"Under Review"))
         testcard = tcs[0]
         testcard_ondeck = tcs[1]
     except:
-        return HttpResponseRedirect('/django/qc/')
+        return HttpResponseRedirect('/qc/')
     
 @permission_required('access.view_flavor')
 def batchsheet_detail(request, lot_pk):
@@ -619,7 +627,7 @@ def lot_detail(request, lot_pk, update=None):
             )
             coa.save()
             
-        lss_list.append((lss.salesordernumber, '/django/qc/coa/%s' % lss.coa_set.all()[0].pk))
+        lss_list.append((lss.salesordernumber, '/qc/coa/%s' % lss.coa_set.all()[0].pk))
     
     #if user clicks 'update database values'
     if update == "database":
@@ -748,7 +756,7 @@ def lot_detail(request, lot_pk, update=None):
     
     return render_to_response('qc/lots/detail.html',
                               {'lot':lot,
-                              'print_link': '/django/batchsheet/%s/' % lot_pk,
+                              'print_link': '/batchsheet/%s/' % lot_pk,
                               'lss_list': lss_list,
                               'result_list': result_list,
                               'customer_dict': customer_dict,
@@ -797,7 +805,7 @@ def edit_test_results(request, lot_pk):
 
 
             
-            return HttpResponseRedirect("/django/qc/lots/%s/" % lot.pk)
+            return HttpResponseRedirect("/qc/lots/%s/" % lot.pk)
         else:
             return render_to_response('newqc/testresult_list.html', 
                                   {'lot': lot,
@@ -856,7 +864,7 @@ def old_lot_detail(request, lot_pk):
         product_info_data = post_data['product_info_form']
         product_info = ProductInfo.objects.get(pk=product_info_data['productinfo_pk'])
         changed = False
-        for attr in ('organoleptic_properties','appearance','notes','testing_procedure'):
+        for attr in ('organoleptic_properties','appearance','product_notes','testing_procedure'):
             if product_info_data[attr] != getattr(product_info, attr):
                 setattr(product_info, attr, product_info_data[attr])
                 changed=True
@@ -941,19 +949,19 @@ def testcard_list(request):
             'page_title': "Test Card List",
         })
     )
-    
+
 def resolve_testcards_ajax_post(request):
     if request.is_ajax():
         testcard = TestCard.objects.get(pk=request.POST['instance_pk'])
         productinfo = ProductInfo.objects.get(pk=request.POST['productinfo_pk'])
-        f = ResolveTestCardForm(request.POST, instance=testcard)
+        f = SimpleResolveTestCardForm(request.POST, instance=testcard)
         product_info_form = ProductInfoForm(request.POST, prefix="product_info", instance=productinfo)
         if f.is_valid():
             f.save()
             product_info_form.save()
             #testcard = TestCard.objects.filter(status='Pending')[1]
             testcard = TestCard.objects.exclude(retain=None).filter(status='Not Passed...')[1]
-            testcard_form = ResolveTestCardForm(instance=testcard)
+            testcard_form = SimpleResolveTestCardForm(instance=testcard)
             productinfo,created = ProductInfo.objects.get_or_create(flavor=testcard.retain.lot.flavor)
             productinfo_form = ProductInfoForm(prefix="product_info",instance=productinfo)
             return render_to_response(
@@ -964,21 +972,62 @@ def resolve_testcards_ajax_post(request):
                 context_instance=RequestContext(request),                 
             )
     
-    
 
+@revision.create_on_success
 @permission_required('access.view_flavor')
 def resolve_testcards_any(request):
-    try:
-        tcs = TestCard.objects.exclude(retain=None).filter(status='Not Passed...').annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1)
-        testcard = tcs[0]
-        testcard_ondeck = tcs[1]
-    except:
-        return HttpResponseRedirect('/django/qc/no_testcards_left/')
-    return render_to_response('qc/testcards/resolve.html', 
+    if request.method == 'POST':
+        testcard = TestCard.objects.get(pk=request.POST['testcard_pk'])
+        testcard_form = SimpleResolveTestCardForm(request.POST,instance=testcard)
+        productinfo = ProductInfo.objects.get(pk=request.POST['productinfo_pk'])
+        productinfo_form = ProductInfoForm(request.POST,instance=productinfo)
+        if testcard_form.is_valid() and productinfo_form.is_valid():
+            revision.comment = "Updated through resolve testcards view."
+            revision.user = request.user
+            testcard_form.save()
+            productinfo_form.save()
+        else:
+            return render_to_response('qc/testcards/resolve.html', 
+                              {'testcard_form':testcard_form,'productinfo_form':productinfo_form,'testcard':testcard_form.instance,'page_title': 'Resolve Test Card',},
+                              context_instance=RequestContext(request))
+            
+    if 'testcard_pk' not in request.GET:
+        try:
+            tcs = TestCard.objects.exclude(retain=None).filter(status__in=('Not Passed...',"Under Review")).annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1).order_by('-retain__date')
+            testcard = tcs[0]
+            remaining = tcs.count()-1
+        except:
+            testcard = None
+        try:
+            next_tc_pk = tcs[1].pk
+        except:
+            next_tc_pk=None
+        if next_tc_pk is not None:
+            return HttpResponseRedirect('/qc/resolve_testcards/?testcard_pk={0}&remaining={1}&next_tc_pk={2}'.format(testcard.pk, remaining, next_tc_pk))
+        elif testcard is not None:
+            return HttpResponseRedirect('/qc/resolve_testcards/?testcard_pk={0}&remaining={1}'.format(testcard.pk, remaining))
+        else:
+            return HttpResponseRedirect('/qc/no_testcards_left/')
+    else:
+        remaining = request.GET.get('remaining',0)
+        next_tc_pk = request.GET.get('next_tc_pk', None)
+        if next_tc_pk is not None:
+            next_tc = TestCard.objects.get(pk=next_tc_pk)
+        else:
+            next_tc = None
+        testcard = TestCard.objects.get(pk=request.GET.get('testcard_pk'))
+        testcard.status="Passed"
+        testcard_form = SimpleResolveTestCardForm(instance=testcard)
+        productinfo,created = ProductInfo.objects.get_or_create(flavor=testcard.retain.lot.flavor)
+        productinfo_form = ProductInfoForm(instance=productinfo)
+        return render_to_response('qc/testcards/resolve.html', 
                               {
+                               'next_tc':next_tc,
+                               'testcard_form':testcard_form,
+                               'productinfo_form':productinfo_form,
                                'testcard':testcard,
-                               'testcard_ondeck':testcard_ondeck,
                                'page_title': 'Resolve Test Card',
+                               'remaining':remaining
                                },
                               context_instance=RequestContext(request))
     
@@ -1020,7 +1069,7 @@ def rm_passed_finder(request):
     testcards = RMTestCard.objects.filter(status="Pending").annotate(num_tcs=Count('retain__rmtestcard')).filter(num_tcs=1)[0:10]
     return render_to_response('qc/testcards/passed_finder.html',
                               {
-                               'form_action_url':'/django/qc/rm_passed_finder/',
+                               'form_action_url':'/qc/rm_passed_finder/',
                                'testcards':testcards},
                               context_instance=RequestContext(request))
 
@@ -1041,15 +1090,13 @@ def passed_finder(request):
                 controller.testcard_simple_status_to_under_review(tc)
 
     
-    testcards = TestCard.objects.filter(status="Pending").annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1)[0:10]
+    testcards = TestCard.objects.filter(status__in=("Pending","Pending QC")).annotate(num_tcs=Count('retain__testcard')).filter(num_tcs=1)[0:10]
     return render_to_response('qc/testcards/passed_finder.html',
                               {
-                               'form_action_url':'/django/qc/passed_finder/',
+                               'form_action_url':'/qc/passed_finder/',
                                'testcards':testcards},
                               context_instance=RequestContext(request))
-    
-def test():
-    return 1
+
 
 def last_chance(request):
    
@@ -1109,7 +1156,7 @@ def edit_coa(request, ssl_pk): #TODO TODO TODO DOTODOTDOTO TODOT TODTODO OTODOTD
 #             
 # 
 #             
-#             #return HttpResponseRedirect("/django/access/%s/spec_list/" % flavor.number)
+#             #return HttpResponseRedirect("/access/%s/spec_list/" % flavor.number)
 #         else:
 #             return render_to_response('access/flavor/spec_list.html', 
 #                                   {'flavor': flavor,
@@ -1168,12 +1215,74 @@ def edit_coa(request, ssl_pk): #TODO TODO TODO DOTODOTDOTO TODOT TODTODO OTODOTD
     #   save the form
 
 
+lot_list_queryset = Lot.objects.extra(select={'lotyear':'extract(year from date)','lotmonth':'extract(month from date)'})
+lls = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
+#Lot.objects.extra(select={'lotyear':'YEAR(date)','lotmonth':'MONTH(date)'}, order_by=['lotyear','lotmonth',],),
 
 
+# @permission_required('access.view_flavor')
+# def lot_list(request, paginate_by = 'default', queryset = 'default'):
+#     
+#     
+#     if (queryset != 'default'): #use different queryset (eg. lots by day)
+#         queryset = queryset
+#         pagination_count = None
+#     else:
+#         
+#         lot_list_queryset = Lot.objects.extra(select={'lotyear':'extract(year from date)','lotmonth':'extract(month from date)'})   
+#         queryset = lot_list_queryset.order_by('-lotyear','-lotmonth','-number')
+#     
+#         if (paginate_by != 'default'): #when the user clicks a new pagination value, save the new value into the user's userprofile
+#             request.user.userprofile.lot_paginate_by = int(paginate_by)
+#             pagination_count = int(paginate_by)
+#         else:
+#             pagination_count = request.user.userprofile.lot_paginate_by 
+#             if pagination_count == None: #this only occurs once; when the user accesses the lots page for the first time it will no longer be None
+#                 request.user.userprofile.lot_paginate_by = 100
+#                 pagination_count = 100
+#             
+#         request.user.userprofile.save() #save new lot pagination value
+# 
+#     return list_detail.object_list(
+#         request,
+#         queryset = queryset,
+#         paginate_by = pagination_count,
+#         extra_context = dict({
+#             'page_title': 'Lots',
+#             'print_link': 'javascript:document.forms["lot_selections"].submit()',
+#             'month_list': lot_month_list,
+#             'status_list': lot_status_list,
+#             'filterselect':LotFilterSelectForm(),
+#             'user': request.user.get_full_name(),
+#             'pagination_list': [10, 25, 50, 100, 500, 1000],
+#             'pagination_count': pagination_count,
+#             'lot_list_admin': "/admin/newqc/lot/"
+#             # fix this javascript...
+#         }),
+#     )
+def scanned_docs(request, paginate_by='default',):
+    if (paginate_by != 'default'): #when the user clicks a new pagination value, save the new value into the user's userprofile
+        pagination_count = int(paginate_by)
+    else:
+        pagination_count = 100
+        
 
+    #scanned_doc_types = ScannedDoc.objects.all().order_by('content_type__name').values('content_type__id', 'content_type__name').distinct()
+    return list_detail.object_list(
+        request,
+        queryset=ScannedDoc.objects.all(),
+        paginate_by=pagination_count,
+        extra_context={
+            'page_title': "Scanned Documents",
+            'pagination_count': pagination_count,
+            'pagination_list': [10, 25, 50, 100, 500, 1000],
+            #'scanned_doc_types': scanned_doc_types,
+        }
+    )
 
-
-
+def migrate_scanned_docs(request):
+    populate_scanned_docs.execute()
+    return HttpResponseRedirect('/django/qc/scanned_docs/')
 
 #to generate pngs from a pdf file
 # convert -geometry 3000x3000 -density 300x300 -quality 100 test.pdf testdf.png
@@ -1183,11 +1292,10 @@ def edit_coa(request, ssl_pk): #TODO TODO TODO DOTODOTDOTO TODOT TODTODO OTODOTD
 
 #
 #def logger_test(request):
-#    logging.basicConfig(filename='/usr/local/django/fd/curlprinter.log', level=logging.INFO)
+#    logging.basicConfig(filename='/var/www/django/fd/curlprinter.log', level=logging.INFO)
 #    
 #    result = logger_test_task.delay(request.META['QUERY_STRING'])
 #    result.wait()
 #    logging.info('Request result: %s' % result.result)
 #    return render_to_response('base.html',
 #                              {"page_title":result.result})
-#    

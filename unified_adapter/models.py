@@ -143,9 +143,9 @@ class ProductInfo(models.Model):
     @staticmethod
     def get_absolute_url(self):
         if self.production_number:
-            return '/django/access/%s/' % self.production_number
+            return '/access/%s/' % self.production_number
         elif self.experimental_number:
-            return '/django/access/experimental/%s/' % self.experimental_number
+            return '/access/experimental/%s/' % self.experimental_number
     
     @staticmethod
     def get_absolute_url_from_softkey(softkey):
@@ -225,7 +225,7 @@ class Application(models.Model):
     memo = models.TextField(blank=True)
     
     def get_admin_url(self):
-        return "/django/admin/unified_adapter/application/%s/" % self.pk
+        return "/admin/unified_adapter/application/%s/" % self.pk
     
     def __unicode__(self):
         if self.memo is not "":
@@ -266,7 +266,7 @@ app_types = [
              ["Non-food Fragrance",62,63],
              ]
 
-def import_applications(spreadsheet_path="/usr/local/django/dump/sample_data/flavors.xls"):
+def import_applications(spreadsheet_path="/var/www/django/dump/sample_data/flavors.xls"):
     re_init()
     wb = open_workbook(spreadsheet_path)
     sheet = wb.sheets()[0]

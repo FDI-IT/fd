@@ -16,6 +16,7 @@
 <div id="formula_form">
 {{ status_msg }}
 <form method="post" action="">
+	{% csrf_token %}
     {{ mgmt_form }}
     
     <table>

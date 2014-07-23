@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div id="content-main">
+    <h3>Every purchased raw material is listed in this report once corresponding to the most recent time it was ordered. The links on the left lead to the raw material review page. The links on the right lead to the purchase order and supplier pages.</h3>
+    <div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+
+    <table width="100%">
+	<tr>
+	    <th>PIN</th>
+	    <th>Name</th>
+	    <th>PO Date Ordered</th>
+	    <th>PO Number</th>
+	    <th>PO Supplier</th>
+	</tr>
+	{% for poli in object_list %}
+	    <tr>
+		<td><a href="{{poli.raw_material.get_absolute_url}}">{{ poli.raw_material.id }}</a></td>
+		<td><a href="{{poli.raw_material.get_absolute_url}}">{{ poli.raw_material.product_name }}</a></td>
+		<td>{{ poli.po.date_ordered }}</td>
+		<td><a href="{{ poli.po.get_absolute_url }}">{{ poli.po.number }}</a></td>
+		<td><a href="{{ poli.po.supplier.get_absolute_url }}">{{ poli.po.supplier }}</a></td>
+	    </tr>
+	{% endfor %}
+    </table>
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+    </div>
+{% endblock %}

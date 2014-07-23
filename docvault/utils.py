@@ -43,7 +43,7 @@ def process_jbg(jbg_path):
     jbg_name = jbg_path.split('/')[-1]
     
     # a copy is made before it's deleted...better that than lose anything
-    cache_jbg_path = "/usr/local/django/dump/imagecache/%s - %s" % (datetime.now(), jbg_name)
+    cache_jbg_path = "/var/www/django/dump/imagecache/%s - %s" % (datetime.now(), jbg_name)
     shutil.copyfile(jbg_path, cache_jbg_path)
     process = subprocess.Popen(['echo'], shell=False)
 
@@ -108,7 +108,7 @@ def barcode_scan(img_path):
     process.wait()
     # just in case you need to convert to a cropped selection, increase
     # zbarimg success rated
-    # convert /usr/local/django/dump/scanbatch/image\(6\).png -crop 1100x1100+400+400 crop.png
+    # convert /var/www/django/dump/scanbatch/image\(6\).png -crop 1100x1100+400+400 crop.png
     #
     # parsing the results
     scan_value = process.communicate()[0]
@@ -197,7 +197,7 @@ def convert_pdf(path, user=User.objects.get(username='stachurski')):
 # the same. Get a jbg file, hash it, make a test card and delete the jbg.
 #
 #def scan_card():
-#    card_file = get_card_file('/usr/local/django/dump/scanbatch/')
+#    card_file = get_card_file('/var/www/django/dump/scanbatch/')
 #    
 #    if card_file:
 #        jbg_file = open(card_file, 'r')
