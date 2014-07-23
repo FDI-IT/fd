@@ -55,9 +55,16 @@ urlpatterns = patterns('',
     (r'^history_audit/', include ('history_audit.urls')),
     (r'^export/', include ('export.urls')),
     (r'^reports/', include ('reports.urls')),
+    (r'^ghs_app/', include ('hazard_calculator.urls')),
 )
 
 urlpatterns += staticfiles_urlpatterns()
+
+# import django.views.static.serve
+# 
+# urlpatterns += patterns('',
+#     url(r'^static/(?P<path>.*)$', serve_static, {'document_root': settings.STATIC_ROOT, 'show_indexes': settings.DEBUG}),
+# )
 
 from access.models import Flavor, Ingredient, ExperimentalLog, Formula
 

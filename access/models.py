@@ -1242,7 +1242,7 @@ class Flavor(FormulaInfo):
     
     @property
     def table_name(self):
-        return " ".join(self.name, self.label_type)
+        return " ".join([self.name, self.label_type])
     
     @property
     def natart_name_with_type(self):
