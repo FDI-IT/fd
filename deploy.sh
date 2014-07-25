@@ -3,7 +3,7 @@ apt-get update
 
 apt-get -fy upgrade 
 
-apt-get -y install build-essential tmux vim ipython apache2 apache2-bin apache2-data apache2-mpm-worker libapache2-mod-wsgi rsync python-pip python-dev glabels glabels-dev glabels-data openssh-server memcached libboost-python-dev python-pythonmagick libzbar-dev libcurl4-gnutls-dev libpq-dev
+apt-get -y install build-essential tmux vim ipython apache2 apache2-bin apache2-data apache2-mpm-worker libapache2-mod-wsgi rsync python-pip python-dev glabels glabels-dev glabels-data openssh-server memcached libboost-python-dev python-pythonmagick libzbar-dev libcurl4-gnutls-dev libpq-dev man postgresql-client-9.3
 
 pip install psycopg2 xlrd pycurl celery elaphe python-memcached python-dateutil django==1.4.13 django-reversion==1.6.6 django-celery django-formfieldset
 pip install --allow-external pil --allow-unverified pil pil 

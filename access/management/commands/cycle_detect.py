@@ -23,10 +23,6 @@ class Command(BaseCommand):
     can_import_settings = True                
 
     def handle(self, *args, **options):
-#        if options.get('testdata') == True:
-#            base_path = settings.CSVTEST_PATH
-#        else:
-#            base_path = settings.CSVSOURCE_PATH
         
         # clean up the directory where all our exception info is logged
         cd = CycleDetection()

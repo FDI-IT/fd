@@ -1,15 +1,4 @@
 # Django settings for fd project.
-import os
-import sys
-sys.path.append(os.getcwd())
-
-#add the ghs project to access hazard calculator
-#sys.path.append('/var/www/django/ghs')
-sys.path.append('/var/www/django/')
-
-
-# Set the DJANGO_SETTINGS_MODULE environment variable.
-os.environ['DJANGO_SETTINGS_MODULE'] = "fd.settings"
 
 from LOCAL_SECRETS import DATABASES, SECRET_KEY
 
@@ -20,9 +9,7 @@ TEMPLATE_DEBUG = DEBUG
 #HAYSTACK_SEARCH_ENGINE = 'whoosh'
 #HAYSTACK_WHOOSH_PATH = '/var/www/django/dump/haystack'
 
-THUMBNAIL_FORMAT = 'PNG'
 DUMP_DIR = '/var/www/django/dump'
-#FIXTURE_DIRS = '/var/www/django/fd/fixtures'
 CSVSOURCE_PATH = '/var/www/django/dump/sample_data/sql_files'
 MDB_FILE = 'flv.mdb'
 CSVTEST_PATH = '/var/www/django/dump/sql_filestt'

@@ -1,0 +1,11 @@
+DROP TABLE south_migrationhistory;
+DROP TABLE celery_taskmeta;
+DROP TABLE celery_tasksetmeta;
+DROP TABLE djcelery_intervalschedule CASCADE;
+DROP TABLE djcelery_intervalschedule CASCADE;
+DROP TABLE djcelery_crontabschedule;
+DROP TABLE djcelery_crontabschedule CASCADE;
+DROP TABLE djcelery_periodictasks CASCADE;
+DROP TABLE djcelery_periodictask CASCADE;
+DROP TABLE djcelery_workerstate CASCADE;
+DROP TABLE djcelery_taskstate CASCADE;

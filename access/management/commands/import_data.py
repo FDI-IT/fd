@@ -102,7 +102,10 @@ class Command(BaseCommand):
             Models need a "access_table_name" field to indicate which table
             is the source of data of the model.
             """
-        if options.get('anon') == True:
+        if options.get('anon') == True:#        if options.get('testdata') == True:
+#            base_path = settings.CSVTEST_PATH
+#        else:
+#            base_path = settings.CSVSOURCE_PATH
             self.handle_anon(model_list)
             
         # TODO check integrity here!
