@@ -145,6 +145,8 @@ INSTALLED_APPS = (
     'django.contrib.databrowse',
     'django.contrib.messages',
     'djcelery',
+    'south',
+    'reversion',
     'pluggable',
     'homepage', 
     'haccp',
@@ -158,16 +160,12 @@ INSTALLED_APPS = (
     'flavor_usage',
     'performance_appraisal',
     'formfieldset',
-    'reversion',
-    #'fdileague',
     'batchsheet',
     'docvault',
     'unified_adapter',
     'reports',
     'hazard_calculator',
-    'south',
     #'history_audit',
-    #'haystack',
 )
 
 # Celery configuration
