@@ -1,6 +1,9 @@
 from django.conf.urls.defaults import *
-
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
+import autocomplete_light
+autocomplete_light.autodiscover()
+
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -55,9 +58,17 @@ urlpatterns = patterns('',
     (r'^history_audit/', include ('history_audit.urls')),
     (r'^export/', include ('export.urls')),
     (r'^reports/', include ('reports.urls')),
+    (r'^ghs_app/', include ('hazard_calculator.urls')),
+    (r'^autocomplete/', include('autocomplete_light.urls')),
 )
 
 urlpatterns += staticfiles_urlpatterns()
+
+# import django.views.static.serve
+# 
+# urlpatterns += patterns('',
+#     url(r'^static/(?P<path>.*)$', serve_static, {'document_root': settings.STATIC_ROOT, 'show_indexes': settings.DEBUG}),
+# )
 
 from access.models import Flavor, Ingredient, ExperimentalLog, Formula
 

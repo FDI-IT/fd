@@ -62,10 +62,14 @@ i don't know if this interferes with all the 'media' stuff
 to create a test server: python manage.py testserver access/fixtures/testdata.json --addrport 0.0.0.0:8000
 
 '''
-STATIC_ROOT = ''
-STATIC_URL = '/djangomedia/'
+STATIC_ROOT = '/var/www/static_root'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = ('/var/www/django/fd/staticmedia',)
 
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder"
+)
 
 
 
@@ -85,14 +89,17 @@ MEDIA_URL = '/djangomedia/'
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/djangoadminmedia/'
+#ADMIN_MEDIA_PREFIX = '/djangoadminmedia/'
 
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.load_template_source',
+    
+    #loads templates from Python eggs rather than from the filesystem
+    #can now use templates from hazard_calculator
+    'django.template.loaders.eggs.Loader', 
 )
 
 
@@ -144,6 +151,7 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'django.contrib.databrowse',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
     'djcelery',
     'south',
     'reversion',
@@ -165,6 +173,7 @@ INSTALLED_APPS = (
     'unified_adapter',
     'reports',
     'hazard_calculator',
+    #'autocomplete_light',
     #'history_audit',
 )
 
