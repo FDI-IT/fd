@@ -185,7 +185,8 @@ INSTALLED_APPS = (
     'unified_adapter',
     'reports',
     'hazard_calculator',
-    'south',
+    #'autocomplete_light',
+    #'south',
     #'history_audit',
     #'haystack',
 )

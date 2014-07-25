@@ -276,7 +276,7 @@ class Ingredient(models.Model):
     cas = models.CharField( 
             max_length=15,
             blank=True,
-            db_column="CAS")
+            db_column="cas") #change to CAS?  why?
     rawmaterialcode = models.PositiveIntegerField(
             primary_key=True,
             db_column='RawMaterialCode',
