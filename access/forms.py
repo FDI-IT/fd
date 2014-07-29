@@ -472,6 +472,11 @@ class FlavorFilterSelectForm(forms.Form):
         choices=RISK_ASSESSMENT_CHOICES,                                              
         )
     
+    flash_point = forms.IntegerField(required=False, help_text="Only flavors with a flash point greater than the entered value will be part of search results. Flavors with blank flash points will not be returned.")
+    exclude_any_ingredients = forms.CharField(label="Exclude ANY ingredients", required=False, help_text="Enter a list of PINs separated by comma. Flavors with any of these ingredients will not be part of search results.")
+    include_any_ingredients = forms.CharField(label="Include ANY ingredients", required=False, help_text="Enter a list of PINs separated by comma. Flavors with any of these ingredients will be part of search results.")
+    include_all_ingredients = forms.CharField(label="Include ALL ingredients", required=False, help_text="Enter a list of PINs separated by comma. Flavors with this specific combination of ingredients will be part of search results.")
+    
 class ExperimentalFilterSelectForm(forms.Form):
     cursor = connection.cursor()
     cursor.execute('select distinct "ExperimentalLog"."Initials" from "ExperimentalLog" ORDER BY "ExperimentalLog"."Initials" ASC')
