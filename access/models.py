@@ -275,8 +275,7 @@ class Ingredient(models.Model):
                                       default=get_next_rawmaterialcode)
     cas = models.CharField( 
             max_length=15,
-            blank=True,
-            db_column="cas") #change to CAS?  why?
+            blank=True,) 
     rawmaterialcode = models.PositiveIntegerField(
             primary_key=True,
             db_column='RawMaterialCode',
@@ -1339,6 +1338,48 @@ class Flavor(FormulaInfo):
         return next_tempex_number
     
     @staticmethod
+    def process_special_kwargs(resultant_objects, form_data):
+        if 'exclude_any_ingredients' in form_data and form_data['exclude_any_ingredients'] != '':
+            exclude_any_ingredients = form_data['exclude_any_ingredients'].replace(' ','').split(',')
+            resultant_objects = Flavor.flavors_excluding_ingredients(resultant_objects, exclude_any_ingredients)
+        if 'include_any_ingredients' in form_data and form_data['include_any_ingredients'] != '':
+            include_any_ingredients = form_data['include_any_ingredients'].replace(' ','').split(',')
+            resultant_objects = Flavor.flavors_including_any_ingredients(resultant_objects, include_any_ingredients)
+        if 'include_all_ingredients' in form_data and form_data['include_all_ingredients'] != '':
+            include_all_ingredients = form_data['include_all_ingredients'].replace(' ','').split(',')
+            resultant_objects = Flavor.flavors_including_all_ingredients(resultant_objects, include_all_ingredients)
+        if 'flash_point' in form_data and form_data['flash_point'] != '':
+            flash_point = form_data['flash_point']
+            resultant_objects = resultant_objects.filter(flashpoint__gte=flash_point)
+        return resultant_objects
+    
+    @staticmethod
+    def flavors_excluding_ingredients(flavor_queryset, exclude_ingredients):
+        """Modifies flavor_queryset to exclude flavors that contain any 
+        ingredients with IDs listed in exclude_ingredients.
+        """
+        exclude_these = LeafWeight.objects.filter(
+                ingredient__id__in=exclude_ingredients).values_list(
+                'root_flavor',flat=True).order_by().distinct()
+        return flavor_queryset.exclude(pk__in=exclude_these)
+    
+    @staticmethod
+    def flavors_including_any_ingredients(flavor_queryset, include_any_ingredients):
+        include_these = LeafWeight.objects.filter(
+                ingredient__id__in=include_any_ingredients).values_list(
+                'root_flavor',flat=True).order_by().distinct()
+        return flavor_queryset.filter(pk__in=include_these)
+    
+    @staticmethod
+    def flavors_including_all_ingredients(flavor_queryset, include_all_ingredients):
+        for ingredient_id in include_all_ingredients:
+            include_these = LeafWeight.objects.filter(
+                    ingredient__id=ingredient_id).values_list(
+                    'root_flavor',flat=True).order_by().distinct()
+            flavor_queryset = flavor_queryset.filter(pk__in=include_these)
+        return flavor_queryset
+    
+    @staticmethod
     def build_kwargs(qdict, default, get_filter_kwargs):
         string_kwargs = {}
         for key in get_filter_kwargs(qdict):
@@ -1377,6 +1418,8 @@ class Flavor(FormulaInfo):
                 for my_arg in qdict.getlist(key):
                     arg_list.append(my_arg)
                 string_kwargs[keyword] = arg_list
+            elif key in ["exclude_any_ingredients", "include_any_ingredients", "include_all_ingredients", "flash_point"]:
+                continue
             else:
                 keyword = '%s__in' % (key)
                 arg_list = []
