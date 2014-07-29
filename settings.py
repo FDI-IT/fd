@@ -46,7 +46,6 @@ TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-us'
 
 SITE_ID = 1
-SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -153,7 +152,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djcelery',
-    'south',
+#    'south',
     'reversion',
     'pluggable',
     'homepage', 
@@ -173,7 +172,7 @@ INSTALLED_APPS = (
     'unified_adapter',
     'reports',
     'hazard_calculator',
-    #'autocomplete_light',
+    'autocomplete_light',
     #'history_audit',
 )
 

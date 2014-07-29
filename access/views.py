@@ -1713,7 +1713,6 @@ def specification_list(request, flavor):
                               context_instance=RequestContext(request))    
         
 
-@permission_required('access.view_flavor')
 def edit_spec(request, flavor_number, spec_id=0):
     page_title = "Edit Customer Spec"
     
