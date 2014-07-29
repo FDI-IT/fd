@@ -522,7 +522,7 @@ def build_rm_checklist_row(pin):
 #        else:
 #            return HttpResponse(
 #                simplejson.dumps({
-#                    'preview': '<div><img src="/djangomedia/images/Icons/128x128/delete.png"></div>',
+#                    'preview': '<div><img src="/static/images/Icons/128x128/delete.png"></div>',
 #                    'fail': 'fail'          
 #                    
 #                }), 

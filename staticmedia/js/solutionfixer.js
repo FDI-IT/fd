@@ -151,7 +151,7 @@ var loadItems = function() {
 
 jQuery(document).ready(function(){
 	
-	$('body').append('<div id="ajaxBusy"><p><img src="/djangomedia/images/loading.gif"></p></div>');
+	$('body').append('<div id="ajaxBusy"><p><img src="/static/images/loading.gif"></p></div>');
 	
 	$('#ajaxBusy').css({
 		display:"none",

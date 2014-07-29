@@ -39,42 +39,42 @@
 		    	{% block toolbar %}
 		    	{% if help_link %}
 		    		{% ifnotequal help_link "" %} 
-		    			<a href="{{ help_link }}"><img src="/djangomedia/images/Icons/16x16/help.png"></a>
+		    			<a href="{{ help_link }}"><img src="/static/images/Icons/16x16/help.png"></a>
 		    		{% endifnotequal %}
 		    	{% endif %}
 				{% if accept_link %}
 		    		{% ifnotequal accept_link "" %} 
-		    			<a href="{{ accept_link }}" title="{{accept_link_alt}}"><img src="/djangomedia/images/Icons/16x16/accept.png"></a>
+		    			<a href="{{ accept_link }}" title="{{accept_link_alt}}"><img src="/static/images/Icons/16x16/accept.png"></a>
 		    		{% endifnotequal %}
 		    	{% endif %}
 				{% if del_link %}
 		    		{% ifnotequal del_link "" %} 
-		    			<a href="{{ del_link }}" title="{{ del_link_alt}}"><img src="/djangomedia/images/Icons/16x16/delete.png"></a>
+		    			<a href="{{ del_link }}" title="{{ del_link_alt}}"><img src="/static/images/Icons/16x16/delete.png"></a>
 		    		{% endifnotequal %}
 				{% endif %}
 				{% if repeat_link %}
 		    		{% ifnotequal repeat_link "" %} 
-		    			<a href="{{ repeat_link }}" title="{{repeat_link_alt}}"><img src="/djangomedia/images/Icons/16x16/repeat.png"></a>
+		    			<a href="{{ repeat_link }}" title="{{repeat_link_alt}}"><img src="/static/images/Icons/16x16/repeat.png"></a>
 		    		{% endifnotequal %}
 		    	{% endif %}
 				{% if pause_link %}
 		    		{% ifnotequal pause_link "" %} 
-		    			<a href="{{ pause_link }}" title="{{pause_link_alt}}"><img src="/djangomedia/images/Icons/16x16/pause.png"></a>
+		    			<a href="{{ pause_link }}" title="{{pause_link_alt}}"><img src="/static/images/Icons/16x16/pause.png"></a>
 		    		{% endifnotequal %}
 		    	{% endif %}
 				{% if print_link %}
 		    		{% ifnotequal print_link "" %} 
-		    			<a href="{{ print_link }}"><img src="/djangomedia/images/Icons/16x16/print.png"></a>
+		    			<a href="{{ print_link }}"><img src="/static/images/Icons/16x16/print.png"></a>
 		    		{% endifnotequal %}
 		    	{% endif %}
 		    	{% if recalculate_link %}
 		    		{% ifnotequal recalculate_link "" %} 
-		    			<a href="{{ recalculate_link }}"><img src="/djangomedia/images/Icons/16x16/calculator.png"></a>
+		    			<a href="{{ recalculate_link }}"><img src="/static/images/Icons/16x16/calculator.png"></a>
 		    		{% endifnotequal %}
 		    	{% endif %}
 		    	{% if experimental_edit_link %}
 		    		{% ifnotequal edit_link "" %} 
-	    			<a id="edit_link" href="{{ experimental_edit_link }}"><img src="/djangomedia/images/Icons/16x16/edit.png"></a>
+	    			<a id="edit_link" href="{{ experimental_edit_link }}"><img src="/static/images/Icons/16x16/edit.png"></a>
 		    		<ul id="edit_menu">
 	    				<li><a href="/access/experimental/{{experimental.experimentalnum}}/name_edit/">name</a></li>
 	    				<li><a href="/access/experimental/{{experimental.experimentalnum}}/edit/">properties</a></li>
@@ -83,7 +83,7 @@
 		    	{% endif %}
 		    	{% if flavor_edit_link %}
 		    		{% ifnotequal flavor_edit_link "" %} 
-	    			<a id="edit_link" href="{{ flavor_edit_link }}"><img src="/djangomedia/images/Icons/16x16/edit.png"></a>
+	    			<a id="edit_link" href="{{ flavor_edit_link }}"><img src="/static/images/Icons/16x16/edit.png"></a>
 		    		<ul id="edit_menu">
 	    				<li><a href="/access/flavor/{{flavor.number}}/spec_sheet/">spec sheet</a></li>
 	    			</ul>
@@ -91,7 +91,7 @@
 		    	{% endif %}
 		    	{% if approve_link %}
 		    		{% ifnotequal approve_link "" %} 
-		    			<a href="{{ approve_link }}"><img src="/djangomedia/images/Icons/16x16/accept.png"></a>
+		    			<a href="{{ approve_link }}"><img src="/static/images/Icons/16x16/accept.png"></a>
 		    		{% endifnotequal %}
 		    	{% endif %}
 				{% endblock toolbar %}

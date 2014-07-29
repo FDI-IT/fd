@@ -2,7 +2,7 @@
 {% load dashboard %}
 {% block toolbar %}
 {{ block.super }}
-<a href="../add_rm_retains/" title="Add Retains"><img src="/djangomedia/images/Icons/16x16/add.png"></a>
+<a href="../add_rm_retains/" title="Add Retains"><img src="/static/images/Icons/16x16/add.png"></a>
 {% endblock toolbar %}
 
 {% block content %}
@@ -62,9 +62,9 @@
 		<td><a href="/qc/rm_retains/{{retain.date|date:'Y'}}/{{retain.date|date:'m'}}/{{retain.date|date:'d'}}/">{{ retain.date|date:"Y-m-d" }}</a></td>
 		<td><a href="/qc/rm_retains/{{retain.status}}/">{{ retain.status }}</a></td>
 		{% if retain.rmtestcard_set.all.count > 0 %}
-			<td class="tc_present cell_icon"><img src="/djangomedia/images/Icons/16x16/accept.png">
+			<td class="tc_present cell_icon"><img src="/static/images/Icons/16x16/accept.png">
 		{% else %}
-			<td class="tc_missing cell_icon"><img src="/djangomedia/images/Icons/16x16/delete.png"></td>
+			<td class="tc_missing cell_icon"><img src="/static/images/Icons/16x16/delete.png"></td>
 		{% endif %}
 		</td>
 	    </tr>
