@@ -125,6 +125,7 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'django.contrib.databrowse',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
     'djcelery',
     'south',
     'reversion',
