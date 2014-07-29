@@ -375,9 +375,9 @@ class Lot(models.Model):
         
         for testresult in self.testresult_set.all():
             if testresult.result == '' or testresult.result == None:
-                return '/djangomedia/images/Icons/16x16/pause.png'
+                return '/static/images/Icons/16x16/pause.png'
                 
-        return '/djangomedia/images/Icons/16x16/accept.png'
+        return '/static/images/Icons/16x16/accept.png'
             
     
     headers = (

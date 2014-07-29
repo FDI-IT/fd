@@ -5,17 +5,6 @@ from LOCAL_SECRETS import DATABASES, SECRET_KEY
 DEBUG =True 
 TEMPLATE_DEBUG = DEBUG
 
-#HAYSTACK_SITECONF = 'search_sites'
-#HAYSTACK_SEARCH_ENGINE = 'whoosh'
-#HAYSTACK_WHOOSH_PATH = '/var/www/django/dump/haystack'
-
-DUMP_DIR = '/var/www/django/dump'
-CSVSOURCE_PATH = '/var/www/django/dump/sample_data/sql_files'
-MDB_FILE = 'flv.mdb'
-CSVTEST_PATH = '/var/www/django/dump/sql_filestt'
-CSVEXCEPTION_PATH = '/var/www/django/dump/exceptions'
-SOUTH_TESTS_MIGRATE = False
-
 AUTH_PROFILE_MODULE = 'personnel.UserProfile'
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 
@@ -51,9 +40,6 @@ SITE_ID = 1
 # to load the internationalization machinery.
 USE_I18N = True
 
-
-
-
 '''
 added all this stuff so static files are deployed when using runserver/testserver
 i don't know if this interferes with all the 'media' stuff
@@ -70,10 +56,6 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.AppDirectoriesFinder"
 )
 
-
-
-
-
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
 MEDIA_ROOT = '/var/www/djangomedia/'
@@ -85,20 +67,13 @@ MEDIA_URL = '/djangomedia/'
 #MEDIA_URL = 'http://localhost:8000/djangomedia/'
 #MEDIA_URL = '/staticmedia/'
 
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-#ADMIN_MEDIA_PREFIX = '/djangoadminmedia/'
 
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    
-    #loads templates from Python eggs rather than from the filesystem
-    #can now use templates from hazard_calculator
-    'django.template.loaders.eggs.Loader', 
+#     'django.template.loaders.eggs.load_template_source',
 )
 
 
@@ -150,9 +125,8 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'django.contrib.databrowse',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'djcelery',
-#    'south',
+    'south',
     'reversion',
     'pluggable',
     'homepage', 
@@ -172,7 +146,6 @@ INSTALLED_APPS = (
     'unified_adapter',
     'reports',
     'hazard_calculator',
-    #'autocomplete_light',
     #'history_audit',
 )
 
@@ -205,4 +178,3 @@ CSVSOURCE_PATH = '/var/www/django/dump/sample_data/sql_files'
 MDB_FILE = 'flv.mdb'
 CSVTEST_PATH = '/var/www/django/dump/sql_filestt'
 CSVEXCEPTION_PATH = '/var/www/django/dump/exceptions'
-

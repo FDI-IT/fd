@@ -27,10 +27,12 @@ cp django_apache_wsgi.conf /etc/apache2/sites-available/
 ln -s /etc/apache2/sites-available/django_apache_wsgi.conf /etc/apache2/sites-enabled/django_apache_wsgi.conf
 
 mkdir /var/www/djangomedia
-ln -s /usr/local/lib/python2.7/dist-packages/django/contrib/admin/static/admin /var/www/djangomedia/admin
-ln -s /var/www/django/fd/staticmedia/css /var/www/djangomedia/css
-ln -s /var/www/django/fd/staticmedia/js /var/www/djangomedia/js
-ln -s /var/www/django/fd/staticmedia/images /var/www/djangomedia/images
+
+mkdir /var/ww/static_root
+ln -s /usr/local/lib/python2.7/dist-packages/django/contrib/admin/static/admin /var/www/static_root/admin
+ln -s /var/www/django/fd/staticmedia/css /var/www/static_root/css
+ln -s /var/www/django/fd/staticmedia/js /var/www/static_root/js
+ln -s /var/www/django/fd/staticmedia/images /var/www/static_root/images
 
 chown -R www-data:www-data /var/www
 mkdir /var/log/django

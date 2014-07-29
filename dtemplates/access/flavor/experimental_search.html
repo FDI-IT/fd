@@ -38,9 +38,9 @@
 		    	<td>{{ flavor.rawmaterialcost }}</td>
 		    	<td>{{ flavor.lastspdate|date:"M Y" }}</td>
 		    	<td>{{ flavor.solvent }}</td>
-		    	<td>{% if flavor.valid %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</td>
-		    	<td>{% if flavor.approved %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</td>
-		    	<td>{% if flavor.sold %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</td>
+		    	<td>{% if flavor.valid %}<img src="/static/images/Icons/001_06.png">{% else %}<img src="/static/images/Icons/001_05.png">{% endif %}</td>
+		    	<td>{% if flavor.approved %}<img src="/static/images/Icons/001_06.png">{% else %}<img src="/static/images/Icons/001_05.png">{% endif %}</td>
+		    	<td>{% if flavor.sold %}<img src="/static/images/Icons/001_06.png">{% else %}<img src="/static/images/Icons/001_05.png">{% endif %}</td>
 		    </tr>
 		    {% endfor %}
 		    </tbody>

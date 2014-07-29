@@ -2,7 +2,7 @@
 {% load dashboard %}
 {% block toolbar %}
 {{ block.super }}
-<a href="../add_retains/" title="Add Retains"><img src="/djangomedia/images/Icons/16x16/add.png"></a>
+<a href="../add_retains/" title="Add Retains"><img src="/static/images/Icons/16x16/add.png"></a>
 {% endblock toolbar %}
 
 {% block content %}
@@ -63,9 +63,9 @@
 		<td>{{ retain.lot.amount|floatformat:0 }}</td>
 		<td><a href="/qc/retains/{{retain.status}}/">{{ retain.status }}</a></td>
 		{% if retain.testcard_set.all.count > 0 %}
-			<td class="tc_present cell_icon"><img src="/djangomedia/images/Icons/16x16/accept.png">
+			<td class="tc_present cell_icon"><img src="/static/images/Icons/16x16/accept.png">
 		{% else %}
-			<td class="tc_missing cell_icon"><img src="/djangomedia/images/Icons/16x16/delete.png"></td>
+			<td class="tc_missing cell_icon"><img src="/static/images/Icons/16x16/delete.png"></td>
 		{% endif %}
 		</td>
 	    </tr>

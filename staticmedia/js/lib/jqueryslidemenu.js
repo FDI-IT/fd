@@ -23,7 +23,7 @@ buildmenu:function(menuid, arrowsvar){
 			this.istopheader=$curobj.parents("ul").length==1? true : false
 			$subul.css({top:this.istopheader? this._dimensions.h+"px" : 0})
 			$curobj.children("a:eq(0)").css(this.istopheader? {paddingRight: arrowsvar.down[2]} : {}).append(
-				'<img src="/djangomedia/images/'+ (this.istopheader? arrowsvar.down[1] : arrowsvar.right[1])
+				'<img src="/static/images/'+ (this.istopheader? arrowsvar.down[1] : arrowsvar.right[1])
 				+'" class="' + (this.istopheader? arrowsvar.down[0] : arrowsvar.right[0])
 				+ '" style="border:0;" />'
 			)

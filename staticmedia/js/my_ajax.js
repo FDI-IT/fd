@@ -168,7 +168,7 @@ function update_label_preview () {
 		},
 		function (data) {
 			d = new Date();
-			jQuery('#label-preview').attr('src', '/djangomedia/images/preview.png?'+d.getTime());
+			jQuery('#label-preview').attr('src', '/static/images/preview.png?'+d.getTime());
 		}, 'json');
 };
 
@@ -238,7 +238,7 @@ jQuery(document).ready(function(){
 		// return false;
 	// });
 	
-	//$('body').append('<div id="ajaxBusy"><p><img src="/djangomedia/images/loading.gif"></p></div>');
+	//$('body').append('<div id="ajaxBusy"><p><img src="/static/images/loading.gif"></p></div>');
 	$('#ajaxBusy').css({
 		display:"none",
 		margin:"0px",
