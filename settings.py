@@ -172,7 +172,7 @@ INSTALLED_APPS = (
     'unified_adapter',
     'reports',
     'hazard_calculator',
-    #'autocomplete_light',
+    'autocomplete_light',
     #'history_audit',
 )
 
