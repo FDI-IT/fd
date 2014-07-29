@@ -172,7 +172,7 @@ INSTALLED_APPS = (
     'unified_adapter',
     'reports',
     'hazard_calculator',
-    'autocomplete_light',
+    #'autocomplete_light',
     #'history_audit',
 )
 
@@ -196,3 +196,13 @@ CELERYBEAT_SCHEDULE = {
         "args": ()
     },
 }
+
+SOUTH_TESTS_MIGRATE = False
+
+LOG_PATH = '/var/log/django/'
+DUMP_DIR = '/var/www/django/dump'
+CSVSOURCE_PATH = '/var/www/django/dump/sample_data/sql_files'
+MDB_FILE = 'flv.mdb'
+CSVTEST_PATH = '/var/www/django/dump/sql_filestt'
+CSVEXCEPTION_PATH = '/var/www/django/dump/exceptions'
+
