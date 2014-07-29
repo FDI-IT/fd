@@ -127,7 +127,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djcelery',
-    'south',
+    #'south',
     'reversion',
     'pluggable',
     'homepage', 

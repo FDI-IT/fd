@@ -20,10 +20,11 @@ def ji_function_initialize():
         RETURNS NULL ON NULL INPUT;                       
         
         DROP FUNCTION IF EXISTS jilist_update(integer);
-        
+
         CREATE FUNCTION jilist_update(integer) RETURNS VOID AS
-        'UPDATE access_jilist SET score = jaccard_index($1, "access_integratedproduct"."number") FROM "access_integratedproduct" WHERE a = $1 AND b = "access_integratedproduct"."number" OR a = "access_integratedproduct"."number" AND b = $1;
-        INSERT INTO access_jilist(a, b, score) SELECT $1, "access_integratedproduct"."number", jaccard_index($1, "access_integratedproduct"."number") FROM "access_integratedproduct" WHERE NOT ("access_integratedproduct"."number" = $1) AND NOT EXISTS (SELECT 1 FROM access_jilist WHERE a = $1 AND b = "access_integratedproduct"."number" OR a = "access_integratedproduct"."number" AND b = $1);'
+        'INSERT INTO access_jilist(a, b, score) SELECT $1, "access_integratedproduct"."number", jaccard_index($1, "access_integratedproduct"."number") FROM "access_integratedproduct" WHERE NOT ("access_integratedproduct"."number" = $1);
+        DELETE FROM access_jilist WHERE id NOT IN (SELECT id FROM access_jilist WHERE a=$1 ORDER BY -score LIMIT 100);'
+        
         LANGUAGE SQL
         RETURNS NULL ON NULL INPUT;
         
@@ -33,8 +34,13 @@ def ji_function_initialize():
         
     cursor.execute('COMMIT')    
 
-
-
+#    Using UPDATE slows down execution time exponentially as each flavor is processed
+#
+#         CREATE FUNCTION jilist_update(integer) RETURNS VOID AS
+#         'UPDATE access_jilist SET score = jaccard_index($1, "access_integratedproduct"."number") FROM "access_integratedproduct" WHERE a = $1 AND b = "access_integratedproduct"."number" OR a = "access_integratedproduct"."number" AND b = $1;
+#         INSERT INTO access_jilist(a, b, score) SELECT $1, "access_integratedproduct"."number", jaccard_index($1, "access_integratedproduct"."number") FROM "access_integratedproduct" WHERE NOT ("access_integratedproduct"."number" = $1) AND NOT EXISTS (SELECT 1 FROM access_jilist WHERE a = $1 AND b = "access_integratedproduct"."number" OR a = "access_integratedproduct"."number" AND b = $1);'
+#         LANGUAGE SQL
+#         RETURNS NULL ON NULL INPUT;
 
 
 def ji_update(flavor_num):
