@@ -3349,8 +3349,8 @@ def get_lorem_queue():
 q = get_lorem_queue()
 
 class JIList(models.Model):
-    a = models.PositiveIntegerField()
-    b = models.PositiveIntegerField()
+    a = models.PositiveIntegerField(db_index=True)
+    b = models.PositiveIntegerField(db_index=True)
     score = models.FloatField()
     
     class Meta:
