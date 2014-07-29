@@ -28,7 +28,7 @@ from access.barcode import barcodeImg, codeBCFromString
 from access.models import *
 from access.my_profile import profile
 from access.templatetags.review_table import review_table as legacy_explosion
-from access.templatetags.ft_review_table import consolidated, consolidated_indivisible, explosion, spec_sheet, customer_info, production_lots, retains, raw_material_pin, gzl_ajax, revision_history
+from access.templatetags.ft_review_table import consolidated, consolidated_indivisible, explosion, spec_sheet, customer_info, production_lots, retains, raw_material_pin, gzl_ajax, revision_history, similar_flavors
 from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_flavor
 from access.tasks import ingredient_replacer_guts
@@ -1280,6 +1280,7 @@ ajax_function = {
     'revision_history': (revision_history, 'history_audit/revision_history.html'),
     'spec_sheet': (spec_sheet, 'access/flavor/review_specsheet.html'),
     'customer_info': (customer_info, 'access/flavor/customer_info.html'),
+    'similar_flavors': (similar_flavors, 'access/flavor/similar_flavors.html')
 }
 
 #def ajax_dispatch(request, template_name, flavor_number):

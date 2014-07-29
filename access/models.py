@@ -1398,7 +1398,8 @@ class Flavor(FormulaInfo):
                        ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
                        ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
                        ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
-                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
+                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info'),
+                       ('/access/ajax_dispatch/?tn=similar_flavors&pk=%s' % self.pk, 'Similar Flavors')
                        ]
         if self.retain_superset().count()>0:
             related_links.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
@@ -1429,7 +1430,8 @@ class Flavor(FormulaInfo):
                        ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
                        ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
                        ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
-                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
+                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info'),
+                       ('/access/ajax_dispatch/?tn=similar_flavors&pk=%s' % self.pk, 'Similar Flavors')
                        ]
         if self.retain_superset().count()>0:
             product_tabs.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
