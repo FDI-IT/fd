@@ -27,9 +27,9 @@ def validate_lot_number(num):
 #         raise ValidationError(mark_safe("<a href='/qc/lots/'>Please enter a valid lot number."))
     if num.isdigit() == False:
         raise ValidationError("Lot number must be an integer.")
-    if Lot.objects.filter(number = num).count() > 1:
-        num = str(num)
-        raise ValidationError(mark_safe("<a href='/admin/newqc/lot/?q=%s'>Multiple lots exist with this lot number." % escape(num)))
+#     if Lot.objects.filter(number = num).count() > 1:
+#         num = str(num)
+#         raise ValidationError(mark_safe("<a href='/admin/newqc/lot/?q=%s'>Multiple lots exist with this lot number." % escape(num)))
 
         
 class FlavorNumberField(forms.IntegerField):

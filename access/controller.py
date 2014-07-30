@@ -22,8 +22,9 @@ def ji_function_initialize():
         DROP FUNCTION IF EXISTS jilist_update(integer);
 
         CREATE FUNCTION jilist_update(integer) RETURNS VOID AS
-        'INSERT INTO access_jilist(a, b, score) SELECT $1, "access_integratedproduct"."number", jaccard_index($1, "access_integratedproduct"."number") FROM "access_integratedproduct" WHERE NOT ("access_integratedproduct"."number" = $1);
-        DELETE FROM access_jilist WHERE id NOT IN (SELECT id FROM access_jilist WHERE a=$1 ORDER BY -score LIMIT 100);'
+        'DELETE FROM access_jilist WHERE a=$1;
+        INSERT INTO access_jilist(a, b, score) SELECT $1, "access_integratedproduct"."number", jaccard_index($1, "access_integratedproduct"."number") FROM "access_integratedproduct" WHERE NOT ("access_integratedproduct"."number" = $1);
+        DELETE FROM access_jilist WHERE a=$1 and id NOT IN (SELECT id FROM access_jilist WHERE a=$1 ORDER BY -score LIMIT 100);'
         
         LANGUAGE SQL
         RETURNS NULL ON NULL INPUT;
