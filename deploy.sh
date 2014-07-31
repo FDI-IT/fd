@@ -11,7 +11,7 @@ apt-get -y install build-essential tmux vim ipython apache2 apache2-bin \
 
 pip install psycopg2 xlrd pycurl celery elaphe python-memcached \
     python-dateutil django==1.4.13 django-reversion==1.6.6 django-celery \
-    django-formfieldset django-autocomplete-light south pillow
+    django-formfieldset django-autocomplete-light south pillow redis
 pip install --allow-external zbar --allow-unverified zbar zbar 
 
 # Monkey patching this line in Django to get admin to work with our super long model names
