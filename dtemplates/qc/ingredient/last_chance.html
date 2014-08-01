@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table>
+	<thead>
+		<tr>
+			<th>Retain Number</th>
+			<th>PIN</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for retain in lcr_list %}
+		<tr>
+			<td>{{ retain.short_repr }}</td>
+			<td><a href="/access/ingredient/pin_review/{{ retain.pin }}/">{{ retain.pin }}</a></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

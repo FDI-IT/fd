@@ -32,7 +32,7 @@ from access.models import Flavor, Ingredient, FlavorSpecification
 from access.views import flavor_info_wrapper
 from newqc.forms import TestResultForm, NewFlavorRetainForm, SimpleResolveTestCardForm, RetainStatusForm, ResolveRetainForm, ResolveLotForm, NewRMRetainForm, ProductInfoForm, LotFilterSelectForm, NewReceivingLogForm, AddObjectsBatch
 from newqc.models import Retain, ProductInfo, TestCard, Lot, RMRetain, BatchSheet, ReceivingLog, RMTestCard, LotSOLIStamp, TestResult, ScannedDoc
-from newqc.utils import process_jbg, get_card_file, scan_card
+from newqc.utils import process_jbg, get_card_file, scan_card, get_lcrs, get_rm_lcrs
 from newqc.tasks import walk_scanned_docs
 from salesorders.models import SalesOrderNumber, LineItem
 
@@ -1098,11 +1098,23 @@ def passed_finder(request):
                               context_instance=RequestContext(request))
 
 
-def last_chance(request):
-   
+def last_chance_retains(request):
+    lcr_dict = get_lcrs()
+    lcr_list = lcr_dict.values()
+    lcr_list = sorted(lcr_list, key=lambda retain: retain.date)
     return render_to_response('qc/retains/last_chance.html',
                               {
-                               
+                               'lcr_list':lcr_list,
+                               },
+                              context_instance=RequestContext(request))
+    
+def last_chance_rms(request):
+    lcr_dict = get_rm_lcrs()
+    lcr_list = lcr_dict.values()
+    lcr_list = sorted(lcr_list, key=lambda retain: retain.date)
+    return render_to_response('qc/ingredient/last_chance.html',
+                              {
+                               'lcr_list':lcr_list,
                                },
                               context_instance=RequestContext(request))
     

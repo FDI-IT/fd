@@ -101,4 +101,16 @@ def get_lcrs():
         if r == retain_list[0]:
             lcrs[f] = r
     return lcrs
-        
+
+def get_rm_lcrs():
+    lcrs = {}
+    last_chance_year = date.today().year-3
+    last_chance_retains = models.RMRetain.objects.filter(date__year=last_chance_year).filter(status="Passed")
+    for r in last_chance_retains:
+        print r
+        pin = r.pin
+        if pin in lcrs:
+            continue
+        if r == models.RMRetain.objects.filter(pin=pin)[0]:
+            lcrs[pin] = r
+    return lcrs

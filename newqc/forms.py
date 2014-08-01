@@ -53,7 +53,11 @@ class NewFlavorRetainForm(forms.Form):
         lot_number = cleaned_data.get("lot_number")
         
         try:
-            lot_pk = Lot.objects.get(number=lot_number).pk
+            lots = Lot.objects.filter(number=lot_number).filter(flavor__number=flavor_number)
+            if lots.count() == 1:
+                lot_pk = lots[0].pk
+            else:
+                raise ValidationError(mark_safe("The given lot number exists but does not correspond to the given flavor."))
         except Lot.DoesNotExist:
             raise ValidationError(mark_safe("A lot with that number does not exist. <a href='/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a>"))
         
