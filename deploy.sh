@@ -7,7 +7,8 @@ apt-get -y install build-essential tmux vim ipython apache2 apache2-bin \
     apache2-data apache2-mpm-worker libapache2-mod-wsgi rsync python-pip \
     python-dev glabels glabels-dev glabels-data openssh-server memcached \
     libboost-python-dev python-pythonmagick libzbar-dev libcurl4-gnutls-dev \
-    libpq-dev man postgresql-client-9.3 gettext zlib1g-dev libjpeg-dev
+    libpq-dev man postgresql-client-9.3 gettext zlib1g-dev libjpeg-dev \
+    redis-server
 
 #setting up virtualenv and virtualenvwrapper
 pip install virtualenv
