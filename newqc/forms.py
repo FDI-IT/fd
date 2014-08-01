@@ -27,9 +27,9 @@ def validate_lot_number(num):
 #         raise ValidationError(mark_safe("<a href='/qc/lots/'>Please enter a valid lot number."))
     if num.isdigit() == False:
         raise ValidationError("Lot number must be an integer.")
-    if Lot.objects.filter(number = num).count() > 1:
-        num = str(num)
-        raise ValidationError(mark_safe("<a href='/admin/newqc/lot/?q=%s'>Multiple lots exist with this lot number." % escape(num)))
+#     if Lot.objects.filter(number = num).count() > 1:
+#         num = str(num)
+#         raise ValidationError(mark_safe("<a href='/admin/newqc/lot/?q=%s'>Multiple lots exist with this lot number." % escape(num)))
 
         
 class FlavorNumberField(forms.IntegerField):
@@ -53,7 +53,11 @@ class NewFlavorRetainForm(forms.Form):
         lot_number = cleaned_data.get("lot_number")
         
         try:
-            lot_pk = Lot.objects.get(number=lot_number).pk
+            lots = Lot.objects.filter(number=lot_number).filter(flavor__number=flavor_number)
+            if lots.count() == 1:
+                lot_pk = lots[0].pk
+            else:
+                raise ValidationError(mark_safe("The given lot number exists but does not correspond to the given flavor."))
         except Lot.DoesNotExist:
             raise ValidationError(mark_safe("A lot with that number does not exist. <a href='/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a>"))
         
