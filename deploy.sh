@@ -9,6 +9,16 @@ apt-get -y install build-essential tmux vim ipython apache2 apache2-bin \
     libboost-python-dev python-pythonmagick libzbar-dev libcurl4-gnutls-dev \
     libpq-dev man postgresql-client-9.3 gettext zlib1g-dev libjpeg-dev
 
+#setting up virtualenv and virtualenvwrapper
+pip install virtualenv
+pip install virtualenvwrapper
+echo 'WORKON_HOME=$HOME/.virtualenvs' >> ~/.bashrc
+echo 'source /usr/local/bin/virtualenvwrapper.sh' >> ~/.bashrc
+source ~/.bashrc
+mkvirtualenv fd_env
+workon fd_env
+
+
 pip install psycopg2 xlrd pycurl celery elaphe python-memcached \
     python-dateutil django==1.4.13 django-reversion==1.6.6 django-celery \
     django-formfieldset django-autocomplete-light south pillow
