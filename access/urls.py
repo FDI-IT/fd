@@ -74,4 +74,5 @@ urlpatterns = patterns('access.views',
     (r'^rm_allergen_list/$', 'rm_allergen_list'),
     (r'^angularjs_test/$', 'angularjs_test'),
     (r'^ingredient_comparison_reports/$', 'ingredient_comparison_reports'),
+    (r'^search/$', include('haystack.urls')),
 )

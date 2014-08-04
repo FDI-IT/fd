@@ -111,7 +111,16 @@ TEMPLATE_DIRS = (
     '/var/www/django/fd/dtemplates',
 )
 
-#
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://elasticsearch:9200/',
+        'INDEX_NAME': 'haystack',
+    },
+}
+
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.databrowse',
@@ -147,9 +156,11 @@ INSTALLED_APPS = (
     'unified_adapter',
     'reports',
     'hazard_calculator',
+    'haystack',
     #'autocomplete_light',
     #'history_audit',
 )
+
 
 # Celery configuration
 import djcelery
@@ -172,6 +183,7 @@ CELERYBEAT_SCHEDULE = {
     },
 }
 
+
 SOUTH_TESTS_MIGRATE = False
 
 LOG_PATH = '/var/log/django/'
@@ -180,3 +192,4 @@ CSVSOURCE_PATH = '/var/www/django/dump/sample_data/sql_files'
 MDB_FILE = 'flv.mdb'
 CSVTEST_PATH = '/var/www/django/dump/sql_filestt'
 CSVEXCEPTION_PATH = '/var/www/django/dump/exceptions'
+
