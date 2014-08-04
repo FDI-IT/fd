@@ -34,8 +34,8 @@ cd ghs
 python setup.py install
 
 cd /var/www/django/fd
-cp django_apache_wsgi.conf /etc/apache2/sites-available/
-ln -s /etc/apache2/sites-available/django_apache_wsgi.conf /etc/apache2/sites-enabled/django_apache_wsgi.conf
+ln -s /var/www/django/fd/django_apache_wsgi.conf /etc/apache2/sites-enabled/
+ln -s /etc/apache2/sites-enabled/django_apache_wsgi.conf /etc/apache2/sites-available/
 
 mkdir /var/www/djangomedia
 
