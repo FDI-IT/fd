@@ -19,6 +19,7 @@ from django.db import transaction
 from django.db.models import Count
 from django.views.generic.create_update import create_object
 from django.core.urlresolvers import reverse
+from django.core.files.uploadedfile import UploadedFile
 
 from reversion import revision
 
@@ -32,9 +33,9 @@ from access.templatetags.ft_review_table import consolidated, consolidated_indiv
 from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_flavor
 from access.tasks import ingredient_replacer_guts
-from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form, GHSReportForm, IngredientCasFemaPreviewForm, CasFemaSpreadsheetFileForm
+from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form, GHSReportForm, CasFemaSpreadsheetsFileForm
 from access.ghs_analysis import get_ghs_only_ingredients, get_fdi_only_ingredients, write_ghs_report, write_fdi_report
-from access.fema_cas import find_fema_changes, create_CAS_FEMA_dict, find_pending_changes_from_cas_fema_file
+from access.fema_cas import initialFormData, initialFormData_errors, initialFormData_changes, find_fema_changes, create_CAS_FEMA_dict, makeSelectedChanges, find_pending_changes_from_cas_fema_file, find_pending_changes_from_cas_fema_files
 
 from solutionfixer.models import Solution, SolutionStatus
 from one_off.mtf import *
@@ -2180,50 +2181,66 @@ def ingredient_comparison_reports(request):
     else:
         form = GHSReportForm()
     
-    return render_to_response('access/get_ingredient_comparison_reports.html', {'form': form,})
+    return render_to_response('access/get_ingredient_comparison_reports.html', {'form': form})
 
     
 def upload_cas_fema(request):
+    #CasFemaSpreadSheetFileFormSet = formset_factory(forms.CasFemaSpreadsheetFileForm, extra=2)
     if request.method == 'POST':
-        form = CasFemaSpreadsheetFileForm(request.POST, request.FILES)
+        form=CasFemaSpreadsheetsFileForm(request.POST, request.FILES)                               ##ISSUE (C.F.SpredsheetS) form is not valid
         if form.is_valid():
-            # to see how to process a file first check django docs, then see where parse_orders is used in this project
-            pending_changes = find_pending_changes_from_cas_fema_file(request.FILES['file'])
+        #formset=CasFemaSpreadSheetFileFormSet(request.POST, request.FILES)
+        #print request.FILES['file']
+#         uformset = formset_factory(forms.UploadedFile, extra=2)
+#         formset = uformset(request.POST, request.FILES)
+        #if formset.is_valid():
+            pending_changes = find_pending_changes_from_cas_fema_files(request.FILES['file1'], request.FILES['file2'])                    ##ISSUE --> can't .write() FileField (not UploadedFile field)
+            #pending_changes = find_pending_changes_from_cas_fema_files(request.FILES['form1'], request.FILES['form2'])
             request.session['pending_changes'] = pending_changes
             ##this is where we'll save the pending changes in the request session
             return HttpResponseRedirect('/access/preview_cas_fema')
     else:
-        form = CasFemaSpreadsheetFileForm()
-    return render_to_response('access/upload_cas_fema.html', {'form': form})
+        #formset = CasFemaSpreadSheetFileFormSet()
+        form = CasFemaSpreadsheetsFileForm()
+        #form2 = CasFemaSpreadsheetFileForm()
+    return render_to_response('access/upload_cas_fema.html', {'form': form})      # {'form1':form1, 'form2':form2})
 
 def preview_cas_fema(request):
     #pending_changes = request.session['pending_changes']
-    CasFemaFormSet = formset_factory(IngredientCasFemaPreviewForm)
-   # return render_to_response('access/preview_cas_fema.html', {'pending_changes':pending_changes})
-    if request.method == 'POST':
-        #CasFemaFormSet = formset_factory(IngredientCasFemaPreviewForm)  ##request.POST????
-        formset=CasFemaFormSet(request.POST)
-        if formset.is_valid():
-            process_formset(formset)
+    CasFemaFormSet = formset_factory(forms.CasFemaPreviewForm, extra=0)
+    #import pdb; pdb.set_trace()
+    if request.method == 'POST': 
+        
+        formset_changes=CasFemaFormSet(request.POST)
+
+        if formset_changes.is_valid():
+            listChanges = makeSelectedChanges(formset)
+            request.session.flush()
+            request.session['listChanges'] = listChanges               
             return HttpResponseRedirect('/access/success_cas_fema')
     else:
         pending_changes = request.session['pending_changes']
-        #find some way to stuff the pending changes into the below formset
-        #CasFemaFormSet = formset_factory(IngredientCasFemaPreviewForm)
-        initialFormData=[]
-        for ing in pending_changes:
-            initialFormData.append({
-                                    'change':False,
-                                    'ing_pk' : ing.pk,
-                                    'fema' : ing.fema,
-                                    'cas' : ing.cas,
-            })
-        formset = CasFemaFormSet(initial=initialFormData)                         ##request.POST????
-       # for ing in pending_changes:
-       # formset.clean()
-    return render_to_response('access/preview_cas_fema.html', {'formset': formset, 'pending_changes':pending_changes})
+        #(initialFormData_changes, other)=initialFormData_preview_view(pending_changes)
+        initialData_changes = initialFormData_changes(pending_changes['changed_ings'])
+        formset_changes = CasFemaFormSet(initial=initialData_changes)  
+        initialData_errors = initialFormData_errors(pending_changes['disagreements'])
+        formset_disagreements = CasFemaFormSet(initial=initialData_errors) 
+        initialData_noInfo = initialFormData(pending_changes['no_info'])
+        formset_noInfo = CasFemaFormSet(initial=initialData_noInfo)
+        initialData_unknownFema = initialFormData(pending_changes['unknownFema'])
+        formset_unknownFema = CasFemaFormSet(initial=initialData_unknownFema)
+    return render_to_response('access/preview_cas_fema.html', {
+                                                               'formset_changes': formset_changes, 
+                                                               'formset_disagreements': formset_disagreements, 
+                                                               'formset_noInfo':formset_noInfo, 
+                                                               'formset_unknownFema': formset_unknownFema
+                                                               })
 
-#def success_cas_fema(request):
+def success_cas_fema(request):
+    listChanges = request.session['listChanges']
     
-    
-    
+    request.session.flush()
+    return render_to_response('access/success_cas_fema.html', {'listChanges': listChanges})
+
+
+

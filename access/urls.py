@@ -74,5 +74,6 @@ urlpatterns = patterns('access.views',
     (r'^ingredient_comparison_reports/$', 'ingredient_comparison_reports'),
     (r'^upload_cas_fema/$', 'upload_cas_fema'),
     (r'^preview_cas_fema/$', 'preview_cas_fema'),
-)
-
+    (r'^success_cas_fema/$', 'success_cas_fema'),
+    
+) 

@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="title">
+	<div id="title-left">
+		<span id="name">Preview Ingredient CAS/FEMA data</span>
+	</div>
+</div>
+
+<div id="content-main">
+
+	<form enctype="multipart/form-data" action="/access/preview_cas_fema/" method="post">
+		{% csrf_token %}
+		
+		{{ formset_changes.management_form }}
+		{{ formset_changes.non_form_errors }}
+		{{ formset_changes.errors}}
+
+		<h1> Changed Ingredients </h1>
+		{% if formset_changes.isEmpty %}
+			<p> There are no ingredients in the database that should be corrected according to the attached documents</p>
+		{% else %}	
+		<table class="sorttable" width=100%>
+			<thead>
+				<tr class="cas_fema_headers">
+				<th width='15px'>Select</th>
+				<th> Ingredient</th>
+				<th> CAS Number</th>
+				<th> FEMA Number</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for form in formset_changes.forms %}
+								
+					{% if form.errors %}
+						<tr bgcolor="#FFDDDD">
+						<td colspan='4'><b>Please correct the error(s) in the following row. {{form.non_field_errors}} {{form.errors}}</b></td>
+						</tr>
+					{% endif %}
+					<tr>	
+					<td>
+					{{ form.Checkbox }}
+					{{ form.ing_pk  }}
+			 		</td>
+					<td>{{ form.ing_name }}  {{ form.ing_name.errors }} </td>
+					<td>{{ form.CAS }}  {{ form.CAS.errors }}  </td>
+					<td>{{ form.FEMA}} {{ form.FEMA.errors }} </td>
+					</tr>
+				{% endfor %}	
+			</tbody>
+		</table>
+		{% endif %}
+		
+		{{ formset_disagreements.management_form }}
+		{{ formset_disagreements.non_form_errors }}
+		{{ formset_disagreements.errors}}
+
+		<h1> Errors in Database </h1>
+		{% if formset_disagreements.isEmpty %}
+			<p> No information of Ingredients in the database disagree with the attached documents</p>
+		{% else %}	
+		<table class="sorttable" width=100%>
+			<thead>
+				<tr class="cas_fema_headers">
+				<th width='15px'>Select</th>
+				<th> Ingredient (in Database)</th>
+				<th> CAS Number (in Database)</th>
+				<th> FEMA Number (in Database)</th>
+				<th> Error                       </th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for form in formset_disagreements.forms %}
+								
+					{% if form.errors %}
+						<tr bgcolor="#FFDDDD">
+						<td colspan='4'><b>Please correct the error(s) in the following row. {{form.non_field_errors}} {{form.errors}}</b></td>
+						</tr>
+					{% endif %}
+					<tr>	
+					<td>
+					{{ form.Checkbox }}
+					{{ form.ing_pk  }}
+			 		</td>
+					<td>{{ form.ing_name }}  {{ form.ing_name.errors }} </td>
+					<td>{{ form.CAS }}  {{ form.CAS.errors }}  </td>
+					<td>{{ form.FEMA}} {{ form.FEMA.errors }} </td>
+					<td> {{ form.error }}</td>
+					</tr>
+				{% endfor %}	
+			</tbody>
+		</table>
+		{% endif %}
+		
+		{{ formset_noInfo.management_form }}
+		{{ formset_noInfo.non_form_errors }}
+		{{ formset_noInfo.errors}}
+
+		<h1> Ingredient has no Information in attached files </h1>
+		<table class="sorttable" width=100%>
+			<thead>
+				<tr class="cas_fema_headers">
+				<th width='15px'>Select</th>
+				<th> Ingredient</th>
+				<th> CAS Number</th>
+				<th> FEMA Number</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for form in formset_noInfo.forms %}
+								
+					{% if form.errors %}
+						<tr bgcolor="#FFDDDD">
+						<td colspan='4'><b>Please correct the error(s) in the following row. {{form.non_field_errors}} {{form.errors}}</b></td>
+						</tr>
+					{% endif %}
+					<tr>	
+					<td>
+					{{ form.Checkbox }}
+					{{ form.ing_pk  }}
+			 		</td>
+					<td>{{ form.ing_name }}  {{ form.ing_name.errors }} </td>
+					<td>{{ form.CAS }}  {{ form.CAS.errors }}  </td>
+					<td>{{ form.FEMA}} {{ form.FEMA.errors }} </td>
+					</tr>
+				{% endfor %}	
+			</tbody>
+		</table>
+		
+		{{ formset_unknownFema.management_form }}
+		{{ formset_unknownFema.non_form_errors }}
+		{{ formset_unknownFema.errors}}
+
+		<h1> Unknown Fema Number </h1>
+		<table class="sorttable" width=100%>
+			<thead>
+				<tr class="cas_fema_headers">
+				<th width='15px'>Select</th>
+				<th> Ingredient</th>
+				<th> CAS Number</th>
+				<th> FEMA Number (defaut is 0)</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for form in formset_unknownFema.forms %}
+								
+					{% if form.errors %}
+						<tr bgcolor="#FFDDDD">
+						<td colspan='4'><b>Please correct the error(s) in the following row. {{form.non_field_errors}} {{form.errors}}</b></td>
+						</tr>
+					{% endif %}
+					<tr>	
+					<td>
+					{{ form.Checkbox }}
+					{{ form.ing_pk  }}
+			 		</td>
+					<td>{{ form.ing_name }}  {{ form.ing_name.errors }} </td>
+					<td>{{ form.CAS }}  {{ form.CAS.errors }}  </td>
+					<td>{{ form.FEMA}} {{ form.FEMA.errors }} </td>
+					</tr>
+				{% endfor %}	
+			</tbody>
+		</table>		
+
+		<input type="submit" value="Submit" />
+	</form>
+</div>
+
+
+
+{% endblock %}

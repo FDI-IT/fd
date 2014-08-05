@@ -47,35 +47,9 @@ class UnicodeWriter:
         self.encoder = codecs.getincrementalencoder(encoding)()
 
     def writerow(self, row):
-        
-
-        #USE THIS IF NOT ALL ENTRIES ARE UNICODE; SOME ARE UNICODE/STRING/INT
-        encoded_row = []
-         
- 
-        for s in row:
-  
-            if type(s) == unicode:
-                u = s
-            elif type(s) == str:
-                u = unicode(s, 'utf-8')
-            elif type(s) == int:
-                u = unicode(s)
-                  
-            encoded_row.append(unicodedata.normalize('NFKD', u).encode('ascii','ignore'))
-             
-        self.writer.writerow(encoded_row)
-
-        #USE THIS IF ALL ENTRIES ARE UNICODE
-        #self.writer.writerow([unicodedata.normalize('NFKD', s).encode('ascii','ignore') for s in row])
-
-        #USE THIS IF ALL ENTRIES ARE STRINGS
-        #self.writer.writerow([unicodedata.normalize('NFKD', unicode(s,'utf-8')).encode('ascii','ignore') for s in row])
-        
-        #THIS IS THE ORIGINAL
-        #self.writer.writerow([s.encode("utf-8") for s in row])
-        
-
+        x = [s.encode("utf-8") for s in row]
+#         print x[1]
+        self.writer.writerow(x)
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         data = data.decode("utf-8")

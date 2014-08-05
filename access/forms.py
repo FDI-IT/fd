@@ -939,13 +939,18 @@ class GHSReportForm(forms.Form):
     
     report_to_download = forms.ChoiceField(required=True, choices=REPORT_CHOICES, widget=forms.RadioSelect())
     
-
-class CasFemaSpreadsheetFileForm(forms.Form):
-    file = forms.FileField()
+    
+class CasFemaSpreadsheetsFileForm(forms.Form):
+    file1 = forms.FileField()
+    file2 = forms.FileField()
+                                                           
                                         
-class IngredientCasFemaPreviewForm(forms.Form):
-    change = forms.BooleanField()
+class CasFemaPreviewForm(forms.Form):
+    Checkbox = forms.BooleanField(initial=True, required=False)
     ing_pk = forms.IntegerField(initial=0, widget=forms.HiddenInput)  
-    fema = forms.CharField(max_length=10)
-    cas = forms.CharField(max_length=10)                 
+    FEMA = forms.CharField(max_length=1)
+    CAS = forms.CharField(max_length=15)
+    ing_name = forms.CharField(max_length=60) 
+    error = forms.CharField(max_length=50)  
+
 
