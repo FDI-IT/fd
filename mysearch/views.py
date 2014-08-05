@@ -83,7 +83,9 @@ def search_guts(request, context_dict, paginate_by=None):
     sc = sanity_check(resultant_objects)
     if sc: return sc
     
-    
+    if MyModel == Flavor:
+        resultant_objects = Flavor.process_special_kwargs(resultant_objects, filterselect.data)
+
     # so now there are actual search results, some session stuff
     # happens including ordering the data
     last_search_space = request.session.get('last_space', None)

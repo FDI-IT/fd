@@ -1,26 +1,11 @@
 {% extends "base.html" %}
 {% load flat_review_table %}
 {% load blades %}
-{% load related_links %}
+{% load product_tabs %}
 {% block content %}
 
-<script type="text/javascript" src="/djangomedia/js/flavor_review.js?v=25"></script>
+<script type="text/javascript" src="/static/js/flavor_review.js?v=25"></script>
 <script>
-jQuery(document).ready(function(){	
-	
-	$( "#flavor-tabs" ).tabs({ 
-		cache: true,
-		active: 0,
-		spinner: '',
-		ajaxOptions: {
-			error: function(xhr, status, index, anchor) {
-				$( anchor.hash ).html(
-					"Failed to load tab."
-				);
-			}
-		}
-	});
-
 	$( "#flat-table" ).tablesorter({
 			headers: {
 			0: {
@@ -71,11 +56,11 @@ jQuery(document).ready(function(){
 {% endif %}
 
 <div class="product-memo"><span class="label">Memo</span>{{flavor.linked_memo|safe}}</div>
-<div class="product-memo"><span class="label">Memo</span>{{flavor.mixing_instructions}}</div>
+<div class="product-memo"><span class="label">Mixing Instructions</span>{{flavor.mixing_instructions}}</div>
 <div class="product-memo"><span class="label">Pricing Memo</span>{{flavor.pricing_memo}}</div>
 
-<div id="flavor-tabs">
-	{% related_links flavor %}
+<div id="product_tabs">
+	{% product_tabs flavor %}
 	
 	<input type="hidden" id="actual_adjusted_weight" value="1000">
 
@@ -89,6 +74,7 @@ jQuery(document).ready(function(){
 
 
 <form id="exportform" action="/access/table_to_csv" method="post" target="_blank">
+{% csrf_token %}
 <input type="hidden" id="exportdata" name="exportdata" />
 <input type="hidden" id="flavor_number" name="flavor_number" value="{{ flavor.number }}" />
 </form>

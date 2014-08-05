@@ -16,6 +16,7 @@
 		
 	
 	<form id="new-experimental-form" action="/access/experimental/{{experimental.experimentalnum}}/approve/" method="post">
+		{% csrf_token %}
 		{{ form.errors}}
 		{{form.non_form_errors}}
 		{{form.as_p}}

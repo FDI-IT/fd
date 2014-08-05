@@ -25,7 +25,7 @@
 		<tbody>
 	    {% for form in formset.forms %}
 	    	{% if form.errors %}
-	    		<tr bgcolor="#FF0000">
+	    		<tr bgcolor="#FFDDDD">
 	    			<td colspan = "4"><b> Please correct the error(s) in the following row. {{form.non_field_errors}}</b></td>
 	    		</tr>
 	    	{% endif %}

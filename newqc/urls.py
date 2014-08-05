@@ -86,4 +86,6 @@ urlpatterns = patterns('newqc.views',
     (r'^scanned_docs/paginate(?P<paginate_by>\d+)/$', 'scanned_docs'),
     
     (r'^migrate_scanned_docs/$', 'migrate_scanned_docs'),
+    (r'^last_chance_retains/$', 'last_chance_retains'),
+    (r'^last_chance_rms/$', 'last_chance_rms'),
 )

@@ -40,7 +40,9 @@ SD_COST = Decimal('3.50')
 
 all_solvent_list = Solvent.get_id_list()
 
-    
+
+
+
  
 def find_usage(ingredient_pk, gazinta_lists, flavor_valid):
     ingredient = Ingredient.objects.get(pk=ingredient_pk)
@@ -1045,6 +1047,30 @@ def recalculate_flavor(flavor):
         'flavor_results':flavor_results,
         'gazinta_results_list':gazinta_results_list,
     }
+    
+def recalculate_flavors(flavor_qs):
+    seen_set = set()
+    recalculated_list = []
+    for f in flavor_qs:
+        if f in seen_set: continue
+        
+        gazinta_list_bottom_up = list(f.gazintas())
+        gazinta_list_bottom_up.reverse()
+        
+        for g in gazinta_list_bottom_up:
+            if g not in seen_set:
+                recalculate_guts(g)
+                recalculated_list.append(g)
+                seen_set.add(g)
+                
+        recalculate_guts(f)
+        recalculated_list.append(f)
+        seen_set.add(f)
+    
+    return {
+            'seen_set':seen_set,
+            'recalculated_list':recalculated_list,
+        }
         
 """
 ALTER TABLE "ExperimentalLog" ADD COLUMN flavor_id integer;

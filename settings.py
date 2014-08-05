@@ -1,33 +1,9 @@
 # Django settings for fd project.
-import os
-import sys
-sys.path.append(os.getcwd())
-
-#add the ghs project to access hazard calculator
-sys.path.append('/var/www/django/ghs')
-sys.path.append('/var/www/django/')
-
-
-# Set the DJANGO_SETTINGS_MODULE environment variable.
-os.environ['DJANGO_SETTINGS_MODULE'] = "fd.settings"
 
 from LOCAL_SECRETS import DATABASES, SECRET_KEY
 
 DEBUG =True 
 TEMPLATE_DEBUG = DEBUG
-
-#HAYSTACK_SITECONF = 'search_sites'
-#HAYSTACK_SEARCH_ENGINE = 'whoosh'
-#HAYSTACK_WHOOSH_PATH = '/var/www/django/dump/haystack'
-
-THUMBNAIL_FORMAT = 'PNG'
-DUMP_DIR = '/var/www/django/dump'
-#FIXTURE_DIRS = '/var/www/django/fd/fixtures'
-CSVSOURCE_PATH = '/var/www/django/dump/sample_data/sql_files'
-MDB_FILE = 'flv.mdb'
-CSVTEST_PATH = '/var/www/django/dump/sql_filestt'
-CSVEXCEPTION_PATH = '/var/www/django/dump/exceptions'
-SOUTH_TESTS_MIGRATE = False
 
 AUTH_PROFILE_MODULE = 'personnel.UserProfile'
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
@@ -59,14 +35,10 @@ TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-us'
 
 SITE_ID = 1
-SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = True
-
-
-
 
 '''
 added all this stuff so static files are deployed when using runserver/testserver
@@ -75,14 +47,14 @@ i don't know if this interferes with all the 'media' stuff
 to create a test server: python manage.py testserver access/fixtures/testdata.json --addrport 0.0.0.0:8000
 
 '''
-STATIC_ROOT = ''
-STATIC_URL = '/djangomedia/'
+STATIC_ROOT = '/var/www/static_root'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = ('/var/www/django/fd/staticmedia',)
 
-
-
-
-
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder"
+)
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
@@ -95,17 +67,13 @@ MEDIA_URL = '/djangomedia/'
 #MEDIA_URL = 'http://localhost:8000/djangomedia/'
 #MEDIA_URL = '/staticmedia/'
 
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/djangoadminmedia/'
 
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
-#     'django.template.loaders.eggs.load_template_source',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+    'django.template.loaders.eggs.Loader',
 )
 
 
@@ -124,8 +92,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.gzip.GZipMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.csrf.middleware.CsrfMiddleware', 
-    'django.contrib.csrf.middleware.CsrfViewMiddleware', 
+    'django.middleware.csrf.CsrfViewMiddleware', 
     'django.middleware.transaction.TransactionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -142,9 +109,20 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     '/var/www/django/fd/dtemplates',
+    'fooalksdjf',
 )
 
-#
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://elasticsearch:9200/',
+        'INDEX_NAME': 'haystack',
+    },
+}
+
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.databrowse',
@@ -158,7 +136,10 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'django.contrib.databrowse',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
     'djcelery',
+    #'south',
+    'reversion',
     'pluggable',
     'homepage', 
     'haccp',
@@ -172,16 +153,16 @@ INSTALLED_APPS = (
     'flavor_usage',
     'performance_appraisal',
     'formfieldset',
-    'reversion',
-    #'fdileague',
     'batchsheet',
     'docvault',
     'unified_adapter',
     'reports',
     'hazard_calculator',
+    'haystack',
+    #'autocomplete_light',
     #'history_audit',
-    #'haystack',
 )
+
 
 # Celery configuration
 import djcelery
@@ -203,3 +184,14 @@ CELERYBEAT_SCHEDULE = {
         "args": ()
     },
 }
+
+
+SOUTH_TESTS_MIGRATE = False
+
+LOG_PATH = '/var/log/django/'
+DUMP_DIR = '/var/www/django/dump'
+CSVSOURCE_PATH = '/var/www/django/dump/sample_data/sql_files'
+MDB_FILE = 'flv.mdb'
+CSVTEST_PATH = '/var/www/django/dump/sql_filestt'
+CSVEXCEPTION_PATH = '/var/www/django/dump/exceptions'
+

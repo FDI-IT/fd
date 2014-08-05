@@ -316,7 +316,7 @@ margin-top:10px;}
 
 .title{height:20px;
 width:150px;
-background-image:url(/djangomedia/images/blade_back.png);
+background-image:url(/static/images/blade_back.png);
 font:helvetica;
 font-size:11px;
 font-weight:bold;
@@ -370,7 +370,7 @@ span.table_action_links {
 	display:none;
 }
 
-#flavor-tabs {
+#product_tabs {
 	clear:both;
 	position:fixed;
 	top:140px;

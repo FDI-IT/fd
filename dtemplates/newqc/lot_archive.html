@@ -15,7 +15,7 @@
 		</ul>
 	</div>
     <div id="content-main">
-    <form name="retain_selections" action="/qc/batch_print/" method="post">
+    <form name="retain_selections" action="/qc/batch_print/" method="post">{% csrf_token %}
     <table class="sorttable" width="100%">
 	<tr class="qcheaders">
 		<th width="15px">Select</th>

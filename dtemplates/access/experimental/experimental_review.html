@@ -5,10 +5,10 @@
 {% block content %}
 
 
-<script type="text/javascript" src="/djangomedia/js/flavor_review.js?v=25"></script>
+<script type="text/javascript" src="/static/js/flavor_review.js?v=25"></script>
 <script>
 jQuery(document).ready(function(){	
-	$( "#flavor-tabs" ).tabs({ 
+	$( "#product_tabs" ).tabs({ 
 		cache: true,
 		spinner: '',
 		ajaxOptions: {
@@ -81,7 +81,7 @@ jQuery(document).ready(function(){
 
 
 <h2 style="float:left;clear:both;"><a href="{{experimental.flavor.get_absolute_url}}">{{experimental.flavor}}</a></h2>
-<div id="flavor-tabs">
+<div id="product_tabs">
 	{% related_links experimental.flavor %}
 	
 	<input type="hidden" id="actual_adjusted_weight" value="1000">

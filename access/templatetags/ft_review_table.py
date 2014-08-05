@@ -3,11 +3,11 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django import template
 from django.core.urlresolvers import reverse
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 
-from access.models import Flavor, FormulaTree, Ingredient, FormulaException, FormulaCycleException, FlavorSpecification
+from access.models import Flavor, FormulaTree, Ingredient, FormulaException, FormulaCycleException, FlavorSpecification, JIList
 from access.utils import coster_headers
 from itertools import chain
 from reversion.models import Revision
@@ -233,9 +233,28 @@ def customer_info(flavor):
     return {'flavor': flavor,
             'customer_table': customer_table}
         
+@register.inclusion_tag('access/flavor/similar_flavors.html')
+def similar_flavors(flavor):
+    
+    #get 100 most similar flavors; using django Q objects to use an 'OR' filter
+    most_similar_flavors = JIList.objects.filter(Q(a=flavor.number) | Q(b=flavor.number)).order_by('-score')[:100]
+    
+    similar_flavor_list = []
+    
+    for ji_object in most_similar_flavors:
+        if ji_object.a == flavor.number:
+            similar_flavor_list.append((Flavor.objects.get(number=ji_object.b), round(ji_object.score*100, 2)))
+        else: #ji_object.b == flavor.number:
+            similar_flavor_list.append((Flavor.objects.get(number=ji_object.a), round(ji_object.score*100, 2)))
     
     
+    return {'flavor': flavor,
+            'similar_flavor_list': similar_flavor_list}
     
+    
+        
+    
+
     
     
 

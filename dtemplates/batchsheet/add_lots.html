@@ -8,6 +8,7 @@
 		{% endif %}
 
     <form action="" method="POST">
+    	{% csrf_token %}
 	{{ formset.management_form }}
 	
 	<table id="lot-rows" width="100%">

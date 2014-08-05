@@ -15,13 +15,55 @@ import pickle
 
 def dump_pickle_sds_list():
     
-    sds_list = []
-    for fl in Flavor.objects.all():
-        sds_list.append(fl.get_hazards)
-        
-    pickle.dump(sds_list, open("sds_list.p", "wb"))
+    pfile = open("sds_list.p", "wb")
     
+    for fl in Flavor.objects.all():
+        try:
+            pickle.dump(fl.get_hazards(), pfile)
+            print fl
+        except:
+            print "Flavor %s failed to dump" % fl.number
+    
+    pfile.close()
+    
+def load_sds_list():
+    
+    #i don't know how to load all the sds's without storing them first
+    #i'll just try to store them as lists
+    
+    pfile = open("sds_list.p", "rb")
+    
+    sds_list = []
+    
+    while True:
+        flavor_sds = []
+        try:
+            for key, value in pickle.load(pfile).iteritems():
+                flavor_sds.append((key, value))
+            #sds_list.append(pickle.load(pfile))
+        except:
+            break
+        
+        sds_list.append(flavor_sds)
+        
+    return sds_list
 
+# def dump_pickle_sds_list():
+#     
+#     #if this crashes because it uses too much memory, do 1 of 2 things:
+#     #    1. replace dictionaries with lists and convert them back to dictionaries later
+#     #    2. pickle dump the dictionaries one at a time so that they aren't all stored in the same list
+#     
+#     sds_list = []
+#     for fl in Flavor.objects.all():
+#         sds_list.append(fl.get_hazards())
+#         
+#     pickle.dump(sds_list, open("sds_list.p", "wb"))
+#     
+# def load_sds_list():
+#     
+#     sds_list = pickle.load(open('sds_list.p','rb'))
+#     return sds_list
 
 def get_ghs_only_ingredients(path_to_destination=None):
     ghs_only = []
@@ -270,7 +312,7 @@ def create_sds_identifier_dictionary(test_hazard_list = test_hazard_list):
     
             
                 
-def create_small_sds_identifier_dictionary(flavor_list, test_hazard_list):
+def create_sds_identifier_dictionary_2(flavor_list, test_hazard_list = test_hazard_list):
     '''
     Attempt to create an sds identifier dict that only contains SDS's that match flavors exactly.
     Each Flavor in the flavor_list will have exactly one SDS that matches it exactly.
@@ -283,9 +325,17 @@ def create_small_sds_identifier_dictionary(flavor_list, test_hazard_list):
     sds_list = []
     
     for fl in flavor_list:
-        flavor_hazards = fl.get_hazards()
+
+        sds_list.append(fl.get_hazards())
+
+    sds_identifier_dict = {}
+    index = 1
+    
+    for sds in sds_list:
+        sds_identifier_dict[index] = sds
+        index += 1
         
-        sds_list.append(dict((hazard, )))
+    return sds_identifier_dict
         
     
     

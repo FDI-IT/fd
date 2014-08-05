@@ -2,7 +2,7 @@
 {% load dashboard %}
 {% block toolbar %}
 {{ block.super }}
-<a href="../add_receiving_log/" title="Add To Receiving Log"><img src="/djangomedia/images/Icons/16x16/add.png"></a>
+<a href="../add_receiving_log/" title="Add To Receiving Log"><img src="/static/images/Icons/16x16/add.png"></a>
 {% endblock toolbar %}
 
 {% block content %}
@@ -33,6 +33,7 @@
 	</div>
 	
     <form name="receiving_log_selections" action="/qc/receiving_log_print/" method="post">
+    {% csrf_token %}
     <table class="sorttable" class="receiving_logtable" width="100%">
     <caption><a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a></caption>	
 	<tr class="qcheaders">

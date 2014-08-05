@@ -48,9 +48,9 @@
 		    	<td><a href="/access/{{ flavor.number }}">{{ flavor.rawmaterialcost }}</a></td>
 		    	<td><a href="/access/{{ flavor.number }}">{{ flavor.lastspdate|date:"Y-m" }}</a></td>
 		    	<td><a href="/access/{{ flavor.number }}">{{ flavor.solvent }}</a></td>
-		    	<td><a href="/access/{{ flavor.number }}">{% if flavor.valid %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</a></td>
-		    	<td><a href="/access/{{ flavor.number }}">{% if flavor.approved %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</a></td>
-		    	<td><a href="/access/{{ flavor.number }}">{% if flavor.sold %}<img src="/djangomedia/images/Icons/001_06.png">{% else %}<img src="/djangomedia/images/Icons/001_05.png">{% endif %}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{% if flavor.valid %}<img src="/static/images/Icons/001_06.png">{% else %}<img src="/static/images/Icons/001_05.png">{% endif %}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{% if flavor.approved %}<img src="/static/images/Icons/001_06.png">{% else %}<img src="/static/images/Icons/001_05.png">{% endif %}</a></td>
+		    	<td><a href="/access/{{ flavor.number }}">{% if flavor.sold %}<img src="/static/images/Icons/001_06.png">{% else %}<img src="/static/images/Icons/001_05.png">{% endif %}</a></td>
 		    </tr>
 		    {% endfor %}
 		    </tbody>

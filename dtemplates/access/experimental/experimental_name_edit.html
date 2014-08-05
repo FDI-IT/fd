@@ -7,10 +7,10 @@ window.__admin_media_prefix__ = "{% filter escapejs %}{% admin_media_prefix %}{%
 </script>
 <script type="text/javascript" src="/admin/jsi18n/"></script>
 <script type="text/javascript" src="/djangoadminmedia/js/core.js"></script>
-<script type="text/javascript" src="/djangomedia/js/experimental_label_edit.js"></script>
+<script type="text/javascript" src="/static/js/experimental_label_edit.js"></script>
 <link rel="stylesheet" type="text/css" href="/djangoadminmedia/css/global.css"/>
 <link rel="stylesheet" type="text/css" href="/djangoadminmedia/css/widgets.css"/>
-<link href="/djangomedia/css/wizard.css?v=25" type="text/css" rel="stylesheet" media="screen">
+<link href="/static/css/wizard.css?v=25" type="text/css" rel="stylesheet" media="screen">
 {{experimental_name_form.media}}
 {% endblock %}
 {% block content %}
@@ -19,6 +19,7 @@ window.__admin_media_prefix__ = "{% filter escapejs %}{% admin_media_prefix %}{%
 <div id="content-left-half">
 	
 	<form id="new-experimental-form" action="/access/experimental/{{experimental.experimentalnum}}/name_edit/" method="post">
+		{% csrf_token %}
 		{{ management_form }}
 		{{ experimental_name_form.errors}}
 		{{experimental_name_form.non_field_errors}}

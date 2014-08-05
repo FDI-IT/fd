@@ -43,7 +43,7 @@
 		    <div id="content-title">
 		    	{% if help_link %}
 		    		{% ifnotequal help_link "" %} 
-		    			<a href="{{ help_link }}"><img src="/djangomedia/images/Icons/help.png"></a>
+		    			<a href="{{ help_link }}"><img src="/static/images/Icons/help.png"></a>
 		    		{% endifnotequal %}
 		    	{% endif %}
 		    	{% if page_title %}

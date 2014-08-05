@@ -375,9 +375,9 @@ class Lot(models.Model):
         
         for testresult in self.testresult_set.all():
             if testresult.result == '' or testresult.result == None:
-                return '/djangomedia/images/Icons/16x16/pause.png'
+                return '/static/images/Icons/16x16/pause.png'
                 
-        return '/djangomedia/images/Icons/16x16/accept.png'
+        return '/static/images/Icons/16x16/accept.png'
             
     
     headers = (
@@ -536,6 +536,8 @@ class RMRetain(models.Model):
     def __unicode__(self):
         return u"PIN: " + str(self.pin) + " " + str(self.date.year)[2:5] + "-R" + str(self.r_number).zfill(3)
 
+    def short_repr(self):
+        return str(self.date.year)[2:5] + "-R" + str(self.r_number).zfill(3)
         
     @staticmethod
     def get_absolute_url(self):

@@ -80,7 +80,10 @@ DIACETYL_PKS = [262,]
 PG_PKS = [670,6717]
 
 def get_next_flavorid():
-    return Flavor.objects.all().order_by('-id')[0].id+1
+    try:
+        return Flavor.objects.all().order_by('-id')[0].id+1
+    except:
+        return 1
 
 def get_next_rawmaterialcode():
     try:
@@ -272,7 +275,7 @@ class Ingredient(models.Model):
                                       default=get_next_rawmaterialcode)
     cas = models.CharField( 
             max_length=15,
-            blank=True)
+            blank=True,) 
     rawmaterialcode = models.PositiveIntegerField(
             primary_key=True,
             db_column='RawMaterialCode',
@@ -739,6 +742,46 @@ class Ingredient(models.Model):
             )
         related_links.append(('/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'))
         return related_links
+    
+    def get_product_tabs(self):
+        product_tabs = [
+                ('moo','Details by Code'),
+                ('moo','Retain History'),
+                ('/solutionfixer/pin_review/%s/' % self.id, 'Related Solutions'),
+                ('/access/ingredient/pin_review/%s/gzl/' % self.id, 'Gazinta List'),
+            ]
+
+        return product_tabs
+    
+#     product_tabs = [
+#                        ('#flat_review_table','Formula'),
+#                        ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
+#                        ('/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
+#                        ('/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
+#                        ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
+#                        ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
+#                        ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
+#                        ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
+#                        ]
+#         if self.retain_superset().count()>0:
+#             product_tabs.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
+#             product_tabs.append(('/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
+# 
+#         try:
+#             self.experimentallog
+#             product_tabs.append(('/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
+#         except:
+#             pass
+#         try:
+#             rmr = self.raw_material_record
+#             if rmr:
+#                 product_tabs.append(('/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
+#                 if Formula.objects.filter(ingredient=rmr).count() > 0:
+#                     product_tabs.append(('/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
+#         except:
+#             pass
+# 
+#         return product_tabs
 
     def resembles(self, ingredient):
         if self.id != ingredient.id:
@@ -1239,7 +1282,7 @@ class Flavor(FormulaInfo):
     
     @property
     def table_name(self):
-        return "%s %s" % (self.name, self.label_type)
+        return " ".join((self.name, self.label_type))
     
     @property
     def natart_name_with_type(self):
@@ -1295,6 +1338,48 @@ class Flavor(FormulaInfo):
         return next_tempex_number
     
     @staticmethod
+    def process_special_kwargs(resultant_objects, form_data):
+        if 'exclude_any_ingredients' in form_data and form_data['exclude_any_ingredients'] != '':
+            exclude_any_ingredients = form_data['exclude_any_ingredients'].replace(' ','').split(',')
+            resultant_objects = Flavor.flavors_excluding_ingredients(resultant_objects, exclude_any_ingredients)
+        if 'include_any_ingredients' in form_data and form_data['include_any_ingredients'] != '':
+            include_any_ingredients = form_data['include_any_ingredients'].replace(' ','').split(',')
+            resultant_objects = Flavor.flavors_including_any_ingredients(resultant_objects, include_any_ingredients)
+        if 'include_all_ingredients' in form_data and form_data['include_all_ingredients'] != '':
+            include_all_ingredients = form_data['include_all_ingredients'].replace(' ','').split(',')
+            resultant_objects = Flavor.flavors_including_all_ingredients(resultant_objects, include_all_ingredients)
+        if 'flash_point' in form_data and form_data['flash_point'] != '':
+            flash_point = form_data['flash_point']
+            resultant_objects = resultant_objects.filter(flashpoint__gte=flash_point)
+        return resultant_objects
+    
+    @staticmethod
+    def flavors_excluding_ingredients(flavor_queryset, exclude_ingredients):
+        """Modifies flavor_queryset to exclude flavors that contain any 
+        ingredients with IDs listed in exclude_ingredients.
+        """
+        exclude_these = LeafWeight.objects.filter(
+                ingredient__id__in=exclude_ingredients).values_list(
+                'root_flavor',flat=True).order_by().distinct()
+        return flavor_queryset.exclude(pk__in=exclude_these)
+    
+    @staticmethod
+    def flavors_including_any_ingredients(flavor_queryset, include_any_ingredients):
+        include_these = LeafWeight.objects.filter(
+                ingredient__id__in=include_any_ingredients).values_list(
+                'root_flavor',flat=True).order_by().distinct()
+        return flavor_queryset.filter(pk__in=include_these)
+    
+    @staticmethod
+    def flavors_including_all_ingredients(flavor_queryset, include_all_ingredients):
+        for ingredient_id in include_all_ingredients:
+            include_these = LeafWeight.objects.filter(
+                    ingredient__id=ingredient_id).values_list(
+                    'root_flavor',flat=True).order_by().distinct()
+            flavor_queryset = flavor_queryset.filter(pk__in=include_these)
+        return flavor_queryset
+    
+    @staticmethod
     def build_kwargs(qdict, default, get_filter_kwargs):
         string_kwargs = {}
         for key in get_filter_kwargs(qdict):
@@ -1333,6 +1418,8 @@ class Flavor(FormulaInfo):
                 for my_arg in qdict.getlist(key):
                     arg_list.append(my_arg)
                 string_kwargs[keyword] = arg_list
+            elif key in ["exclude_any_ingredients", "include_any_ingredients", "include_all_ingredients", "flash_point"]:
+                continue
             else:
                 keyword = '%s__in' % (key)
                 arg_list = []
@@ -1341,7 +1428,11 @@ class Flavor(FormulaInfo):
                 string_kwargs[keyword] = arg_list
         return string_kwargs
     
+    
     def get_related_links(self):
+        """This is going to be replaced by get_product_tabs and might
+        be able to be removed. Leaving it in for now, just in case.
+        """
         related_links = [
                        ('#flat_review_table','Formula'),
                        ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
@@ -1350,7 +1441,8 @@ class Flavor(FormulaInfo):
                        ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
                        ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
                        ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
-                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info')
+                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info'),
+                       ('/access/ajax_dispatch/?tn=similar_flavors&pk=%s' % self.pk, 'Similar Flavors')
                        ]
         if self.retain_superset().count()>0:
             related_links.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
@@ -1371,6 +1463,39 @@ class Flavor(FormulaInfo):
             pass
 
         return related_links
+    
+    def get_product_tabs(self):
+        product_tabs = [
+                       ('#flat_review_table','Formula'),
+                       ('/access/ajax_dispatch/?tn=consolidated&pk=%s' % self.pk,'Consolidated'),
+                       ('/access/ajax_dispatch/?tn=consolidated_indivisible&pk=%s' % self.pk, 'Consolidated-Indivisible'),
+                       ('/access/ajax_dispatch/?tn=explosion&pk=%s' % self.pk,'Explosion'),
+                       ('/access/ajax_dispatch/?tn=legacy_explosion&pk=%s' % self.pk,'Legacy Explosion'),
+                       ('/access/ajax_dispatch/?tn=revision_history&pk=%s' % self.pk, 'Revision History'),
+                       ('/access/ajax_dispatch/?tn=spec_sheet&pk=%s' % self.pk, 'Spec Sheet'),
+                       ('/access/ajax_dispatch/?tn=customer_info&pk=%s' % self.pk, 'Customer Info'),
+                       ('/access/ajax_dispatch/?tn=similar_flavors&pk=%s' % self.pk, 'Similar Flavors')
+                       ]
+        if self.retain_superset().count()>0:
+            product_tabs.append(('/access/ajax_dispatch/?tn=production_lots&pk=%s' % self.pk, 'Production Lots'))
+            product_tabs.append(('/access/ajax_dispatch/?tn=retains&pk=%s' % self.pk, 'Retains'))  
+
+        try:
+            self.experimentallog
+            product_tabs.append(('/access/ajax_dispatch/?tn=experimental_log&pk=%s' % self.pk,'Experimental'))
+        except:
+            pass
+        try:
+            rmr = self.raw_material_record
+            if rmr:
+                product_tabs.append(('/access/ajax_dispatch/?tn=raw_material_pin&pk=%s' % self.pk,'Raw Material PIN'))
+                if Formula.objects.filter(ingredient=rmr).count() > 0:
+                    product_tabs.append(('/access/ajax_dispatch/?tn=gzl_ajax&pk=%s' % self.pk, 'GZL'))
+        except:
+            pass
+
+        return product_tabs
+
  
     @property
     def linked_memo(self):
@@ -1949,7 +2074,7 @@ class Flavor(FormulaInfo):
         """
         
         formula_list = []
-        
+        no_cas_total = 0
         
         '''
         Need to account for two possibilities:
@@ -1970,9 +2095,24 @@ class Flavor(FormulaInfo):
         '''
         
         
-        no_cas_total = 0
+#         if self.consolidated_leafs == {}:
+#             raise NoLeafWeightError(self.number)
         
-        for ingredient, weight in self.consolidated_leafs.iteritems():
+        lws = LeafWeight.objects.filter(root_flavor=self)
+        if not lws.exists():
+                                           
+            if self.formula_set.exists():
+                from access.scratch import recalculate_guts
+                recalculate_guts(self) 
+               
+            else:
+                raise NoFormulaError(self.number)
+        
+#         for ingredient, weight in self.consolidated_leafs.iteritems():
+
+        for lw in lws:
+            ingredient = lw.ingredient
+            weight = lw.weight
             
             #case 1
             if ingredient.cas == '':
@@ -1992,17 +2132,22 @@ class Flavor(FormulaInfo):
                 fli = FormulaLineItem(cas='00-00-00', weight=no_cas_total)
                 formula_list.append(fli)
                 
-        #return formula_list
-#              
-#         subhazard_dict = create_subhazard_dict(formula_list)
-#               
-#         accumulator = HazardAccumulator(subhazard_dict)
-#           
-#         hazard_dict = accumulator.get_hazard_dict()
-          
+       
+
         hazard_dict = calculate_flavor_hazards(formula_list)
-          
         return hazard_dict
+
+
+            
+class NoFormulaError(Exception):
+    #this is used above and is raised when a flavor has no consolidated leaves
+    def __init__(self, num=None):
+        self.num = num
+            
+    def __str__(self):
+        if self.num:
+            return "Flavor %s has no formula; cannot calculate hazards" % self.num
+
          
         
 
@@ -2490,6 +2635,9 @@ class Supplier(models.Model):
         
     def __unicode__(self):
         return self.suppliername   
+    
+    def get_absolute_url(self):
+        return "/access/purchase/supplier/%s/" % self.pk
  
     def save(self, *args, **kwargs):
         if self.suppliercode != "":
@@ -3201,8 +3349,8 @@ def get_lorem_queue():
 q = get_lorem_queue()
 
 class JIList(models.Model):
-    a = models.PositiveIntegerField()
-    b = models.PositiveIntegerField()
+    a = models.PositiveIntegerField(db_index=True)
+    b = models.PositiveIntegerField(db_index=True)
     score = models.FloatField()
     
     class Meta:
@@ -3460,5 +3608,5 @@ def update_prices_and_get_updated_flavors(old_ingredient, new_ingredient):
     return updated_flavors
 
         
-        
+
 

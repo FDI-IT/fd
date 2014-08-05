@@ -91,7 +91,7 @@ def scan_card():
 def get_lcrs():
     lcrs = {}
     last_chance_year = date.today().year-3
-    last_chance_retains = models.Retain.objects.filter(date__year=last_chance_year).filter(status="Passed").select_related()
+    last_chance_retains = models.Retain.objects.filter(date__year=last_chance_year).filter(status__in=("Expired","Passed","PassedLC")).select_related()
     for r in last_chance_retains:
         print r
         f = r.lot.flavor
@@ -100,5 +100,21 @@ def get_lcrs():
         retain_list = f.combed_sorted_retain_superset()
         if r == retain_list[0]:
             lcrs[f] = r
+            r.status="PassedLC"
+            r.save()
     return lcrs
-        
+
+def get_rm_lcrs():
+    lcrs = {}
+    last_chance_year = date.today().year-3
+    last_chance_retains = models.RMRetain.objects.filter(date__year=last_chance_year).filter(status__in=("Expired","Passed","PassedLC"))
+    for r in last_chance_retains:
+        print r
+        pin = r.pin
+        if pin in lcrs:
+            continue
+        if r == models.RMRetain.objects.filter(pin=pin)[0]:
+            lcrs[pin] = r
+            r.status="PassedLC"
+            r.save()
+    return lcrs

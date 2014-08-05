@@ -307,6 +307,12 @@ span.sub_heading {
 	font-size:13px;
 }
 
+span.mixing_instructions {
+	float:left;
+	margin-left:8px;
+	font-size:13px;
+}
+
 input[readonly] {
 	background:#FCE0A5;
 	color:red;

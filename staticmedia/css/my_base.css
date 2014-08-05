@@ -1,7 +1,7 @@
 body {
 	font-family:arial,helvetica,sans-serif;
 	font-size:11px;
-	background:url(/djangomedia/images/background.png);
+	background:url(/static/images/background.png);
 	background-repeat:repeat-x;
 	background-position:top;
 	margin: 0;
@@ -20,7 +20,7 @@ body {
 	position:absolute;
 	width:1100px;
 	height:55px;
-	background-image: url(/djangomedia/images/backgroundheader.png);
+	background-image: url(/static/images/backgroundheader.png);
 	background-repeat: repeat-y;
 	z-index:2;}
 	
@@ -30,7 +30,7 @@ body {
 	height:55px;
 	width:1100px;
 	z-index:3;
-	background-image: url(/djangomedia/images/logo.png);
+	background-image: url(/static/images/logo.png);
 	background-repeat: no-repeat;
 	background-position: left;
 	}
@@ -43,7 +43,7 @@ body {
 	z-index:3;
 	font-size:18px;
 	color: white;
-	/*background-image: url(/djangomedia/images/title.png);*/
+	/*background-image: url(/static/images/title.png);*/
 	background-repeat: no-repeat;
 	background-position: right;
 	text-align:right;
@@ -372,20 +372,10 @@ div.content-table{
 	padding-top:10px;
 	padding-bottom:10px
 }
-#flavor-tabs {
+#product_tabs {
 clear:both;
 }
-/*
-#flavor-tabs > div{
-	position:relative;
-	margin:0px 10px 20px 0px;
-	float:left;
-	background-color:#f2f2f3;
-	width:730px;
-	padding-top:10px;
-	padding-bottom:10px
-}
-*/
+
 span.table_action_links{
 	padding:0px 0px 0px 10px;
 }
@@ -449,7 +439,7 @@ margin-top:10px;}
 
 .title{height:20px;
 width:150px;
-background-image:url(/djangomedia/images/blade_back.png);
+background-image:url(/static/images/blade_back.png);
 font:helvetica;
 font-size:11px;
 font-weight:bold;

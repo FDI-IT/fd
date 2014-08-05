@@ -20,6 +20,7 @@
 	 
 	 
 	<form action="" method="POST" onsubmit="return FORMULA_EDIT.validate_form()">
+		{% csrf_token %}
 	{{ management_form }}
 	<table id="formula-rows" width="100%">
 		<tr>

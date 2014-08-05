@@ -168,11 +168,56 @@ function update_label_preview () {
 		},
 		function (data) {
 			d = new Date();
-			jQuery('#label-preview').attr('src', '/djangomedia/images/preview.png?'+d.getTime());
+			jQuery('#label-preview').attr('src', '/static/images/preview.png?'+d.getTime());
 		}, 'json');
 };
 
 jQuery(document).ready(function(){	
+
+   flag = true;
+   var $product_tabs = $('#product_tabs');
+   $product_tabs.tabs({
+    cache:true,
+    spinner: '',
+    ajaxOptions: {
+        error: function(xhr, status, index, anchor) {
+            $( anchor.hash ).html("Failed to load tab.");
+        }
+    },
+	activate: function(event, ui)
+	{
+	    if(!event.originalEvent)
+	        return;
+		window.location.hash = '#t=' + ui.newTab.find('span').text();
+	}
+	});
+	var $product_tabs_list = $('#product_tabs_list');
+	var find_tab_index_by_text = function(tab_text) {
+		return $product_tabs_list.find('span').filter(function() {
+		    return $(this).text() == tab_text;
+		}).closest('li').index();
+	};
+	$.address.change(function(event)    {
+		if(!flag)   {
+		    flag = true;
+		    return;
+		}
+		var param = '';
+		param = window.location.hash;
+		if(param.indexOf('t=') > 0)
+		{
+		    var regexp = /#t=(.+)/i;
+		    var hash = param.match(regexp);
+		    if(hash.length > 0)
+		    {
+		        hash = hash[1];
+		        var tab_index = find_tab_index_by_text(hash);
+		        $product_tabs.tabs("option", "active", tab_index);
+		    }
+		} else {
+		    $product_tabs.tabs("option", "active", 0);
+		}
+	});
 
 	$('table.sorttable').tablesorter();
 	
@@ -193,7 +238,7 @@ jQuery(document).ready(function(){
 		// return false;
 	// });
 	
-	//$('body').append('<div id="ajaxBusy"><p><img src="/djangomedia/images/loading.gif"></p></div>');
+	//$('body').append('<div id="ajaxBusy"><p><img src="/static/images/loading.gif"></p></div>');
 	$('#ajaxBusy').css({
 		display:"none",
 		margin:"0px",

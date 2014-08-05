@@ -1,0 +1,16 @@
+# SQL COMMANDS
+drop table south_migrationhistory ;
+DROP TABLE djcelery_crontabschedule ;
+DROP TABLE djcelery_crontabschedule CASCADE;
+DROP TABLE djcelery_crontabschedule CASCADE;
+DROP TABLE djcelery_intervalschedule CASCADE;
+DROP TABLE djcelery_periodictask;
+DROP TABLE djcelery_periodictasks ;
+DROP TABLE djcelery_taskstate ;
+DROP TABLE djcelery_workerstate ;
+DROP TABLE celery_taskmeta ;
+DROP TABLE celery_tasksetmeta ;
+
+# SHELL COMMANDS FROM PROJECT DIRECTORY
+python manage.py syncdb
+python manage.py migrate

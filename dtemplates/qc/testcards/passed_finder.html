@@ -3,7 +3,7 @@
 
 {% block htmlhead %}
 {{ block.super }}
-<script type="text/javascript" src="/djangomedia/js/passed_finder.js?v=25"></script>
+<script type="text/javascript" src="/static/js/passed_finder.js?v=25"></script>
 {% endblock  %}
 
 {% load related_links %}
@@ -15,6 +15,7 @@
 
 <div>
 	<form method="post" action="{{ form_action_url }}">
+	{% csrf_token %}
 	<div id="testcard_gallery">
 		{% for tc in testcards %}
 		<div id="testcard{{ forloop.counter}}" class="image_select">
