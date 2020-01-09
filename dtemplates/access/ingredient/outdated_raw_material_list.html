@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div id="content-main">
+	<table>
+		<thead>
+			<tr>
+				<th>PIN</th>
+				<th>Name</th>
+				<th>Last QC Date</th>
+				<th>Last Purchase Price Update</th>
+				<th>Supplier</th>
+				<!-- <th>Status</th> -->
+			</tr>
+		</thead>
+		{% for ing, last_qc_date in outdated_raw_material_list %}
+			<tr>
+				<td>{{ ing.id }}</td>
+				<td><a href="/access/ingredient/pin_review/{{ ing.id }}/">{{ ing.art_nati }} {{ ing.prefix }} {{ ing.product_name }}</a></td>
+				<td>{{ last_qc_date }}</td>
+				<td>{{ ing.purchase_price_update.date }}</td>
+				<td>{{ ing.supplier.suppliercode }}</td>
+			</tr>
+		{% endfor %}
+	</table>
+	
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if outdated_raw_material_list.has_previous %}
+	            <a href="?page={{ outdated_raw_material_list.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ outdated_raw_material_list.number }} of {{ outdated_raw_material_list.paginator.num_pages }}.
+	        </span>
+	
+	        {% if outdated_raw_material_list.has_next %}
+	            <a href="?page={{ outdated_raw_material_list.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+	
+</div>
+
+{% endblock %}
+

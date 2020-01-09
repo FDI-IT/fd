@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load blades %}
+{% block content %}
+    <div id="content-right">
+		{% blades po true %}
+	</div>
+<div id="content-main">
+<div id="title-left">
+	<span id="name"><a href="{{po.get_absolute_url}}">{{po}}</a></span>
+</div>
+
+    <div id="content-main">
+		{% if status_message %}
+		<h1>{{ status_message }}</h1>
+		{% endif %}
+		
+		{% include "access/purchase/poli_form.html" %}
+    </div>
+
+</div>
+{% endblock %}

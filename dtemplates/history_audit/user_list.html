@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load mainsearch %}
+
+{% block content %}
+
+
+	<table id="user-rows" width="100%">
+		<tr>
+			<th class="id-cell">User ID</th>
+			<th class="name-cell">Name</th>
+			<th class="revision_count-cell">Number of Revisions</th>
+		</tr>
+
+		{% for id, name, revision_count in user_rows %}
+
+		<tr class="user_row" align="center">	
+			<td class="id-cell">{{ id }}</td>
+			{% url history_audit.views.user_info id as the_url %}
+			<td class="name-cell"><a href = '{{ the_url }}'> {{ name }} </a></td>
+			<td class="revision_count-cell" >{{ revision_count }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+
+
+{% endblock %}

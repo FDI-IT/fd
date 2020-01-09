@@ -1,0 +1,7 @@
+{% extends "djblets_base.html" %}
+{% load djblets_deco %}
+{% block content %}
+{% box %}
+{{datagrid.render_listview}}
+{% endbox %}
+{% endblock %}

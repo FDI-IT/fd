@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <style>
+    .subcategory{
+      padding-left: 3em;
+      border-collapse:collapse ;
+    }
+    td.h3{
+      margin: 0px !important;
+    }
+    tr, table,td, th {
+      border-collapse: collapse;
+      border: none;
+
+    }
+    .hide{
+      /* display: none; */
+      visibility: hidden;
+    }
+
+    input{
+      vertical-align: center;
+    }
+    .container{
+      width: 100%;
+    }
+    .form{
+      float: left;
+      width:65%;
+    }
+    .totalweight{
+      text-align: center;
+      float: left;
+      /* right: 22%; */
+      left: 50%;
+      position: fixed;
+      width: 35%%;
+      font-size: 16px;
+    }
+    .weighterror{
+      color: red;
+    }
+  </style>
+
+  <form method = 'GET'>
+      {% csrf_token %}
+      {{ management_form }}
+      {{ form.rm_search.errors }}
+      {{ form.rm_search }}
+  <input type = "hidden" id="ing" name="ing" value="{{ing}}">
+  <input name="submit" type="submit" value="Submit">
+
+  </form>
+  {{saved}}
+
+
+<div class = "container" oninput = "checkTotalWeight()">
+  <div class= "form">
+    <form method = 'POST'>
+      <input type = "hidden" id="ing" name="ing" value="{{ing}}">
+      {% csrf_token %}
+      {{form.nutriform.errors}}
+      <table>
+            <th>{{ingredient.name}}</th>
+            <!-- {{nutriform}} -->
+            {% for row in nutriform %}
+              {% if row.label == "Shrt Desc"%}
+              <tr>
+                <td><h3>Raw Material</h3></td>
+                <td><p>{{row.value}}</p></td>
+                <div class = "hide">{{row}}</div>
+              </tr>
+              {% elif row.label == "Calories" %}
+              <tr>
+                <td><h3>Calories</h3></td>
+                <td><p id = "calories"></p></td>
+                <div class = "hide">{{row}}</div>
+              </tr>
+              {% elif row.label in hide %}
+              <tr>
+                <div class = "hide">{{row}}</div>
+              </tr>
+              {% elif row.label in major %}
+                {% if row.label == "Other Fat" %}
+                  <tr>
+                    <td><h3>Total Fats</h3></td>
+                    <td> <p id = "total fat"></p></td>
+                  </tr>
+                  <tr>
+                    <tr>
+                      <td class = "subcategory">{{row.label}}</td>
+                      <td>{{row}} g</td>
+                    </tr>
+                  </tr>
+                {% elif row.label == "Carbohydrates" %}
+                  <tr>
+                    <td><h3>{{row.label}}</h3></td>
+                    <td> <p id = "totalcarbs"></p></td>
+                  </tr>
+                  <tr>
+                    <tr>
+                      <td class = "subcategory">Other Carbohydrates</td>
+                      <td>{{row}} g</td>
+                    </tr>
+                  </tr>
+                {% elif row.label == "Alcohol Content" %}
+                <tr>
+                  <td><h3>{{row.label}}</h3></td>
+                  <td>
+                    <p><span id ='totalalcohol'></span> g</p>
+                    <div class="hide" > {{row}} </div>
+                  </td>
+                  <!-- <td> <p>{{row}} g</p></td> -->
+                </tr>
+
+                  <!-- <tr>
+                    <td class = "subcategory">Fusel Oil</td>
+                    <td>{{row}} g</td>
+                  </tr> -->
+                {% else %}
+                  <tr>
+                    <td><h3>{{row.label}}</h3></td>
+                    <td> <p>{{row}} g</p></td>
+                  </tr>
+                {% endif %}
+
+              {% else %}
+                {% if row.label in grams %}
+                  <tr>
+                    <td class = "subcategory">{{row.label}}</td>
+                    <td>{{row}} g</td>
+                  </tr>
+                {% elif row.label in mcg %}
+                  <tr>
+                    <td class = "subcategory">{{row.label}}</td>
+                    <td>{{row}} mcg</td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td class = "subcategory">{{row.label}}</td>
+                    <td>{{row}} mg</td>
+                  </tr>
+                {% endif %}
+              {% endif %}
+
+            {% endfor %}
+
+      </table>
+      <br>
+        <input name="{{nutri.ingredient_id}}" id ="{{nutri.ingredient_id}}" type = "submit" value="Save">
+      <br>
+    </form>
+  </div>
+
+
+  <div class = "totalweight">
+    <span id = "total"></span> g
+  </div>
+</div>
+
+  <script>
+
+    function totalfatupdate() {
+      var poly = document.getElementById("id_FA_Poly").value;
+      var mono = document.getElementById("id_FA_Mono").value;
+      var satf = document.getElementById("id_FA_Sat").value;
+      var other = document.getElementById("id_TotalFat").value;
+      var totalFat = document.getElementById("total fat");
+
+      var total = parseFloat(poly) + parseFloat(mono) + parseFloat(satf) + parseFloat(other);
+      totalFat.innerHTML = total + " g";
+    }
+    function totalcarbupdate() {
+      var carbs = document.getElementById("id_Carbohydrt").value;
+      var sugars = document.getElementById("id_Sugars").value;
+      var fiber = document.getElementById("id_Fiber_TD").value;
+      var totalcarbs = document.getElementById("totalcarbs");
+
+      var total = parseFloat(carbs) + parseFloat(sugars) + parseFloat(fiber);
+      totalcarbs.innerHTML = total + " g";
+    }
+
+    function totalalcoholupdate() {
+      var ethyl = document.getElementById("id_ethyl").value;
+      var fusel = document.getElementById("id_fusel").value;
+      var pg = document.getElementById("id_pg").value;
+      var tc = document.getElementById("id_tri_citrate").value;
+      var glycerin = document.getElementById("id_glycerin").value;
+      var triacetin = document.getElementById("id_triacetin").value;
+      var totalalcohol = document.getElementById("totalalcohol");
+
+      var total = parseFloat(ethyl) + parseFloat(fusel) + parseFloat(pg)+ parseFloat(tc)+parseFloat(glycerin)+parseFloat(triacetin);
+      // console.log(total);
+      totalalcohol.innerHTML = total
+      totalalcohol.value = total;
+    }
+
+    function totalcalories(){
+      var totalfat = parseFloat(document.getElementById("total fat").innerHTML);
+      var protein = parseFloat(document.getElementById("id_Protein").value);
+      var totalcarbs = parseFloat(document.getElementById("totalcarbs").innerHTML);
+      // var alcohol = parseFloat(document.getElementById("id_AlcoholContent").value);
+      var ethyl = document.getElementById("id_ethyl").value;
+      var fusel = document.getElementById("id_fusel").value;
+      var pg = document.getElementById("id_pg").value;
+      var tc = document.getElementById("id_tri_citrate").value;
+      var glycerin = document.getElementById("id_glycerin").value;
+      var triacetin = document.getElementById("id_triacetin").value;
+      // (fusel + ethyl) * 7 + pg * 4 + tri_ci * Decimal(3.7) + glycerin * 4 + triacetin * Decimal(1.7)
+      var calories = 4 * (protein + totalcarbs) + 9 * totalfat + fusel * 7 + ethyl * 7 + pg * 4 + tc * 3.7 + glycerin * 4 + triacetin * 1.7;
+      // console.log(calories);
+      document.getElementById("calories").innerHTML = calories.toFixed(2);
+      document.getElementById("id_Calories").value = calories.toFixed(2);
+    }
+
+    function checkTotalWeight(){
+      var poly = parseFloat(document.getElementById("id_FA_Poly").value);
+      var mono = parseFloat(document.getElementById("id_FA_Mono").value);
+      var satf = parseFloat(document.getElementById("id_FA_Sat").value);
+      var other = parseFloat(document.getElementById("id_TotalFat").value);
+      var water = parseFloat(document.getElementById("id_Water").value);
+      var protein = parseFloat(document.getElementById("id_Protein").value);
+      var flavor = parseFloat(document.getElementById("id_FlavorContent").value);
+      var alcohol = parseFloat(document.getElementById("totalalcohol").value);
+      var carbs = parseFloat(document.getElementById("id_Carbohydrt").value);
+      var sugar = parseFloat(document.getElementById("id_Sugars").value);
+      var fiber = parseFloat(document.getElementById("id_Fiber_TD").value);
+      var ash = parseFloat(document.getElementById("id_Ash").value);
+      console.log(alcohol);
+      var t = poly + mono + satf + other + water + protein + flavor + carbs + fiber + sugar + ash + alcohol;
+      document.getElementById("total").innerHTML = t;
+      if(!(t < 102) || !(t > 98)){
+          document.getElementById("total").classList.add("weighterror");
+      }
+      else{
+          document.getElementById("total").classList.remove("weighterror");
+      }
+    }
+
+    totalfatupdate();
+    totalcarbupdate();
+    // totalcalories();
+    totalalcoholupdate();
+    checkTotalWeight();
+
+
+    document.getElementById("id_FA_Poly").addEventListener('input', function(){
+    totalfatupdate();
+    // totalcalories();
+    });
+    document.getElementById("id_FA_Mono").addEventListener('input', function(){
+    totalfatupdate();
+    // totalcalories();
+    });
+    document.getElementById("id_FA_Sat").addEventListener('input', function(){
+    totalfatupdate();
+    // totalcalories();
+    });
+    document.getElementById("id_TotalFat").addEventListener('input', function(){
+    totalfatupdate();
+    // totalcalories();
+    });
+    document.getElementById("id_Carbohydrt").addEventListener('input', function(){
+        totalcarbupdate();
+        // totalcalories();
+    });
+    document.getElementById("id_Sugars").addEventListener('input', function(){
+        totalcarbupdate();
+        // totalcalories();
+    });
+    document.getElementById("id_Fiber_TD").addEventListener('input', function(){
+        totalcarbupdate();
+        totalcalories();
+    });
+
+    document.getElementById("id_Protein").addEventListener('input', totalcalories);
+
+    document.getElementById("id_ethyl").addEventListener('input', function(){
+    totalalcoholupdate();
+    totalcalories();});
+    document.getElementById("id_fusel").addEventListener('input', function(){
+    totalalcoholupdate();
+    totalcalories();});
+    document.getElementById("id_pg").addEventListener('input', function(){
+    totalalcoholupdate();
+    totalcalories();});
+    document.getElementById("id_tri_citrate").addEventListener('input', function(){
+    totalalcoholupdate();
+    totalcalories();});
+    document.getElementById("id_glycerin").addEventListener('input', function(){
+    totalalcoholupdate();
+    totalcalories();});
+    document.getElementById("id_triacetin").addEventListener('input', function(){
+    totalalcoholupdate();
+    totalcalories();});
+  </script>
+  <!-- <script type = 'text/javascript' src="static/js/document.js" </script> -->
+{% endblock %}

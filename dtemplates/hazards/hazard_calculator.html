@@ -1,0 +1,43 @@
+{% extends "hazards/base.html" %}
+
+{% block content %}
+     <div id="content-main">
+        <div class="container">
+            <div class="panel panel-default">
+
+				<form action="" method="POST" >
+				<div class="panel-heading"><h2> {{ name_form }}</h2></div>
+
+                
+                {{ management_form }}
+                {% csrf_token %}
+
+                <table class="table table-condensed" id="formula-rows" width="100%">
+                    <tr>
+                        <th>CAS Number</th>
+                        <th>Weight</th>
+                        <th>Delete</th>
+                    </tr>
+
+                    {% for form in formset %}
+                    {% if form.errors %}
+                    <tr class="formula_row danger" >
+                    {% else %}
+                    <tr class="formula_row">
+                    {% endif %}
+                        <td class="number-cell">{{ form.cas }}{{ form.cas.errors }}{{form.non_field_errors}}</td>
+                        <td class="amount-cell">{{ form.weight }}{{ form.weight.errors }}</td>
+                        <td class="deleterow" ><div class='glyphicon glyphicon-remove'></div></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+
+                <button class='addnewrow'> New Row <span class="glyphicon glyphicon-plus"></span></button>
+
+                <input id="formula-submit-button" type="submit" value="Submit Formula" />
+                </form>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

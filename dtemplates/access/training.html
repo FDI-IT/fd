@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<table>
+{% for i in types %}
+  <tr>
+    <td>{{i.1}}</td>
+    {% if i.1 in training %}
+      <td>Completed</td>
+    {% else %}
+      <td>Not Completed</td>
+    {% endif %}
+  </tr>
+{% endfor %}
+</table>
+{% endblock %}

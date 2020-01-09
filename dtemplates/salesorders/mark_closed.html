@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="title">
+	<div id="title-left">
+		<span id="name">Mark all sales orders <i>closed</i>.</span>
+		<span id="number"></span>
+	</div>
+	<div id="title-right">
+	</div>
+	<div id="related-links">
+	<ul>
+		
+	</ul>
+	</div>
+</div>
+
+<div id="content-main">
+<form action="/salesorders/mark_closed/clear/" method="post">
+{% csrf_token %}
+	<input type="submit" value="Mark" />
+</form>
+</div>
+
+
+
+<div id="content-right">
+	
+</div>
+
+</form>
+{% endblock %}
+

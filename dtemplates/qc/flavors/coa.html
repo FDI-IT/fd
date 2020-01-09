@@ -1,0 +1,180 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="/static/css/spec_sheet.css" />
+	<link rel="stylesheet" type="text/css" href="/static/css/spec_sheet_print.css" media="print"/>
+</head>
+	
+<body>
+
+
+{% block content %}
+
+<div class="specsheet_application_container">
+	<div class="print_page_container">
+		<div class="print_page_content" id="spec_sheet_page">
+			<div class="float-container fdi_print_header">
+					<img id="fdi_print_header_logo" src="/static/images/logo.png">
+					<p class="fdi_print_header_address">
+						Flavor Dynamics, Inc.<br>
+						640 Montrose Ave<br>
+						South Plainfield, NJ 07080<br>
+						888.271.8424 - 908.822.8547 fax
+					</p>
+			</div>
+			<div class="float-container">
+				<h1 class="fdi_print_title">
+					{{ coa.lss.lot.flavor.get_fdnum }}<br>
+					{{ coa.lss.lot.flavor.natart_name_with_type }}<br>
+					Lot {{ coa.lss.lot.number }}
+				</h1>
+			</div>
+			
+			<div class="float-container">
+				<h2 class="fdi_print_subtitle">
+					Certificate of Analysis
+					
+				</h2>
+			</div>
+			
+			<div class="float-container spec_body">
+				<ul class="float-container">
+					<li>
+						<span class="spec_label">
+							Manufactured date
+						</span>
+						<span class="spec_value">
+							{{ coa.lss.lot.date }}
+						</span>
+					</li>
+					<li>
+						<span class="spec_label">
+							Customer
+						</span>
+						<span class="spec_value">
+							{{ salesorder.customer.companyname }}
+						</span>
+					</li>
+					<li>
+						<span class="spec_label">
+							Customer Product Code
+						</span>
+						<span class="spec_value">
+							{{ salesorder.customer.companyname }}
+						</span>
+					</li>
+					<li>
+						<span class="spec_label">
+							Customer Purchase Order
+						</span>
+						<span class="spec_value">
+							{{ salesorder.customer.companyname }}
+						</span>
+					</li>
+				</ul>
+			</div>
+			
+			<div class="float-container spec_body">
+				<h2 class="fdi_print_subtitle">Analysis</h2>
+				<table class="fdi_specifications_table">
+					<thead>
+						<tr>
+							<th>
+								Name
+							</th>
+							<th>
+								Specification
+							</th>
+							<th>
+								Result
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for test in testresults %}
+						<tr>
+							<td>
+								{{ test.name }}
+							</td>
+							<td>
+								{{ test.specification }}
+							</td>
+							<td>
+								{{ test.result }}
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			
+			<div class="float-container fdi_print_footer_wrap">
+				<div class="fdi_print_footer">
+					<p>This is the standard statement at the bottom of all spec sheets. The normal standard stuff would go here. All the normal things that belong on this type of document.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="document_control_sidebar">
+		<h1>Certificates of Analysis</h1>
+		
+		<p>This would have info about all related records.</p>
+		
+		<p>
+			A COA displays a wide range of information from our database 
+			through many relationships.
+		</p>
+		
+		<p>
+			When exploring the relationships, the main entry point into the
+			database is that a COA is generated from a sales order or invoice
+			line item. Through this record, all the information necessary to
+			print a COA can be derived.
+		</p>
+		
+		<p>
+			A COA displays the full name of the flavor. It displays
+			information about the customer, their purchase order, and our
+			lot number. It also displays a list of specifications and test
+			results for the lot. The List of specifications is customized per
+			flavor.
+		</p>
+		
+		<p>Pertinent information:</p>
+		
+		<ul>
+			<li>Who created the lot.</li>
+			<li>Who QC'd the lot.</li>
+			<li>Who reviewed the QC records.</li>
+			<li>Who last edited the specs list.</li>
+			<li>Hyperlinks to scanned batchsheets and QC cards.</li>
+		</ul>
+		
+		<h3>Design Issues</h3>
+		<p>
+			We need to be able to edit the list of flavor specs, but we need
+			to preserve the exact state of old COAs. A COA has to record the
+			list of specs at the time it was made as well as the results.
+		</p>
+		<p>
+			A saved COA will have a one-to-many relationship with test results.
+			Each test result snap-shots the specification of the product at the
+			time, in addition to the results.
+		</p>
+		<p>
+			This way rendering old COAs is totally de-coupled from the 
+			current specs of the product.
+		</p>
+		<p>
+			When a new COA is created, it presents a form where all the current
+			specs have to be filled out to proceed.
+		</p>
+		<p>
+			The spec can be edited by an administrator.
+		</p>
+	</div>
+</div>
+{% endblock %}
+</body>
+</html>

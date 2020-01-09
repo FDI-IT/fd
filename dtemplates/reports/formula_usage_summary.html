@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block htmlhead %}
+{{ block.super }}
+{{ date_range_form.media }}
+{% endblock %}
+{% block content %}
+
+<div id="content-solo">
+	{{date_range_form.as_p}}
+<div class="hideable">
+	<a id="showhidetoggle" href="#" onclick="toggle_visible();">Show search options</a>
+	
+</div>
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+        {% endif %}
+    </span> 
+</div>
+<div id="object-list">
+	<table>
+		<thead>
+			<tr>
+				<th>Flavor</th>
+				<th>Num Orders</th>
+				<th>Total Weight</th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for object in object_list %}
+			<tr>
+				<td><a href="/access/{{object.number}}/"></a>{{ object.number }}</a></td>
+				<td>{{ object.lot_count }}</td>
+				<td>{{ object.lot_amount_sum }}</td>
+			</tr>
+		{% endfor %}	
+		</tbody>
+	</table>
+</div>
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+        {% endif %}
+    </span>
+</div>
+</div>
+{% endblock %}

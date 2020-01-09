@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <style>
+    tr, td, th, table{
+      border: 1px solid black;
+    }
+    .custom_br{
+      margin:0px;
+    }
+  </style>
+  <script type="text/javascript">
+    function printLabel(divName){
+      var printContent = document.getElementById(divName).innerHTML;
+      var originalContent = document.body.innerHTML;
+      document.body.innerHTML = printContent;
+      window.print();
+      document.body.innerHTML = originalContent;
+      //document.body.style = originalStyle;
+    }
+
+  </script>
+
+
+  <br>
+  <!--search-->
+  <form method = 'GET'>
+      {% csrf_token %}
+      {{ management_form }}
+      {{ form.rm_search }}
+
+      <!-- <input name="submit" type="submit" value="Submit"/> -->
+      <input type = "button" onclick="printLabel('label')" value="Print" />
+  </form>
+
+  <br>
+
+
+  <div id = "label"> <!-- print div-->
+    <!-- letter header -->
+    <style>
+      #inner-body{
+        font-size: 12px;
+      }
+      tr, td, th, table{
+        border: 1px solid black;
+        font-size: 12px;
+      }
+      .custom_br{
+        margin:0px;
+      }
+      .header_p_margin{
+        margin-top: 6px;
+        margin-bottom: 6px;
+      }
+      h2{
+        margin:auto;
+      }
+    </style>
+      <div id="inner-body">
+          <div style="display:inline-block; width:100%;">
+            <div>
+              <div style = "height: 90px; width: 30%; float:left">
+                <img style="max-height: 100%; max-width:100%;" src = "{{STATIC_URL}}images/fdi_logo.jpg"/>
+              </div>
+              <div align="right"style="width:70%; float:right">
+                <h2>FLAVOR DYNAMICS, INC</h2>
+                <p class='header_p_margin'> 640 Montrose Ave. • South Plainfield, NJ  07080</p>
+                <p class='header_p_margin'>Phone: 908-822-8855</p>
+                <p class='header_p_margin'>customercare@flavordynamics.com</p>
+              </div>
+
+            </div>
+            <div style = "width:100%;float:left">
+              <h1 align="center" style="border-top:solid 2px black; border-bottom: solid 2px black; margin:0px;">Allergen Declaration</h1>
+            </div>
+          </div>
+
+    <!-- <br> -->
+          <div>
+            <p id="font" class="custom_br">{% now 'm/d/Y' %}</p>
+            <p id="font" class="custom_br">{{name}}</p>
+            <p id="font">To Whom it May Concern:</p>
+
+            <p id="font">To the best of our knowledge, this product's allergen status is as follows: </p>
+          </div>
+
+    <!--table filled with info from search-->
+          <table align="center">
+      <tr>
+           <th>ALLERGEN SOURCES</th>
+           <th>PRESENT</th>
+           <th>INGREDIENT</th>
+      </tr>
+      <tr>
+        <th colspan="3">USA</th>
+      </tr>
+      <tr>
+          <td>Wheat* (includes Triticum species and Triticale)</td>
+          {% if name.wheat %}
+            <td>Yes</td>
+            <td>wheat</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Egg and Egg Products</td>
+          {% if name.egg %}
+            <td>Yes</td>
+            <td>Egg</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Fish</td>
+          {% if name.fish == None or name.fish == '' %}
+            <td>No</td>
+            <td>N/A</td>
+            {% else %}
+            <td>Yes</td>
+            <td>{{name.fish}}</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Milk and Milk Products</td>
+          {% if name.milk %}
+            <td>Yes</td>
+            <td>milk</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Soybeans</td>
+          {% if name.soybeans %}
+            <td>Yes</td>
+            <td>soybeans</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Peanut Products (oil, nut, etc)</td>
+          {% if name.peanuts %}
+            <td>Yes</td>
+            <td>peanuts</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Crustacean Shellfish</td>
+          {% if name.crustacean == None or name.crustacean == '' %}
+            <td>No</td>
+            <td>N/A</td>
+            {% else %}
+            <td>Yes</td>
+            <td>{{name.crustacean}}</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Soy (flour, oil, proteins, etc)</td>
+          {% if name.soy %}
+            <td>Yes</td>
+            <td>soy</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <!-- <tr>
+          <td>Sulfur Dioxide and Sulfites</td>
+          {% if name.sulfur %}
+            <td>Yes</td>
+            <td>sulfur</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr> -->
+      <tr>
+          <td>Tree Nuts</td>
+          {% if name.treenuts == None or name.treenuts == '' %}
+            <td>No</td>
+            <td>N/A</td>
+            {% else %}
+            <td>Yes</td>
+            <td>{{name.treenuts}}</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <th colspan="3">Canada, EU</th>
+      </tr>
+      <tr>
+          <td>Celery (root, stalk, leaves, not seeds)</td>
+          {% if name.celery %}
+            <td>Yes</td>
+            <td>celery</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Lupines</td>
+          {% if name.lupines %}
+            <td>Yes</td>
+            <td>lupines</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Mollusks (oysters, clams, etc)</td>
+          {% if name.mollusks %}
+            <td>Yes</td>
+            <td>mollusks</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Mustard and Products thereof</td>
+          {% if name.mustard %}
+            <td>Yes</td>
+            <td>mustard</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Sesame and Products thereof</td>
+          {% if name.sesame %}
+            <td>Yes</td>
+            <td>sesame</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Yellow #5</td>
+          {% if name.yellow_5 %}
+            <td>Yes</td>
+            <td>yellow #5</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+        <th>FOOD SENSITIZERS</th>
+        <th>PRESENT</th>
+        <th>THRESHOLD</th>
+      </tr>
+      <tr>
+          <td>Sulfur dioxide and sulfites at concentrations of more than 10ppm expressed as SO2</td>
+          {% if name.sulfites_ppm > 10 %}
+            <td>{{name.sulfites_ppm}} ppm</td>
+            <td>{{name.sulfites_usage_threshold}}% in the final product</td>
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+      <tr>
+          <td>Grains (Rye, Millet, Oats, Barley, Rice, Sorghum, etc.)</td>
+          {% if name.gluten_ppm %}
+            <td>{{name.gluten_ppm}} ppm</td>
+            <!-- <td>{{name.sulfites_usage_threshold}}% in the final product</td> -->
+            {% else %}
+            <td>No</td>
+            <td>N/A</td>
+          {% endif %}
+      </tr>
+
+    </table>
+
+          <p align="center" class="custom_br"> *Note: Although oats, barley or rye contains a gluten type protein, it is not considered an allergen.
+          <p id="font"> Dolf Derovira Jr.</p>
+          <img style = "height:50px; width: 90px;" src = "{{STATIC_URL}}images/jr_non_sig.png"/>
+          <p id="font" class="custom_br">Q.C. Manager</p>
+
+          <p id="font" align="center" style="border-top:black 2px solid;">The above product allergen information is based on laboratory submissions or limited production batches. The data presented above might be modified as more information is obtained from larger production sizes.</p>
+        </div>
+  </div>
+
+  <!-- <input type = "button" onclick="printLabel('label')" value="Print" />
+
+{% endblock %}

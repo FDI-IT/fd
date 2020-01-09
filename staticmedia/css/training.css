@@ -1,0 +1,25 @@
+/* body{
+  font-size: 12px;
+} */
+
+ul {
+  list-style-type:none;
+  /* font-size: 12px; */
+}
+
+p, ol, table, tr, td{
+  font-size: 12px;
+}
+ol li ul li{
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+table, tr, td{
+  border: none;
+}
+/*
+input{
+  display: inline-block;
+  text-align: right;
+} */

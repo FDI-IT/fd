@@ -1,0 +1,29 @@
+{% load permissions %}
+{% autoescape off %}
+
+<div id="blades">
+	<div id="critical">
+		<ul>
+		{% for label, datum, color in blade_list %}
+			{% if label == "Raw Material Cost" or label == "Profit ratio" %}
+			<!-- template stuff maybe here? -->
+				{% if user.is_authenticated %}
+					<li>
+					<span class="label">{{ label }}</span>
+					<span class="datum" style="color:{{ color }}" id="{{label|cut:" "}}">{{ datum }}</span>
+					</li>
+				{% endif%}
+			{% else %}
+				<li>
+				<span class="label">{{ label }}</span>
+				<span class="datum" style="color:{{ color }}" id="{{label|cut:" "}}">{{ datum }}</span>
+				</li>
+			{% endif %}
+		{% endfor %}
+		</ul>
+	</div>
+</div>
+<div>
+
+</div>
+{% endautoescape %}

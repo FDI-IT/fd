@@ -1,0 +1,562 @@
+# TODO:    change row amounts according to form value
+#          change page appearance after print link is pressed
+
+import datetime
+import sys
+import logging
+import hashlib
+import os
+import json
+from decimal import Decimal, ROUND_HALF_UP
+from operator import itemgetter
+from datetime import date
+
+
+from django.template import Context, loader
+from django.shortcuts import render, get_object_or_404
+import json
+from django.http import Http404
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.template import RequestContext, Context
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.forms.formsets import formset_factory
+from django.forms.models import modelformset_factory
+from django.template.loader import get_template
+from django.db import connection
+from django.db.models import Sum
+from django.db import transaction
+from django.contrib.contenttypes.models import ContentType
+
+import reversion
+
+
+from elaphe import barcode
+
+from access.models import Flavor
+from newqc.models import Lot, get_next_lot_number, LotSOLIStamp
+from salesorders.models import SalesOrderNumber, LineItem
+
+from access.views import flavor_info_wrapper
+from batchsheet import forms
+from batchsheet.forms import BatchSheetForm, NewLotForm, UpdateLotForm, build_confirmation_rows
+from batchsheet.controller import BatchAddLots
+from batchsheet.exceptions import BatchLotAddException
+
+def batchsheet_home(request):
+    batch_sheet_form = BatchSheetForm({
+        'batch_amount':0,
+        'update_rm_inventory': True,
+       # 'lot_number':get_next_lot_number()
+    })
+    return render(
+        request,
+        'batchsheet/batchsheet_home.html',
+        {
+            'batch_sheet_form': batch_sheet_form,
+        },
+    )
+
+def next_lot(request):
+    return HttpResponse(json.dumps({'lot_number':get_next_lot_number()}), content_type='application/json; charset=utf-8')
+
+def check_lot_number(request):
+    """This is a function that looks at lot number that someone wants to use
+    in a batchsheet, and checks if it is ok to use.
+
+    The lot number might already be used, for that flavor or another flavor.
+
+    The lot number might be out of sequence, meaning higher than the next lot
+    number.
+
+    Or the lot number might be equal to the next lot number. If that is the
+    case then we should init the lot immediately to avoid de-sync errors
+    later.
+    """
+    lot_number = request.GET.get('lot_number', None)
+    flavor_number = request.GET.get('flavor_number', None)
+    if lot_number == '' or lot_number == None:
+        return HttpResponse(json.dumps({'err':'no lot given'}, content_type='application/json; charset=utf-8'))
+
+    try:
+        if Lot.objects.filter(number=lot_number).exists() == True:
+            lot = Lot.objects.filter(number=lot_number)[0]
+            return HttpResponse(json.dumps({'used':'true', 'lot_number':lot.number, 'flavor_number':lot.flavor.number, 'amount':str(lot.amount), 'next_lot_number': get_next_lot_number()}), content_type='application/json; charset=utf-8')
+        else:
+            if lot_number != get_next_lot_number():
+                return HttpResponse(json.dumps({'out_of_sequence':'true'}), content_type='application/json; charset=utf-8')
+            else:
+                return HttpResponse(json.dumps({'used':'false'}), content_type='application/json; charset=utf-8')
+    except Exception as e:
+        return HttpResponse(json.dumps({'err':str(e)}), content_type='application/json; charset=utf-8')
+
+
+def lot_init(request):
+    #if request.is_ajax():
+    try:
+        lot_number = request.GET.get('lot_number', None)
+        if lot_number == '':
+            lot_number = None
+        update = request.GET.get('update', None)
+
+        #only make a new lot if the lot had not just been created; otherwise, just return the lot number and re-print the page
+        if Lot.objects.filter(number=lot_number).exists() == False:
+            if lot_number is None or int(lot_number) == get_next_lot_number():
+                l = Lot(
+                    amount=request.GET['amount'],
+                    flavor=get_object_or_404(Flavor,number=request.GET['flavor_number']),
+                    status='Batchsheet Printed'
+                )
+                l.save()
+
+                # if request.GET.get('update_rm_inventory') == True:
+                #     l.update_rm_inventory()
+
+        elif update == 'true':
+            update_lot = Lot.objects.get(number=lot_number)
+            update_lot.amount = request.GET['amount']
+            update_lot.save()
+
+        return HttpResponse(json.dumps({'success':'success'}), content_type='application/json; charset=utf-8')
+
+    except Exception as e:
+        return HttpResponse(json.dumps({'err':str(e)}), content_type='application/json; charset=utf-8')
+#    else:
+#        return HttpResponse(json.dumps("NOTHING TO DO HERE"))
+
+def get_last_lot(request):
+    today = date.today()
+    lot = Lot.objects.filter(flavor__number = int(request.GET.get('flavor_number'))).order_by('-date')
+    if lot.exists() and (today-lot[0].date).days >= (365*3):
+        # return HttpResponse(json.dumps({'success':'success'}), content_type='application/json; charset=utf-8')
+        return JsonResponse({'success':'success', 'threeyears':True})
+    else:
+        # return HttpResponse(json.dumps({'error':'error'}), content_type='application/json; charset=utf-8')
+        return JsonResponse({'success':'success', 'threeyears':False})
+
+class Bubble():
+    def __init__(self, headline, contents):
+        self.headline = headline
+        self.contents = contents
+
+pounds_grams_conversion = Decimal("453.59237")
+def weighted_formula_set(f,wf):
+    for fr in f.formula_set.all():
+        fr.amount = fr.amount * wf
+        fr.totalweight = fr.amount * pounds_grams_conversion
+        yield fr
+
+def get_barcode(request, barcode_contents):
+    barode_string = "BATCHSHEET_LOT-%s" % str(barcode_contents)
+    x = barcode('qrcode', barode_string, options=dict(version=4, eclevel='M'),margin=0, data_mode='8bits')
+    #x = barcodeImg(codeBCFromString(str(retain_pk)))
+    response = HttpResponse(content_type="image/png")
+    x.save(response, "PNG")
+    return response
+
+def batchsheet_single(request, lot_pk):
+    return render(
+        request,
+        'batchsheet/batchsheet_batch_print.html',
+        {
+            'lot_pks':[lot_pk,],
+        },
+    )
+
+@flavor_info_wrapper
+def batchsheet_print(request, flavor):
+    json_dict = {}
+    json_dict['batchsheet'] = ""
+    json_dict['sidebar'] = ""
+
+    try:
+        batch_sheet_form = BatchSheetForm(request.GET)
+        if batch_sheet_form.is_valid():
+            dci =  flavor.discontinued_ingredients
+            qv = flavor.quick_validate()
+
+            packaging_requirements = batch_sheet_form.cleaned_data['packaging_requirements']
+
+            if qv != True:
+                c = {'flavor':"%s -- NOT APPROVED -- %s" % (flavor.__str__(), qv)}
+                json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)
+            elif len(dci) != 0:
+                c = {'flavor':"%s -- NOT APPROVED -- Contains discontinued ingredients: %s" % (flavor.__str__(), ", ".join(dci))}
+                json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)
+            elif flavor.approved == False:
+                c = {'flavor':"%s -- NOT APPROVED" % flavor.__str__()}
+                json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)
+            else:
+                try:
+                    batch_amount = Decimal(batch_sheet_form.cleaned_data['batch_amount'])
+                except TypeError:
+                    batch_amount = Decimal('0')
+
+                if 'get_next_lot' in request.GET:
+                    lot_number = get_next_lot_number()
+                    json_dict['lot_number'] = lot_number
+                else:
+                    lot_number = None
+
+                if flavor.yield_field and flavor.yield_field != 100:
+                    batch_amount = batch_amount/(flavor.yield_field/Decimal("100"))
+
+                weight_factor = batch_amount / Decimal("1000")
+                c = {
+                    'flavor': flavor,
+                    'weighted_formula_set':weighted_formula_set(flavor,weight_factor),
+                    'lot_number': lot_number,
+                    'batch_amount': batch_amount,
+                    'packaging_requirements': packaging_requirements
+                }
+                json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)
+
+                soli_bubble=[]
+                for soli in LineItem.objects.filter(flavor=flavor).filter(salesordernumber__open=True):
+                    soli_bubble.append("%s - %s - %s -%s lbs" % (
+                            soli.salesordernumber.number,
+                            soli.salesordernumber.customer,
+                            soli.salesordernumber.create_date,
+                            soli.quantity
+                        ))
+                bubbles = [
+                        Bubble('<a href="/access/%s/" target="_blank">Flavor Info</a>' % flavor.number, [
+                                "Flash point: %s" % flavor.flashpoint,
+                                "Yield: %s" % flavor.yield_field,
+                                "Allergens: %s" % flavor.allergen,
+                                "Solvent: %s" % flavor.solvent,
+                                "Kosher: %s" % flavor.kosher,
+                                "Organic: %s" % flavor.organic,
+                            ]),
+                        Bubble('Summary', [
+                                "Open orders: %s" % LineItem.objects.filter(flavor=flavor).filter(salesordernumber__open=True).count(),
+                                "Total weight: %s" % LineItem.objects.filter(flavor=flavor).filter(salesordernumber__open=True).aggregate(Sum('quantity'))['quantity__sum'],
+                            ]),
+                        Bubble('<a href="/salesorders/" target="_blank">Open Sales Orders</a>', soli_bubble),
+                    ]
+                c = {
+                    'bubbles':bubbles,
+                }
+                json_dict['sidebar'] = loader.get_template('batchsheet/batchsheet_sidebar.html').render(c)
+
+    except Exception as e:
+        json_dict['errors'] = repr(e)
+        return HttpResponse(json.dumps(json_dict), content_type="application/json")
+
+    return HttpResponse(json.dumps(json_dict), content_type="application/json")
+
+
+def update_lots(request, lot_pk, amount, extra=1): #change this - if updating one lot from add lots screen, go straight to update confirmation
+    if request.method == 'GET':
+        #get list of ot numbers and amounts from request.get
+        #if list exists:
+            #confirmation page
+        #else:
+            #update page
+
+        LotFormSet = formset_factory(forms.UpdateLotForm, extra=extra) #default, empty formset
+        formset = LotFormSet()
+
+        try:
+            LotFormSet = formset_factory(forms.UpdateLotForm, extra=0)
+            formset = LotFormSet(request.GET)
+            #print 'z'
+        except:
+            try:
+                #redirected from Add Lots page
+                if lot_pk != None and amount != None:
+                    update_lot = Lot.objects.get(pk = lot_pk)
+                    update_row = [{'lot_number': update_lot.number, 'flavor_number': update_lot.flavor.number, 'amount': amount}]
+
+                    LotFormSet = formset_factory(forms.UpdateLotForm, extra = 0)
+                    formset = LotFormSet(initial = update_row)
+                #print 'y'
+            except:
+                pass
+                #print 'x'
+
+
+        #else:
+        #    LotFormSet = formset_factory(forms.UpdateLotForm)
+        #    formset = LotFormSet(request.GET)
+
+        if formset.is_valid():
+
+
+            display_info = build_confirmation_rows(formset)
+            confirmation_rows = list(zip(formset.forms, display_info))
+
+
+            return render(
+                request,
+                'batchsheet/lot_update_confirmation.html',
+                {
+                    'formset': formset,
+                    'management_form': formset.management_form,
+                    #'confirmation_info': confirmation_info,
+                    'confirmation_rows': confirmation_rows,
+                    #'confirm': confirm,
+                },
+            )
+        else:
+            return render(
+                request,
+                'batchsheet/update_lots.html',
+                {
+                    'formset': formset,
+                    'management_form': formset.management_form,
+                },
+            )
+    elif request.method == 'POST':
+        LotFormSet = formset_factory(forms.UpdateLotForm)
+        formset = LotFormSet(request.POST)
+
+        if formset.is_valid():
+            for form in formset.forms:
+                cd = form.cleaned_data
+
+                update_lot = Lot.objects.get(number = cd['lot_number'])
+                update_lot.amount = cd['amount']
+                update_lot.status = 'Created'
+
+
+        else:
+            print('AKJSHF')
+
+
+def lot_update_confirmation(request, lot_list=None): #go straight here if clicking url from add_lots
+    if request.method == 'POST':
+
+        LotUpdateFormSet = formset_factory(UpdateLotForm)
+
+        formset = LotUpdateFormSet(request.POST)
+        if formset.is_valid():
+            for form in formset.forms:
+                cd = form.cleaned_data
+                update_lot = Lot.objects.get(cd['lot_number'])
+
+                update_lot.amount = cd['amount']
+                update_lot.status = 'Created'
+
+                update_lot.save()
+
+            redirect_path = "/qc/lots"
+            return HttpResponseRedirect(redirect_path)
+
+        else:
+            return render(
+                request,
+                'batchsheet/lot_update_confirmation.html',
+                {
+                    'formset': formset,
+                    'management_form': formset.management_form
+                },
+            )
+
+    else:
+        if lot_list != None:
+            LotFormSet = formset_factory(forms.UpdateLotForm, extra=0)
+            formset = LotFormSet(initial=lot_list)
+        #else:
+        #    formset = None
+
+
+        confirm = True
+        update_info = []
+        for lot_number, flavor_number, amount in lot_list:
+            old_amount = Lot.objects.get(number = lot_number).amount
+            old_status = Lot.objects.get(number = lot_number).status
+
+            if amount == old_amount:
+                warning = 'The specified lot already has an amount of %s.' % old_amount
+            else:
+                warning = None
+
+            update_info.append((lot_number, flavor_number, old_amount, old_status, amount, 'Created', warning))
+
+            if warning:
+                confirm = False
+
+        return render(
+            request,
+            'batchsheet/lot_update_confirmation.html',
+            {
+                'update_info': update_info,
+                'formset': formset,
+                'management_form': formset.management_form,
+                'confirm': confirm
+            },
+        )
+
+
+def batchsheet_batch_print(request):
+    if request.method == 'POST':
+        lot_pks = request.POST.getlist('lot_pks')
+
+        test = []
+
+        for lot_pk in lot_pks:
+            lot = Lot.objects.get(pk = lot_pk)
+            lot.status = 'Batchsheet Printed'
+            lot.save()
+            test.append((lot_pk, lot.status))
+
+        return render(
+            request,
+            'batchsheet/batchsheet_batch_print.html',
+            {
+                'lot_pks':lot_pks,
+            },
+        )
+
+def lot_notebook(request):
+    pass
+
+def get_discontinued_orders(request):
+
+    discontinued_list= {}
+    flavor_numbers = list(map(int, request.GET.getlist('flavor_numbers[]')))
+
+    for flavor_number in flavor_numbers:
+        flavor = Flavor.objects.get(number=flavor_number)
+        if(flavor.contains_discontinued_ingredients == True):
+            if flavor_number not in discontinued_list:
+                ingredients = []
+
+                for ingredient in flavor.discontinued_ingredients:
+                    ingredients.append(ingredient)
+
+                discontinued_list[flavor_number] = "Contains the following discontinued ingredient(s): " + ','.join(ingredients)
+
+
+
+    return HttpResponse(json.dumps(discontinued_list), content_type='application/json; charset=utf-8')
+
+
+def sales_order_list(request, status_message=None):
+    page_title="Sales Orders - Production"
+    help_link = "/wiki/index.php/Sales_orders"
+    hundredths = Decimal('0.00')
+    orders= {}
+    for order in LineItem.objects.filter(covered=False).filter(salesordernumber__open=True):
+        try:
+            orders[order.flavor] += [order]
+        except KeyError:
+            orders[order.flavor] = [order]
+
+    summarized_orders = []
+    for flavor, details in list(orders.items()):
+
+        total = Decimal('0')
+        for detail in details:
+            total += detail.quantity
+        try:
+            totalcost = flavor.rawmaterialcost * total
+            totalcost = totalcost.quantize(hundredths, rounding=ROUND_HALF_UP)
+            #flavor.update_cost()
+        except:
+            totalcost = 0
+        summarized_orders.append({'flavor': flavor,
+                                  'total': total,
+                                  'details':details,
+                                  'totalcost':totalcost,
+                                  })
+    summarized_orders = sorted(summarized_orders, key=itemgetter('total'))
+    resultant_orders = summarized_orders
+
+    return render(
+        request,
+        'batchsheet/sales_order_production.html',
+        {
+            'window_title': page_title,
+            'accept_link': 'javascript:salesorder_selections_submit()',
+            'orders':resultant_orders,
+            'help_link': help_link,
+            'status_message': status_message,
+            'page_title':page_title,
+            'get': request.GET,
+        },
+     )
+
+
+
+
+@reversion.create_revision()
+def add_lots(request):
+    if request.method == 'POST':
+        LotFormSet = formset_factory(NewLotForm)
+
+        formset = LotFormSet(request.POST)
+        if formset.is_valid():
+            try:
+                BatchAddLots.add_lots(formset.forms)
+            except BatchLotAddException:
+                #transaction.rollback()
+                return render(
+                    request,
+                    'batchsheet/add_lots.html',
+                    {
+                        'formset': formset,
+                        'status_message': "Some of the sales order that you tried to create lots for are already covered. Please go back to the sales order screen and refresh the page to get the most up to date list of open sales orders.",
+                        'management_form': formset.management_form
+                    },
+                )
+
+            #transaction.commit()
+            redirect_path = "/qc/lots"
+            return HttpResponseRedirect(redirect_path)
+
+        else:
+            #transaction.rollback()
+            for form in formset:
+                form.fields['amount'].widget.attrs['readonly'] = True
+            return render(
+                request,
+                'batchsheet/add_lots.html',
+                {
+                    'formset': formset,
+                    'management_form': formset.management_form
+                },
+            )
+
+
+
+
+    else:
+
+        lot_checklist = []
+        selected_orders = request.GET.getlist('flavor_pks')
+
+
+        for order in selected_orders:
+            #this changes the format of the GET request to convert the json strings into python dicts
+            lot_checklist.append((json.loads(order.replace('\'','!').replace('\"','\'').replace('!','\"')))[0])
+
+        #print lot_checklist
+
+        #lot_number = get_next_lot_number()
+
+        '''
+        #assign lot numbers to new lots
+        for lot in lot_checklist:
+            #if lot['amount'][-2:] == '00':
+            #    lot['amount'] = lot['amount'][:-1] #get rid of the second decimal digit in amount, since the lot model only takes one
+            #lot['amount'] = int(lot['amount'])
+            lot['lot_number'] = lot_number
+            lot_number = lot_number + 1
+        '''
+
+        LotFormSet = formset_factory(forms.NewLotForm, extra=0)
+
+        formset = LotFormSet(initial=lot_checklist)
+        for form in formset:
+            form.fields['amount'].widget.attrs['readonly'] = True
+        #lot_list = formset.forms
+       # transaction.rollback()
+        return render(
+            request,
+            'batchsheet/add_lots.html',
+            {
+                'formset': formset,
+                'management_form': formset.management_form,
+            },
+        )

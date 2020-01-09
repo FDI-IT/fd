@@ -1,0 +1,7 @@
+{{ object.number }}
+{{ object.name }}
+{{ object.approved }}
+{{ object.sold }}
+{{ object.valid }}
+{{ object.natart }}
+{{ object.prefix }}

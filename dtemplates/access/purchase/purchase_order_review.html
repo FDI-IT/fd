@@ -1,0 +1,62 @@
+{% extends "bootstrap_base.html" %}
+
+{% block content %}
+
+<div id="content-main">
+	<div class="container">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h1> Purchase Order {{ po.number }} <small>{{ po.supplier.suppliername }}</small> </h1>
+			</div>
+		
+			<div class="panel-body">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th>RM Pin</th>
+							<th>RM Name</th>
+							<th>Due Date</th>
+							<th>Quantity Requested (lbs)</th>
+							<th>Package Size Requested (lbs)</th>
+							<th>Total Amount Received (lbs)</th>
+							<th>Status</th>
+							<th>Create/View Receiving Log</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for poli in poli_rows %}
+						<tr class="{% if poli.closed == True %} success {% elif poli.total_amount_received > 0 %} warning {% endif %}">
+							
+							<td>{{ poli.raw_material.id }}</td>
+							<td>{{ poli.raw_material.product_name }}</td>
+							<td>{{ poli.due_date }}</td>
+							<td>{{ poli.quantity }}</td>
+							<td>{{ poli.package_size }}</td>
+							<td>{{ poli.total_amount_received|floatformat:-2 }}/{{ poli.total_amount_requested|floatformat:-3 }}</td>
+							<td>
+                                {% if poli.closed %}
+                                    Closed
+                                {% else %}
+                                    Open
+                                {% endif %}
+                            </td>
+							<td> 
+								<a href="edit/{{ poli.pk }}">
+								<button type="button" class="btn btn-secondary">
+									<span class="glyphicon glyphicon-pencil"></span>
+								</button>
+								</a> 
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			<div class="panel-footer">
+				<a role="button" href="/access/purchase_orders_within_one_year/" class="btn btn-default"> &lt;&lt; Back to Purchase Orders </a>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

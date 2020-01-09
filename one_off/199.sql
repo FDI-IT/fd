@@ -1,0 +1,1 @@
+ALTER TABLE newqc_scanneddoc ADD COLUMN import_log text NOT NULL DEFAULT '';

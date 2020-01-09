@@ -1,0 +1,123 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from django.contrib.auth.models import User
+from django.db.models import Q
+from decimal import *
+
+from access.models import Flavor, flavor_api_fields, Ingredient, LeafWeight
+from flavor_usage.models import Application, Tag
+from api.serializers import FlavorSerializer, UserSerializer, TagSerializer, IngredientSerializer, LeafWeightSerializer
+from api.pagination import StandardPagination
+
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter, NumberFilter
+from rest_framework import viewsets
+from rest_framework.filters import SearchFilter, OrderingFilter
+
+# Create your views here.
+class FlavorFilter(FilterSet):
+    # name_contains = CharFilter(name="name", lookup_expr='icontains')
+    min_flash = NumberFilter(name="flashpoint", lookup_expr='gte')
+    max_flash = NumberFilter(name="flashpoint", lookup_expr='lte')
+    min_selling_price = NumberFilter(name="unitprice", lookup_expr='gte')
+    max_selling_price = NumberFilter(name="unitprice", lookup_expr='lte')
+
+    def natart(self, queryset, name, value):
+        include = queryset.split(",")[0]
+        if include == "Include":
+            return queryset.filter(natart__in=natart.split(",")[1:])
+        elif include == "Exclude":
+            return queryset.exclude(natart__in=natart.split(",")[1:])
+
+    class Meta:
+        model = Flavor
+
+        #remove tag fields which we override in the get_queryset method of the viewset
+        non_tag_fields = [field for field in flavor_api_fields if field not in ['natart', 'product_category', 'kosher']]
+        fields = non_tag_fields
+
+class FlavorViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint that allows flavors to be viewed.
+    """
+    #queryset = Flavor.objects.all()
+    serializer_class = FlavorSerializer
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_class = FlavorFilter
+    search_fields = ('name')
+    ordering_fields = '__all__'
+    pagination_class = StandardPagination
+
+
+    def get_queryset(self):
+        queryset = Flavor.objects.all()
+
+        name_filter_parameter = self.request.query_params.get('name_contains', None)
+        if name_filter_parameter:
+            queryset = queryset.filter(Q(name__icontains=name_filter_parameter) | Q(label_type__icontains=name_filter_parameter))
+
+        tag_filter_lookups = {
+            'natart':'natart__in',
+            'product_category':'product_category__in',
+            'kosher':'kosher__in',
+            'tags':'tag__name__in',
+            'applications':'applications__application_type__name__in',
+            'contains_ingredient_gazinta':'leaf_weights__ingredient__id__in',
+            'contains_ingredient_formula':'formula__ingredient__id__in',
+        }
+
+        for tag_filter in tag_filter_lookups:
+            tag_filter_parameters = self.request.query_params.get(tag_filter, None)
+            if tag_filter_parameters:
+                include = tag_filter_parameters.split(",")[0]
+                filter_params = {'%s' % tag_filter_lookups[tag_filter]:tag_filter_parameters.split(",")[1:]}
+                if include == "Include":
+                    queryset = queryset.filter(**filter_params)
+                if include == "Exclude":
+                    queryset = queryset.exclude(**filter_params)
+
+        #the ordering parameter is automatically handled for fields in the serializer
+        #when we want to order by LeafWeight weights, we need to do it manually here
+        ordering_param = self.request.query_params.get('ordering', None)
+        if ordering_param and 'ingredient' in ordering_param:
+            ascending = False if ordering_param.startswith('-') else True
+
+
+        return queryset
+
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    pagination_class = StandardPagination
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+
+    search_fields = ('id','art_nati','prefix','product_name')
+
+class LeafWeightViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = LeafWeightSerializer
+    pagination_class = StandardPagination
+    filter_backends = (DjangoFilterBackend,)
+
+    def get_queryset(self):
+        queryset = LeafWeight.objects.all()
+
+        flavor_id_list = self.request.query_params.get('flavor_id_list', None)
+        if flavor_id_list:
+            queryset = queryset.filter(root_flavor__in=flavor_id_list.split(","))
+
+        return queryset
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint that allows flavor tags to be viewed.
+    """
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint that allows users to be viewed.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+

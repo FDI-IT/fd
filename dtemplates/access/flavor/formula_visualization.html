@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Formula Visualization</title>
+
+<!-- CSS Files -->
+<link href="/static/css/formula_visualization.css?v=25" type="text/css" rel="stylesheet" >
+
+<!-- JIT Library File -->
+<script  type="text/javascript" src="/static/js/lib/jit_yc.js"></script>
+<script  type="text/javascript" src="/static/js/lib/jquery-1.7.1.min.js"></script>
+<script  type="text/javascript" src="/static/js/lib/json2html.js"></script>
+<script  type="text/javascript" src="/static/js/lib/jquery.json2html.js"></script>
+
+<script type="text/javascript">
+	{% autoescape off %}
+	var st_data = {{ st_data }};
+	var st_layout_parameters = {{ st_layout_parameters }};
+	{% endautoescape %}
+</script>
+
+<!-- Example File -->
+<script type="text/javascript" src="/static/js/formula_visualization.js"></script>
+</head>
+
+
+<body onload="init();">
+<div id="container">
+
+<div id="left-container">
+
+
+
+<div class="text">
+<h4>
+Formula Tree Animation   
+</h4> 
+
+            <b>Click</b> on a node to select it.<br /><br />
+            <b>You can choose whether a tree is constrained to just the basic formula</b>
+            You can <b>select the tree orientation</b> by changing the select box in the right column.<br /><br />
+            You can <b>change the selection mode</b> from <em>Normal</em> selection (i.e. center the selected node) to 
+            <em>Set as Root</em>.<br /><br />
+            <b>Drag and Drop the canvas</b> to do some panning.<br /><br />
+            Leaves color depend on the number of children they actually have.
+            
+</div>
+
+<div id="id-list"></div>
+
+
+<div style="text-align:center;"><a href="example1.code.html">See the Example Code</a></div>
+</div>
+
+<div id="center-container">
+    <div id="infovis"></div>    
+</div>
+
+<div id="right-container">
+	<h4>Flavor Info</h4>
+	<ul>
+		<li>Max depth: {{ max_depth }}</li>
+	</ul>
+	<h4>Tree Layout</h4>
+	<form id="st_layout_form" action="/access/{{flavor.number}}/formula_visualization/" method="get">
+		{{st_layout_form.as_ul}}
+		<input type="submit" value="Refresh">
+	</form>
+	<h4>Node Info</h4>
+	<div id="node_info">
+		
+	</div>
+</div>
+
+<div id="log"></div>
+</div>
+</body>

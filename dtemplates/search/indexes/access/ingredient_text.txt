@@ -1,0 +1,3 @@
+{{ object.prefix }}
+{{ object.product_name }}
+{{ object.part_name2 }}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div id="content-main">
+	
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if raw_material_list.has_previous %}
+	            <a href="?page={{ raw_material_list.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ raw_material_list.number }} of {{ raw_material_list.paginator.num_pages }}.
+	        </span>
+	
+	        {% if raw_material_list.has_next %}
+	            <a href="?page={{ raw_material_list.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+	
+	<table>
+		<thead>
+			<tr>
+				<th>PIN</th>
+				<th>Name</th>
+				<th># of Products Containing this Ingredient</th>
+				<th>Supplier</th>
+				<th>CAS Number (not in reference document)</th>
+				<th width=15%>Admin Page</th>
+				<!-- <th>Status</th> -->
+			</tr>
+		</thead>
+		{% for ing, product_count in raw_material_list %}
+			<tr align="center">
+				<td>{{ ing.id }}</td>
+				<td><a href="/access/ingredient/pin_review/{{ ing.id }}/">{{ ing.product_name }}</a></td>
+				<td>{{ product_count }}</td>
+				<td>{{ ing.supplier.suppliercode }}</td>
+				<td>{{ ing.cas }}</td>
+				<td><a href="{{ing.get_admin_url}}">Change CAS</a></td>
+			</tr>
+		{% endfor %}
+	</table>
+	
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if raw_material_list.has_previous %}
+	            <a href="?page={{ raw_material_list.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ raw_material_list.number }} of {{ raw_material_list.paginator.num_pages }}.
+	        </span>
+	
+	        {% if raw_material_list.has_next %}
+	            <a href="?page={{ raw_material_list.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+	
+</div>
+
+{% endblock %}
+

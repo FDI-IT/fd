@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load filters %}
+{% block content %}
+<style>
+  .indent{
+    text-indent: 2500px;
+  }
+</style>
+{{message}}
+
+<table>
+  <th>
+    Training Documents
+  </th>
+{% for i in types %}
+  <tr>
+    <!-- <td>{{i.1}}</td> -->
+
+    {% if i.0 in admin and not i.0 in training %}
+      <td>{{i.1}}</td>
+      <td>Not Completed</td>
+    {% else %}
+      {% if i.0 in fs and not i.0 in training %}
+        <td>{{i.1}}</td>
+        <td><a href="../food_safety/{{i.0}}">Not Completed</a></td>
+      {% elif not i.0 in training %}
+        <td>{{i.1}}</td>
+        <td><a href="../{{i.0}}">Not Completed</a></td>
+      {% endif %}
+    {% endif %}
+  </tr>
+{% endfor %}
+
+</table>
+
+<script>
+  // function sensory_link(e){
+  //   if(e.checked){
+  //     console.log("YUH!");
+  //     var link = document.createElement("a")
+  //     link.setAttribute("href", '../s')
+  //   }
+  //
+  // }
+</script>
+
+
+{% endblock %}

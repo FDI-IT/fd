@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+  <link rel="stylesheet" type="text/css" href='/static/css/training.css'/>
+</head>
+
+<iframe width="1099.5" height="630" src="https://www.youtube.com/embed/toFKdtV_ZO4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<form method="POST">
+  {% csrf_token %}
+  <ol>
+    {% for q in questions %}
+      <li>
+        {{q.0}}
+        <ul>
+          {% for a in q.1 %}
+            <li><input type='radio' name='fltv{{forloop.parentloop.counter0}}' value="{% cycle 'True' 'False' %}" required/> {{a}}</li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ol>
+  <input type='submit'/>
+</form>
+
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  /* #comments {background:#fff} */
+  iframe {width:200%; height:250px;border:0;}
+  /* #comment-wrap {background:#fff;position:relative} */
+  /* #comments #comment-wrap{display:none;z-index:5;padding:10px}
+  #comments:hover #comment-wrap {display:block} */
+</style>
+{{message}}
+{% if pending %}
+
+  <fieldset>
+    <legend>Pending Documents</legend>
+    <form method='POST'>
+      {% csrf_token %}
+      <table>
+        {% for name, ings in pending.iteritems %}
+          <tr>
+            <td>
+              {{name.filename}}:
+              <div id="comments">
+                  <a href='{{name.uploadfile.url}}' target="_blank"> preview</a>
+                <div id="comment-wrap">
+                  <iframe src="{{name.uploadfile.url}}"></iframe>
+                </div>
+              </div>
+
+            </td>
+            <td>
+              <select name='supplist'>
+                {% for i in ings %}
+                  <option value='{{i.rawmaterialcode}}__{{name.filename}}'>{{i.supplier.suppliercode}}</option>
+                {% endfor %}
+                  <option value='idk'>Pass it off to Kristy and give her more work</option>
+              </select>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+        <input type='submit' name='pending' id='pending'/>
+    </form>
+  </fieldset>
+{% endif %}
+<br>
+<h2>MISNAMED or DOESN'T EXIST</h2>
+<h3>{{misnamed|length}}</h3>
+{% for m in misnamed %}
+    <p>{{m}}</p>
+{% endfor %}
+<br>
+<br>
+<h2>MULTIPLE SUPPLIERS</h2>
+<h3>{{multiples|length}}</h3>
+<!-- {% for m in multiples %}
+  <p>{{m}}</p>
+{% endfor %} -->
+<br>
+<br>
+<h2>SUCCESS</h2>
+<h3>{{success|length}}</h3>
+<!-- {% for s in success %}
+  <p>{{s}}</p>
+{% endfor %} -->
+<br>
+<br>
+{% if multiplesupps %}
+<h2>Multiple Suppliers</h2>
+  <form method="POST">
+    {% csrf_token %}
+    <table>
+      {% for k, supps in multiplesupps.iteritems %}
+        <tr>
+          <td>
+            {{k.filename}}:
+            <div id="comments">
+                <a href='{{k.uploadfile.url}}' target="_blank"> preview</a>
+              <div id="comment-wrap">
+                <iframe src="{{k.uploadfile.url}}"></iframe>
+              </div>
+            </div>
+
+          </td>
+          <td>
+            <select name='supplist'>
+              {% for s in supps %}
+                <option value='{{s.rawmaterialcode}}__{{k.filename}}'>{{s.supplier.suppliercode}}</option>
+              {% endfor %}
+                <option value='idk'>Pass it off to Kristy and give her more work</option>
+            </select>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+    <input type='submit' name='choosesupplier'/>
+    <input type='hidden' name='doctype' value='{{doctype}}'/>
+  </form>
+
+{% endif %}
+<br>
+<br>
+
+{% if not multiplesupps %}
+  <form method="POST" enctype="multipart/form-data" >
+    {% csrf_token %}
+
+    <input type='file' name="doc" multiple/>
+    <input type='submit' name='massupload'/>
+  </form>
+
+{% endif %}
+
+
+<script>
+
+hover = function() {
+    if (!document.body.currentStyle) return;
+    var DIVcomments = document.getElementById('comments');
+    var DIVcomment_wrap = document.getElementById('comment-wrap');
+    DIVcomments.onmouseover = function() {
+        DIVcomment_wrap.style.display = 'block';
+    }
+    DIVcomments.onmouseout = function() {
+        DIVcomment_wrap.style.display = 'none';
+    }
+}
+window.onload = hover;
+
+</script>
+
+{% endblock %}

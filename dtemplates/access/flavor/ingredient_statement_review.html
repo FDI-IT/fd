@@ -1,0 +1,44 @@
+{% extends "bootstrap_base.html" %}
+
+{% block content %}
+
+<div id="content-main">
+	<div class="container">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h1> Ingredient Statement <small> {{ flavor }} </small></h1>
+			</div>
+		
+			<div class="panel-body">
+				<form method="post">
+				{% csrf_token %}
+			
+				{% if ingredient_statement %}
+					<h2>{{ ingredient_statement.ingredient_statement }}</h2>
+					
+					{% if ingredient_statement.verified %}
+						<div class="alert alert-success" role="alert"> <b> Verified. </b> This ingredient statement can be used on labels. </div>
+					{% else %}
+						<div class="alert alert-danger" role="alert"> <b> Not verified. </b> This ingredient statement must be verified or edited before it can be used on labels.</div>
+						<input type="submit" value="Verify" name="verify"/>
+					{% endif %}
+			
+					<input type="submit" value="Edit" name="edit">
+				{% else %}
+					<div class="alert alert-warning" role="alert"> <b> This product has no ingredient statement. </b>
+						<input type="submit" value="Create" name="create"/>
+					</div>
+				{% endif %}
+				
+				</form>
+			</div>
+			
+			<div class="panel-footer">
+				<a class="btn btn-default" href="/access/ingredient_statement/" role="button"> &lt&lt Enter Product Number </a>
+			</div>
+			
+		</div>
+	</div>
+</div>
+
+{% endblock %}

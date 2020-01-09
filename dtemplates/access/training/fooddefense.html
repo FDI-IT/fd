@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+  <link rel="stylesheet" type="text/css" href='/static/css/training.css'/>
+</head>
+<div>
+  <p>  We have done a careful analysis of the Food Defense System in place at Flavor Dynamics, Inc.   This, in accordance with criteria set forth by the Food and Drug Administration and the cooperation of the employees will assure the safety of our products.
+    The Food and Drug Administration defines 4 parts to the Food Defense Program, namely;
+  </p>
+  <ol>
+    <li>Actionable Process Steps – This is similar to the Risk Analysis we had to do for our HACCP Plan.</li>
+    <li>Focused Mitigation Strategy – This is similar to identifying our CCP’s and Good Manufacturing Practices.</li>
+    <li>Procedures for Monitoring Corrective Actions and Verification – All Similar to our HACCP Plan.</li>
+    <li>Documentation – The main system of HACCP control.</li>
+  </ol>
+
+
+  <h3>IDENTIFICATION OF VULNERABILITIES</h3>
+
+  <p> The first step in Identifying Vulnerabilities is to define them into three categories </p>
+
+  <ol>
+    <li>Entry from doors by unauthorized individuals.</li>
+    <li>Addition of contaminants to batches.</li>
+    <li>Adulteration of raw materials or packaging before receipt.</li>
+  </ol>
+
+
+  <h3>ACTIONABLE PROCESS</h3>
+
+  <ol>
+    <li>Door Entry Monitoring – Cameras are employed at all doors, codes are used for entrance in secondary door, and employee cards enable access into entryways.  Visitors are known.  They sign secrecy agreements and sign in at the front entrance.  Only deliveries and shipments are made at the side entrances.  Unless there is need for ground level entrance, only employees use the rear door.</li>
+    <li>Constant Oversight of Process and Prevention of Contamination to Batch – Employees have individual carts that they monitor.  They keep track of all batches.  The will report any suspicious activity of outside contractors; they will safely store items overnight so no contamination can occur.</li>
+    <li>Supplier Documentation – Supplier of raw materials and packaging are monitored annually and the form #20 Supplier Questionnaire ver 2015 and Form #40 Lot Traceability Questionnaire ver 2015.   These suppliers are well known in the industry and we have been dealing with them for many years.</li>
+  </ol>
+</div>
+
+<br>
+
+<div>
+  <form method="POST" id='fd_form'>
+    {% csrf_token %}
+    <ol>
+      <li>
+        <p name='question'>What types of suspicious activity should be reported to your supervisor?</p>
+        <br>
+        <textarea name="fd_response" form="fd_form"></textarea>
+      </li>
+      <li>
+        <p name='question'>What steps would we use to approve a new supplier?</p>
+        <br>
+        <textarea name="fd_response" form="fd_form"></textarea>
+
+
+       </li>
+      <li>
+        <p name='question'>Where can a trucker go?</p>
+        <br>
+        <textarea name="fd_response" form="fd_form"></textarea>
+      </li>
+      <li>
+        <p name='question'>Where can a contractor go?</p>
+        <br>
+        <textarea name="fd_response" form="fd_form"></textarea>
+      </li>
+      <li>
+        <p name='question'>What types of suspicious activity should be reported to your supervisor?What steps would we use to approve a new supplier? Where can a trucker go? Where can a contractor go? What would you do it you have an unfinished batch and it is time to go for the day?</p>
+        <br>
+        <textarea name="fd_response" form="fd_form"></textarea>
+      </li>
+    </ol>
+    <input type='submit'>
+  </form>
+</div>
+
+
+{% endblock %}

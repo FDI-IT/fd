@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <table>
+    <tr>
+        <th> Category </th>
+        <th> # of Items </th>
+        <th> View Items </th>
+    </tr>
+    {% for label, list, url in rows %}
+    <tr>
+        <td> {{ label }} </td>
+        <td> {{ list|length }}</td>
+        <td> <a href="{{ url }}">View Items</a></td>
+    </tr>
+    {% endfor %}
+    </table>
+
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script type="text/javascript" src="/static/js/analyze_tc.js?v=25"></script>
+<div id="content-right">
+	<div id="loading">
+		<img src="/static/images/loading.gif">
+	</div>
+</div>
+<div id="content-main">
+	<ul id="progress-steps">
+		<li class="active">Retrieving scanned test cards from printer.</li>
+		<li>{{ n  }} test cards retrieved.</li>
+		<li>Processing images...</li>		
+	</ul>
+	
+	<div id="done" class="hidden">
+		<a href="/qc/pending_testcards/"><img src="/static/images/Icons/128x128/accept.png"></a>
+	</div>
+</div>
+{% endblock %}

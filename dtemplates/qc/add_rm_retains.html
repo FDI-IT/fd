@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+	
+	<!--
+    {{ formset.non_form_errors }}
+	{{ formset.errors }}
+	-->
+	
+	
+    <form action="" method="POST">
+    {% csrf_token %}
+	{{ formset.management_form }}
+	
+	<table id="retain-rows" width="100%">
+		<thead>
+			<tr>
+				<th>R number</th>
+				<th>Pin</th>
+				<th>Lot</th>
+				<th>Supplier</th>
+			</tr>
+		</thead>
+		<tbody>
+	    {% for form in formset.forms %}
+	    	{% if form.errors %}
+	    		<tr bgcolor="#FF0000">
+	    			<td colspan = "4"><b> Please correct the error(s) shown. </b></td>
+	    		</tr>
+	    	{% endif %}
+			<tr>
+				<td class="object-number-cell">{{ form.object_number }}{{form.object_number.errors}}</td>
+				<td class="number-cell">{{ form.pin }}{{form.pin.errors}}</td>
+				<td class="lot-cell">{{ form.lot }}{{form.lot.errors}}</td>
+				<td class="weight-cell">{{ form.supplier }}{{form.supplier.errors}}</td>
+			</tr>
+	    {% endfor %}
+		</tbody>
+	</table>
+	<input id="retain-submit-button" type="submit" value="Submit Retains" />
+    </form>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if initial %}
+  <form method="POST">
+    {% csrf_token %}
+    <table>
+      <tr>
+        <td>Origin Flavor</td>
+        <td>
+            <input list='oflavor' name='oflavor' required>
+            <datalist id='oflavor'>
+              {% for f in flavors %}
+                <option value={{f.number}}> {{f}}
+
+              {% endfor %}
+            </datalist>
+        </td>
+      </tr>
+      <tr>
+        <td>New Flavor</td>
+        <td>
+
+          <input list='nflavor' name='nflavor' required>
+          <datalist id='nflavor' >
+            {% for f in flavors %}
+              <option value={{f.number}}> {{f}}
+
+            {% endfor %}
+          </datalist>
+
+        </td>
+      </tr>
+    </table>
+    <input type ='submit' name='flavorselect'/>
+  </form>
+{% endif %}
+{% if not initial %}
+<br>
+<form method='POST'>
+  {% csrf_token %}
+  <input type="hidden" name='onumber' value='{{oflavor.number}}'/>
+  <input type="hidden" name='nnumber' value='{{nflavor.number}}'/>
+  <table>
+    <th>Attribute</th>
+    <th>Origin Flavor Value | {{oflavor}}</th>
+    <th>New Flavor Value | {{nflavor}}</th>
+    <th>Copy</th>
+    <th>New Value</th>
+    {% for a, o, n in flist %}
+      <tr>
+        <td>{{a}}</td>
+        <td>{{o}}</td>
+        <td>{{n}}</td>
+        <td>
+          <input type='checkbox' name='{{a}}' onclick="toggletext()" checked/>
+        </td>
+        <td>
+          <input type='text' name='{{a}}text' id='{{a}}' disabled />
+        </td>
+
+      </tr>
+
+    {% endfor %}
+  </table>
+  <br>
+  <input type='submit' name='copy'/>
+</form>
+
+{% endif %}
+<script>
+  function toggletext() {
+    checks = document.getElementsByTagName('input');
+    for(i = 0; i < checks.length; i++){
+      if(checks[i].type=='checkbox'){
+        // alert(checks[i]);
+        if(checks[i].checked){
+          document.getElementById(checks[i].name).disabled = true;
+        }
+        else{
+          document.getElementById(checks[i].name).disabled = false;
+        }
+      }
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link href="/static/css/batchsheet_base.css?v=25" type="text/css" rel="stylesheet">
+	<link href="/static/css/batchsheet_print.css?v=25" type="text/css" rel="stylesheet" media="print">
+	<link href="/static/css/jquery-ui-1.8.2.custom.css" type="text/css" rel="stylesheet">
+	<script type="text/javascript" src="/static/js/lib/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="/static/js/lib/jquery-ui-1.8.2.custom.min.js"></script>
+	<script type="text/javascript" src="/static/js/lib/jquery.tablesorter.min.js"></script>
+	<script type="text/javascript" src="/static/js/batchsheet.js?v=25"></script>
+
+    <title>
+    	Lot Notebook
+    </title>
+
+</head>
+
+<body>
+	<div class="top_form_bar">
+		<ul>
+		{{ batch_sheet_form.as_ul }}
+		<li>
+			<a href="#" id="print_link"><img src="/static/images/Icons/16x16/print.png"></a>
+		</li>
+		</ul>
+	</div>
+	
+	<div id="sidebar">
+	</div>
+	
+	<div class="batchsheet">
+	</div>
+</body>
+</html>

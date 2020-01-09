@@ -1,0 +1,250 @@
+{% extends "hazards/base.html" %}
+{% load humanize %}
+
+
+{% block navbar %}
+	{% if incomplete_pcodes %}
+		<div class="header-wrapper">
+			{{ block.super }}
+		
+			<div class="alert alert-danger">
+				<h3 style="text-align: center"> <strong> Incomplete precuationary statements! </strong> 
+					You must fill out all precautionary statements
+					below in order to view/print an SDS. </h3>
+			</div>	
+		</div>
+	{% else %}
+		{{ block.super }}
+	{% endif %}
+	
+{% endblock %}
+
+
+{% block content %}
+    <div id="content-main">
+
+        <div class="container">
+            <a class="btn btn-default btn-lg pull-right {% if incomplete_pcodes %} disabled {% endif %}" href="{{ sds_url }}">
+                <span class="glyphicon glyphicon-th-list"></span> Print SDS
+            </a>
+
+            <div class="panel panel-default">
+
+                <div class="panel-heading">
+                    {% if product_name %}
+                        <h2>Formula: {{ product_name }}</h2>
+                    {% else %}
+                        <h2>Formula</h2>
+                    {% endif %}
+                </div>
+
+                <table class="table table-condensed" id="formula-rows" width="100%">
+                    <tr>
+                        <th>FDI Ingredient</th>
+                        <th>CAS Number</th>
+                        <th>Weight</th>
+                        <th>Percent</th>
+                    </tr>
+
+                    {% for ingredient, weight, percent, hazards_approved in formula_details %}
+                        {% if hazards_approved == False %}
+                            <tr class="warning" title="Hazards have not been approved for this ingredient.">
+                        {% else %}
+                            <tr>
+                        {% endif %}
+							<td class="source-name-cell"><a href="{{ ingredient.url }}">{{ ingredient }}</td>
+                            <td class="number-cell">{{ ingredient.cas }}</td>
+
+
+                            <td class="number-cell">{{ weight }}</td>
+                            <td class="number-cell">{{ percent|floatformat:4 }}%</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+
+
+
+            <div class="panel panel-primary">
+
+                <div class="panel-heading"><h2>Hazards</h2></div>
+
+                <table class="table table-hover" id="formula-rows" width="100%">
+                    <tr>
+                        <th>Hazard Name</th>
+                        <th>Category</th>
+                    </tr>
+
+                    {% for hazard, info in product_hazards %}
+                        <tr class="clickable {% if info.category != 'No' %} warning {% endif %}" data-toggle="collapse" id="{{forloop.counter}}" data-target=".{{forloop.counter}}collapsed">
+                            <td class="hazard-cell">{{ hazard }}</td>
+                            <td class="category-cell">{{ info.category }}</td>
+                        </tr>
+                        <tr class="collapse out budgets {{forloop.counter}}collapsed">
+                            <td colspan="2">
+
+                                <div class="row-fluid">
+                                    <div class="col-lg-10 col-lg-offset-1">
+
+                                        <div class="panel panel-info">
+                                            <div class="panel-heading"><h4>{{ hazard }} - Calculations</h4></div>
+
+                                            <table class="table table-condensed">
+                                                <tr>
+                                                    <th>Test</th>
+                                                    <th>Value</th>
+                                                    <th>Result</th>
+                                                    <th>Category</th>
+                                                </tr>
+
+                                                {% for test, value, category, result, category_found in info.show_work_rows %}
+                                                    {% if category_found %}
+                                                        <tr class="grayrow">
+                                                    {% else %}
+                                                        {% if result == 'Pass' %}
+                                                            <tr class="success">
+                                                        {% else %}
+                                                            <tr class="danger">
+                                                        {% endif %}
+                                                    {% endif %}
+                                                        <td> {{test}} </td>
+                                                        <td> {{value}} </td>
+                                                        <td> {{result}} </td>
+                                                        <td> {{category}} </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </div>
+
+                                        {% if info.subcategory_calculation_rows %}
+                                            <div class="panel panel-info">
+                                                <div class="panel-heading"><h4>{{ hazard }} - Subcategory Calculation</h4></div>
+
+                                                <table class="table table-condensed">
+
+                                                        <tr>
+                                                            <th>Is this hazard found in any component?</th>
+                                                            <th>Answer</th>
+                                                            <th>Resulting Subcategory</th>
+                                                        </tr>
+
+
+                                                        {% for hazard, result, subcategory, subcat_found in info.subcategory_calculation_rows %}
+                                                            {% if subcat_found %}
+                                                                <tr class="grayrow">
+                                                            {% else %}
+                                                                {% if result == 'Yes' %}
+                                                                    <tr class="success">
+                                                                {% else %}
+                                                                    <tr class="danger">
+                                                                {% endif %}
+                                                            {% endif %}
+                                                                <td> {{ hazard }} </td>
+                                                                <td> {{ result }} </td>
+                                                                <td> {{ subcategory }} </td>
+                                                            </tr>
+                                                        {% endfor %}
+
+                                                </table>
+                                            </div>
+                                        {% endif %}
+                                        <div class="panel panel-info">
+                                            <div class="panel-heading"><h4>{{ hazard }} - Relevant Components</h4></div>
+
+                                            <table class="table table-condensed">
+
+                                                {% if info.relevant_components %}
+
+                                                    <tr>
+                                                        <th>Hazard</th>
+                                                        <th>Category</th>
+                                                        <th>LD50</th>
+                                                        <th>CAS Number</th>
+                                                        <th>Name</th>
+                                                        <th>Weight</th>
+                                                        <th>Percent</th>
+                                                    </tr>
+
+
+                                                    {% for hazard, category, ld50, cas, name, weight, percent, duplicate in info.relevant_components %}
+                                                        {% if duplicate %}
+                                                        <tr class="danger" title="This ingredient has multiple relevant hazards.  Its weight has already been counted.">
+                                                        {% else %}
+                                                        <tr>
+                                                        {% endif %} 
+                                                            <td> {{ hazard }} </td>
+                                                            <td> {{ category }} </td>
+                                                            <td> {{ ld50 }} </td>
+                                                            <td> {{ cas }} </td>
+                                                            <td> {{ name }} </td>
+                                                            <td> {{ weight }} </td>
+                                                            <td> {{ percent }} </td>
+                                                        </tr>
+                                                    {% endfor %}
+
+                                                {% else %}
+                                                    <tr><h5> No component contains this hazard. </h5></tr>
+                                                {% endif %}
+                                            </table>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+                </table>
+
+            </div>
+
+			{% if ellipsis_data %}
+
+            <div class="panel panel-default">
+
+                <div class="panel-heading">
+	                <h2>Editable Precautionary Statements</a></h2>
+                </div>
+
+				<form action="" method="POST" >
+                {{ ellipsis_formset.management_form }}
+                {% csrf_token %}
+
+                <table class="table table-condensed" width="100%">
+                    <tr>
+                        <th>P-Code</th>
+                        <th>Current Statment</th>
+                        <th>Edit Statement</th>
+                    </tr>
+
+                    {% for pcode, current_statement, editable_statement, errors in ellipsis_data %}
+                    	{% if current_statement == None %}
+                        	<tr class="danger" title="No data available.  Edit and submit in order to view SDS.">
+                        {% else %}
+                        	<tr>
+                        {% endif %}
+ 	                        <td>{{ pcode }}</td>
+							<td>{{ current_statement|safe }}</td>
+							<td>{{ editable_statement|safe }}</td>  
+                        </tr>
+                        {% if errors %}
+                        <tr class="danger">
+                        	<td colspan="100"> Error in the row above: {{ errors|safe }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+
+                <input class="submit" name="ELLIPSES" id="ellipses-submit" type="submit" value="Submit"/>
+                </form>   
+             
+            </div>
+
+			{% endif %}
+
+        </div>
+    </div>
+
+{% endblock %}

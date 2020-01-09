@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block htmlhead %}
+{{ block.super }}
+{{date_range_form.media}}
+<script type="text/javascript" src="/static/js/reports_experimental_log.js?v=25"></script>
+{% endblock %}
+{% block content %}
+
+<div id="content-solo">
+<div class="hideable">
+	<a id="showhidetoggle" href="#" onclick="toggle_visible();">Show search options</a>
+	<form action="/reports/experimental_log/" method="get">
+		<div id="advanced-search" class="hidden">
+		{{filterselect.as_p}}
+		{{date_range_form.as_p}}
+		<input type="submit" value="Filter">
+		</div>
+	</form>
+</div>
+<div id="object-list">
+	<h3>Details</h3>
+	<form action="/reports/experimental_log_exclude/" method="post">
+	{% csrf_token %}
+	<table id="reports_experimental_log_details">
+		<thead>
+			<tr>
+				<th>Exclude</th>
+				<th>Number</th>
+				<th>Initials</th>
+				<th>N-A</th>
+				<th>Name</th>
+				<th>Date sent</th>
+				<th>Converted</th>
+				<th>Lots</th>
+				<th>Total Weight</th>
+				<th>Avg Weight</th>
+				<th>RMC</th>
+				<th>Unit Price</th>
+				<th>Profit Ratio</th>
+				<th>Unit Profit</th>
+				<th>Gross Profit</th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for experimental_log in experimental_logs %}
+		    {% if experimental_log.count_lots %}
+			{% if experimental_log.exclude_from_reporting %}
+			<tr class="reports_exclude">
+				<td><input type="checkbox" name="experimental_log_pks" value="{{ experimental_log.pk }}" checked></td>
+			{% else %}
+			<tr>
+				<td><input type="checkbox" name="experimental_log_pks" value="{{ experimental_log.pk }}"></td>
+			{% endif %}
+				<td><a href="{{experimental_log.get_absolute_url}}">{{experimental_log.experimentalnum}}</a></td>
+				<td><a href="/mysearch/?search_space=experimental&search_string=&initials={{experimental_log.initials}}">{{ experimental_log.initials }}</a></td>
+				<td>{{experimental_log.natart}}</td>
+				<td>{{experimental_log.table_name}}</td>
+				<td>{{experimental_log.datesent|date:"m-Y"}}</td>
+				<td>{% if not experimental_log.flavor == None %}<a href="{{experimental_log.flavor.get_absolute_url}}">{{experimental_log.flavor}}</a>{% endif %}</td>
+				<td>{% if experimental_log.count_lots %}{{experimental_log.count_lots}}{% endif %}</td>
+				<td>{% if experimental_log.sum_lot_amount %}{{experimental_log.sum_lot_amount|floatformat}}{% endif %}</td>
+				<td>{% if experimental_log.avg_lot_amount %}{{experimental_log.avg_lot_amount|floatformat:0}}{% endif %}</td>
+				<td>{% if experimental_log.flavor.rawmaterialcost %}{{experimental_log.flavor.rawmaterialcost|floatformat:2}}{% endif %}</td>
+				<td>{% if experimental_log.flavor.unitprice %}{{experimental_log.flavor.unitprice|floatformat:2}}{% endif %}</td>
+				<td>{% if experimental_log.profit_ratio %}{{experimental_log.profit_ratio|floatformat:2}}{% endif %}</td>
+				<td>{% if experimental_log.unit_profit %}{{experimental_log.unit_profit|floatformat:2}}{% endif %}</td>
+				<td>{% if experimental_log.gross_profit %}{{experimental_log.gross_profit|floatformat:2}}{% endif %}</td>
+			</tr>
+			{% endif %}
+		{% endfor %}
+		</tbody>
+	</table>
+	</form>
+</div>
+<div>
+	<h3>Summary</h3>
+	<table>
+		<thead>
+			<tr>
+				<th>Initials</th>
+				<th>Num Converted</th>
+				<th>Num Lots</th>
+				<th>Total Weight</th>
+				<th>Avg Weight</th>
+				<th>Avg RMC</th>
+				<th>Avg Unitprice</th>
+				<th>Avg Profit Ratio</th>
+				<th>Avg Unit Profit</th>
+				<th>Avg Gross Profit</th>
+				<th>Total Gross Profit</th>
+				<th>% Total Gross</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for initials, agg_data in aggregated_data.initials.iteritems %}
+			<tr>
+				<td>{{ initials }}</td>
+				<td>{% if agg_data.count_converted %}{{ agg_data.count_converted }}{% endif %}</td>
+				<td>{% if agg_data.num_lots %}{{ agg_data.num_lots }}{% endif %}</td>
+				<td>{% if agg_data.total_weight %}{{ agg_data.total_weight|floatformat:0 }}{% endif %}</td>
+				<td>{% if agg_data.avg_lot_amount %}{{ agg_data.avg_lot_amount|floatformat:0 }}{% endif %}</td>
+				<td>{% if agg_data.avg_rmc %}{{ agg_data.avg_rmc|floatformat:2 }}{% endif %}</td>
+				<td>{% if agg_data.avg_unitprice %}{{ agg_data.avg_unitprice|floatformat:2 }}{% endif %}</td>
+				<td>{% if agg_data.avg_profit_ratio %}{{ agg_data.avg_profit_ratio|floatformat:2 }}{% endif %}</td>
+				<td>{% if agg_data.avg_unit_profit %}{{ agg_data.avg_unit_profit|floatformat:2 }}{% endif %}</td>
+				<td>{% if agg_data.avg_gross_profit %}{{ agg_data.avg_gross_profit|floatformat:2 }}{% endif %}</td>
+				<td>{% if agg_data.total_gross_profit %}{{ agg_data.total_gross_profit|floatformat:2 }}{% endif %}</td>
+				<td>{% if agg_data.percent_total_gross %}{{ agg_data.percent_total_gross|floatformat:1 }}%{% endif %}</td>
+			</tr>
+			{% endfor %}
+			<tr>
+				<td>TOTAL</td>
+				<td>{% if aggregated_data.totals.count_converted %}{{ aggregated_data.totals.count_converted }}{% endif %}</td>
+				<td>{% if aggregated_data.totals.num_lots %}{{ aggregated_data.totals.num_lots }}{% endif %}</td>
+				<td>{% if aggregated_data.totals.total_weight %}{{ aggregated_data.totals.total_weight|floatformat:0 }}{% endif %}</td>
+				<td>{% if aggregated_data.totals.avg_lot_amount %}{{ aggregated_data.totals.avg_lot_amount|floatformat:0 }}{% endif %}</td>
+				<td>{% if aggregated_data.totals.avg_rmc %}{{ aggregated_data.totals.avg_rmc|floatformat:2 }}{% endif %}</td>
+				<td>{% if aggregated_data.totals.avg_unitprice %}{{ aggregated_data.totals.avg_unitprice|floatformat:2 }}{% endif %}</td>
+				<td>{% if aggregated_data.totals.avg_profit_ratio %}{{ aggregated_data.totals.avg_profit_ratio|floatformat:2 }}{% endif %}</td>
+				<td>{% if aggregated_data.totals.avg_unit_profit %}{{ aggregated_data.totals.avg_unit_profit|floatformat:2 }}{% endif %}</td>
+				<td>{% if aggregated_data.totals.avg_gross_profit %}{{ aggregated_data.totals.avg_gross_profit|floatformat:2 }}{% endif %}</td>
+				<td>{% if aggregated_data.totals.total_gross_profit %}{{ aggregated_data.totals.total_gross_profit|floatformat:2 }}{% endif %}</td>
+				<td>100%</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+</div>
+{% endblock %}

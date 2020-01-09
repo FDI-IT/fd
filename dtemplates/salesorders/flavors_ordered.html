@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if status_message %}
+	<h1>{{ status_message }}</h1>
+{% endif %}
+<div id="flavors-ordered">
+<table width="100%" class="sorttable">
+	<thead>
+		<tr>
+			<th title="Two-character prefix">Pf</th>
+			<th title="Flavor Number" class="{sorter: 'link-digit'}">Num</th>
+			<th title="Nat-Art Label">N-A</th>
+			<th>Name</th>
+			<th>Type</th>
+			<th title="Last Date When Price Changed">Update</th>
+			<th title="Total Weight Ordered" class="{sorter: 'link-digit'}">Weight</th>
+			<th title="Count of appearances in other formulas" class="{sorter: 'link-digit'}">Count</th>
+		</tr>
+	</thead><tbody>
+	{% for f, fo in flavors_ordered.items %}
+	<tr id="{{ f.number }}">
+		<td>{{ f.prefix }}</td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ f.number }}</a></td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ f.natart }}</a></td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ f.name }}</a></td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ f.label_type }}</a></td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ f.lastspdate|date:"Y-m" }}</a></td>
+		<td><a href="/access/{{ f.number }}?wf={{ fo.weight }}" target="_blank">{{ fo.weight }}</a></td>
+		<td><a href="/access/{{ f.number }}" target="_blank">{{ fo.count }}</td>
+	</tr>
+	{% endfor %}
+    </tbody>
+</table>
+</div>
+
+</form>
+{% endblock %}
+

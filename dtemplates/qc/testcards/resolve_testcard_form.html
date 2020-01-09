@@ -1,0 +1,28 @@
+<div class="{{divclass}}" id="div_{{testcard_form.instance.pk}}" data-sidebar_link="<li id='li_{{ testcard_form.instance.pk}}'>
+																					<a target='_blank' href='/admin/newqc/testcard/{{testcard_form.instance.pk}}'>
+																						{{ testcard_form.instance.retain }}
+																				</a> - <a target='_blank' href='/admin/newqc/lot/{{testcard_form.instance.retain.lot.pk}}'>{{testcard_form.instance.retain.lot.number}}</a> - {{ testcard_form.instance.retain.lot.flavor}}</li>">
+
+	<!--{{ preview_image.url }} 
+		-->
+	<img src="{{ testcard_form.instance.thumbnail.url }}" align="right" class="testcard_resolve_image" >
+	<img src="{{ testcard_form.instance.large.url }}" class="hidden_image">
+	<form method="post" action="/qc/resolve_testcards/">
+	{% csrf_token %}
+		<h2>{{productinfo_form.instance.flavor}}</h2>
+		<fieldset>
+		<legend>Test Card Fields</legend>
+		{{testcard_form.non_field_errors}}
+		{{testcard_form.errors}}
+		{{ testcard_form.as_p }}
+		</fieldset>
+		<fieldset>
+		<legend>Product Info Fields</legend>
+		{{productinfo_form.non_field_errors}}
+		{{productinfo_form.errors}}
+		{{ productinfo_form.as_p }}
+		</fieldset>
+		<input type="hidden" name="instance_pk" value="{{testcard_form.instance.pk}}">
+		<input type="hidden" name="productinfo_pk" value="{{ productinfo_form.instance.pk }}">
+	</form>
+</div>

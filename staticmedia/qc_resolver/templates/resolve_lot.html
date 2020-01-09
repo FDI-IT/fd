@@ -1,0 +1,190 @@
+<div class="container-fluid">
+	<div class="page-header">
+		<h1> Lot {{ lot.number }} <small> QC Resolver </small> </h1>
+	</div>
+	<div class="row">
+		
+	  <form name="resolveForm" ng-submit="submitForm(resolveForm.$valid)" novalidate>
+		
+	  <div class="col-md-3">
+
+		  		<div ng-repeat="retain in lot.retains | orderBy:'retain':false track by retain.id">
+		  			<div class="panel panel-info">
+		  				<div class="panel-heading text-center">
+		  					<b> Testcard(s) for Retain {{ retain.retain }} </b>
+		  				</div>
+		  				<div class="panel-body">
+				  			<div ng-repeat="testcard in retain.testcards | orderBy:'qc_time === null ? qc_time : sort_time':false track by testcard.id ">
+				  				<div class="panel panel-info" ng-class="{'panel-info':testcardFieldForm.status.$valid || !submitted, 'panel-danger':testcardFieldForm.status.$invalid && submitted, highlight: currentTestcard == testcard}">
+				  					<div class="panel-body text-center">
+						  				<div class="row">
+					 		  				<div class="col-md-6">
+							  					<b> QC Time </b><br> {{ testcard.qc_time === null ? 'Not Available' : testcard.qc_time | date: "M/d/yy h:mm a" }} <br>
+							  					<b> Scan Time </b><br> {{ testcard.scan_time | date: "M/d/yy h:mm a"}} <br>
+							  				</div>
+							  				
+						  					<div class="col-md-6">
+							        			<img class="testcard-thumbs" ng-src="/static/qc_resolver/images/{{testcard.large}}" 
+							        			ng-click="setTestcard(testcard)">	        			
+											</div>
+											
+										</div>
+										<div class="row">
+								  			<ng-form name="testcardFieldForm">
+								  				<fieldset ng-disabled="testcard != currentTestcard"> 
+										  			<div class="testcard-form text-center" >
+									  					<b>Notes:</b> <textarea ng-model="testcard.notes"> </textarea> <br>
+									  					<b>Status:</b> <select status name="status" ng-class="{invalid_field : testcardFieldForm.status.$invalid==true && submitted==true}" ng-model="testcard.status" ng-options="choice for choice in STATUS_CHOICES" required>
+									  						<option value="">-- choose status --</option>
+									  					</select>
+					  					
+									  					<!-- Debugging Info... -->
+									  					<!-- Status: {{ testcard.status }} <br>
+									  					invalidStatus: {{ invalidStatus(testcard.status) }} <br>
+									  					$Invalid: {{ testcardFieldForm.status.$invalid }} <br>		 -->					  					
+												  					
+									  					<!-- <br><p class="error" ng-show="submitted && testcardFieldForm.status.$invalid" validate-status status-form-name="testcardFieldForm" status-value="testcard.status"> Select a Status</p> -->
+									  					<br><p class="error" ng-show="submitted && (testcardFieldForm.status.$error.required || testcardFieldForm.status.$error.status)"> Select a Status</p>
+										  			</div>
+										  		</fieldset>
+									  		</ng-form>
+										</div>
+									</div>
+								</div>
+				  			</div>
+				  		</div>
+			  		</div>
+		  		</div>
+
+	  </div>
+	  
+	  <!-- CURRENT TESTCARD IMAGE -->
+	  <div class="col-md-5">
+  	
+	  	<div class="panel panel-info">
+	  		<div class="panel-heading text-center">
+	  			<b> Test Card Preview </b>
+	  		</div>	
+	  		<div class="panel-body highlight">
+	  			<!-- <ng-form name="testcardFieldForm">
+		  			<div class="testcard-form text-center" >
+	  					<b>Notes:</b> <textarea ng-model="currentTestcard.notes" required> </textarea>
+	
+	  					<b>Status:</b> <select ng-model="currentTestcard.status" ng-options="choice for choice in STATUS_CHOICES" required>
+	  						<option value="">-- choose status --</option>
+	  					</select>
+	  					
+	  					<br><p class="error" ng-show="submitted && testcardFieldForm.status.$invalid" validate-status status-form-name="testcardFieldForm" status-value="currentTestcard.status"> Select a Status</p>
+	  					
+		  			</div>
+		  		</ng-form> -->
+	  			
+	  			<a href="/static/qc_resolver/images/{{ currentTestcard.large }}" target="_blank">
+	  				<img ng-src="/static/qc_resolver/images/{{ currentTestcard.large }}" class="testcard img-responsive">
+	  			</a>
+	  			
+     		</div>
+	  	</div>
+	  	
+	  </div>
+	  
+	  
+	  <!-- RETAIN FORMS -->
+	  <div class="col-md-2">
+	  	
+	  	<!-- <form name="retainForm" ng-submit="submitForm(retainForm.$valid)" novalidate> -->
+	  	
+		  	<div ng-repeat="retain in lot.retains | orderBy:'retain' track by retain.id">
+		  		
+		  		<!-- This is the validation for the lot status, which is further down.  I don't know why this only works in this ng-repeat...  -->
+		  		<div validate-status status-form-name="lotFieldForm" status-value="lot.status"></div>
+		  		
+		  		<div class="row">
+		  			<div class="panel" ng-class="{ 'panel-info':retainFieldForm.status.$valid || !submitted, 'panel-danger':retainFieldForm.status.$invalid && submitted}">
+	  				<!-- <div class="panel" ng-class="{{ retainFieldForm.status.$invalid && submitted ? 'panel-danger' : 'panel-info' }}"> -->
+		  				<div class="panel-heading text-center">
+		  					<b> Retain {{ retain.retain }} </b>
+		  				</div>
+		  				<div class="panel-body text-center" ng-class="{ highlight :currentTestcard.retain==retain.id }">
+					  		<ng-form name="retainFieldForm">
+					  			<fieldset ng-disabled="currentTestcard.retain!=retain.id"> 
+				  						
+				  					<b>Notes</b> <br> 
+				  						<!-- Uncomment the below comments to use testcard note concatenation feature  -->
+										<!-- <i>Use Test Card Notes</i> <input type="checkbox" ng-model="retain.concatenate_notes" ng-click="updateNotes(retain)"> <br>
+				  						<textarea ng-model="retain.notes" ng-disabled="retain.concatenate_notes"> {{ updateNotes(retain) }}{{ retain.notes }} </textarea> <br> -->
+				  						
+				  						<!-- Not using testcard concatenation -->
+				  						<textarea ng-model="retain.notes">{{ retain.notes }} </textarea> <br>
+
+
+
+				  					<b>Status:</b> <select status ng-class="{invalid_field : retainFieldForm.status.$invalid==true && submitted==true}" ng-model="retain.status" name="status" ng-options="choice for choice in STATUS_CHOICES" resolve required>
+				  						<option value="">-- choose status --</option>
+				  					</select>
+				  					
+				  					<!-- <br><p class="error" ng-show="submitted && retainFieldForm.status.$invalid" validate-status status-form-name="retainFieldForm" status-value="retain.status"> Select a Status</p> -->
+				  					<br><p class="error" ng-show="submitted && (retainFieldForm.status.$error.required || retainFieldForm.status.$error.status)"> Select a Status</p>
+				  					<!-- Debugging Info... -->
+				  					<!-- Status: {{ retain.status }} <br>
+				  					invalidStatus: {{ invalidStatus(retain.status) }} <br>
+				  					$Invalid: {{ retainFieldForm.status.$invalid }} <br>
+				  					$Valid: {{ retainFieldForm.status.$valid }} -->
+
+								</fieldset>
+		  					</ng-form>  
+		  				</div>
+		  			</div>
+		  		</div>
+		  				  		
+		  	</div>
+	  	
+	  	<!-- </form> -->
+	  	
+	  </div>
+	  
+	  <!-- LOT FORM -->
+	  <div class="col-md-2">
+	  	
+	  	<!-- <form name="lotForm" ng-submit="submitForm(lotForm.$valid)" novalidate> -->
+	  	
+	  		<div class="row">
+	  			<div class="col-md-12">
+		  			<div class="panel" ng-class="{ 'panel-info':lotFieldForm.status.$valid || !submitted, 'panel-danger':lotFieldForm.status.$invalid && submitted}">
+		  				<div class="panel-heading text-center">
+		  					<b> Lot {{ lot.number }} </b>
+		  				</div>
+		  				<div class="panel-body highlight text-center">
+		  					<ng-form name="lotFieldForm">
+			  					<b>Status:</b> <select class="lot-status" name="status" ng-class="{invalid_field : lotFieldForm.status.$invalid==true && submitted==true}" ng-model="lot.status" ng-options="choice for choice in STATUS_CHOICES" resolve required>
+			  						<option value="">-- choose status --</option>
+			  					</select>
+
+			  					<br><p class="error" ng-class="{ lot_error : submitted && lotFieldForm.status.$error.status }" ng-show="submitted && lotFieldForm.status.$error.status"> To resolve the lot, select 'Passed', 'Rejected', or 'Expired'. </p>
+
+								<button type="submit" class="submit-button btn btn-lg btn-success" ng-click="submitted=true; validate()"> RESOLVE LOT </button>
+
+							</ng-form>
+						</div>
+		  			</div>
+	  			</div>
+		  	</div>
+	  	
+	  	<!-- </form> -->
+	  	
+	  </div>
+	  
+	</form>
+	  
+	</div>
+</div>
+
+
+
+
+
+
+
+
+
+

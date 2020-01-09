@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="title">
+	<div id="title-left">
+		<span id="name">Changes Successful</span>
+		<span id="number"></span>
+	</div>
+</div>
+<div id="content-main">
+	<table class="sorttable" width=100%>
+	<tr class="cas_fema_headers">
+		<th>Ingredient Name</th>
+		<th> Old CAS Number </th>
+		<th> Old FEMA Number </th>
+		<th> </th>
+		<th> New Ingredient Name</th>
+		<th> New CAS Number </th>
+		<th> New FEMA Number </th>
+	</tr>
+	
+	{% for pair in listChanges %}
+		<tr>
+			<td> {{ pair.0.ingredient }} </td>
+			<td> {{ pair.0.CAS}} </td>
+			<td> {{ pair.0.FEMA }} </td>
+			<td> changed to </td>
+			<td> {{ pair.1.ingredient }}</td>
+			<td> {{ pair.1.CAS }} </td>
+			<td> {{ pair.1.FEMA }} </td>
+		</tr>	
+
+	{% endfor %}
+	
+	</table>
+	
+</div>
+
+{% endblock %}
+

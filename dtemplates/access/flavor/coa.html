@@ -1,0 +1,319 @@
+ {% extends "base.html" %}
+
+{% block content %}
+<script type="text/javascript">
+  function printLabel(divName){
+      var untouchables = ['origin_lot', 'flash_point', 'specific_gravity', 'search_string'];
+      var list = document.getElementsByTagName("input");
+      for(var i = 0; i< list.length; i++){
+        if(list[i].value == "" || list[i].value == null){
+          if( untouchables.indexOf(list[i].getAttribute("name")) < 1){
+            list[i].value = "Matches Standard";
+          }
+          // list[i].classList.add('removeoutline');
+        }
+        if(document.getElementById('id_origin_lot').value == "Matches Standard"){
+          var ol = document.getElementById('id_origin_lot');
+          ol.value = "";
+        }
+      }
+
+    if(checkAnalysis()){
+      window.print();
+    }
+
+  }
+
+
+  function removeinputbox(inputelement){
+    document.getElementById(inputelement).classList.add('removeoutline');
+
+  }
+
+
+</script>
+<span class="no-print">
+  {{multipleOneoffs | safe}}
+  {{multipleLines | safe}}
+  {{spec}}
+</span>
+<br>
+{% if not multiple %}
+<br>
+    <input type = "button" id = "print" onclick="printLabel('label')" value="Print" class="no-print"/>
+    <!-- <input type = "submit" id = "save" value="Save" class="no-print"/> -->
+<br>
+
+
+<div id = "label" media="print">
+
+  <style>
+    @media print {
+        .no-print{
+          display: none;
+        }
+        input {
+          outline: none;
+          border: none;
+        }
+    }
+    .main{
+      float: left;
+      width: 100%;
+      position: relative;
+      font-size:15px;
+    }
+    .coahead{
+      width: 100%;
+      float: left;
+      position: relative;.
+      text-align: center;
+    }
+    .hide{
+      display:none;
+    }
+    table{
+      width: 100%;
+      align: center;
+      text-align: left;
+      border: none;
+    }
+    td, th{
+      text-align: left;
+      border: none;
+      font-size:13px;
+    }
+    tr{
+      width: 100%;
+    }
+    .legalize{
+      text-align: center;
+      border: solid 1px black;
+    }
+  </style>
+
+
+
+  <div class = "main">
+    <div style = "height: 150px; width: 30%; float:left">
+      <img style="max-height: 100%; max-width:100%;" src = "{{STATIC_URL}}images/fdi_logo.jpg"/>
+    </div>
+    <div align="right"style="width:70%; float:right">
+      <h1>FLAVOR DYNAMICS, INC</h1>
+      <p> 640 Montrose Ave. • South Plainfield, NJ  07080</p>
+      <p>Phone: 908-822-8855</p>
+      <p>customercare@flavordynamics.com</p>
+    </div>
+  </div>
+
+  <div>
+    <h1 class='coahead'>Certificate of Analysis</h1>
+    <div>
+
+<!--
+      <table>
+        <tr><td>Date:             </td>   <td> {% now 'M d, Y' %} </td>     </tr>
+        <tr><td>Product Name:     </td>   <td> {{flavor.name}}    </td>     </tr>
+        <tr><td>Product Number:   </td>   <td> {{flavor.number}}  </td>     </tr>
+      </table> -->
+    </div>
+
+
+    <div>
+
+      <table>
+        <tr><td>Date:             </td>   <td> {% now 'M d, Y' %} </td>     </tr>
+        <tr><td>Product Name:     </td>   <td> {{flavor.name}}    </td>     </tr>
+        <tr><td>Product Number:   </td>   <td> {{flavor.number}}  </td>     </tr>
+        <tr><td>Lot Number:             </td>      <td> {{lot.number}}</td></tr>
+        <tr><td>Manufactured Date:      </td>      <td> {{lot.date}}  </td></tr>
+        <tr><td>Expiration Date:        </td>      <td> {{expiration}}  </td></tr>
+        <tr><td>Purchase Order Number:  </td>      <td> </td></tr>
+        <tr><td>Customer Code Number:   </td>      <td> </td></tr>
+        <tr><td>Customer:               </td>      <td> {{lineitem.salesordernumber.customer}}</td></tr>
+      </table>
+      <!-- <span></span> seperate two tables-->
+      <!-- {{coa}} -->
+      <br>
+      <!-- {{speclist}} -->
+
+      <hr>
+
+
+<form method="POST" onsubmit="return checkAnalysis();">
+  <!-- {{coaform.errors}} -->
+
+  {% csrf_token %}
+
+  <table>
+
+    <tr>  <th>Attribute</th>  <th>Actual Analysis</th>   <th>Specification Limits</th></tr>
+
+    {% for a,b in zipped%}
+
+        {% if not a.name == "lot" and not a.name == "line" and not a.name == "flavor" and not a.name == "sp" and not a.name == "product_name" and not a.name == "one_off_customer" and not a.name == "product_number"%}
+
+                    {% if a.name == "origin_lot"%}
+                          {% if not a.value == None and not a.value == "" %}
+                              <tr id="origin_lot" name=="origin_lot">
+                                <td>{{a.label}}</td>
+                                <td> {{a}} </td>
+                              </tr>
+                          {% else %}
+                              <tr class = "hide" id="origin_lot" name=="origin_lot">
+                                <td>{{a.label}}</td>
+                                <td> {{a}} </td>
+                              </tr>
+                          {% endif %}
+                    {% elif a.name == 'ingredient_statement' or a.name == 'description' %}
+                              <tr>
+                                <td>{{a.label}}</td>
+                                <td class='speclimit' id = "sl_{{a.name}}"> {{b}} </td>
+                              </tr>
+                    {% elif a.name == 'flash_point' %}
+                              <tr>
+                                <td>{{a.label}}</td>
+                                <td> {{a}}°F</td>
+                                <td class ='speclimit' id = "sl_{{a.name}}">{{b}}°F</td>
+                              </tr>
+                    {% elif a.name == 'specific_gravity' %}
+                              <tr>
+                                <td>{{a.label}}</td>
+                                <td> {{a}}@ 20°C</td>
+                                <td class ='speclimit' id = "sl_{{a.name}}">{{b}} +/-0.05 @ 20°C</td>
+                              </tr>
+                    {% elif a.name == 'date' %}
+                              <tr>
+                                <td>{{a.label}}</td>
+                                <td> {{a}} </td>
+
+                              </tr>
+
+                    {% elif b == None or b == ""%}
+                              <tr class = "hide">
+                                <td>{{a.label}}</td>
+                                <td> {{a.value}} </td>
+                                <td >{{b}}</td>
+                              </tr>
+                    {% else %}
+                              <tr>
+                                <td>{{a.label}}</td>
+                                <td> {{a}} </td>
+                                <td class='speclimit' id = "sl_{{a.name}}">{{b}}</td>
+                              </tr>
+                    {% endif %}
+
+        {% else %}
+          <tr class = "hide">
+            <td>{{a.label}}</td>
+            <td> {{a}} </td>
+            <td>{{b}}</td>
+          </tr>
+        {% endif %}
+    {% endfor %}
+
+  </table>
+  <input type = "submit" name = "save" value="Save" class="no-print"/>
+  <br>
+    <div class ="no-print">
+      Optional origin lot field for repacks:
+      <input type = "checkbox" id="originLotBox" onclick="showOriginLot('origin_lot')" class="no-print"/>
+    </div>
+
+</form>
+  </div>
+  <br><br>
+  <div id = "signature">
+    <span>_______________________________</span><br>
+    <p>Authorized Signature</p>
+  </div>
+  <br>
+  <div>
+    <p class="legalize">
+      The above product specifications are based on a laboratory submission or limited production batches.
+      The data presented above might be modified as more information is obtained from larger production sizes.
+    </p>
+  </div>
+</div>
+</div>
+{%endif%}
+
+
+<script>
+  function showOriginLot(name){
+
+    if(document.getElementById('originLotBox').checked){
+      document.getElementById('origin_lot').classList.remove('hide');
+    }
+    else {
+      document.getElementById('origin_lot').classList.add('hide');
+    }
+  }
+
+
+  function checkAnalysis(){
+      untouchables = ['lot', 'line', 'origin_lot', 'flavor', 'sp', 'product_name', 'one_off_customer', 'product_number', 'ingredient_statement', 'description', 'shelf_life', 'storage'];
+      plus_minus = "+/-";
+      // inputs = document.getElementsByTagName('input');
+      limitVals = []
+      speclimits = document.getElementsByClassName('speclimit');
+
+
+      for(i = 0; i < speclimits.length; i++){
+        specstr = speclimits[i].id;
+        if(untouchables.indexOf(specstr.substring(3)) > 0){
+          continue;
+        }
+        else{
+          input = document.getElementById("id_"+ specstr.substring(3));
+          sp = specstr.substring(3);
+        }
+        // console.log(specstr.substring(3));
+        // console.log(input);
+
+
+        if(sp == "specific_gravity"){
+          if( !(Math.abs(parseFloat(speclimits[i].innerHTML) - parseFloat(input.value)) <= .05)) {
+            alert("analysis doesnt match: " + input.name + ", " + input.value + "; " + speclimits[i].innerHTML);
+            window.stop();
+            return false;
+          }
+        }
+
+        else if(sp == "flash_point"){
+          if( !(Math.abs(parseFloat(speclimits[i].innerHTML) - parseFloat(input.value)) <= 2)){
+            alert("analysis doesnt match: " + input.name + ", " + input.value + "; " + speclimits[i].innerHTML);
+            window.stop();
+            return false;
+          }
+        }
+        else if(sp == "brix"){
+          if( !(Math.abs(parseFloat(speclimits[i].innerHTML) - parseFloat(input.value)) <= 3)){
+            alert("analysis doesnt match: " + input.name + ", " + input.value + "; " + speclimits[i].innerHTML);
+            window.stop();
+            return false;
+          }
+        }
+        else if(input.value != 'Matches Standard' && !(input.name in untouchables) && input.value != speclimits[i].innerHTML){
+
+          alert("analysis doesnt match: " + input.name + ", " + input.value + "; " + speclimits[i].innerHTML);
+          window.stop();
+          return false;
+        }
+        // console.log(input.name + " " + input.value);
+      }
+
+
+
+      // for(i = 0; i < speclimits.length; i++){
+      // for(i = 0; i<inputs.length; i++){
+      //     console.log(inputs[i].value);
+      // }
+
+      return true;
+      // }
+
+  }
+
+</script>
+{% endblock %}

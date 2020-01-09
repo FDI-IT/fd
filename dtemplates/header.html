@@ -1,0 +1,129 @@
+  {% load mainsearch %}
+
+  <div id="header">
+    <!-- <a href="./"> -->
+		<div id="header-logob"></div>
+		<div id="header-logol"></div>
+    <a href="/" id="header-logol"></a>
+	 	<div id="header-logor">
+	 		<form action="/mysearch/" id="mainsearch" method="GET">
+	 			<div>{% mainsearch %}</div>
+			</form>
+			<p>
+			    {% if request.user.is_authenticated %}
+			    {{ request.user}} <a href="/accounts/logout/?next={{request.get_full_path}}">Logout</a>
+			    {% else %}
+				<a href="/accounts/login/?next={{request.get_full_path}}">Login</a>
+				{% endif %}
+			</p>
+		</div>
+  </div>
+
+
+  <div id="menubar">
+   	<div id="myslidemenu" class="jqueryslidemenu">
+      	<ul>
+        <li><a href="/mysearch/?search_space=flavor&search_string=">Flavors</a>
+        	<ul>
+        		<li><a href="/mysearch/?search_space=flavor&search_string=">Flavors (Products)</a></li>
+        		<li><a href="/mysearch/?search_space=ingredient&search_string=">Raw Materials</a></li>
+        		<li><a href="/mysearch/?search_space=experimental&search_string=">Experimentals</a></li>
+        		<li><a href="/mysearch/?search_space=unified&search_string=">Flavors & Experimentals</a></li>
+
+        	</ul>
+        </li>
+        <li><a href="/">Lab</a>
+        	<ul>
+        		<li><a href="/access/new_rm/">New Raw Material</a></li>
+        		<li><a href="/access/new_ex/">New Experimental</a></li>
+        		<li><a href="/access/new_rm/solution_starter/">New Solution</a></li>
+        		<li><a href="/access/ingredient_replacer/">Ingredient Replacer</a></li>
+				<!--<li><a href="/solutionfixer/">Solution Details</a></li>
+				<li><a href="/solutionfixer/flagged">Solution Details - flagged</a></li>
+				<li><a href="/solutionfixer/solution_summary">Solution Summary</a></li>
+				<li><a href="/solutionfixer/flagged_summary">Flagged Summary</a></li>-->
+        		<li><a href="/lab/finished_product_labels/">Finished Product Location Codes</a></li>
+        		<li><a href="/lab/experimental_labels/">Experimental Location Codes</a></li>
+        		<li><a href="/lab/rm_labels/">Raw Material Location Codes</a></li>
+        		<li><a href="/lab/inventory/">Sample Inventory</a></li>
+        		<li><a href="/lab/experimentals_by_customer/">Experimentals By Customer</a></li>
+                <li><a href="/access/ingredient/rm_inventory_data_entry/">Inventory Data Entry</a></li>
+                <li><a href="/mysearch/flavor_search/">NEW Flavor Search</a></li>
+        	</ul>
+        </li>
+		<li><a href="/qc/">QC</a>
+        	<ul>
+        		<li><a href="/qc/retains">Product Retains</a></li>
+				<li><a href="/qc/lots">Product Lots</a></li>
+        		<li><a href="/qc/rm_retains">RM Retains</a></li>
+        		<li><a href="/qc/review/">Review</a></li>
+        	</ul>
+        </li>
+    <li>
+      <a href="/access/document_verification/">RM Documents</a>
+    </li>
+
+		<li><a href="/salesorders/">Sales Orders</a>
+        	<ul>
+        		<li><a href="/salesorders/">Overview</a></li>
+				<li><a href="/salesorders/product/">By Product</a></li>
+				<li><a href="/salesorders/lineitem/">By Line Item</a></li>
+				<li><a href="/salesorders/upload_report/">Upload Report</a></li>
+        	</ul>
+        </li>
+		<li><a href="/mysearch/?search_space=purchase_order&search_string=">Purchase Orders</a>
+        	<ul>
+        		<li><a href="/access/purchase/new/">New PO</a></li>
+        		<li><a href="/access/active_purchase_orders/">Active Purchase Orders</a></li>
+        		<li><a href="/access/purchase_orders_within_one_year/">Purchase Orders - One Year </a></li>
+        	</ul>
+        </li>
+		<li><a href="/invoices/">Invoices</a>
+        	<ul>
+        		<li><a href="/invoices/">Summary</a></li>
+        		<li><a href="/invoices/upload_report/">Upload Report</a></li>
+        		<li><a href="/invoices/upload_report_lw/">Upload Report New Version</a></li>
+        	</ul>
+        </li>
+        <li><a href="/batchsheet/" target="_blank">Production</a>
+        	<ul>
+        		<li><a href="/batchsheet/" target="_blank">Batchsheets</a></li>
+        		<li><a href="/qc/lots/">Lots</a></li>
+       			<li><a href="/batchsheet/sales_orders/">Sales Orders - Production</a></li>
+                <li><a href="/access/ingredient/rm_inventory_data_entry/">Inventory Data Entry</a></li>
+        	</ul>
+        </li>
+        <li><a href="/haccp">HACCP</a>
+            <ul>
+              <li><a href="/haccp">HACCP</a></li>
+              <li><a href="/access/training">Training</a></li>
+            </ul>
+        </li>
+		<li><a href="/access/query_list">Query List</a></li>
+		{% if experimental %}
+			<li><a href="{{ experimental.get_admin_url }}">Admin</a></li>
+		{% else %}{% if flavor %}
+			<li><a href="{{ flavor.get_admin_url }}">Admin</a></li>
+		{% else %}{% if ingredient %}
+			<li><a href="{{ ingredient.get_admin_url }}">Admin</a></li>
+		{% else %}{% if highlighted_ingredient %}
+			<li><a href="{{ highlighted_ingredient.get_admin_url }}">Admin</a></li>
+		{% else %}{% if product %}
+			<li><a href="{{ product.get_admin_url }}">Admin</a></li>
+		{% else %}{% if form.instance.get_admin_url %}
+			<li><a href="{{ form.instance.get_admin_url }}">Admin</a></li>
+		{% else %}{% if admin_link %}
+			<li><a href="{{ admin_link }}">Admin</a></li>
+		{% else %}{% if lot %}
+			<li><a href="{{ lot.get_admin_url }}">Admin</a></li>
+		{% else %}{% if lot_list_admin %}
+			<li><a href="{{ lot_list_admin }}">Admin</a></li>
+		{% else %}
+			<li><a href="/admin">Admin</a></li>
+		{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}{% endif %}
+        <li><a href="http://fdiwiki.flavordynamics.lan/wiki/">Wiki</a></li>
+		</ul>
+      	<br style="clear: left" />
+    	</div>
+
+  </div>

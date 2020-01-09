@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<div id="content-right">
+		<ul>
+			<li><a href="/qc/retains/">Latest</a></li>
+		{% for month in month_list %}
+			<li><a href="/qc/retains/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+		{% endfor %}
+		</ul>
+	</div>
+    <div id="content-main">
+    <form name="retain_selections" action="/qc/batch_print/" method="post">
+    {% csrf_token %}
+       <table class="sorttable" width="100%">
+	<tr class="qcheaders">
+		<th width="15px">Select</th>
+	    <th>Retain</th>
+	    <th>Flavor</th>
+	    <th>Lot</th>
+		<th>Date</th>
+	    <th>Amount</th>
+	    <th class="sorttable_nosort">Status</th>
+	</tr>
+	{% for retain in latest %}
+	    <tr>
+	    <td><input type="checkbox" name="flavor_numbers" value="{{ retain.lot.flavor.pk }}" {% if checkall %}checked{% endif %}></td>
+		<td>{{ retain.retain }}</td>
+		<td><a href="{{ retain.lot.flavor.get_absolute_url }}">{{ retain.lot.flavor }}</a></td>
+		<td><a href="/qc/lots/{{ retain.lot.pk }}/">{{ retain.lot.number }}</a></td>
+		<td>{{ retain.date|date:"Y-m-d" }}</td>
+		<td>{{ retain.lot.amount|floatformat:0 }}</td>
+		<td>{{ retain.status }}</td>
+	    </tr>
+	{% endfor %}
+    </table>
+	</form>
+    </div>
+{% endblock %}

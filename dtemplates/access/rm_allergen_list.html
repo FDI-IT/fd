@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load qstring %}
+{% load mainsearch %}
+
+{% block content %}
+
+<div id="content-solo">
+<div id="object-list">
+	<table width="100%">
+		<thead><tr>
+			<th>Raw Material</th>
+			<th>Allergen</th>
+		</tr></thead>
+		<tbody>
+	    {% for rm in rms %}
+	    <tr>
+	    	<td><a href="{{ rm.get_absolute_url }}">{{rm}}</a></td>
+	    	<td>{{rm.allergen}}</td>
+	    </tr>
+	    {% endfor %}
+	    </tbody>
+	</table>
+</div>
+</div>
+{% endblock %}

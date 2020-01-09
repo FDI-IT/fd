@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+
+{% block htmlhead %}
+{{ block.super }}
+<script type="text/javascript" src="/admin/jsi18n/"></script>
+<script type="text/javascript" src="/static/admin/js/core.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/admin/css/global.css"/>
+<link rel="stylesheet" type="text/css" href="/static/admin/css/widgets.css"/>
+<link href="/static/css/wizard.css?v=25" type="text/css" rel="stylesheet" media="screen">
+{{form.media}}
+{% endblock %}
+
+{% block content %}
+<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
+{% if form.errors %}
+<p>Please correct the error(s) in the following row. {{form.non_field_errors}}
+	</p>
+		{% endif %}
+<form action="." method="post">{% csrf_token %}
+{{ wizard.management_form }}
+{% for hidden in form.hidden_fields %}
+{{hidden}}
+{%endfor%}
+<table>
+{{ form }}
+</table>
+<input type="hidden" name="{{ step_field }}" value="{{ step0 }}" />
+{{ previous_fields|safe }}
+<input type="submit">
+</form>
+{% endblock %}

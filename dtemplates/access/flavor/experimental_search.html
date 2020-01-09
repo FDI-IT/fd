@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+	{% if status_message %}
+	<h1>{{ status_message }}</h1>
+	{% endif %}
+	
+	<div id="experimentalsearch">
+	<form action="" method="GET">
+	    <div id="keywordsearch">{{ search.as_ul }}</div>
+	</form>
+	</div>
+	  
+	<div id="experimental-list"> 
+		{% include "pagination_bar.html" %}
+		{% if list_items %}
+		<table width="100%">
+			<thead><tr>
+				
+				<th width="50px">Number</th>
+				<th width="30px">N/A</th>
+				<th>Name</th>
+				<th width="20px">Initials</th>
+				<th>Date</th>
+			</tr></thead>
+			<tbody>
+		    {% for experimental in list_items.object_list %}
+		    <tr id="{{ experimental.experimentalnum }}">
+		    	<td>{{ experimental.experimentalnum }}</td>
+		    	<td>
+		    		{% if experimental.na %}
+		    			N/A
+		    		{% endif %}
+		    		{% if experimental.
+		    	</td>
+		    	<td>{{ flavor.name }}</td>
+		    	<td>{{ flavor.label_type }}</td>
+		    	<td>{{ flavor.rawmaterialcost }}</td>
+		    	<td>{{ flavor.lastspdate|date:"M Y" }}</td>
+		    	<td>{{ flavor.solvent }}</td>
+		    	<td>{% if flavor.valid %}<img src="/static/images/Icons/001_06.png">{% else %}<img src="/static/images/Icons/001_05.png">{% endif %}</td>
+		    	<td>{% if flavor.approved %}<img src="/static/images/Icons/001_06.png">{% else %}<img src="/static/images/Icons/001_05.png">{% endif %}</td>
+		    	<td>{% if flavor.sold %}<img src="/static/images/Icons/001_06.png">{% else %}<img src="/static/images/Icons/001_05.png">{% endif %}</td>
+		    </tr>
+		    {% endfor %}
+		    </tbody>
+		</table>
+		{% else %}
+		<p>No list_items available</p>
+		{% endif %}
+		{% include "pagination_bar.html" %}
+	</div>
+{% endblock %}

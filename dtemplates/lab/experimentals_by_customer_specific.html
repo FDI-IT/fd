@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Experimentals by customer</h2>
+
+<table width="100%">
+	<thead>
+		<tr>
+			<th>Experimental Number</th>
+			<th>N/A</th>
+			<th>Name</th>
+			<th>Location Code</th>
+		</tr>
+	</thead>
+	<tfoot>
+	</tfoot>
+	<tbody>
+		{% for obj in queryset %}
+		
+		<tr>
+			<td><a href="{{ obj.get_absolute_url }}">{{ obj.experimentalnum }}</a></td>
+			<td><a href="{{ obj.get_absolute_url }}">{{ obj.natart }}</a></td>
+			<td><a href="{{ obj.get_absolute_url }}">{{ obj.product_name }}</a></td>
+			<td><a href="{{ obj.get_absolute_url }}">{{ obj.location_code }}</a></td>
+		</tr>
+		</a>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

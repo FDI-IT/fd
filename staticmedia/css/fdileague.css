@@ -1,0 +1,38 @@
+div.ten_best_totals {
+	font-family:arial;
+	font-size: 11px;
+}
+
+ul.h_list {
+	display:inline;
+	
+}
+
+ul.h_list img {
+	width:98px;
+	margin-bottom:-2px;
+}
+
+ul.h_list > li {
+	display:inline-block;
+	text-align:center;
+	margin:-2px;
+	padding:0px;
+}
+
+ul.v_list {
+	list-style:none;
+	margin:0px;
+	padding:0px;
+}
+
+li.rank {
+	position:relative;
+	right:42px;
+	top:15px;
+	font-size:12px;
+	color:white;
+	text-shadow:black 1px 1px 1px;
+	font-weight:bold;
+}
+

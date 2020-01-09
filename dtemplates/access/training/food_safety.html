@@ -1,0 +1,43 @@
+{% extends  "base.html" %}
+
+{% block content %}
+<head>
+  <link rel="stylesheet" type="text/css" href='/static/css/training.css'/>
+</head>
+ {% for s in sections %}
+
+    <a href='{{s.1}}/'>{{s.0}}</a>
+ {% endfor %}
+{{alert}}
+
+
+{% if questions %}
+  {{pdf|safe}}
+  {% if "_sp" in section %}
+    <p> For English version, <a href="../{{section|slice:"0:-3"}}/">Click here</a></p>
+  {% else %}
+    <p> For Spanish version, <a href="../{{section}}_sp">Click here</a></p>
+  {% endif %}
+  <form method='POST'>
+    {% csrf_token %}
+    <ol>
+      {% for q in questions %}
+        <li>{{q.0}}
+          <ul>
+            {% for key, a in q.1.items %}
+              <!-- <li><input type='radio' name='{{section}}{{q.2}}' value="{{key}}" required/>{{a}}</li> -->
+              <li><input type='radio' name='{{section}}{{ forloop.parentloop.counter0 }}' value="{{key}}" required/>{{a}}</li>
+            {% endfor %}
+          </ul>
+
+        </li>
+
+
+      {% endfor %}
+    </ol>
+    <input type='submit'/>
+  </form>
+{% endif %}
+
+
+{% endblock %}

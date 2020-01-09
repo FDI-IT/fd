@@ -1,0 +1,133 @@
+<div class="container-fluid">
+<div class="row">
+  <div class="col-md-2">
+    <!--Sidebar content-->
+
+    <b>Search:</b> <input ng-model="search" ng-change="updateNumPages()" placeholder="Search"> <br>
+    
+    <br>
+    
+    <b title="Change the date range below and click 'Update' to retrieve the lots created within that range." >Date Range</b> 
+    
+    <!-- <select ng-init="dateRangeOptions[0].label" ng-model="startDate" ng-options="option.value as option.label for option in dateRangeOptions"></select> -->
+    
+    
+    <select ng-model="selectedRange" ng-options="option.label for option in dateRangeOptions track by option.value" ng-change="updateRange()" ng-disabled="customDate"></select>
+    
+    <br> <input type="checkbox" ng-model="customDate" ng-change="updateRange()"> Custom Date Range
+   
+	<div ng-show="customDate">    
+	    <form name="dateRangeForm">
+	    	<div>
+	    		<b>Start:</b><input type="date" maxlength="10" name="startDate" ng-model="startDate" placeholder="yyyy-MM-dd" required /> 
+		    	<span class="error" ng-show="dateRangeForm.startDate.$error.required"> Required! </span>
+		    	<span class="error" ng-show="dateRangeForm.startDate.$error.date"> Invalid Date </span> 
+	    	</div> 
+	    	
+	    	<div>
+				<b>End:</b><input type="date" maxlength="10" name="endDate" ng-model="endDate" placeholder="yyyy-MM-dd" required /> 
+		    	<span class="error" ng-show="dateRangeForm.endDate.$error.required"> Required! </span>
+		    	<span class="error" ng-show="dateRangeForm.endDate.$error.date"> Invalid Date </span> 
+		    </div>  
+	    </form>
+	    
+	    <button type="submit" ng-disabled="dateRangeForm.$pristine || dateRangeForm.$invalid" class="btn btn-sm btn-primary" 
+	    	ng-click="getLots(); updateNumPages(); submitted=true; dateRangeForm.$setPristine()"> Update </button> <br>
+    </div>
+    
+    <br><br>     
+    
+    <b>Filters</b> <br>
+
+	<div ng-repeat="(group_name, data) in filters">
+		
+		<i class="expand-collapse-btn fa" ng-click="toggleExpand(group_name)" ng-class="{ 'fa-chevron-down':filters[group_name]['expand'], 'fa-chevron-right':!filters[group_name]['expand'] }" ></i>
+		<input type="checkbox" class="{{ group_name }}" ng-model="filters[group_name]['checked']" ng-change="selectAllSubfilters(group_name); updateNumPages()"> <b>{{ group_name }}</b>
+		
+		<div class="subfilter" ng-repeat="status_name in data.subfilters" ng-show="filters[group_name]['expand']">
+			<input type="checkbox" ng-model="subfilters[status_name]" ng-change="updateNumPages()"> {{ status_name }}
+		</div>
+	</div> 
+	
+	<input class="Complex" type="checkbox" ng-model="complexFilter" ng-change="updateNumPages()"> <b title="When checked, only shows lots that have more than one associated testcard."> Complex </b>
+	<!-- <input type="checkbox" ng-model="simpleFilter"> <b> Simple </b>  -->
+	
+	<br><br>
+	
+	<div class="result-count" value="{{ filtered.length }}"> <b> Number of Results: {{ filtered.length == null ? 'Pending' : filtered.length }}</b></div>
+
+  </div>
+  <div class="col-md-10">
+    <!--Body content-->
+	<pagination total-items="totalItems" ng-model="currentPage" items-per-page="itemsPerPage" max-size="maxSize" boundary-links="true" ng-show="!loading && filtered.length > 0"></pagination>
+
+	<div ng-show="loading" class="text-center">
+		<br>  
+		<i class="fa fa-spinner fa-spin fa-5x"></i>
+		<span class="loading-text"> 
+			<i> Retrieving Lots </i> <br>
+			<i> {{ startDate | date:'longDate' }} - {{ endDate | date:'longDate' }}</i>
+		</span>
+		<br>	
+	</div>
+	
+	<div class="text-center" ng-show="filtered.length == 0 && !loading">
+		<h2>No lots were found for the given search parameters.</h2>
+	</div>
+
+	<!-- <div class="lots panel panel-default" ng-repeat = "lot in lots" ng-show = "([lot] | filter:query | filter:filterByStatus).length > 0"> -->
+	<div class="lots panel panel-default" ng-show="!loading" on-repeat-end="test()" ng-repeat = "lot in filtered = (lots | filter:search | filter:filterByStatus | filter:filterComplexLots) | startFrom:(currentPage-1)*itemsPerPage | limitTo:itemsPerPage track by lot.id">
+
+		<div class="panel-body">
+			<div class = "row">
+				<div class="col-md-3">
+			        <b> Lot Number: </b> {{ lot.number }} <br>
+			        <b> Flavor: </b> <a href="/access/{{ lot.flavor.number }}"> {{ lot.flavor.natart }} {{ lot.flavor.prefix }}-{{ lot.flavor.number }} {{ lot.flavor.name }} </a><br>
+			        <b> Date: </b> {{ lot.date }} <br>
+			        <b> Status: </b> {{ lot.status }} <br>
+			        
+			        <p ng-if="!isResolved(lot.status)">
+			    		<a href="#/lots/resolve_lot/{{ lot.id }}" class="btn btn-primary btn-lg resolve-btn">Resolve Lot</a>
+			    	</p>
+			        <p ng-if="isResolved(lot.status)">
+			    		<a href="#/lots/resolve_lot/{{ lot.id }}" class="btn btn-success btn-lg resolve-btn">Edit Lot</a>
+			    	</p>
+			         
+		        </div>
+		    
+			    
+			    <div class="col-md-9">
+			    	<div class="row">
+			    		<div ng-repeat="retain in lot.retains track by retain.id" ng-if="retain.testcards.length > 0" class="col-md-{{ retain.testcards.length*2 }} text-center column-border" ng-class="{'last-column':$last}">
+				    		<div class="panel panel-info">
+				    			<div class="panel-heading text-center"> 
+				    				<b> Retain {{ retain.retain }} </b> 
+				    			</div>
+				    			 	
+				    			<div class="row testcard-panel"> 
+						        	<div ng-repeat="testcard in retain.testcards track by testcard.id" class="col-md-{{ Math.floor(12 / retain.testcards.length) }}" ng-init="$index">
+						        		<!-- <b> TestCard: </b> {{ testcard.id }} Index: {{ index }} {{ $index }} Length: {{retain.testcards.length}} foo: {{ 12/retain.testcards.length}} -->
+						        		<!-- <b>{{ testcard.scan_time | date: 'shortDate' }}<br>{{ testcard.scan_time | date: 'shortTime'}}</b> -->
+						        		<b>{{ testcard.scan_time | date: "M/d/yy h:mm a" }}</b>
+						        		<a href="#" class="thumbnail">
+						        			<img src="/static/qc_resolver/images/testcard_thumbnail.png"/>	        			
+						        		</a>
+						        			
+						        	</div>
+				    			</div>
+			    			</div>
+				    	</div>
+			    	</div>
+			    </div>	   
+			    
+	        </div>
+		</div>
+				
+	</div>
+
+	<pagination total-items="totalItems" ng-model="currentPage" items-per-page="itemsPerPage" max-size="maxSize" boundary-links="true" ng-show="!loading && filtered.length > 10"></pagination>
+
+  </div>
+
+  </div>
+</div>

@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% include "htmlhead.html" %}
+{% block content %}
+<head>
+
+  <link rel="stylesheet" href="/static/css/document.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <link href="/static/css/jquery.flexdatalist.min.css" rel="stylesheet" type="text/css">
+  <script src="/static/js/jquery.flexdatalist.js"></script>
+
+
+</head>
+<br>
+
+{% if messages %}
+  {% for m in messages %}
+    <p>{{m|safe}}</p>
+  {% endfor %}
+{% endif  %}
+{{message}}
+
+<!-- RM Documents page -->
+{% if unverified and not form and not review  %}
+<h1>Unverified Documents</h1>
+<br>
+  <form method ="POST">
+    {% csrf_token %}
+
+    <!-- <input type="text" id="pin_search" name="pin_search"/> -->
+    <input list ="pin_search" name="pin_search">
+    <datalist id="pin_search">
+    {% for i in ingredients %}
+      <option value="{{i.id}}"></option>
+    {% endfor %}
+    </datalist>
+    <input type = "submit" value="PIN Search" id = "pinsearch" name="pinsearch"/>
+  </form>
+<br>
+<table id = "list">
+  <!-- <tr class="table_head">Unverified Documents</tr> -->
+  <th>Document Type</th>
+  <th>Number Unverified</th>
+  <th>Number for Review</th>
+  <th>No Documentation</th>
+  {% for u, c in unverified.items %}
+    <tr>
+        <td width="60%">
+            <span name = 'docheader' >
+              {{c.3}}
+            </span>
+        </td>
+        <td>
+          {% if not c.0 == 0 %}
+            <a href="/access/document_verification/?{{u}}">
+              {{c.0}}
+            </a>
+          {% else %}
+            {{c.0}}
+          {% endif %}
+        </td>
+        <td>
+          {% if not c.1 == 0 %}
+            <a href="/access/document_verification/?review_{{u}}">
+              {{c.1}}
+            </a>
+          {% else %}
+            {{c.1}}
+          {% endif %}
+        </td>
+        <td>
+          {% if not c.2 == 0 %}
+            <a href="/access/document_verification/?rm_{{u}}">
+              {{c.2}}
+            </a>
+          {% else %}
+            {{c.2}}
+          {% endif %}
+        </td>
+
+    </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<!-- RM DOCS BY DOCTYPE -->
+
+{% if not form and not review and not unverified and documents or docsby_rm %}
+<h1>Unverified Documents <span name = 'docheader'>{{message}}</span></h1>
+{{documents|length}}
+<table id = "list">
+  {% if documents %}
+    <th>Ingredient</th>
+    <th>Action</th>
+    <th>Uploader</th>
+    <th>Date Uploaded</th>
+    <th>Expiration</th>
+    <th>Document Type</th>
+    {% for d in documents %}
+      <tr>
+          <td>{{d.rawmaterial}}</td>
+          {% if d.dv_count == 2 %}
+            {% if admin and not request.user.username in d.get_verifiers %}
+              <td><a href="/access/document_verification/{{d.id}}/">Review By Admin</a></td>
+            {% else %}
+              <td>Review By Admin</td>
+            {% endif %}
+          {% else %}
+            {% if not request.user.username in d.get_verifiers  %}
+              <td><a href ="/access/document_verification/{{d.id}}">Verify</a></td>
+            {% else %}
+              <td>Verify</td>
+            {% endif %}
+            <!-- <td><a href="/access/document_verification/{{d.id}}/">Verify</a></td> -->
+          {% endif %}
+          <td>{{d.uploader.username}}</td>
+          <td>{{d.documententry}}</td>
+          <td>{{d.expiration}}</td>
+          <td>{{d.get_doctype_display}}</td>
+      </tr>
+    {% endfor %}
+
+  {% elif docsby_rm %}
+    {{docsby_rm|length}}
+    <th>Raw Materials Without <span name = "docheader">{{doctype}}</span> Document</th>
+    {% for d in docsby_rm %}
+    <tr>
+      <td>
+        <a href ="/access/document_control/{{d.id}}/{{d.rawmaterialcode}}/{{doctype}}"  target="_blank">{{d}}</a>
+      </td>
+    </tr>
+      {% endfor %}
+  {% endif %}
+
+</table>
+
+{% endif %}
+
+
+<!-- VERIFICATION -->
+
+{% if form %}
+  <h1>Document Verification | {{doc.rawmaterial}} | {{doc.get_doctype_display}}</h1>
+  <input type='checkbox' id='move_doc' onclick="toggle_move_form()"> Move Document
+  <form method="post" id="move_doc_form" hidden>
+    {% csrf_token %}
+    <input name='moving_doc' type='hidden' value='{{doc.id}}'/>
+    <table>
+      <th></th><th>Document Type</th><th>Raw Material</th>
+      <tr>
+        <td>Move Document</td>
+        <td><select name="correct_type" required>
+              <option disabled selected value> -- choose correct document type -- </option>
+              <option value='allergen'>Allergen</option>
+              <option value='COI'>COI</option>
+              <option value='COA'>COA</option>
+              <option value='GMO'>GMO</option>
+              <option value='GPVC'>GMO Verification Certificate</option>
+              <option value='halal'>Halal</option>
+              <option value='origin'>Origin</option>
+              <option value='LOG'>Letter of Guarantee</option>
+              <option value='sds'>Safety Data Sheet</option>
+              <option value='kosher'>Kosher</option>
+              <option value='traceablility'>Traceability</option>
+              <option value='nutri'>Nutri</option>
+              <option value='vegan'>Vegan</option>
+              <option value='natural'>Natural</option>
+              <option value='questionnaire'>Questionnaire</option>
+              <option value='specsheet'>SpecSheet</option>
+              <option value='organic'>Organic</option>
+              <option value='ingbreak'>Ingredient Breakdown</option>
+            </select>
+        </td>
+        <td>
+          Please input appropriate pin number and choose from the drop down list:
+          <input type='text' id='correct_ing' name='correct_ing' required/>
+          <!-- <input list = 'select_ing' id='correct_ing' name='correct_ing'> -->
+          <!-- <datalist id = 'select_ing'>
+
+          </datalist> -->
+        </td>
+      </tr>
+    </table>
+    <input type='submit' name='doc_change'/>
+  </form>
+
+  {% if doc.doctype == "COA" %}
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" name="discardcoa" value="{{doc.id}}">Discard COA</button>
+  </form>
+  {% endif %}
+
+  <form method="post" action="./?next={{previous}}" >
+    {% csrf_token %}
+
+    {{form|safe}}
+
+
+  </form>
+
+
+{% endif %}
+
+
+{% if review %}
+<a href="{{doc.uploadfile.url}}">Uploaded File</a>
+<h1>Document Review | {{doc.rawmaterial}} | {{doc.get_doctype_display}}</h1>
+  <form method="post" action="./?next={{previous}}">
+    {% csrf_token %}
+
+    {{review|safe}}
+  </form>
+{% endif %}
+
+
+
+<script
+  src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+  crossorigin="anonymous"></script>
+<script type="text/javascript" src="/static/js/document.js"></script>
+{% endblock %}

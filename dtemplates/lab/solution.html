@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div>
+{{ status_msg }}
+<form method="get" action="" id="solution-form">
+    {{ form.as_p }}
+    <p><input type="submit" value="Submit" /></p>
+</form>
+</div>
+
+<div>
+<h2>Label preview</h2>
+<p><img id="label-preview" src="/static/images/preview.png"></p>
+</div>
+
+
+{% endblock %}

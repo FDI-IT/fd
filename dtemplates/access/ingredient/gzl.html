@@ -1,0 +1,24 @@
+<table id="flat-table" width="100%">
+<thead>
+	<tr>
+		<th align="center">PF</th>
+		<th align="center">Number</th>
+		<th align="center">N/A</th>
+		<th align="center">Name</th>
+		<th align="center">Type</th>
+		<th align="center">Amount</th>
+	</tr>
+</thead>
+<tbody>
+{% for lw in leafweights %}
+<tr>
+	<td align="center"><a href="{{lw.root_flavor.url}}">{{ lw.root_flavor.prefix }}</a></td>
+	<td align="center"><a href="{{lw.root_flavor.url}}">{{ lw.root_flavor.number }}</a></td>
+	<td align="center"><a href="{{lw.root_flavor.url}}">{{ lw.root_flavor.natart }}</a></td>
+	<td><a href="{{lw.root_flavor.url}}">{{ lw.root_flavor.name }}</a></td>
+	<td align="center"><a href="{{lw.root_flavor.url}}">{{ lw.root_flavor.label_type }}</a></td>
+	<td align="center"><a href="{{lw.root_flavor.url}}">{{ lw.weight }}</a></td>
+</tr>
+{% endfor %}
+</tbody>
+</table>

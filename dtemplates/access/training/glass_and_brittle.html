@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+  <link rel="stylesheet" type="text/css" href='/static/css/training.css'/>
+</head>
+{% if user.is_authenticated %}
+{{error}}
+<p>
+  It is the intent of the company to eliminate or at least minimize the usage of glass and brittle plastics in the plant.
+<ol>
+  <li>Exception - within the Free Area Zone (located between the Plant Men's Locker room, Loading dock area and Front Office Access Door by the large
+    Cold Storage Room), sample bottles (112 oz. Can be taken and sent in the QC lab for Raw Material Approval.</li>
+  <li>If samples are taken of raw materials that have been approved, for R&D used; try to avoid the use of glass.
+    If glass must be used, the person carrying the glass should keep it with them at all times, and then bring the bottle immediately to the Laboratory.
+  </li>
+  <li>Glass can be used in the Small Production Lab. 1-2 Pound bottles are used here for inventory, storage and sale.</li>
+  <li>If glass is seen in production it is to be immediately removed.</li>
+  <li>Shoes should be inspected before reentering the production area.  If glass is present shoes must be left outside and a new pair will be provided.</li>
+  <li>Contaminated clothing should be placed in a plastic bag and put in the uniform cleaning service bin labeled glass contamination.</li>
+  <li>If there is a breakage of glass; it is not to be cleaned up. A supervisor must be called and the plume of damage must be assessed. If any open containers, or potential contamination of raw materials or finished products could have occurred, an immediate assessment of the situation must be made. It will be reported in the emergency condition log, and signed by the supervisor. Product so contaminated will be thrown away. If equipment is involved, and the glass is not readily accessible, it shall be dismantled. In the case of inability to dismantle the equipment it shall either be disposed of or professionally repaired.</li>
+  <li>The person involved will go outside and brush him or herself off. A special glass emergency broom will be used, with dustpan, and these will all be thrown out after use and replaced.</li>
+  <li>Everyone is to sign an acknowledgement of this policy. Periodic interview by management will occur and results be placed in the personnel file to assure the information is retained. This will start randomly 2 months after the signing of the acknowledgement, and will continue to occur until the employee demonstrates a retained knowledge of the procedure.</li>
+</ol>
+
+</p>
+
+
+<p>
+  By checking the box and signing below, I understand and agree to comply with what I have read.
+</p>
+
+<form method="POST" autocomplete="off">
+  {% csrf_token %}
+  <table>
+    <tr>
+      <td>Signature Checkbox</td>
+      <td><input type="checkbox" 'signature'/></td>
+    </tr>
+    <tr>
+      <td>Enter Username</td>
+      <td><input type='text' name='username' required/></td>
+    </tr>
+    <tr>
+      <td>Enter Password</td>
+      <td><input type='password' name= 'pw' required/></td>
+    </tr>
+    <tr>
+      <td><input type='submit'/></td>
+    </tr>
+  </table>
+</form>
+
+
+{% endif %}
+{% endblock %}

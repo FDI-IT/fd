@@ -1,0 +1,11 @@
+{% load humanize %}
+{% for bubble in bubbles %}
+<div class="bubble">
+	<h1>{% autoescape off %}{{ bubble.headline }}{% endautoescape %}</h1>
+	<ul>
+		{% for c in bubble.contents %}
+			<li>{{ c }}</li>
+		{% endfor %}
+	</ul>
+</div>
+{% endfor %}

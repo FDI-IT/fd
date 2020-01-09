@@ -1,0 +1,22 @@
+{% block paginate_bar %}
+    {% if list_items %}
+	{% qstring %}
+	<div id="footer"><span class="step-links">
+	    {% if list_items.has_previous %}
+		<a href="?page={{ list_items.previous_page_number }}">
+		    previous
+		</a>
+	    {% endif %}
+	    
+	    <span class="current">
+		Page {{ list_items.number }} of {{ list_items.paginator.num_pages }}
+	    </span>
+	    {% if list_items.has_next %}
+		<a href="?page={{ list_items.next_page_number }}">
+		    next
+		</a>
+	    {% endif %}
+	</span></div>
+
+    {% endif %}
+{% endblock %}

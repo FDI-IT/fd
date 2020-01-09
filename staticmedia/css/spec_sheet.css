@@ -1,0 +1,156 @@
+@charset "utf-8";
+/* CSS Document 
+ * */
+body{
+	font-family:helvetica;
+}
+
+table {
+	
+}
+
+div.specsheet_application_container {
+	width:1400px;
+}
+
+div.document_control_sidebar {
+	width:400px;
+	float:right;
+	top:20px;
+	right:20px;	
+}
+
+div.float-container {
+	clear:both;
+	overflow:hidden;
+}
+
+div.print_page_container {
+	border-style:solid;
+	border-color:black;
+	border-width:3px;
+	width:834px;
+	padding:40px;
+	float:left;
+}
+
+div.print_page_content {
+}
+
+#fdi_print_header_logo{
+	height:100px;
+	width:208px;
+	float:left;
+}
+
+p.fdi_print_header_address {
+	float:right;
+	font-size:18px;
+}
+
+h2.fdi_print_subtitle {
+	font-style: italic;
+	text-align:center;
+	clear:both;
+}
+
+
+*.fdi_print_title {
+	text-align:center;
+	clear:both;
+}
+
+
+
+h2.fdi_print_subtitle {
+	font-style: italic;
+}
+
+tr.customer_spec {
+	background-color:#FFFF00;
+}
+
+table.fdi_specifications_table {
+	margin-left: auto;
+	margin-right: auto;
+	width:66%;
+	margin-bottom:26px;
+}
+
+div.fdi_print_footer {
+	border-style:solid;
+	border-color:black;
+	border-width:3px;
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:40px;
+}
+
+div.fdi_print_footer p {
+	margin:20px;
+}
+
+table.fdi_specifications_table th {
+	font-style: italic;
+}
+
+table.fdi_specifications_table > tbody  td:first-child {
+	text-align:left;
+	padding-left:2 5px;
+}
+
+
+div.spec_body > ul {
+	padding:0px;
+	list-style-type:none;
+}
+
+div.spec_body > ul > li {
+	padding:0px;
+	margin:0px;
+	border-bottom:black 1px dotted;
+	height:40px;
+	overflow:hidden;
+}
+
+div.spec_body span {
+	padding:10px 10px 5px 10px;
+}
+
+
+span.spec_label {
+	float:left;
+}
+
+span.spec_value {
+	float:right;
+}
+
+
+/*
+
+
+div.fdi_print_footer {
+	border-style:solid;
+	border-color:black;
+	border-width:3px;
+	width:90%;
+	padding:12px 24px 12px 24px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+
+
+div.fdi_print_header {
+	
+	width:100%;
+}
+
+
+
+h1.fdi_print_title {
+	text-align:center;
+	font-style: italic;
+}
+*/

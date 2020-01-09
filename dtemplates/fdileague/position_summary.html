@@ -1,0 +1,18 @@
+{% extends "fdileague/base.html" %}
+{% block content %}
+<div class="ten_best_totals">
+<ul class="h_list">	
+	{% for player in ten_best_totals %}
+	<li>
+		<ul class="v_list">
+			<li class="rank">{{forloop.counter}}</li>
+			<li><img src="{{player.image_url}}"></li>
+			<li><a href="/fdileague/players/{{player.pk}}/">{{ player }}</a></li>
+			<li>{{ player.yearscore__score__sum }}</li>
+		</ul>
+	</li>
+	{% endfor %}
+</ul>
+</div>
+
+{% endblock %}

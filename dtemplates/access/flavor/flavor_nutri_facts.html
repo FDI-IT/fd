@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <script type="text/javascript">
+    function printLabel(divName){
+      var printContent = document.getElementById(divName).innerHTML;
+      var originalContent = document.body.innerHTML;
+      document.body.innerHTML = printContent;
+      window.print();
+      document.body.innerHTML = originalContent;
+      //document.body.style = originalStyle;
+    }
+
+  </script>
+
+  <style>
+    /* body{
+      font-size: 15px;
+    } */
+
+  </style>
+  <br>
+  <!--search-->
+  <form method = 'POST'>
+      {% csrf_token %}
+      {{ management_form }}
+      {{ form.rm_search }}
+
+      <input name="submit" type="submit" value="Submit"/>
+      <input type = "button" onclick="printLabel('label')" value="Print" />
+  </form>
+  <br>
+
+  <div><!-- error message-->
+    <h1>{{message}}</h1>
+    {% if errors %}
+      {{warning|safe}}
+    {% endif %}
+    {% for n in nonExistentNi %}
+      <li><a href="../rm_nutri_edit/?rm={{n.id}}" target="_blank">{{n}}</a></li>
+    {% endfor %}
+  </div>
+
+
+  <div id = "label"> <!-- print div-->
+    <!-- letter header -->
+    <style type="text/css">
+        table { page-break-inside:auto }
+        tr    { page-break-inside:avoid; page-break-after:auto }
+        p,td  {font-size: 16px;}
+        table,th,td{
+          border: 1px solid black;
+        }
+        .subcategory{
+          padding-left: 3em;
+          /* border-collapse:collapse ; */
+        }
+    </style>
+
+    <div style="display:inline-block; width:100%;">
+      <div>
+        <div style = "height: 100px; width: 30%; float:left">
+          <img style="max-height: 100%; max-width:100%;" src = "{{STATIC_URL}}images/fdi_logo.jpg"/>
+        </div>
+        <div align="right"style="width:70%; float:right">
+          <h1>FLAVOR DYNAMICS, INC</h1>
+          <p> 640 Montrose Ave. • South Plainfield, NJ  07080</p>
+          <p>Phone: 908-822-8855</p>
+          <p>customercare@flavordynamics.com</p>
+        </div>
+
+      </div>
+      <div style = "width:100%;float:left">
+        <h1 align="center" style="border-top:solid 2px black; border-bottom: solid 2px black;">NUTRITIONAL ANALYSIS</h1>
+      </div>
+    </div>
+
+    <br>
+    <div>
+      <p id="font">{% now 'm/d/Y' %}</p>
+      <p id="font" onload="displayDate()" id ="dateField"></p>
+      <p id="font"> {{name}} </p>
+
+      <br>
+      <p id="font">To Whom it May Concern:</p>
+      <br>
+      <p id="font">To the best of our knowledge, this product's nutrional analysis is as follows: </p>
+    </div>
+
+    <!--table filled with info from search-->
+    <table id ="nutri_table" align="center">
+      <tr>
+           <th style="border: 1px solid black; width: 300px;">{{name}}</th>
+           <th style="border: 1px solid black;"> Calculated Analysis Per 100 Grams</th>
+      </tr>
+
+      {% for key, value in zipped.items %}
+        {% if key in major %}
+
+          {% if key == "Calories" %}
+            <tr>
+              <td>{{key}}</td>
+              <td>{{value}} kcal</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td>{{key}}</td>
+              <td>{{value}} g</td>
+            </tr>
+          {% endif %}
+        {% elif key in subcategorygrams %}
+          <tr>
+            <td class="subcategory">{{key}}</td>
+            <td>{{value}} g</td>
+          </tr>
+        {% elif key in subcategorymicrograms %}
+          <tr>
+            <td class="subcategory">{{key}}</td>
+            <td>{{value}} mcg</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td class="subcategory">{{key}}</td>
+            <td>{{value}} mg</td>
+          </tr>
+        {% endif %}
+      {% endfor%}
+      <!--<tr>
+           <td style="border: 1px solid black;">total    </td>
+           <td style="border: 1px solid black;">g</td>
+      </tr>-->
+      <!-- {{zipped}} -->
+    </table>
+    <p id="font"> Dolf Derovira Jr</p>
+    <img style = "height:50px; width: 100px;" src = "{{STATIC_URL}}images/jr_non_sig.png"/>
+    <p id="font">Q.C. Manager</p>
+
+    <p id="font" align="center" style="border-top:black 2px solid;">The above product Nutritional information is based on laboratory submissions or limited production batches.  The data presented above might be modified as more information is obtained from larger production sizes.</p>
+  </div>
+  <br>
+  <input type = "button" onclick="printLabel('label')" value="Print" />
+
+{% endblock %}

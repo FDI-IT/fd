@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {{ formset.non_form_errors }}
+
+    <form action="" method="POST">
+    {% csrf_token %}
+	{{ formset.management_form }}
+	<table align="center" width="100%">
+	    {% for form in formset.forms %}
+		{% if forloop.first %}
+		    <tr class="qcheaders">
+			<th>Flavor Choice</th>
+			<th>Amount</th>
+			<th>Lot</th>
+			<th>Sub lot</th>
+			<th width="100%">Errors</th>
+		    </tr>
+		{% endif %}
+		<tr>
+		    {% for field in form %}
+			<td>{{ field }}</td>
+		    {% endfor %}
+		    <td class="formerrors">{{ form.errors }}</td>
+		</tr>
+	    {% endfor %}
+	</table>
+	<p>
+	    <input type="submit" value="Submit" />
+	</p>
+    </form>
+{% endblock %}

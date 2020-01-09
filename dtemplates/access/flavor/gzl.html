@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load gzl_table %}
+{% load blades %}
+{% block content %}
+<div id="content-right">
+	{% blades flavor 1000 %}
+</div>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{flavor}}</span>
+</div>
+<div id="related-links">
+<ul>
+	{% for formlink, formtitle in flavorforms %}
+        <li><a href="{{ formlink }}">{{ formtitle }}</a> |</li>
+    {% endfor %}
+</ul>
+</div>
+
+<div class="product-memo"><span class="label">Memo</span>{{flavor.productmemo}}</div>
+<div class="content-table">
+	<span id="exploded-table">
+		{% gzl_table flavor %}
+	</span>
+	
+</div>
+</div>
+
+{% endblock %}
+

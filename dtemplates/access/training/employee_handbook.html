@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+  <link rel="stylesheet" type="text/css" href='/static/css/training.css'/>
+</head>
+<p><a href="http://fdiwiki.flavordynamics.lan/wiki/index.php/Category:EMPLOYEE_HANDBOOK" target="_blank">Click here</a> to view the FDI employee handbook.</p>
+
+<p> By completing the form below, you acknowledge that you have read and will abide by the policies noted in the handbook.</p>
+
+<form method="POST" autocomplete="off">
+  {% csrf_token %}
+  <table>
+    <tr>
+      <td>Signature Checkbox</td>
+      <td><input type="checkbox" 'signature'/></td>
+    </tr>
+    <tr>
+      <td>Enter Username</td>
+      <td><input type='text' name='username' required/></td>
+    </tr>
+    <tr>
+      <td>Enter Password</td>
+      <td><input type='password' name= 'pw' required/></td>
+    </tr>
+    <tr>
+      <td><input type='submit'/></td>
+    </tr>
+  </table>
+</form>
+
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div id="content-main">
+	{% if status_message %}
+	<h1>{{ status_message }}</h1>
+	{% endif %}
+	
+	{% if list_items %}
+	<ul>
+	    {% for flavor in list_items.object_list %}
+	    <li>
+		<a href="/flavorbase/{{ flavor.number }}">
+		    {{ flavor.number }} - {{ flavor.name }}
+		</a>
+	    </li>
+	    {% endfor %}
+	</ul>
+	{% else %}
+	<p>No list_items available</p>
+	{% endif %}
+    </div>
+
+    <div id="content-right">
+	<form action="" method="GET">
+	    {{ search }}
+	    <input type="submit" value="Search" />
+	</form>
+    </div>
+{% endblock %}

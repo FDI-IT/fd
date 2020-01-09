@@ -1,0 +1,45 @@
+<div id="pagination-bar" align="right">
+	{% include "pagination_bar.html" %}
+</div>
+
+<table id="revision_info">
+	<caption>Revision History</caption>
+	
+   	<div id = "revision-list">
+	    <thead>
+	        <tr>
+				<th class="date-cell">Date</th>
+				<th class="object-cell">Object(s) Changed</th>
+				<th class="comment-cell">Comment</th>
+				<th class="user-cell">User</th>
+				<th class="revision_id-cell">Revision Details</th>
+	        </tr>
+	    </thead>
+
+		{% for date, version_object, version_url, count, comment, user, id in revision_rows %}
+			<tr class="revision_row" align="center">	
+				<td class="date-cell" width="20%">{{ date }}</td>
+				<td class="object-cell" width="30%">
+
+					{% if version_url == 0 %}
+						{{ version_object.object_repr }} 
+					{% else %}
+						<a href='{{ version_url }}'> {{ version_object.object_repr }} </a> 
+					{% endif %}
+					
+					{% if count > 1 %}
+						<br> ...and {{count|add:"-1"}} other objects
+					{% endif %}
+
+				</td>
+				<td class="comment-cell" width="30%">{{ comment }}</td>
+				<td class="user-cell" width="10%">{{ user }}</td>
+				<td class="revision_id-cell" width="10%">
+					{% url history_audit.views.revision_info id as the_url %}
+					<a href='{{ the_url }}'>{{id}}</a>
+				</td>
+			</tr>
+			{% endfor %}
+	</div>
+</table>
+

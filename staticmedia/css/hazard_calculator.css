@@ -1,0 +1,44 @@
+.ui-autocomplete {
+    max-height: 300px;
+    max-width: 350px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+    /* add padding to account for vertical scrollbar */
+    padding-right: 20px;
+}
+
+.alert {
+    border: 1px solid transparent;
+    padding: 5px;
+}
+
+/* For fixed navbar after scrolling */
+.alert.affix {
+    position: fixed;
+    z-index: 10000;
+    top: 0;
+    width: 100%
+}
+
+.header-wrapper
+{
+    min-height:160px;
+}
+
+
+.table-nonfluid {
+    width: auto;
+}
+
+.grayrow {
+    background-color: #D0D0D0
+}
+
+/*the css below is for rendering forms inline*/
+p { display: inline }
+
+label {
+	display: none;
+}
+

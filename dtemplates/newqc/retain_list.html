@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load dashboard %}
+{% block toolbar %}
+{{ block.super }}
+<a href="../add_retains/" title="Add Retains"><img src="/static/images/Icons/16x16/add.png"></a>
+{% endblock toolbar %}
+
+{% block content %}
+    <div id="content-right">
+    	<ul>
+    		<li><a href="/qc/retains/">All statuses</a></li>
+		{% for status in status_list %}
+			<li><a href="/qc/retains/{{ status }}/">{{ status }}</a></li>
+		{% endfor %}
+    	</ul>
+		<ul>
+			<li><a href="/qc/retains/">Latest</a></li>
+		{% for month in month_list %}
+			<li><a href="/qc/retains/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+		{% endfor %}
+		</ul>
+	</div>
+    <div id="content-main">
+    <div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
+    <form name="retain_selections" action="/qc/batch_print/" method="post">
+    {% csrf_token %}
+    <table class="sorttable" class="retaintable" width="100%">
+    	
+	<tr class="qcheaders">
+		<th width="15px">Select</th>
+	    <th>Retain</th>
+	    <th>Flavor</th>
+	    <th>Lot</th>
+		<th>Date</th>
+	    <th>Amount</th>
+	    <th class="sorttable_nosort">Status</th>
+	    <th>Scanned</th>
+	</tr>
+	{% for retain in object_list %}
+	    <tr>
+	    <td><input type="checkbox" name="retain_pks" value="{{ retain.pk }}" {% if checkall %}checked{% endif %}></td>
+			<td>
+			<a href="{{ retain.get_admin_url }}">{{ retain.retain }}</a>
+			</td>
+		<td><a href="{{ retain.lot.flavor.get_absolute_url }}">{{ retain.lot.flavor }}</a></td>
+		<td><a href="/qc/lots/{{ retain.lot.pk }}/">{{ retain.lot.number }}</a></td>
+		<td><a href="/qc/retains/{{retain.date|date:'Y'}}/{{retain.date|date:'m'}}/{{retain.date|date:'d'}}/">{{ retain.date|date:"Y-m-d" }}</a></td>
+		<td>{{ retain.lot.amount|floatformat:0 }}</td>
+		<td><a href="/qc/retains/{{retain.status}}/">{{ retain.status }}</a></td>
+		{% if retain.testcards.all.count > 0 %}
+			<td class="tc_present cell_icon"><img src="/static/images/Icons/16x16/accept.png">
+		{% else %}
+			<td class="tc_missing cell_icon"><img src="/static/images/Icons/16x16/delete.png"></td>
+		{% endif %}
+		</td>
+	    </tr>
+	{% endfor %}
+    </table>
+	</form>
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+    </div>
+{% endblock %}

@@ -1,0 +1,15 @@
+syntax: glob
+*.pyc
+*~
+*.swo
+*.bak
+*.swn
+*.db
+*.orig
+LOCAL*
+
+syntax: regexp
+ipython
+(^|/)\.
+
+/migrations

@@ -1,0 +1,61 @@
+{% extends "bootstrap_base.html" %}
+
+{% block htmlhead %}
+	{{ block.super }}
+	<script src="{{ STATIC_URL }}js/rm_inventory_data_entry.js"></script>
+	<link href="{{ STATIC_URL }}css/mattcss.css?v=25" type="text/css" rel="stylesheet" media="screen">
+
+{% endblock %}
+
+{% block content %}
+
+<div id="content-main">
+	<div class="container">
+        <div class="row">
+			<div class="col-sm-12">
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h1> Raw Material Inventory Data Entry Form </h1>
+                    </div>
+
+                    <div class="panel-body">
+                        <form method="POST">
+                        {% csrf_token %}
+                        {{ management_form }}
+
+                            <table class="table table-hover table-condensed centerTable">
+                                <thead>
+                                    <tr>
+                                        <th class="col-sm-1">#</th>
+                                        <th class="col-sm-3">PIN</th>
+                                        <th class="col-sm-4">Ingredient Name</th>
+                                        <th class="col-sm-2">Amount (lbs)</th>
+                                        <th class="col-sm-2">Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for form in formset %}
+                                        <tr class="entry-row">
+                                            <td>{{ forloop.counter }}</td>
+                                            <td class="pin-field">{{ form.pin }}{{ form.pin.errors }}</td>
+                                            <td class="name-field"></td>
+                                            <td>{{ form.amount }}{{ form.amount.errors }}</td>
+                                            <td>{{ form.quantity }}{{ form.quantity.errors }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+
+                        <input name="submit" type="submit" class="btn btn-success pull-right" value="Submit"/>
+
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+	</div>
+</div>
+
+{% endblock %}

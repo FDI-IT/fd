@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <style>
+    tr, td, th, table{
+      border: 1px solid black;
+    }
+  </style>
+  <script type="text/javascript">
+    function printLabel(divName){
+      var printContent = document.getElementById(divName).innerHTML;
+      var originalContent = document.body.innerHTML;
+      document.body.innerHTML = printContent;
+      window.print();
+      document.body.innerHTML = originalContent;
+      //document.body.style = originalStyle;
+    }
+
+  </script>
+
+
+  <br>
+  <!--search-->
+  <form method = 'GET'>
+      {% csrf_token %}
+      {{ management_form }}
+
+      <input type = "button" onclick="printLabel('statement')" value="Print" />
+  </form>
+
+  <br>
+
+
+  <div id = "statement"> <!-- print div-->
+    <!-- letter header -->
+    <style>
+      #font{
+        font-size: 20px;
+      }
+    </style>
+    <div style="display:inline-block; width:100%;">
+      <div>
+        <div style = "height: 100px; width: 30%; float:left">
+          <img style="max-height: 100%; max-width:100%;" src = "{{STATIC_URL}}images/fdi_logo.jpg"/>
+        </div>
+        <div align="right"style="width:70%; float:right">
+          <h1>FLAVOR DYNAMICS, INC</h1>
+          <p> 640 Montrose Ave. • South Plainfield, NJ  07080</p>
+          <p>Phone: 908-822-8855</p>
+          <p>customercare@flavordynamics.com</p>
+        </div>
+
+      </div>
+      <div style = "width:100%;float:left">
+        <h1 align="center" style="border-top:solid 2px black; border-bottom: solid 2px black;">GMO Statement</h1>
+      </div>
+    </div>
+
+    <br>
+    <div id = "font">
+      <p>{% now 'm/d/Y' %}</p>
+      <p> {{flavor}} </p>
+      <br>
+      <p>{{letter_content|safe}} </p>
+      <br>
+      <p>FLAVOR DYNAMICS, INC.</p>
+      <br><br>
+      <p>_______________________</p>
+      <p>Authorized Signature</p>
+    </div>
+
+
+  <br>
+</div>
+  <input type = "button" onclick="printLabel('statement')" value="Print" />
+
+{% endblock %}

@@ -1,0 +1,49 @@
+{% autoescape off %}
+<div id="blades">
+	<div id="critical">
+		<ul>
+		{% for label, datum, update_link in crit_list %}
+
+			{{ update_link }}
+			<li>
+			<span class="label">{{ label }}</span>
+			<span class="datum" id="{{label|cut:" "}}">{{ datum }}</span>
+			</li>
+			{% if update_link %}
+			</a>
+			{% endif %}
+
+		{% endfor %}
+
+		</ul>
+	</div>
+
+	{% if info_link %}
+	<div id="flavor-info">
+		<div class="title">{{ info_link }}Special Information</a></div>
+		<ul>
+		{% for label, datum in flavor_info_list %}
+			<li>
+			<span class="label">{{ label }}</span>
+			<span class="datum">{{ datum }}</span>
+			</li>
+		{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+
+	{% if ex_link %}
+	<div id="applicable-info">
+		<div class="title">{{ experimental_link }}Experimental Log</a></div>
+		<ul>
+		{% for label, datum in applicable_info_list %}
+			<li>
+			<span class="label">{{ label }}</span>
+			<span class="datum">{{ datum }}</span>
+			</li>
+		{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+</div>
+		{% endautoescape %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block htmlhead %}
+{% include "htmlhead.html" %}
+<!-- <script type="text/javascript" src="/static/js/sales_order_production.js?v=25"></script> DO NOT USE-->
+<script>
+var salesorder_selections_submit = function() {
+	jQuery( ":checked" ).each( function()  {
+		var $this = jQuery(this);
+		var v = $this.val();
+		var newv = v.replace(/[ \t\r\n]/g, '');
+		$this.val(newv);
+	});
+	document.forms["salesorder_selections"].submit();
+};
+</script>
+{% endblock %}
+
+{% block content %}
+
+{% if status_message %}
+	<h1>{{ status_message }}</h1>
+{% endif %}
+
+<div id="flavorsearch">
+	
+</div>
+
+<div id="content-main">
+	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
+	<form name="salesorder_selections" action="/batchsheet/add_lots/" method="get">
+	    {% csrf_token %}
+	
+	<table id="sales_order-rows" width="100%" class="sorttable">
+		<thead>
+			<tr>
+				<th title="Select Box">Select</th>
+				<th title="Flavor Number" class="{sorter: 'link-digit'}">Num</th>
+				<th title="Weight Ordered" class="{sorter: 'link-digit'}">Weight</th>
+				<th class="{sorter: 'link-digit'}" title="Unit Raw Material Cost">Unit $</th>
+				<th class="{sorter: 'link-digit'}" title="Total Raw Material Cost">Total $</th>
+				<th>Details</th>
+			</tr>
+		</thead><tbody>
+		{% for order in orders %}
+		{% if order.flavor.status %}
+			<tr id="{{ order.0 }}" class="discontinued error" title="{{order.flavor.status}}">
+		{% else %}
+			<tr id="{{ order.0 }}">
+		{% endif %}
+			<td>
+				<input type="checkbox" name="flavor_pks" value="[{'flavor_number':'{{order.flavor.number}}', 'amount':'{{order.total}}',
+				'details':[
+				{% for detail in order.details %}
+				'{{detail.pk}}'{% if forloop.last %}{% else %},{%endif%}
+				{% endfor %}]
+				}]"{% if checkall %}checked{% endif %}>
+			</td>
+			<td class="number-cell">
+				<a class="darkblue" href="/access/{{ order.flavor.number }}?wf={{ order.total }}">{{ order.flavor.number }}</a>
+			</td>
+			<td>
+				{{ order.total }}
+			</td>
+			<td>
+				{{ order.flavor.rawmaterialcost }}
+			</td>
+			<td>
+				{{ order.totalcost }}
+			</td>
+			<td>	
+			{% for detail in order.details %}
+				<a class="darkblue" href="/salesorders/{{ detail.salesordernumber.number }}/">{{ detail }};</a>
+			{% endfor %}
+			</td>
+		</tr>
+		{% endfor %}
+	    </tbody>
+	</table>
+	</form>
+</div>
+
+</form>
+{% endblock %}
+

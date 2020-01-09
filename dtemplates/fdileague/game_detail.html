@@ -1,0 +1,260 @@
+{% extends "fdileague/base.html" %}
+{% block content %}
+<script LANGUAGE="JavaScript">
+	$(document).ready(function() {
+ 		jQuery('a[href^="/players/"]').each( function(i,e) {
+ 			this.href = this.href.replace('players','django/players');
+ 		});
+	});
+</script>
+
+<h1>{{game.away_team.full_name}} at {{game.home_team.full_name}}</h1>
+<h2>{{game.game_date}}</h2>
+
+<table>
+	<caption>Scoring</caption>
+	<thead>
+		<tr>
+			<th></th>
+			<th></th>
+			<th></th>
+			<th>{{game.away_team.city_slug}}</th>
+			<th>{{game.home_team.city_slug}}</th>
+		</tr>
+	</thead>
+	<tbody>
+	    {% autoescape off %}
+		{% for s in game.scoring_set.all %}
+		<tr>
+			<td>{{ s.quarter }}</td>
+			<td>{{ s.team }}</td>
+			<td>{{ s.summary }}</td>
+			<td>{{ s.away_score }}</td>
+			<td>{{ s.home_score }}</td>
+		</tr>
+		{% endfor %}
+		{% endautoescape %}
+	</tbody>
+</table>
+
+<table>
+	<caption>Team Stats</caption>
+	<thead>
+		<tr>
+			<td></td>
+			<td>{{game.away_team.city_slug}}</td>
+			<td>{{game.home_team.city_slug}}</td>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>First downs</td>
+			<td>{{ game.teamstats_home.first_downs }}</td>
+			<td>{{ game.teamstats_away.first_downs }}</td>
+		</tr>
+		<tr>
+			<td>Rush-yards-TDs</td>
+			<td>{{ game.teamstats_home.rushes }}-{{ game.teamstats_home.rush_yards }}-{{ game.teamstats_home.rush_tds }}</td>
+			<td>{{ game.teamstats_away.rushes }}-{{ game.teamstats_away.rush_yards }}-{{ game.teamstats_away.rush_tds }}</td>
+		</tr>
+		<tr>
+			<td>Comp-Att-Yd-TD-INT</td>
+			<td>{{ game.teamstats_home.pass_comp}}-{{ game.teamstats_home.pass_att }}-{{ game.teamstats_home.pass_yards }}-{{ game.teamstats_home.pass_tds }}-{{ game.teamstats_home.pass_int }}</td>
+			<td>{{ game.teamstats_away.pass_comp}}-{{ game.teamstats_away.pass_att }}-{{ game.teamstats_away.pass_yards }}-{{ game.teamstats_away.pass_tds }}-{{ game.teamstats_away.pass_int }}</td>
+		</tr>
+		<tr>
+			<td>Sacked-yards</td>
+			<td>{{ game.teamstats_home.sacks }}-{{ game.teamstats_home.sack_yards }}</td>
+			<td>{{ game.teamstats_away.sacks }}-{{ game.teamstats_away.sack_yards }}</td>
+		</tr>
+		<tr>
+			<td>Net pass yards</td>
+			<td>{{ game.teamstats_home.net_pass_yards }}</td>
+			<td>{{ game.teamstats_away.net_pass_yards }}</td>
+		</tr>
+		<tr>
+			<td>Total yards</td>
+			<td>{{ game.teamstats_home.total_yards }}</td>
+			<td>{{ game.teamstats_away.total_yards }}</td>
+		</tr>
+		<tr>
+			<td>Fumbles-lost</td>
+			<td>{{ game.teamstats_home.fumbles }}-{{ game.teamstats_home.fumbles_lost }}</td>
+			<td>{{ game.teamstats_away.fumbles }}-{{ game.teamstats_away.fumbles_lost }}</td>
+		</tr>
+		<tr>
+			<td>Turnovers</td>
+			<td>{{ game.teamstats_home.turnovers }}</td>
+			<td>{{ game.teamstats_away.turnovers }}</td>
+		</tr>
+		<tr>
+			<td>Penalties-yards</td>
+			<td>{{ game.teamstats_home.penalties }}-{{ game.teamstats_home.penalties_yards }}</td>
+			<td>{{ game.teamstats_away.penalties }}-{{ game.teamstats_away.penalties_yards }}</td>
+		</tr>
+	</tbody>
+</table>
+
+<table>
+	<caption>Passing, Rushing, & Receiving</caption>
+	<thead>
+		<tr>
+		  <th colspan=2></th>
+		  <th colspan=6>Passing</th>
+		  <th colspan=4>Rushing</th>
+		  <th colspan=4>Receiving</th>
+		</tr>
+		<tr>
+		  <th></th>
+		  <th>Tm</th>
+		  <th class="tooltip" tip="Passes completed">Cmp</th>
+		  <th class="tooltip" tip="Passes attempted">Att</th>
+		  <th class="tooltip" tip="Yards Gained by Passing<br>For teams, sack yardage is deducted from this total">Yds</th>
+		  <th class="tooltip" tip="Passing Touchdowns">TD</th>
+		  <th class="tooltip" tip="Interceptions thrown">Int</th>
+		  <th class="tooltip" tip="Longest Completed Pass Thrown">Lng</th>
+		  <th class="tooltip" tip="Rushing Attempts (sacks not included in NFL)">Att</th>
+		  <th class="tooltip" tip="Rushing Yards Gained (sack yardage is not included by NFL)">Yds</th>
+		  <th class="tooltip" tip="Rushing Touchdowns">TD</th>
+		  <th class="tooltip" tip="Longest Rushing Attempt">Lng</th>
+		  <th class="tooltip" tip="Receptions">Rec</th>
+		  <th class="tooltip" tip="Receiving Yards">Yds</th>
+		  <th class="tooltip" tip="Receiving Touchdowns">TD</th>
+		  <th class="tooltip" tip="Longest Reception">Lng</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for prr in game.prr_set.all %}
+			<tr>
+				<td>{{ prr.player }}</td>
+				<td>{{ prr.team }}</td>
+				<td>{{ prr.p_cmp|default_if_none:"" }}</td>
+				<td>{{ prr.p_att|default_if_none:"" }}</td>
+				<td>{{ prr.p_yds|default_if_none:"" }}</td>
+				<td>{{ prr.p_tds|default_if_none:"" }}</td>
+				<td>{{ prr.p_int|default_if_none:"" }}</td>
+				<td>{{ prr.p_lng|default_if_none:"" }}</td>
+				<td>{{ prr.ru_att|default_if_none:"" }}</td>
+				<td>{{ prr.ru_yds|default_if_none:"" }}</td>
+				<td>{{ prr.ru_td|default_if_none:"" }}</td>
+				<td>{{ prr.ru_lng|default_if_none:"" }}</td>
+				<td>{{ prr.re_rec|default_if_none:"" }}</td>
+				<td>{{ prr.re_yds|default_if_none:"" }}</td>
+				<td>{{ prr.re_td|default_if_none:"" }}</td>
+				<td>{{ prr.re_lng|default_if_none:"" }}</td>
+			</tr>
+		{% endfor %}
+		
+	</tbody>
+</table>
+
+
+<table>
+	<caption>Defense & Returns</caption>
+	<thead>
+		<tr>
+		  <th colspan="2"></th>
+		  <th></th>
+		  <th colspan="4">Def Interceptions</th>
+		  <th colspan="4">Fumbles</th>
+		  <th colspan="5">Kick Returns</th>
+		  <th colspan="5">Punt Returns</th>
+		</tr>
+		<tr class="">
+		  <th></th>
+		  <th>Tm</th>
+		  <th class="tooltip" tip="Sacks">Sk</th>
+		  <th class="tooltip" tip="Passes intercepted on defense">Int</th>
+		  <th class="tooltip" tip="Yards interceptions were returned">Yds</th>
+		  <th class="tooltip" tip="Interceptions returned for touchdowns">TD</th>
+		  <th class="tooltip" tip="longest interception return">Lng</th>
+		  <th class="tooltip" tip="Fumbles recovered by a Player or Team<br>Original fumble by either team">FR</th>
+		  <th class="tooltip" tip="Yards recovered fumbles were returned">Yds</th>
+		  <th class="tooltip" tip="Fumbles recovered resulting in a touchdown for the recoverer">TD</th>
+		  <th class="tooltip" tip="Number of times forced a fumble by the opposition recovered by either team">FF</th>
+		  <th class="tooltip" tip="Kickoff Returns">Rt</th>
+		  <th class="tooltip" tip="Yardage for Kickoffs Returned">Yds</th>
+		  <th class="tooltip" tip="Yards per Kickoff Return<br>(minimum one return per game scheduled to qualify as leader)<br>(Kick Return Yardage)/(Kickoff Returns)">Y/Rt</th>
+		  <th class="tooltip" tip="Kickoffs Returned for a touchdown">TD</th>
+		  <th class="tooltip" tip="Longest Kickoff Return">Lng</th>
+		  <th class="tooltip" tip="Punts Returned">Ret</th>
+		  <th class="tooltip" tip="Punts Return Yardage">Yds</th>
+		  <th class="tooltip" tip="Yards per Punt Return<br>(minimum one return per game scheduled to qualify as leader)<br>(Punt Return Yardage)/(Punt Returns)">Y/R</th>
+		  <th class="tooltip" tip="Punts Returned for Touchdown">TD</th>
+		  <th class="tooltip" tip="Longest Punt Return">Lng</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for dr in game.dr_set.all %}
+			<tr>
+				<td>{{ dr.player }}</td>
+				<td>{{ dr.team }}</td>
+				<td>{{ dr.sk|default_if_none:"" }}</td>
+				<td>{{ dr.interceptions|default_if_none:"" }}</td>
+				<td>{{ dr.int_yds|default_if_none:"" }}</td>
+				<td>{{ dr.int_td|default_if_none:"" }}</td>
+				<td>{{ dr.int_lng|default_if_none:"" }}</td>
+				<td>{{ dr.fumble_fr|default_if_none:"" }}</td>
+				<td>{{ dr.fumble_yds|default_if_none:"" }}</td>
+				<td>{{ dr.fumble_td|default_if_none:"" }}</td>
+				<td>{{ dr.fumble_ff|default_if_none:"" }}</td>
+				<td>{{ dr.kickreturn_rt|default_if_none:"" }}</td>
+				<td>{{ dr.kickreturn_yds|default_if_none:"" }}</td>
+				<td>{{ dr.kickreturn_yrt|default_if_none:"" }}</td>
+				<td>{{ dr.kickreturn_td|default_if_none:"" }}</td>
+				<td>{{ dr.kickreturn_lng|default_if_none:"" }}</td>
+				<td>{{ dr.puntreturn_ret|default_if_none:"" }}</td>
+				<td>{{ dr.puntreturn_yds|default_if_none:"" }}</td>
+				<td>{{ dr.puntreturn_yr|default_if_none:"" }}</td>
+				<td>{{ dr.puntreturn_td|default_if_none:"" }}</td>
+				<td>{{ dr.puntreturn_lng|default_if_none:"" }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+
+
+<table>
+	<caption>Kicking & Punting</caption>
+	<thead>
+		<tr>
+		  <th colspan="2"></th>
+		  <th colspan="2">PAT</th>
+		  <th colspan="2">FG</th>
+		  <th colspan="4">Punting</th>
+		</tr>
+		<tr class="">
+		  <th></th>
+		  <th>Tm</th>
+		  <th class="tooltip" tip="Extra Points Made">XPM</th>
+		  <th class="tooltip" tip="Extra Points Attempted">XPA</th>
+		  <th class="tooltip" tip="Total Field Goals Made">FGM</th>
+		  <th class="tooltip" tip="Field Goals Attempted">FGA</th>
+		  <th class="tooltip" tip="Times Punted">Pnt</th>
+		  <th class="tooltip" tip="Total Punt Yardage">Yds</th>
+		  <th class="tooltip" tip="Yards per Punt">Y/P</th>
+		  <th class="tooltip" tip="Longest Punt">Lng</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for kp in game.kp_set.all %}
+			<tr>
+				<td>{{ kp.player }}</td>
+				<td>{{ kp.team }}</td>
+				<td>{{ kp.pat_xpm|default_if_none:"" }}</td>
+				<td>{{ kp.pat_xpa|default_if_none:"" }}</td>
+				<td>{{ kp.fg_fgm|default_if_none:"" }}</td>
+				<td>{{ kp.fg_fga|default_if_none:"" }}</td>
+				<td>{{ kp.p_pnt|default_if_none:"" }}</td>
+				<td>{{ kp.p_yds|default_if_none:"" }}</td>
+				<td>{{ kp.p_yp|default_if_none:"" }}</td>
+				<td>{{ kp.p_lng|default_if_none:"" }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+
+
+{% endblock %}

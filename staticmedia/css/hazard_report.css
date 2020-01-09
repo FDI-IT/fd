@@ -1,0 +1,17 @@
+td {
+	text-align: center;
+}
+th.filter {
+	color: #000000;
+}
+td.filter {
+	background-color: #FFFFBB;
+}
+
+.pagination{
+	margin: 10px 10px;
+}
+
+#content-solo {
+	padding-bottom: 250px;
+}

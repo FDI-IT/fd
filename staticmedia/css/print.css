@@ -1,0 +1,378 @@
+body {
+	font-family:arial,helvetica,sans-serif;
+	font-size:11px;
+}
+
+#header {
+	display:none;
+}
+
+#header-logob{
+	display:none;
+}
+	
+#header-logol{
+	display:none;
+}
+	
+#header-logor{
+	display:none;
+}
+
+#menubar{
+	display:none;
+}
+
+#content-title{
+	display:none;
+}
+	
+thead {
+	display: table-header-group;
+}	
+	
+div.hideable{
+	display:none;
+}
+#object-list {
+	clear:left;
+}
+
+#title-left{
+position:fixed;
+top:0;
+left:0;
+padding:0px 0px 0px 0px;
+margin:0px 0px 0px 0px;
+height:40px;
+overflow:hidden;
+}
+
+#flavor-list {
+clear:left;
+}
+
+#experimental-list {
+clear:left;
+}
+
+#flavor-list img {
+width:15px;
+height:15px;
+display:block;
+margin-left:auto;
+margin-right:auto;
+}
+
+#flavor-list th {
+vertical-align:middle;
+}
+
+div.product-memo {
+	margin:0px 0px 10px 0px;
+	position:fixed;
+	top:50px;
+	left:0px;
+}
+
+#content-title img{
+float:right;
+}
+
+#content-main{
+	padding-bottom:50px;
+	z-index:-1;
+}
+
+#related-links{
+	display:none;
+}
+
+
+form {
+}
+
+/* LINKS */
+
+a:link, a:visited {
+    color: #5b80b2;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #036;
+}
+
+a img {
+    border: none;
+}
+
+a.section:link, a.section:visited {
+    color: white;
+    text-decoration: none;
+}
+
+#formula_form ul {
+	padding: 0px 0px 0px 20px;
+	width: 700px;
+}
+
+.two-col-form {
+	float: left;
+	width: 450px;
+}
+
+.two-col-form ul {
+	padding-left: 0px;
+	margin: 0px 0px 0px 0px;
+}
+
+.two-col-form li {
+display: table-cell;
+list-style-type: none;
+width: 225px;
+}
+
+#new-experimental-form p {
+display:table-cell;
+margin:5px 0px 5px 0px;
+float:left;
+width:325px;
+height:20px;
+text-align:left;
+}
+#new-experimental-form fieldset {
+overflow:auto;
+clear:left;
+}
+
+#new-experimental-form label {
+margin:0px 8px 0px 0px;
+vertical-align:middle;
+text-align:right;
+display:block;
+float:left;
+width:90px;
+}
+
+#new-experimental-form input {
+display:block;
+width:200px;
+float:left;
+}
+
+#flavorsearch div {
+float:left;
+margin: 0px 20px 10px 20px;
+}
+
+#experimentalsearch div {
+	float:left;
+	margin: 0px 20px 10px 20px;
+}
+
+#flavorsearch ul {
+padding: 0px;
+margin: 0px;
+}
+
+#flavorsearch li {
+margin-left:6px;
+display:block;
+}
+
+.filterselect_list > li {
+float:left;
+}
+
+.ui-autocomplete {
+overflow-y: auto;
+max-height:180px;
+}
+
+#prodapp p {
+display:table-cell;
+margin:5px 0px 5px 0px;
+float:left;
+width:150px;
+height:20px;
+text-align:left;
+}
+
+#prodapp label {
+margin:0px 8px 0px 0px;
+vertical-align:middle;
+text-align:right;
+display:block;
+float:left;
+width:90px;
+}
+
+#prodapp input {
+display:block;
+width:20px;
+float:left;
+}
+
+#formula {
+clear:left;
+}
+#formula th{
+width:25%;
+}
+#formula td{
+width:25%;
+}
+
+#label-preview{
+border: 2px solid black;
+}
+
+@charset "utf-8";
+/* CSS Document */
+#name{font:helvetica;
+font-size:19pt;
+margin-top:4px;
+display:block;}
+
+#price{font:helvetica;
+font-size:14px;
+color:#000000;
+text-align:right;
+float:right;
+text-transform:uppercase;
+margin-top:4px;
+font-weight:bold}
+
+#related-links ul{margin:2px 0px 0px -33px;}
+
+#related_links li{display:inline;
+list-style-type:none;
+padding-right:31px;
+font:helvetica;
+font-size:11px;}
+
+#related-links li a{color:#FFFFFF} 
+
+#formula-tables{
+margin:10px 10px 20px 0px;
+padding-top:10px;
+padding-bottom:10px;
+overflow:hidden;}
+
+
+#exploded-table{float:left;
+}
+
+#consolidated-table{
+}
+
+#formula-tables table {background-color:#FFFFFF;
+margin:0px 0px 0px 10px;}
+
+#exploded caption {
+text-align:left;
+font:helvetica;
+font-size:11px;
+text-transform:uppercase;
+font-weight:bold;
+}
+
+#consolidated caption {
+text-align:left;
+font:helvetica;
+font-size:11px;
+text-transform:uppercase;
+font-weight:bold;
+}
+
+#content-right{
+}
+
+
+
+
+.label{font:helvetica;
+font-size:11px;
+text-transform:uppercase;
+display:block;
+font-weight:bold;
+}
+
+.datum{font:helvetica;
+font-size:11px;
+text-transform:uppercase;
+color:#F00;
+font-weight:bold;}
+
+
+#flavor-info{
+height:auto;
+margin-top:10px;}
+
+#applicable-info{
+height:auto;
+margin-top:10px;}
+
+.title{height:20px;
+width:150px;
+background-image:url(/static/images/blade_back.png);
+font:helvetica;
+font-size:11px;
+font-weight:bold;
+text-transform:uppercase;
+padding-right:10px;
+padding-top:3px;}
+
+span.weight_form{
+	display:none;
+}
+
+#blades {
+	clear:both;
+	width:850px;
+	position:fixed;
+	top:90px;
+	left:0px;
+}
+
+#blades div.title{
+	display:none;
+}
+
+#blades ul{
+list-style: none;
+margin:0px;
+padding:0px;} 
+
+
+#blades li{
+	width:120px;
+	float:left;
+	margin:0px 0px 0px 0px;
+	height:35px;
+}
+
+.label{font-family:'liberation sans',arial;
+font-size:11px;
+text-transform:uppercase;
+display:block;
+font-weight:bold;
+}
+
+span.datum{font-family:'liberation sans',arial;
+font-size:11px;
+text-transform:uppercase;
+color:#F00;
+font-weight:bold;}
+
+span.table_action_links {
+	display:none;
+}
+
+#product_tabs {
+	clear:both;
+	position:fixed;
+	top:140px;
+	left:0px;
+}

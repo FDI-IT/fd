@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+	{% if status_message %}
+	<h1>{{ status_message }}</h1>
+	{% endif %}
+	  
+	<div id="sales-order-list"> 
+		<table width="100%" class="sorttable">
+			<thead><tr>
+				<th class="{sorter: 'link-digit'}">Number</th>
+				<th>Product</th>
+				<th>Quantity</th>
+				<th>Unit Price</th>
+				<th class="{sorter: 'isoDate'}">Order date</th>
+				<th class="{sorter: 'isoDate'}">Ship Date</th>
+				<th class="{sorter: 'isoDate'}">Due Date</th>
+				<th>Total Sale Price</th>
+			</tr></thead>
+			<tbody>
+		    {% for sales_order in sales_orders %}
+		    	{% for li in sales_order.lineitem_set.all %}
+			    	{% if forloop.first %}
+			    	<tr id="{{ sales_order.number }}">
+			    	<td class="main_row"><a href="/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.number }}</a></td>
+			    	{% else %}
+			    	<tr id="{{ sales_order.number }}">
+			    	<td class="sub_row"></td>
+			    	{% endif %}
+			    	<td><a href="/access/{{ li.flavor.number }}/">{{ li.flavor }}</a></td>
+			    	<td>{{ li.quantity|floatformat:0 }}</td>
+			    	<td>{{ li.unit_price|floatformat:2 }}</td>
+			    	<td>{{ sales_order.create_date|date:'m-d' }}</td>
+			    	<td>{{ li.ship_date|date:'m-d' }}</td>
+			    	<td>{{ li.due_date|date:'m-d' }}</td>
+			    	<td>{{ li.quantity_price|floatformat:2}}</td>
+			    </tr>
+			    {% if forloop.last %}
+			     <tr class="spacer_row"><td class="sub_row"></td></tr>
+			    {% endif %}
+		    	{% endfor %}
+		    {% endfor %}
+		    </tbody>
+		</table>
+	</div>
+	
+	<div id="ordered-flavors-list">
+		<table width="40%" class="sorttable">
+			<thead><tr>
+				<th>Flavor</th>
+				<th>Create/Edit Customer Specs</th>
+				<th>View Customer Spec Sheet</th>
+			</tr></thead>
+			<tbody>
+				{% for flavor in ordered_flavors %}
+					<tr>
+						<td> <a href="{{ flavor.get_absolute_url }}">{{ flavor.name }}</a> </td>
+						<td> <a href="/salesorders/customer/{{ customer.pk }}/customer_specs/{{ flavor.number }}"> Edit </a> </td>
+						<td> <a href="/salesorders/customer/{{ customer.pk }}/customer_spec_sheet/{{ flavor.number }}"> Spec Sheet </a></td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		
+	</div>
+	
+{% endblock %}
+

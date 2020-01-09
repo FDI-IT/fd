@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<title>
+    {% if page_title %}
+        {{ page_title }}
+    {% else %}
+        Flavor Dynamics Intranet
+    {% endif %}
+</title>
+
+{% block htmlhead %}
+    {% include "bootstrap_htmlhead.html" %}
+	<!-- <script type="text/javascript" src="{{ STATIC_URL }}hazard_calculator/js/hazard_calculator.js"></script>
+	<link rel="stylesheet" href="{{ STATIC_URL }}hazard_calculator/css/hazard_calculator.css"> -->
+{% endblock %}
+
+
+{% block navbar %}
+
+	    <div class="navbar navbar-inverse navbar-static-top" role="navigation">
+	      <div class="container">
+	        <div class="navbar-header">
+	          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	            <span class="sr-only">Toggle navigation</span>
+	            <span class="icon-bar"></span>
+	            <span class="icon-bar"></span>
+	            <span class="icon-bar"></span>
+	          </button>
+	          <a class="navbar-brand" href="/">&lt&lt Back to FDi Home</a>
+	        </div>
+	        <div class="collapse navbar-collapse">
+	          <ul class="nav navbar-nav">
+	          	<!-- To make a tab active, add {'nav_bar':'variable'} to the context dictionary of the view
+	          		and use the 'active' template tag, passing in nav_bar and 'variable'.-->
+	            <!-- <li><a href="#">Flavors</a></li>
+	            <li><a href="#">Lab</a></li>
+	            <li><a href="#">QC</a></li>
+	            <li><a href="/ghs_app/product_list">Sales Orders</a></li> -->
+	          </ul>
+	        </div><!--/.nav-collapse -->
+	      </div>
+	    </div>
+
+
+{% endblock %}
+
+{% block content %}
+{% endblock %}
+
+</html>

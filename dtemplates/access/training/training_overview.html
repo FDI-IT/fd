@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+    <!-- {{employees}} -->
+    <table>
+    {% for e in employees %}
+      <tr>
+        <td><a href="./{{e.0.username}}">{{e.0.username}}</a></td>
+        <td>{{e.2.name}}</td>
+        <td>
+          {% if e.1 %}
+            <ul>
+              {% for t in e.1 %}
+                <li>{{t.1}}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            Up to date on all necessary training
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor  %}
+    </table>
+{% endblock %}

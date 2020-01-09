@@ -1,0 +1,98 @@
+{% extends "hazards/generic_sds.html" %}
+
+{% block company_name %}
+
+	<img class="logo" src="/static/hazard_calculator/images/logo.png" style="width:15em;">
+
+	<h1 class="company_name"> FLAVOR DYNAMICS </h1>
+{% endblock %}
+
+{% block product_info %}
+    <div class='section_body'>
+    	<h4 class='subsection_header'> 1.1 &emsp; Product Identifiers </h4>
+		<div> Product Name: <span class='product_identifiers'>{{ flavor.natart }} {{ flavor.name }} {{ flavor.label_type }}</span></div>
+		{% if experimental %}
+			<div>Product Number: <span class='product_identifiers'>{{ experimental.experimentalnum }}-{{ experimental.initials }}</span></div>
+		{% else %}
+			<div> Product Number: <span class='product_identifiers'>{{ flavor.number }} </span></div>
+		{% endif %}
+	    
+	    <h4 class='subsection_header'> 1.2 &emsp; Relevant identified uses of the substance or mixture and uses advised against </h4>
+    	    <div> Identified Uses: Laboratory chemicals, Manufacture of substances</div>
+	    <h4 class='subsection_header'> 1.3 &emsp; Details of the supplier of the Safety Data Sheet </h4>
+    	    <div> Company: Flavor Dynamics </div>
+    	    <div> Address: 640 Montrose Ave, South Plainfield, NJ 07080</div>
+    	    <div> Telephone: 908-822-8855 </div>
+    	    <div> Email: customercare@flavordynamics.com </div>
+	    <h4 class='subsection_header'> 1.4 &emsp; Emergency Telephone Number </h4>
+	    	<div> Emergency Phone #: 800-424-9300 CHEMTREC </div>
+    </div>
+{% endblock %}
+
+{% block appearance %}
+	{% if 'Powder' in flavor.label_type or 'Powder' in flavor.name %}
+		Powder
+	{% elif 'Flavorcoat' in flavor.name or 'Flavorcoat' in flavor.label_type %}
+		Powder
+	{% elif 'Xanthan Gum' in flavor.name %}
+		Powder
+    {% elif flavor.number == 130647 or flavor.number == 20705 or flavor.number == 110932 %}
+        Powder
+    {% elif 'Granular' in flavor.name %}
+        Granular
+	{% else %}
+		Liquid
+	{% endif %}
+{% endblock %}
+
+{% block ingredient_statement %}
+    {{ ingredient_statement }}
+{% endblock %}
+
+{% block hazardous_components %}
+{% endblock %}
+
+{% block odor %}
+	No data available
+{% endblock %}
+
+{% block flashpoint %}
+	{% if flavor.flashpoint %}
+		{{ flavor.flashpoint }}
+	{% else %}
+		No data available
+	{% endif %}
+{% endblock %}
+
+{% block DOT %}
+        {% if flavor.flashpoint > 140 or flavor.flashpoint == 0 %}
+                No hazardous or special marking required.
+        {% else %}
+                No data available
+        {% endif %}
+{% endblock %}
+
+{% block IMDG %}
+		{% if flavor.flashpoint > 140 or flavor.flashpoint == 0 %}
+                No hazardous or special marking required.
+        {% elif flavor.flashpoint > 72 %}
+                UN1197, Extracts, Flavoring, Liquid, Class 3, Packing Group III <br>
+                PSN: {{ flavor.natart }} {{ flavor.name }} {{ flavor.label_type }}
+        {% elif flavor.flashpoint > 0 %}
+                UN1197, Extracts, Flavoring, Liquid, Class 3, Packing Group II <br>
+                PSN: {{ flavor.natart }} {{ flavor.name }} {{ flavor.label_type }}
+        {% endif %}
+{% endblock %}
+
+
+{% block IATA %}
+		{% if flavor.flashpoint > 140 or flavor.flashpoint == 0 %}
+                No hazardous or special marking required.
+        {% elif flavor.flashpoint > 72 %}
+                UN1197, Extracts, Flavoring, Liquid, Class 3, Packing Group III <br>
+                PSN: {{ flavor.natart }} {{ flavor.name }} {{ flavor.label_type }}
+        {% elif flavor.flashpoint > 0 %}
+                UN1197, Extracts, Flavoring, Liquid, Class 3, Packing Group II <br>
+                PSN: {{ flavor.natart }} {{ flavor.name }} {{ flavor.label_type }}
+        {% endif %}
+{% endblock %}

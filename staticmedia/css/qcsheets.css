@@ -1,0 +1,102 @@
+/* CSS Document */
+
+body{
+	background:url(/images/background_03.gif);
+	text-align:center;margin:0;
+	background-repeat:repeat-x;
+	background-position:top}
+
+.darkblue{
+	font-family:Arial, Helvetica, sans-serif;
+	font-weight:bolder;
+	height:40px;
+	text-indent:5px;
+	color:#FFFFFF;
+	text-align:left;
+	font-size:32px}
+	
+.properties{
+	color:#000000;
+	font-size:16px;
+	height:18px;
+	width:724;
+	text-align:left;
+	font-family:Arial, Helvetica, sans-serif;
+	text-indent:5px;}
+	
+.properties2{
+	background-color:#CCCCCC;
+	color:#000000;
+	font-size:16px;
+	height:18px;
+	width:724;
+	text-align:left;
+	font-family:Arial, Helvetica, sans-serif;
+	text-indent:5px;}
+	
+.headerleft{
+	width:176px;	
+	height:96px;
+	text-align:left;}
+	
+.headerright{
+	width:176px;	
+	height:96px;
+	text-align:center;
+	background-image:url(/images/template-for-slicing_02.gif);
+	vertical-align:middle;}
+	
+.headercenter{
+	width:648px;	
+	height:96px;
+	text-align:center;
+	font-size:28px;
+	font-weight:bolder;
+	vertical-align:middle;
+	color:#FFFFFF}
+	
+.qcheaders {
+	background-color:#333333;
+	color:#FFFFFF;
+	font-weight:bold;
+	text-align:left;
+	text-indent:5px;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:16px}
+	
+.qcbody {
+	background:#FFFFFF;
+	color:#000000;
+	text-align:left;
+	text-indent:5px;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:16px}	
+	
+.pagination {
+	background:#CCCCCC;
+	color:#000000;
+	text-align:center;
+	text-indent:5px;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:16px}	
+	
+.current {
+	background:#cccccc;
+	color:#000000;
+	text-align:center;
+	text-indent:5px;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:16px}	
+	
+.step-links {
+	background:#cccccc;
+	color:#000000;
+	text-align:center;
+	text-indent:5px;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:16px}	
+		
+.formerrors {
+	font-size:9px;
+	font-family:Arial, Helvetica, sans-serif;
+	color:#FF0000;}

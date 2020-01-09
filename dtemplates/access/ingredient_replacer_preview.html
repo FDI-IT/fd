@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form id="ingredient_replacer_preview" action="/access/ingredient_replacer_preview/{{old_ingredient.id}}/{{new_ingredient.id}}/" method="post">
+	{% csrf_token %}
+{% if page_title == "Replacement in process" %}{% else %}
+<input type="submit" value="Replace Ingredient">
+{% endif %}
+</form>
+<table>
+	<tr>
+		<th>Flavor</th>
+		<th>Amount</th>
+	</tr>
+	{% for lw in old_ingredient_gzl %}
+	<tr>
+		<td><a href="{{lw.root_flavor.get_absolute_url}}">{{lw.root_flavor}}</a></td>
+		<td>{{lw.weight}}</td>	
+	</tr>
+	{% endfor %}
+</table>
+
+
+{% endblock %}

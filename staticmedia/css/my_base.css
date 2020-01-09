@@ -1,0 +1,796 @@
+body {
+	font-family:arial,helvetica,sans-serif;
+	font-size:11px;
+	background:url(/static/images/background.png);
+	background-repeat:repeat-x;
+	background-position:top;
+	margin: 0;
+	padding: 0;
+	}
+
+#welcome {width:1100px;
+	margin:auto;
+	margin-top:auto;}
+
+#header{
+	height:55px;
+	width:1100px}
+
+#header-logob{
+	position:absolute;
+	width:1100px;
+	height:55px;
+	background-image: url(/static/images/backgroundheader.png);
+	background-repeat: repeat-y;
+	z-index:2;}
+
+#header-logol{
+	position:absolute;
+	float:left;
+	height:55px;
+	width:1100px;
+	z-index:3;
+	background-image: url(/static/images/logo.png);
+	background-repeat: no-repeat;
+	background-position: left;
+	}
+
+#header-logor{
+	position:relative;
+	float:right;
+	height:55px;
+	width:550px;
+	z-index:3;
+	font-size:18px;
+	color: white;
+	/*background-image: url(/static/images/title.png);*/
+	background-repeat: no-repeat;
+	background-position: right;
+	text-align:right;
+	}
+
+div.half-split {
+	margin:10px 10px 0px 0px;
+	padding: 10px 0px 10px 10px;
+	float:left;
+	background-color:#f2f2f3;
+	width:920px;
+}
+
+div.half-split > div {
+	width:50%;
+	float:left;
+}
+
+#pagination-bar{
+	clear:left;
+}
+
+div.product-memo{margin:10px 10px 10px 0px;
+padding: 10px 0px 10px 10px;
+/*float:left;*/
+background-color:#f2f2f3;
+width:920px;
+}
+
+.label{font-family:helvetica;
+font-size:11px;
+text-transform:uppercase;
+display:block;
+font-weight:bold;
+}
+
+#title-left{
+padding:0px 0px 0px 10px;
+margin:0px 0px 0px 0px;
+background-color:#f2f2f3;
+width:920px;
+/*float:left;*/
+height:40px;
+overflow:hidden;
+z-index:-1;
+}
+
+#name{font:helvetica;
+font-size:19pt;
+color:#000000;
+text-align:left;
+float:left;
+margin-top:4px;}
+
+tr.spacer_row {
+	height:30px;
+}
+
+td.sub_row {
+	border: 0px;
+}
+
+table {
+clear:left;
+}
+
+tr.flavor_tr td{
+	background-color:#ddeeff;
+	font-weight:bold
+}
+tr.flavor_ingredient_statement_row td{
+	background-color:#ddeeff;
+	font-style:italic;
+	font-size:10px;
+}
+tr.raw_material_tr td{
+	background-color:#ffdddd;
+}
+tr.rm_ingredient_statement_row td{
+	background-color:#ffdddd;
+	font-style:italic;
+	font-size:10px;
+}
+
+tr.has_ingredient_statement td{
+	border-bottom:0;
+}
+
+td.highlight{
+	background-color:#ffffbb;
+}
+
+tr.error{
+	background-color:#ffaaaa;
+}
+
+tr.error a:link{
+	color:#003366;
+}
+
+tr.error a:visited{
+	color:#003366;
+}
+
+tr.error a:hover{
+	color:#FFFFFF;
+}
+
+
+
+td.tc_present{
+	background-color:#bbffbb;
+}
+td.cell_icon img{
+	padding-left:20px;
+}
+td.tc_missing{
+	background-color:#ffbbbb;
+}
+
+#flavor-list img {
+width:15px;
+height:15px;
+display:block;
+margin-left:auto;
+margin-right:auto;
+}
+
+#flavor-list th {
+vertical-align:middle;
+}
+
+#content-solo{
+
+}
+
+#content-title{
+	padding-left:10px;
+	color:white;
+	background-color: #3c90ce;
+	height: 26px;
+}
+
+#content-title h2 {
+	margin: 0px 0px 0px 0px;
+	padding-top:4px;
+
+}
+
+#content-title img{
+margin:1px 1px 0px 5px;
+float:right;
+}
+#content-title a{
+}
+
+#content-main{
+	float:left;
+	width: 920px;
+	padding-bottom:50px;
+	clear:left;
+}
+
+#content-right{
+	float: right;
+	width: 160px;
+}
+
+form {
+}
+
+/* LINKS */
+
+a:link, a:visited {
+    color: #5b80b2;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #036;
+}
+
+a img {
+    border: none;
+}
+#object-list img {
+	height:10px;
+}
+
+a.section:link, a.section:visited {
+    color: white;
+    text-decoration: none;
+}
+
+div.ondeck{
+	display:none;
+}
+
+#formula_form ul {
+	padding: 0px 0px 0px 20px;
+	width: 700px;
+}
+
+.two-col-form {
+	float: left;
+	width: 450px;
+}
+
+.two-col-form ul {
+	padding-left: 0px;
+	margin: 0px 0px 0px 0px;
+}
+
+.two-col-form li {
+display: table-cell;
+list-style-type: none;
+width: 225px;
+}
+
+#new-experimental-form p {
+display:table-cell;
+margin:5px 0px 5px 0px;
+float:left;
+width:325px;
+text-align:left;
+}
+#new-experimental-form fieldset {
+overflow:auto;
+clear:left;
+}
+
+#new-experimental-form label {
+margin:0px 8px 0px 0px;
+vertical-align:middle;
+text-align:right;
+display:block;
+float:left;
+width:90px;
+}
+
+#new-experimental-form input {
+display:block;
+width:200px;
+float:left;
+}
+
+#flavorsearch {
+	overflow:auto;
+	width:100%;
+}
+
+#advanced-search {
+	/*margin: 5px 0px 10px 0px;*/
+}
+
+#advanced-search ul {
+	padding: 0px;
+	margin: 0px;
+}
+
+.filterselect_list > li {
+	float:left;
+	margin: 4px 30px 4px 0px;
+}
+
+.filterselect_list li {
+	display:block;
+}
+
+#experimentalsearch div {
+	float:left;
+	margin: 0px 20px 10px 20px;
+}
+
+#sales-order-list {
+	clear:left;
+}
+
+#ingredients-ordered{
+	clear:left;
+}
+
+.ui-autocomplete {
+overflow-y: auto;
+max-height:180px;
+}
+
+#prodapp p {
+display:table-cell;
+margin:5px 0px 5px 0px;
+float:left;
+width:150px;
+height:20px;
+text-align:left;
+}
+
+#prodapp label {
+margin:0px 8px 0px 0px;
+vertical-align:middle;
+text-align:right;
+display:block;
+float:left;
+width:90px;
+}
+
+#prodapp input {
+display:block;
+width:20px;
+float:left;
+}
+
+#formula {
+clear:left;
+}
+
+
+#label-preview{
+border: 2px solid black;
+}
+
+@charset "utf-8";
+/* CSS Document */
+
+
+#price{font:helvetica;
+font-size:14px;
+color:#000000;
+text-align:right;
+float:right;
+text-transform:uppercase;
+margin-top:4px;
+font-weight:bold}
+
+div.content-table{
+	position:relative;
+	margin:0px 10px 20px 0px;
+	float:left;
+	background-color:#f2f2f3;
+	width:730px;
+	padding-top:10px;
+	padding-bottom:10px
+}
+#product_tabs {
+clear:both;
+}
+
+span.table_action_links{
+	padding:0px 0px 0px 10px;
+}
+
+div.content-table table {background-color:#FFFFFF;
+margin:0px 0px 0px 10px;
+width:710px}
+
+div.ajax-content-table table {background-color:#FFFFFF;
+margin:0px 0px 0px 10px;
+width:710px}
+
+
+table caption {
+text-align:left;
+font:helvetica;
+font-size:11px;
+text-transform:uppercase;
+font-weight:bold;
+}
+
+#consolidated caption {
+text-align:left;
+font:helvetica;
+font-size:11px;
+text-transform:uppercase;
+font-weight:bold;
+}
+
+#blades{
+width:160px;
+margin-top:0px;
+float:left;
+background-color:#f2f2f3;
+text-align:right;}
+
+#blades ul{list-style: none;
+margin-top: 10px;
+padding-right:10px;
+padding-left:10px}
+
+.datum{font:helvetica;
+font-size:11px;
+text-transform:uppercase;
+color:#F00;
+font-weight:bold;}
+
+#blades li {
+	padding-bottom:8px;
+}
+
+#flavor-info{
+background-color:#f2f2f3;
+height:auto;
+margin-top:10px;}
+
+#applicable-info{
+background-color:#f2f2f3;
+height:auto;
+margin-top:10px;}
+
+.title{height:20px;
+width:150px;
+background-image:url(/static/images/blade_back.png);
+font:helvetica;
+font-size:11px;
+font-weight:bold;
+text-transform:uppercase;
+padding-right:10px;
+padding-top:3px;}
+
+span.weight_form{
+position:absolute;
+top:36px;
+right:15px;
+}
+
+
+*.ingredient-name-2 {
+	display:none;
+}
+*.sensitive {
+	display:none;
+}
+
+#explosion-divs{
+	width:100%;
+}
+
+#solution-baserm {
+	font-style: italic;
+}
+
+#matchform fieldset {
+	width:400px;
+}
+
+#solution-ingredient-autocomplete > * {
+	display:block;
+}
+
+#ingredient-detail tr.discontinued {
+	background-color:#ffcccc;
+}
+
+#ingredient-detail tr.active {
+	background-color:#ccffcc;
+}
+
+#ingredient-detail tr.highlighted {
+	border:1px solid #0000ff;
+}
+
+#ingredient-pin-price-update p {
+	display:inline;
+}
+
+#ingredient-pin-price-update input {
+}
+
+*.hidden {
+	display:none;
+}
+
+#leftfieldsets {
+	width:20%;
+	float:left;
+}
+
+#rightfieldsets {
+	width:20%;
+	float:left;
+}
+
+#experimental-detail div {
+	width:45%;
+	float:left;
+}
+
+div.pushed-down-tabs {
+	clear:both;
+}
+
+table.retain-list {
+	width:100%;
+}
+
+ul.retain-list {
+	list-style-type: none;
+
+}
+
+*.retain-listing ul {
+	list-style-type: none;
+}
+
+ul.retain-detail {
+	float:left;
+}
+
+ul.thumbnail-list-horzontal {
+	float:right;
+}
+
+#progress-steps li {
+	color:#cccccc;
+}
+
+#progress-steps li.active {
+	color:#000000;
+	font-weight:bold;
+}
+
+#progress-steps li.complete {
+	color:#000000;
+}
+
+div.ft-formula {
+	margin-left:10px;
+	margin-right:10px;
+}
+
+div.ft-spacer {
+	border-left:1px dotted #888888;
+	padding-left:18px;
+}
+span.ingredient-name {
+	overflow:hidden;
+}
+span.ingredient-details {
+	float:right;
+}
+
+span.ingredient-details {
+	display:table-row;
+}
+
+span.ingredient-details > span {
+	display:table-cell;
+	padding-left:7px;
+	padding-right:4px;
+	overflow:hidden;
+}
+
+span.fttype {
+	width:100px;
+}
+
+span.ftupdate {
+	width:100px;
+}
+
+span.ftunitcost {
+	width:80px;
+}
+
+span.ftamount {
+	width:80px;
+}
+
+span.ftrelcost {
+	width:80px;
+}
+
+#testcard_gallery {
+	width:1900px;
+	position:fixed;
+	top:130px;
+	left:10px;
+	height: 1000px;
+}
+
+div.select_overlay {
+	position:absolute;
+	bottom:0;
+	left:0;
+	margin:2px 2px 2px 2px;
+	width:99%;
+	height:486px;
+	background:#FFB338;
+	z-index:-1;
+}
+
+img.testcard_resolve_image {
+	width:250px;
+	height:324px;
+	margin:0px 6px 0px 6px;
+}
+
+div.image_select {
+	float:left;
+	position:relative;
+}
+
+.image_actual.checked_image {
+	opacity:0.5;
+
+}
+
+img.hidden_image {
+	display:none;
+}
+
+.hidden_image.click_to_zoom {
+    display:block;
+	position:absolute;
+	top:10px;
+	right:10px;
+	height:950px;
+    z-index:50;
+}
+
+div.click_to_zoom_image {
+
+}
+
+.image_actual{
+	width:376px;
+	float:left;
+	margin:2px;
+	height:486px;
+}
+
+.hidden_cbox {
+	display:none;
+}
+
+th, tfoot td {
+	text-align:center;
+}
+
+div.parent_object_detail {
+	background-color:#A2BEDC;
+}
+
+div.child_object_detail{
+	width:740px;
+	float:right;
+	background-color:#DAB38E;
+	margin:6px;
+	padding:6px;
+}
+
+div.float-container {
+	overflow:hidden;
+	clear:both;
+}
+div.lot_detail {
+	width:930px;
+}
+div.lot_detail input {
+	width:430px;
+}
+div.parent_info {
+	width:150px;
+	float:left;
+}
+
+div.product_info_form p {
+	display:inline-block;
+	width:455px;
+}
+div.lot_detail label {
+	display:block;
+}
+
+#new-experimental-form textarea {
+display:block;
+float:left;
+}
+#hidden{
+display:none;
+}
+
+div.batchsheet_images {
+position:absolute;
+left:0px;
+width:100%;
+}
+
+div.batchsheet_images img {
+
+
+display:block;
+margin-top:10px;
+margin-bottom:10px;
+margin-left:auto;
+margin-right:auto;
+}
+
+#lot_list img {
+	height:10px;
+}
+
+img.scanned_doc_thumbnail {
+	height:100px;
+}
+
+
+h1.status_message {
+color:red;
+}
+
+#formula-rows .number-cell,
+#formula-rows .number-cell input {
+	width:150px;
+}
+
+#formula-rows .amount-cell,
+#formula-rows .amount-cell input {
+	width:120px;
+}
+
+#formula-rows .cost-cell,
+#formula-rows .del-row {
+	width:90px;
+	text-align:center;
+}
+
+#alert span {
+	background-color: red;
+}
+
+#edit_menu {
+    display: none;
+    position: absolute;
+    width: 150px;
+}
+
+#flavor_review_print_menu {
+	display: none;
+    position: absolute;
+    width: 150px;
+}
+
+
+
+tr.reports_exclude {
+	background-color:#ffaaaa;
+}
+
+span.hidden_tooltip {
+	display:none;
+}

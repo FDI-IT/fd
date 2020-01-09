@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="content-solo">
+<div class="hideable">
+	<form action="/reports/lots_by_person/" method="get">
+		{{date_range_form.as_p}}
+		<input type="submit" value="Filter">
+	</form>
+</div>
+<div id="object-list">
+	<table>
+		<thead>
+			<tr>
+				<th>Initials</th>
+				<th>Num Lots</th>
+				<th>Total Weight</th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for object in object_list %}
+			<tr>
+				<td><a href="/mysearch/?search_space=experimental&search_string=&initials={{object.initials}}">{{ object.initials }}</a></td>
+				<td>{{ object.num_lots }}</td>
+				<td>{{ object.total_weight }}</td>
+			</tr>
+		{% endfor %}	
+		</tbody>
+	</table>
+</div>
+</div>
+{% endblock %}

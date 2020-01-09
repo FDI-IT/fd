@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load blades %}
+{% load related_links %}
+{% load rm_history %}
+{% block htmlhead %}
+    {% include "htmlhead.html" %}
+    <script type="text/javascript" src="/static/js/batchsheet.js"></script>
+{% endblock %}
+
+
+{% block content %}
+<div id="content-right">
+	{% blades activated_ingredient request.user %}
+</div>
+
+
+<div id="content-main">
+	<div id="title-left">
+		<span id="name">{{activated_ingredient.id}} - {{activated_ingredient.art_nati}} {{ activated_ingredient.prefix }} {{ activated_ingredient.product_name }} {{ activated_ingredient.part_name2 }}</span>
+	</div>
+	<!-- {% related_links activated_ingredient %} -->
+
+	<div id="ingredient-detail">
+
+
+
+		<table border="1" width="100%" id="rm-by-code">
+			<caption>
+				<p style="text-align:left;">
+					Raw Material Details
+				</p>
+			</caption>
+
+			<thead>
+				<tr>
+				{% for header in table_headers %}
+					<th>{{ header }}</th>
+				{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+			{% for flavor, weight, old_price, new_price, price_difference in updated_flavors %}
+				<!-- {% if ingredient.discontinued %}
+				<tr class="discontinued">
+				{% else %}
+				<tr class="active">
+				{% endif %} -->
+				<tr align="center">
+					<td><a href="/access/{{ flavor.number }}/">{{ flavor.number }}</a></td>
+					<!-- <td><a href="/access/ingredient/{{ ingredient.rawmaterialcode }}/">{{ ingredient.rawmaterialcode }}</a></td> -->
+					<td>{{ weight }}</td>
+					<td>{{ old_price }}</td>
+					<td>{{ new_price }}</td>
+					<td>{{ price_difference }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+		<a href="/access/ingredient/pin_review/{{ activated_ingredient.id }}/"> Back to Ingredient Review Page </a>
+		<!-- <button id="update-submit-button" type="button"> Update Raw Materials </button>
+		BLAHBLAHBLHA -->
+	</div>
+	<!-- <div id="retain_history">
+		{% rm_history activated_ingredient.id %}
+	</div> -->
+</div>
+
+{% endblock %}

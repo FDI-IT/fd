@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+</div>
+	{% if status_message %}
+		<h1>{{ status_message }}</h1>
+		{% endif %}
+
+    <form action="" method="POST">
+    	{% csrf_token %}
+	{{ formset.management_form }}
+	
+	<table id="lot-rows" width="100%">
+		<thead>
+			<tr>
+			<!--<th>Lot Number</th> -->
+				<th>Flavor Number</th>
+				<th>Sales Order Weight</th>
+				<th>Extra Weight</th>
+			</tr>
+		</thead>
+		<tbody>
+	    {% for form in formset.forms %}
+	    	{% if form.errors %}
+	    		<tr bgcolor="#FF0000">
+	    			<td colspan = "4"><b> Please correct the error(s) in the following row. {{form.non_field_errors}}</b></td>
+	    		</tr>
+	    	{% endif %}
+			<tr>
+			
+				<!--<td class="lot-number-cell">{{ form.lot_number }}{{form.lot_number.errors}}</td>-->
+				<td class="number-cell">
+					{{ form.flavor_number }}{{form.flavor_number.errors}}
+					
+					{{ form.details }}
+				</td>
+				<td class="amount-cell">
+					{{ form.amount }}
+				</td>
+				<td class="amount-cell">{{ form.extra_weight }}{{form.extra_weight.errors}}</td>
+			</tr>
+	    {% endfor %}
+		</tbody>
+	</table>
+	<input id="lot-submit-button" type="submit" value="Create Lots" />
+    </form>
+{% endblock %}

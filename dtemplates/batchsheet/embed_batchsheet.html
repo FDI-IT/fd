@@ -1,0 +1,171 @@
+<table id="outer">
+	<thead>
+		<tr>
+			<th>
+				<span id="titleleft">{{ flavor }}</span>
+				<span id="titlecenter">{{ todays_date|date:"D d-M-y" }}</span>
+				<span id="titleright">Lot number: xxxxxxxx <img src="/access/{{ flavor.number }}/barcode" align="top" /></span></th>
+		</tr>
+	</thead>
+	<tfoot>
+	</tfoot>
+	<tbody>
+		{% if flavor.yield_field %}
+		<tr>
+			<td>
+				Yield: {{ flavor.yield_field }}
+			</td>
+		</tr>
+		{% else %}
+		{% endif %}
+		<tr>
+			<td>
+				<table id="formula">
+					<thead>
+						<tr>
+							<th width="45px"><img src="/static/images/sort.gif"></th>
+							<th width="40px"><img src="/static/images/sort.gif"></th>
+							<th><img src="/static/images/sort.gif"></th>
+							<th width="70px"><img src="/static/images/sort.gif">Batch</th>
+							<th width="105px"><img src="/static/images/sort.gif">Grams</th>
+							<th width="180px" colspan="5">Added</th>
+						</tr>
+						<tr>
+							<th>PIN</th>
+							<th>NA</th>
+							<th>Product Name</th>
+							<th>Amount</th>
+							<th>equivalent</th>
+							<th>1</th>
+							<th>2</th>
+							<th>3</th>
+							<th>4</th>
+							<th>5</th>
+						</tr>
+					</thead>
+					<tfoot></tfoot>
+					<tbody>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div id="memorow">
+					<div class="container">
+						<div class="content">
+							<div class="left">
+								Compounder(s)<br>
+								__________________<br>
+								__________________<br>
+								__________________
+							</div>
+							
+							<div class="main">
+								{{ flavor.productmemo }}
+							</div>
+						</div>
+					</div>
+				
+				
+					<div class="sidebar">
+						Flash point:
+						{% if flavor.flashpoint %}
+							{{ flavor.flashpoint }}
+						{% else %}
+							UNAVAILABLE
+						{% endif %}
+					</div>
+				</div>
+				
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div id="checklistrow">
+					<div class="container">
+						<div class="content">
+							<div class="left">
+								Allergens: {{ flavor.allergen }}
+								{% if flavor.crustacean %}
+									CRUSTACEANS
+								{% else %}
+								{% endif %}
+								{% if flavor.eggs %}
+									EGGS
+								{% else %}
+								{% endif %}
+								{% if flavor.fish %}
+									FISH
+								{% else %}
+								{% endif %}
+								{% if flavor.milk %}
+									DAIRY
+								{% else %}
+								{% endif %}
+								{% if flavor.peanuts %}
+									PEANUTS
+								{% else %}
+								{% endif %}
+								{% if flavor.soybeans %}
+									SOYBEANS
+								{% else %}
+								{% endif %}
+								{% if flavor.treenuts %}
+									TREENUTS
+								{% else %}
+								{% endif %}
+								{% if flavor.wheat %}
+									WHEAT
+								{% else %}
+								{% endif %}
+								{% if flavor.sulfites %}
+									SULFITES
+								{% else %}
+								{% endif %}
+						</div>
+						<div class="main">
+							Micro test: {{ flavor.microtest }}
+						</div>
+					</div>
+				</div>
+				<div class="sidebar">
+					{% if flavor.ccp1 %}
+						Sieve CCP 1 Recorded: [ ]<br>
+					{% else %}
+					{% endif %}
+					{% if flavor.ccp2 %}
+						Allergen Cleaning CCP 2 Recorded: [ ]<br>
+					{% else %}
+					{% endif %}
+					{% if flavor.allergen != 'None' %}
+                        Post-Op Negative Equipment Quick Swab: [ ]<br>
+                    {% else %}
+					{% endif %}
+					{% if flavor.ccp4 %}
+						Label Application CCP 4 Recorded: [ ]<br>
+					{% else %}
+					{% endif %}
+					{% if flavor.ccp5 %}
+						Non Detect GMO CP 5 Recorded: [ ]<br>
+					{% else %}
+					{% endif %}
+					{% if flavor.ccp6 %}
+						Thermal Kill Step CCP 6 Recorded: [ ]<br>
+					{% else %}
+					{% endif %}
+				</div>
+			</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				After the entire product run has ended, all utensils and equipment have been<br>
+				inspected for potential contamination by allergens by visual inspection.<br>
+				All product has been transferred from wooden to plastic pallets, and all<br>
+				labels and boxes have been counted.<br><br>
+				Signed: _______________________________________ Date: ____________________
+			</td>
+		</tr>
+	</tbody>
+</table>

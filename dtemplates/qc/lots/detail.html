@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load batchsheet_print %}
+{% block htmlhead %}
+{{ block.super }}
+<script type="text/javascript" src="/static/js/resolve_testcards.js?v=25"></script>
+<script type="text/javascript">
+function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 100 + 'px';
+  }
+</script>
+{% endblock  %}
+
+{% block content %}
+
+
+
+<div id="content-right">
+	<h3>Sales orders:</h3>
+	<ul>
+	
+		{% for so_number, url in lss_list %}
+			<li><a href="/salesorders/{{ so_number }}/">{{ so_number }}</a> - <a href="{{ url }}"> View COA </a></li>
+		{% endfor %}
+	</ul>
+
+	<h3>Test Results:</h3>
+	<ul>
+	
+		{% for test, result, specification in result_list %}
+			<li><b>{{ test }}</b> <br> <i>{{ specification }}</i> <br> {{ result }} </li>
+		{% endfor %}
+		
+	</ul>
+
+	{% if customer_dict.items %}
+	<h3>Customer Spec Results:</h3>
+	{% endif %}
+
+	{% for customer, results in customer_dict.items %}
+	<b> {{ customer.companyname }} </b>
+	<ul>
+		{% for test, replaces, result, specification in results %}
+			<li>
+				<b> {{ test }} {% if replaces %}: Replaces {{ replaces }}{% endif %} </b>
+				<br> <i>{{ specification }}</i> <br> {{ result }} 
+			</li>
+		{% endfor %}
+		
+	</ul>
+	{% endfor %}
+	
+	
+	<h3> <a href="/qc/lots/{{ lot.pk }}/test_results/"> Edit Test Results </a></h3>
+	
+	<h3> <a href="/qc/lots/{{ lot.pk }}/update/true"> Update to Current Specs </a></h3>
+	
+	<h3> <a href="/qc/lots/{{ lot.pk }}/update/database"> Update Database Values </a></h3>
+</div>
+
+
+	<h2><a href="{{ lot.flavor.get_absolute_url }}">{{ lot.flavor }}</a></h2>
+	
+<div class="lot_detail">
+	<!-- Form to edit organoleptics and such. Not really fitting on this page anymore
+		as it's mostly used as a lot overview rather than lot editor
+	<div class="product_info_form">
+		{{product_info_form.non_field_errors}}
+		{{product_info_form.as_p}}10
+		<input type="hidden" name="productinfo_pk" value="{{ lot.flavor.productinfo.pk }}">
+	</div>
+	-->
+	<iframe width="1100px" height="600px" src="/batchsheet/{{ lot.pk }}/" style="transform:translate(-150px,-70px) scale(0.7);" onload='javascript:resizeIframe(this);'></iframe>
+	<div class="float-container">
+		{% for retain in lot.retains.all %}
+		<div id="retain__{{retain.pk}}" class="parent_object_detail float-container">
+			<div class="parent_info">
+				<ul>
+					<li>{{ retain }}</li>
+					<li>{{ retain.date }}</li>
+					<li>{{ retain.status }}</li>
+				</ul>
+			</div>
+			<div id="testcard__{{testcard.pk}}" class="child_object_detail testcard_form_container">
+			{% for testcard in retain.testcards.all %}
+				<span>
+					<img src="{{ testcard.thumbnail.url }}" align="left" class="testcard_resolve_image tc_{{testcard.pk}}" >
+					<img src="{{ testcard.large.url }}" class="hidden_image  tc_{{testcard.pk}}">
+				</span>
+			{% endfor %}
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	
+	<div class="batchsheet_images float-container">
+		{% for bs in lot.batchsheet_set.all %}
+		<img src="{{ bs.thumbnail.url }}">
+	    {% endfor %}  
+	</div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+  <link rel="stylesheet" type="text/css" href='/static/css/training.css'/>
+</head>
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRrK-eVvBYYn71m_nPnMwLxhFeUTqgfvRKxssWvdzGuxiiQHZ_gN5XZfAP02yTL161RRlj8UN_dxpLZ/embed?start=false&loop=false&delayms=60000" frameborder="0" width="1099.5" height="749" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+
+<h3>Test</h3>
+
+<form method="post">
+{% csrf_token %}
+  <ol>
+    <li>
+      <embed src="../../static/images/training/hazcom1.jpg" width="960" height="749"/>
+      <ul>
+
+        <li>Name of product? <input type='text' name='hazcom_q' required/></li>
+        <li>Is it hazardous? <input type='text' name='hazcom_q' required/></li>
+        <li>What are the hazards? <input type='text' name='hazcom_q' required/> </li>
+        <li>Are there any signal words? <input type='text' name='hazcom_q'v required/> </li>
+        <li>What are the precautionary statements? <input type='text' name='hazcom_q' required/> </li>
+      </ul>
+    </li>
+    <li>
+      <embed src="../../static/images/training/hazcom2.jpg" width="960" height="749"/>
+      <ul>
+
+        <li>Name of product? <input type='text' name='hazcom_q' required/></li>
+        <li>Is it hazardous? <input type='text' name='hazcom_q' required/></li>
+        <li>What are the hazards? <input type='text' name='hazcom_q' required/> </li>
+        <li>Are there any signal words? <input type='text' name='hazcom_q' required/> </li>
+        <li>What are the precautionary statements? <input type='text' name='hazcom_q' required/> </li>
+      </ul>
+    </li>
+    <li>
+      <embed src="../../static/images/training/hazcom3.jpg" width="960" height="749"/>
+      <ul>
+
+        <li>Name of product? <input type='text' name='hazcom_q' required/></li>
+        <li>Is it hazardous? <input type='text' name='hazcom_q' required/></li>
+        <li>What are the hazards? <input type='text' name='hazcom_q' required/> </li>
+        <li>Are there any signal words? <input type='text' name='hazcom_q' required/> </li>
+        <li>What are the precautionary statements? <input type='text' name='hazcom_q' required/> </li>
+      </ul>
+    </li>
+    <li>
+      <!-- <iframe src="../../static/images/training/test_sds.pdf" width="960" height="749"></iframe> -->
+      <embed src = "../../static/images/training/test_sds.pdf" width="960" height="749"/>
+      <ul>
+
+        <li>Name of product? <input type='text' name='hazcom_q' required/></li>
+        <li>Is it hazardous? <input type='text' name='hazcom_q' required/></li>
+        <li>What are the hazards? <input type='text' name='hazcom_q' required/> </li>
+        <li>Are there any signal words? <input type='text' name='hazcom_q' required/> </li>
+        <li>What are the precautionary statements? <input type='text' name='hazcom_q' required/> </li>
+      </ul>
+    </li>
+
+  </ol>
+  <input type='submit'/>
+</form>
+{% endblock %}

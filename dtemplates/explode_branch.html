@@ -1,0 +1,6 @@
+{% load exploder %}
+
+<li>{{ detail.id }} {{ detail.productname  }} - {{ ingredient.amount }} lbs
+<ul>
+  {% explode detail.flavornum %}
+</ul>

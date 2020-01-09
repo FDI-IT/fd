@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load mainsearch %}
+
+{% block content %}
+
+<div id="content-solo">
+	<div id="title-left">
+		<span id="title">
+			<h1>{{title}}</h1>
+		</span>
+	</div>
+	
+	<div id="pagination-bar" align="right">
+		{% include "pagination_bar.html" %}
+	</div>
+	
+	<div id = "revision-list">
+	
+		<table id="user-rows" width="100%">
+			<tr>
+				<th class="date-cell">Date</th>
+				<th class="object-cell">Object(s) Changed</th>
+				<th class="comment-cell">Comment</th>
+				<th class="user-cell">User</th>
+				<th class="revision_id-cell">Revision Details</th>
+			</tr>
+	
+			{% for date, version_objects, comment, user, id in revision_rows%}
+	
+			<tr class="revision_row" align="center">	
+				<td class="date-cell" width="20%">{{ date }}</td>
+				<td class="object-cell" width="20%">
+
+					
+					{% for object, url in version_objects %}
+						{% if url == 0 %}
+							{{ object.object_repr }}
+						{% else %}
+							<a href='{{ url }}'> {{ object.object_repr }} </a>
+						{% endif %}
+					<br>
+					{% endfor %}
+				</td>
+				<td class="comment-cell" width="30%">{{ comment }}</td>
+				<td class="user-cell" width="20%">{{ user }}</td>
+				<td class="revision_id-cell" width="10%">
+					{% url history_audit.views.revision_info id as the_url %}
+					<a href='{{ the_url }}'>{{id}}</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+	
+	<div id="pagination-bar_lower" align="right">
+		{% include "pagination_bar.html" %}
+	</div>
+	
+</div>
+
+{% endblock %}

@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <script type="text/javascript">
+    function printLabel(divName){
+      var printContent = document.getElementById(divName).innerHTML;
+      var originalContent = document.body.innerHTML;
+      document.body.innerHTML = printContent;
+      window.print();
+      document.body.innerHTML = originalContent;
+      //document.body.style = originalStyle;
+    }
+
+  </script>
+
+
+
+
+  <h1>{{warning}}</h1>
+
+
+  {{multiple|safe}}
+
+  {% if multiple %}
+
+    <form method ="GET" action="/access/one_off_specs/{{ing}}/">
+      {% csrf_token %}
+      <input type = "hidden" id="ing" name="ing" value="{{ing}}">
+      <input type="submit" id="newOneOff" name="newOneOff" value="New One Off"/>
+    </form>
+    {% if not standard %}
+      <form method ="GET"  action="/access/one_off_specs/{{ing}}/">
+        {% csrf_token %}
+        <input type="submit" id="newStandard" name="newStandard" value ="Create New Standard"/>
+      </form>
+    {% endif %}
+  {% endif %}
+
+
+  {% for e in emptyFields %}
+    <li>{{e}}</li>
+  {% endfor %}
+  {% if linked %}
+  <br>
+      <input type = "button" onclick="printLabel('label')" value="Print" />
+  <br>
+  <div id = "label" media="print"> <!-- print div-->
+    <!-- letter header -->
+    <style type="text/css">
+          /*fix the page cut when printing*/
+          table, tr, td{
+             border: none;
+             font-size:15px;
+           }
+          h2{
+            border-top:solid 2px black;
+            border-bottom: solid 2px black;
+            text-align: center;
+            overflow: visible;
+          }
+          .main p{
+            font-size: 14px;
+            /*page-break-inside:always;
+            page-break-before:always;
+            page-break-after:always;*/
+          }
+          .hide{
+            display: none;
+          }
+
+          .content{
+            display: inline-block;
+            width: 100%;
+          }
+          p.buffer{
+            border-bottom: solid 2px black;
+          }
+    </style>
+
+
+    <div class="main">
+        <!--header-->
+        <div style = "height: 150px; width: 30%; float:left">
+          <img style="max-height: 100%; max-width:100%;" src = "{{STATIC_URL}}images/fdi_logo.jpg"/>
+        </div>
+        <div align="right"style="width:70%; float:right">
+          <h1>FLAVOR DYNAMICS, INC</h1>
+          <p> 640 Montrose Ave. • South Plainfield, NJ  07080</p>
+          <p>Phone: 908-822-8855</p>
+          <p>customercare@flavordynamics.com</p>
+        </div>
+
+
+      <div style = "width:100%;float:left">
+        <h1 align="center" style="border-top:solid 2px black; border-bottom: solid 2px black;">Product Specification Sheet</h1>
+        <table>
+          <tr>
+            <td>Date: </td> <td>{% now 'M d, Y' %} </td>
+          </tr>
+          <tr>
+            <td>Supercedes: </td><td>Any Prior</td>
+          </tr>
+          <tr>
+            <td>Product Name: </td><td>{{flavor.natart}} {{flavor.name}} {{flavor.label_type}}</td>
+          </tr>
+          <tr>
+            <td>Product Number: </td><td>{{flavor.prefix}}-{{flavor.number}}</td>
+          </tr>
+          {% if spec.specification_code %}
+            <tr>
+              <td>Specification Code: </td><td>{{spec.specification_code}}</td>
+            </tr>
+          {% endif%}
+          <tr><td></td></tr>
+
+          <tr>
+            <td>Solubility: </td>             <td>{{flavor.solubility}}</td>
+          </tr>
+          {% if flavor.spg %}
+            <tr>
+              <td>Specific Gravity: </td>       <td>{{flavor.spg}}+/-0.05@20°C</td>
+            </tr>
+          {% endif %}
+          {% if flavor.flashpoint %}
+            <tr>
+              <td>Flash Point: </td>       <td>{{flavor.flashpoint}}°F</td>
+            </tr>
+          {% endif %}
+          {% if spec.sieve %}
+            <tr>
+              <td>Sieve: </td>       <td>{{spec.sieve}}</td>
+            </tr>
+          {% endif %}
+          {% if spec.moisture %}
+            <tr>
+              <td>Moisture: </td>       <td>{{spec.moisture}}</td>
+            </tr>
+          {% endif %}
+          {% if spec.fat_content %}
+            <tr>
+              <td>Fat Content: </td>       <td>{{spec.fat_content}}</td>
+            </tr>
+          {% endif %}
+          {% if spec.salt_content %}
+            <tr>
+              <td>Salt Content: </td>       <td>{{spec.salt_content}}</td>
+            </tr>
+          {% endif %}
+          {% if spec.brix %}
+            <tr>
+              <td>Brix: </td>       <td>{{spec.brix}}</td>
+            </tr>
+          {% endif %}
+          {% if spec.bostwick_consistometer %}
+            <tr>
+              <td>Bostwick Consistometer: </td>       <td>{{spec.bostwick_consistometer}}</td>
+            </tr>
+          {% endif %}
+          {% if spec.ph %}
+            <tr>
+              <td>Ph: </td>       <td>{{spec.ph}}</td>
+            </tr>
+          {% endif %}
+          {% if spec.water_activity %}
+            <tr>
+              <td>Water Activity: </td>       <td>{{spec.water_activity}}</td>
+            </tr>
+          {% endif %}
+        </table>
+        {% if flavor.microsensitive %}
+          <h2>Microbiological Specifications</h2>
+          <table>
+            {% if spec.aerobic_plate_count %}
+              <tr>
+                <td>Aerobic Plate Count: </td>       <td>{{spec.aerobic_plate_count}}</td>
+              </tr>
+            {% endif %}
+            {% if spec.escherichia_coli %}
+              <tr>
+                <td>Escherichia Coli: </td>       <td>{{spec.escherichia_coli}}</td>
+              </tr>
+            {% endif %}
+            {% if spec.salmonella %}
+              <tr>
+                <td>Salmonella: </td>       <td>{{spec.salmonella}}</td>
+              </tr>
+            {% endif %}
+            {% if spec.yeast %}
+              <tr>
+                <td>Yeast: </td>       <td>{{spec.yeast}}</td>
+              </tr>
+            {% endif %}
+            {% if spec.mold %}
+              <tr>
+                <td>Mold: </td>       <td>{{spec.mold}}</td>
+              </tr>
+            {% endif %}
+            {% if spec.listeria %}
+              <tr>
+                <td>Listeria: </td>       <td>{{spec.listeria}}</td>
+              </tr>
+            {% endif %}
+            {% if spec.staphylococci %}
+              <tr>
+                <td>Staphylococci: </td>       <td>{{spec.staphylococci}}</td>
+              </tr>
+            {% endif %}
+            {% if spec.coliforms %}
+              <tr>
+                <td>coliforms: </td>       <td>{{spec.coliforms}}</td>
+              </tr>
+            {% endif %}
+            {% if spec.standard_plate_count %}
+              <tr>
+                <td>Standard Plate Count: </td>       <td>{{spec.standard_plate_count}}</td>
+              </tr>
+            {% endif %}
+          </table>
+        {% endif %}
+
+        <h2>Description</h2>
+        <p>{{spec.description}}</p>
+
+        <h2>Ingredient Statement</h2>
+        <p>{{ingredient_statement}}</p>
+
+        <h2>Shelf Life</h2>
+        <p>{{spec.shelf_life}}</p>
+
+        <h2>Storage</h2>
+        <p>{{spec.storage}}</p>
+
+
+        <p class ='buffer'></p>
+
+        <p>All ingredients contained in this product are approved for use by the FDA, or appear on an FDA approved industry list.</p>
+
+        <p>The above product specifications are based on laboratory submissions or limited production batches. The data presented above might be modified as more information is obtained from larger production sizes.
+        {% if flavor.phase == "Dry" %}
+          The above microbiological guidelines are based on average results for products of this type.  In accordance with our HACCP protocol, products will be micro-tested based on risk analysis.
+        {% endif %}
+        </p>
+
+
+      </div>
+    </div>
+  </div>
+
+
+{% endif %}
+{% endblock %}

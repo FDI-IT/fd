@@ -1,0 +1,71 @@
+th { 
+	font-weight:normal;
+}
+tr.required_field th {
+	font-weight:bold;
+}
+p.required_field label {
+	font-weight:bold;
+} 
+
+#content-left-half {
+	float:left;
+	width:40%;
+	padding-bottom:50px;
+	clear:left;
+}
+
+#content-right-half {
+	float:right;
+	width:55%;
+}
+
+#product-label {
+	border:2px solid;
+	border-radius:6px;
+	padding:12px;
+	font-size:18px;
+}
+
+span.no-user-data-yet {
+	color:gray;
+	font-style:italic;
+}
+
+p.temporarily-disabled {
+	color:gray;
+	font-style:italic;
+}
+
+legend {
+	font-size:14px;
+}
+
+label.field {
+	text-align: right;
+	font-size:12px;
+	font-family:"Lucida Grande", Verdana, Arial, sans-serif;
+	line-height:13px;
+	width:100px;
+	float:left;
+	padding-right:5px;
+}
+
+fieldset p input {
+	width:200px;
+	float:left;
+}
+
+fieldset p input[type='checkbox'] {
+	width:2em;	
+}
+
+fieldset p {
+	clear:both;
+	padding:5px;	
+}
+
+#hidden {
+    display: none;
+}
+

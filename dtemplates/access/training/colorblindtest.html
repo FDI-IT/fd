@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- <img src="../../static/images/colorblindtest.jpg" width="100%"> -->
+
+<style>
+  .container{
+    width:1100px;
+    height: 1100px;
+  }
+  .colorblind_bg{
+    height: 100%;
+    width: 100%;
+    background-image: url('../../static/images/colorblindtest.jpg');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+  td{
+    border: none;
+    /* padding-bottom:-20px; */
+    /* padding-top:340px; */
+    padding-left: 210px;
+    padding-right: 55px;
+  }
+  .t1 td{
+    padding-top:340px;
+  }
+  .t2 td{
+    padding-top:310px;
+  }
+
+  table{
+    float: right;
+    padding-top:30px;
+  }
+
+  input[type=text]{
+    width: 75px;
+  }
+
+</style>
+<div class='container'>
+  {{answers}}
+    <div class="colorblind_bg">
+    <form method="POST">
+      {% csrf_token %}
+      <table>
+        <tr class='t1'>
+          <td><input type='text' name='cb_answer'></td>
+          <td><input type='text' name='cb_answer'></td>
+          <td><input type='text' name='cb_answer'></td>
+        </tr>
+        <tr class='t2'>
+          <td><input type='text' name='cb_answer'></td>
+          <td><input type='text' name='cb_answer'></td>
+          <td><input type='text' name='cb_answer'></td>
+        </tr>
+        <tr class='t2'>
+          <td><input type='text' name='cb_answer'></td>
+          <td><input type='text' name='cb_answer'></td>
+          <td><input type='text' name='cb_answer'></td>
+        </tr>
+      </table>
+
+    </div>
+      <input type='submit'>
+
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div id="title">
+	<div id="left">
+		<span id="name">{{flavor.natart}} {{flavor.name}} {{flavor.type}}</span>
+		<span id="number">{{ flavor.prefix }}-{{ flavor.number }}</span>
+	</div>
+	<div id="right">
+		<span id="price">{{ flavor.unitprice }}<br />
+		Selling Price</span>
+	</div>
+	<div id="related_links">
+	<ul>
+		{% for formlink, formtitle in flavorforms %}
+	        <li><a href="{{ formlink }}">{{ formtitle }}</a></li>
+	    {% endfor %}
+	</ul>
+	</div>
+</div>
+
+
+
+<div id="recipe-tables">
+	<span id="exploded-table">
+		{% include "access/flavor/explode.html" %}
+	</span>
+
+	<span id="consolidated-table">
+	</span>
+</div>
+
+<div id="blades">
+
+	<div id="critical">
+		<ul>
+		{% autoescape off %}
+		{% for label, datum, update_link in crit_list %}
+
+			{{ update_link }}
+			<li>
+			<span class="label">{{ label }}</span>
+			<span class="datum">{{ datum }}</span>
+			</li>
+			{% if update_link %}
+			</a>
+			{% endif %}
+
+		{% endfor %}
+		{% endautoescape %}
+		</ul>
+	</div>
+
+	<div id="flavor-info">
+		<div class="title">Flavor Info</div>
+		<ul>
+		{% for label, datum in flavor_info_list %}
+			<li>
+			<span class="label">{{ label }}</span>
+			<span class="datum"<{{ datum }}</span>
+			</li>
+		{% endfor %}
+		</ul>
+	</div>
+
+	<div id="applicable-info">
+		<div class="title">Applicable Info</div>
+		<ul>
+		{% for label, datum in applicable_info_list %}
+			<li>
+			<span class="label">{{ label }}</span>
+			<span class="datum"<{{ datum }}</span>
+			</li>
+		{% endfor %}
+		</ul>
+	</div>
+
+</div>
+
+{% endblock %}

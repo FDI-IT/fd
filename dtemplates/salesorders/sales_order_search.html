@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+	{% if status_message %}
+	<h1>{{ status_message }}</h1>
+	{% endif %}
+	
+	<div id="flavorsearch">
+	<form action="" method="GET">
+	    <div id="keywordsearch">{{ search.as_ul }}</div>
+	    <div>
+	    	<ul class="filterselect_list">{{ filterselect.as_ul }}
+	    		<li><input type="submit" value="Filter Sales Orders" /></li>
+	    	</ul>
+	    </div>
+	</form>
+	</div>
+	  
+	<div id="sales-order-list"> 
+		<table width="100%" class="sorttable">
+			<thead><tr>
+				<th class="{sorter: 'link-digit'}">Number</th>
+				<th class="{sorter: 'isoDate'}">Date</th>
+				<th>Customer</th>
+				<th>Open</th>
+			</tr></thead>
+			<tbody>
+		    {% for sales_order in orders %}
+		    <tr id="{{ sales_order.number }}">
+		    	<td><a href="/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.number }}</a></td>
+		    	<td><a href="/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.create_date }}</a></td>
+		    	<td><a href="/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.customer }}</a></td>
+		    	<td>{% if sales_order.open %}<img src="/static/images/Icons/001_06.png">{% else %}<img src="/static/images/Icons/001_05.png">{% endif %}</td>
+		    </tr>
+		    {% endfor %}
+		    </tbody>
+		</table>
+
+	</div>
+{% endblock %}

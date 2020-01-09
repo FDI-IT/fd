@@ -1,0 +1,44 @@
+{% extends "bootstrap_base.html" %}
+
+{% block navbar %}
+<!-- navbar is not complete so don't use it for now; get rid of this block if you want to use it -->
+{% endblock %}
+
+{% block htmlhead %}
+  <head>
+	  {{ block.super }}
+	  <meta charset="utf-8">
+	  <title>QC Resolver</title>
+	  <!-- <link rel="stylesheet" href="css/animations.css"> -->
+	  <link rel="stylesheet" href="{{ STATIC_URL }}qc_resolver/css/app.css">
+	  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+	  
+	  <script src="{{ STATIC_URL }}qc_resolver/bower_components/angular/angular.js"></script>
+	  <script src="{{ STATIC_URL }}qc_resolver/bower_components/angular-mocks/angular-mocks.js"></script>
+	  <script src="{{ STATIC_URL }}qc_resolver/bower_components/angular-animate/angular-animate.js"></script>
+	  <script src="{{ STATIC_URL }}qc_resolver/bower_components/angular-route/angular-route.js"></script>
+	  <script src="{{ STATIC_URL }}qc_resolver/bower_components/angular-resource/angular-resource.js"></script>
+	  <script src="{{ STATIC_URL }}qc_resolver/bower_components/angular-cookies/angular-cookies.js"></script>
+	  <script src="{{ STATIC_URL }}qc_resolver/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+	  <script src="{{ STATIC_URL }}qc_resolver/bower_components/restangular/dist/restangular.js"></script>
+	  <script src="{{ STATIC_URL }}qc_resolver/bower_components/lodash/dist/lodash.js"></script>
+      <script src="{{ STATIC_URL }}qc_resolver/js/app.js"></script>
+	  <script src="{{ STATIC_URL }}qc_resolver/js/controllers.js"></script>
+	  <script src="{{ STATIC_URL }}qc_resolver/js/filters.js"></script>
+	  <!-- <script src="js/animations.js"></script>
+	   <script src="js/services.js"></script> -->
+  </head>
+{% endblock %}
+
+{% block content %}
+	{% verbatim %}
+		<body ng-app="qcResolver">
+		
+		  <div class="view-container">
+		    <div ng-view class="view-frame"></div>
+		  </div>
+		
+		</body>
+	{% endverbatim %}
+{% endblock %}

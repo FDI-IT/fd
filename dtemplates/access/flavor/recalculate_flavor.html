@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load review_table %}
+{% load blades %}
+{% load related_links %}
+{% block content %}
+
+<script type="text/javascript" src="/static/js/flavor_review.js?v=16"></script>
+
+<div id="content-right">
+	
+</div>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{flavor}}</span>
+</div>
+<div class="product-memo"><span class="label">Memo</span>{{flavor.productmemo}}</div>
+<div class="content-table">
+	
+	
+	<table>
+		<thead>
+			<tr>
+				<th>Property</th>
+				<th>Old value</th>
+				<th>New Value</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for attr in old_new_attrs %}
+			<tr>
+				<td>{{ attr.0 }}</td>
+				<td>{{ attr.1 }}</td>
+				<td>{{ attr.2 }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</tabel>
+</div>
+</div>
+
+
+
+{% endblock %}
+

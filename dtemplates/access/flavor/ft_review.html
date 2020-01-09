@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load flat_review_table %}
+{% load blades %}
+{% load product_tabs %}
+{% block content %}
+
+<script type="text/javascript" src="/static/js/flavor_review.js?v=25"></script>
+<script>
+
+jQuery(document).ready(function(){
+	$( "#flat-table" ).tablesorter({
+			headers: {
+			0: {
+				sorter: 'link-digit'
+			},
+			1: {
+				sorter: 'text'
+			},
+			2: {
+				sorter: 'text'
+			},
+			3: {
+				sorter: 'text'
+			},
+			4: {
+				sorter: 'digit'
+			},
+			5: {
+				sorter: 'digit'
+			},
+			6: {
+				sorter: 'digit'
+			},
+			7: {
+				sorter: 'text'
+			}},
+	        cssChildRow: "tablesorter-childRow"
+	});
+});
+</script>
+
+<div id="content-right">
+	{% blades flavor request.user %}
+	<ul id="flavor_review_print_menu">
+		<li><a href="javascript:print_review({{flavor.number}})">Flavor Review</a></li>
+		<li><a href="javascript:print_qc({{flavor.number}})">QC Sheet</a></li>
+		<!-- <li><a href="javascript:spec_sheet({{flavor.number}})">Spec Sheet</a></li> -->
+		<li><a href="/access/flavor_nutri_facts/{{flavor.number}}" target="_blank">Nutri Fact Sheet</a></li>
+		<li><a href="/access/product_spec_sheet/{{flavor.number}}" target="_blank">Product Spec Sheets</a></li>
+		<li><a href="/access/allergen_declaration/{{flavor.number}}" target="_blank">Allergen Declaration</a></li>
+		<li><a href="/access/gmo_statement/{{flavor.number}}" target="_blank">GMO Statement</a></li>
+    <li><a href="/access/flavor_hazard_details/{{flavor.number}}">Hazard Details</a></li>
+	</ul>
+</div>
+
+<div id="content-main">
+
+<div id="title-left">
+	<span id="name">{{flavor}}</span>
+</div>
+
+{% if status_message %}
+<h1 class="status_message">{{ status_message|linebreaksbr }}</h1>
+{% endif %}
+
+<div class="product-memo"><span class="label">Ingredient Statement</span>
+	<a href="/access/ingredient_statement/{{ flavor.number }}">
+		{% if ingredient_statement %}
+			{% if not ingredient_statement.verified %}
+				{{ ingredient_statement.ingredient_statement }} <strong style="color:red;">NOT VERIFIED</strong>
+			{% else %}
+				{{ ingredient_statement.ingredient_statement }}
+			{% endif %}
+		{% else %}
+			None
+		{% endif %}
+	</a>
+</div>
+
+<div class="product-memo"><span class="label">Memo</span>{{flavor.linked_memo|safe}}</div>
+{% if flavor.renumber_list %}
+	<div class="product-memo"><span class="label">Renumbers</span>{{flavor.renumber_number_list|safe}}</div>
+{% endif %}
+<div class="product-memo"><span class="label">Mixing Instructions</span>{{flavor.mixing_instructions}}</div>
+<div class="product-memo"><span class="label">Pricing Memo</span>{{flavor.pricing_memo}}</div>
+
+{% if request.user.is_authenticated %}
+<div id="product_tabs">
+	{% product_tabs flavor %}
+
+	<input type="hidden" id="actual_adjusted_weight" value="1000">
+
+	{% flat_review_table flavor %}
+</div>
+{% endif %}
+</div>
+
+
+
+<form id="exportform" action="/access/table_to_csv" method="post" target="_blank">
+{% csrf_token %}
+<input type="hidden" id="exportdata" name="exportdata" />
+<input type="hidden" id="flavor_number" name="flavor_number" value="{{ flavor.number }}" />
+</form>
+{% endblock %}

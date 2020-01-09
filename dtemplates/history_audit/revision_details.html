@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load mainsearch %}
+
+{% block content %}
+
+
+<div id="content-solo">
+	<div id="title-left">
+		<span id="title">
+			<h1>{{title}}</h1>
+		</span>
+	</div>
+	
+	<div id="revision_info">
+		<h2> Date Created: {{revision.date_created}} </h2>
+		<h2> 
+			Comment:
+			{% if reversion.revision.comment %} 
+				{{reversion.revision.comment}} 
+			{% else %}
+				None
+			{% endif %}
+		</h2>
+	</div>
+	
+	
+	<div id="pagination-bar" align="right">
+		{% include "pagination_bar.html" %}
+
+		
+		{% if show_all == 0 %}
+			{% url show_all revision.id total_count as my_url%}
+			<a id="show_all_revisions" href='{{ my_url }}'>show all</a>
+		{% else %}
+			{% url revision_paginated revision.id as my_url%}
+			<a href='{{ my_url }}'>paginate</a>
+		{% endif %}
+			
+	</div>
+	
+
+	{% for version_object, url, version_dict, status in version_objects %}
+		<div id="table_info">
+			
+			<h2>
+				{% if url %}
+					<a href='{{ url }}'> {{ version_object }} </a>
+				{% else %}
+					{{ version_object }}
+				{% endif %}
+			</h2>		
+			
+				
+			<h2 id = "alert">
+				<span>
+				{% if status == 'serialized' %}
+					This object's fields are not up to date (cannot revert to this version)
+				{% endif %}
+				</span>
+			</h2>
+		</div>	
+	
+	
+	
+		<table id="version_object-rows" width="50%">
+			<tr>
+				<th class="field-cell">Field</th>
+				<th class="value-cell">Value</th>
+			</tr>
+	
+			{% for key, value in version_dict %}
+	
+			<tr class="dict_row" align="center">	
+				<td class="field-cell">{{ key|title }}</td>
+				<td class="value-cell">{{ value }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+
+		<br><br>
+	{% endfor %}
+	
+</div>
+
+{% endblock %}

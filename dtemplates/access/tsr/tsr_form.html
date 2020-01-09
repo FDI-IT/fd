@@ -1,0 +1,37 @@
+<fieldset id="poli">
+<legend>TSR Products</legend>
+	<form action="" method="POST">
+		{% csrf_token %}
+	{{ management_form }}
+	<table id="tsr-rows" width="100%">
+		<thead>
+		<tr>
+			<th>Product Type</th>
+			<th>Code</th>
+			<th>Product Name</th>
+			<th>Usage Instructions</th>
+			<th>Delete</th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for form, label in tsr_rows %}
+			{{ form.id }}
+			{% if form.errors %}
+				<tr>
+					<td class="highlight" colspan="5"><b>	 Please correct the error(s) in the following row. {{form.non_field_errors}}</b></td>
+				</tr>
+			{% endif %}
+			<tr>
+				<td class="content_type" width ="25%"> {{ form.content_type_select }} </td>
+				<td class="code-cell" width ="10%">{{ form.code }} {{form.code.errors}}</td>
+				<td class="name-cell"> </td>
+				<td class="usage-cell">{{ form.usage }}</td>
+				<td class="del-row">{{ form.DELETE }}</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+	<input id="tsr-submit-button" type="submit" value="Save" />		
+	</form>
+</fieldset>
+

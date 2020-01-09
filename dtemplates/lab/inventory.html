@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Inventory</h2>
+
+<table width="100%">
+	<thead>
+		<tr>
+			<th>Product/Experimental Number</th>
+			<th>N/A</th>
+			<th>Name</th>
+			<th>Location Code</th>
+		</tr>
+	</thead>
+	<tfoot>
+	</tfoot>
+	<tbody>
+		{% for obj in queryset %}
+		
+		<tr>
+			{% if obj.content_type.model == 'flavor' %}
+				<td><a href="{{ obj.content_object.get_absolute_url }}">{{ obj.content_object.prefix }}-{{ obj.content_object.number }}</a></td>
+			{% elif obj.content_type.model == 'experimentallog' %}
+				<td><a href="{{ obj.content_object.get_absolute_url }}">{{ obj.content_object.experimentalnum }}-{{ obj.content_object.initials }}</a></td>
+			{% endif %}
+			<td><a href="{{ obj.content_object.get_absolute_url }}">{{ obj.content_object.natart }}</a></td>
+			{% if obj.content_type.model == 'flavor' %}
+				<td><a href="{{ obj.content_object.get_absolute_url }}">{{ obj.content_object.name }}</a></td>
+			{% elif obj.content_type.model == 'experimentallog' %}
+				<td><a href="{{ obj.content_object.get_absolute_url }}">{{ obj.content_object.product_name }}</a></td>
+			{% endif %}
+			
+			<td><a href="{{ obj.content_object.get_absolute_url }}">{{ obj.location_code }}</a></td>
+		</tr>
+		</a>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

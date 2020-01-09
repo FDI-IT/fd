@@ -1,0 +1,40 @@
+{% extends "bootstrap_base.html" %}
+
+{% block content %}
+    <div id="content-main">
+
+        <div class="container">
+            <a class="btn btn-default btn-lg pull-right {% if incomplete_pcodes %} disabled {% endif %}" href="/foobar">
+                <span class="glyphicon glyphicon-th-list"></span> Print Something
+            </a>
+
+            <div class="panel panel-default">
+
+                <div class="panel-heading">
+                    <h2>Resolve Testcards</h2>
+                </div>
+
+                <table class="table table-condensed" id="formula-rows" width="100%">
+                    <tr>
+                        <th>Lot</th>
+                        <th># Retains</th>
+                        <th># Testcards</th>
+                    </tr>
+                    
+
+	                {% for lot in lot_list %}
+                    	<tr>
+	                    	<td> <a href="/qc/resolve_complex_lot/{{ lot.pk }}">{{ lot.number }}</a> </td>
+	                    	<td> {{ lot.retain_set.count }} </td>
+	                    	<td> {{ lot.testcard_count }} </td>
+                    	</tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+
+
+        </div>
+    </div>
+
+{% endblock %}

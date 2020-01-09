@@ -1,0 +1,5 @@
+<ul id="related-links">
+	{% for formlink, formtitle in related_links %}
+        <li><a href="{{ formlink }}"><span>{{ formtitle }}</span></a></li>
+    {% endfor %}
+</ul>

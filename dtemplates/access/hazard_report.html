@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load my_dictlookup %}
+{% load hazard_labels %}
+{% load qstring %}
+{% block htmlhead %}
+{{ block.super }}
+<script src="{{ STATIC_URL }}js/hazard_report.js"></script>
+<link href="{{ STATIC_URL }}css/hazard_report.css" type="text/css" rel="stylesheet">
+<script>
+jQuery(document).ready(function(){	
+	$( "#hazard_table" ).tablesorter({
+			headers: {
+			0: {
+				sorter: 'link-digit'
+			},
+			1: {
+				sorter: 'text'
+			},
+			2: {
+				sorter: 'digit'
+			},
+			3: {
+				sorter: 'digit'
+			},
+			4: {
+				sorter: 'digit'
+			},
+			5: {
+				sorter: 'digit'
+			},
+			6: {
+				sorter: 'digit'
+			},
+			7: {
+				sorter: 'digit'
+			},
+			8: {
+				sorter: 'digit'
+			},
+			9: {
+				sorter: 'digit'
+			},
+			10: {
+				sorter: 'digit'
+			}
+	}});
+	
+	$( document ).tooltip({
+	    items: "[data-small_flavor_hazard_label]",
+	    content: function() {
+	        var element = $( this );
+	        var ret_val = element.find('span.small_flavor_hazard_label')[0].innerHTML;
+	        return ret_val;
+	    }
+	});
+});
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div id="current-filter">
+	<h3>Current Filter:</h3>
+	<ul>
+		{% for hazard_class in filter_hazards %}
+		<li><a href="/access/flavor_hazard_report/?filter_hazards=[{{hazard_class.id}}]">{{ hazard_class.human_readable_name }} -- {{ hazard_class.num_flavors }}</a></li>
+		{% endfor %}
+	</ul>
+	<h3> Filtered Total: {{ filtered_hazardous_flavor_count }} </h3>
+	<h3> Total Hazardous Flavor Count: {{ total_hazardous_flavor_count }} </h3>
+	<button id="change-filter">Change Filter</button>
+</div>
+
+
+<div id="dialog-form" title="Change Filter" style="display:none;">
+	<div>
+		<a href="#" id="select_all"> Select All </a> | <a href="#" id="select_none"> Clear </a>
+	</div>
+	<table id="filterselect_table">
+		<thead>
+			<tr>
+				<th>Select</th>
+				<th>Hazard Class</th>
+				<th># of Products w/ this Hazard</th>
+			</tr>
+		</thead>
+		{% for hazard_class in hazard_classes %}
+			<tr align="center">
+				<td> 
+					 <input type="checkbox"
+					  class="filter_checkbox" 
+					  name="{{ hazard_class.human_readable_name}}" 
+					  value="{{ hazard_class.id }}"
+					  {% if hazard_class in filter_hazards %} checked {% endif %}> 
+				</td>
+				<td> {{ hazard_class.human_readable_name }} </td>
+				<td> {{ hazard_class.num_flavors }} </td>
+			</tr>
+		{% endfor %}
+	</table>
+</div>
+
+<h1>{{queries}}</h1>
+
+<div class="pagination" align="right">
+    <span class="step-links">
+    	{% if flavor_list.previous_page_number != 1 %}
+    		<a href="?{% query_transform request page=1 %}">first</a>
+    	{% endif %}
+    	
+    	
+        {% if flavor_list.has_previous %}
+            <a href="?{% query_transform request page=flavor_list.previous_page_number %}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ flavor_list.number }} of {{ flavor_list.paginator.num_pages }}.
+        </span>
+
+        {% if flavor_list.has_next %}
+            <a href="?{% query_transform request page=flavor_list.next_page_number %}">next</a>
+        {% endif %}
+        
+        {% if flavor_list.next_page_number != flavor_list.paginator.num_pages %}
+	    	<a href="?{% query_transform request page=flavor_list.paginator.num_pages %}">last</a>
+		{% endif %}
+	</span>
+
+    <div class="paginate_by">
+    	Paginate By:
+    	{% for count in pagination_list %}
+    		{% if pagination_count == count %}
+    			<b>{{ count }}</b>
+    		{% else %}
+    			<a href="?{% query_transform request paginate_by=count page=1%}"> {{count}} </a>
+    		{% endif %}
+    	{% endfor %}
+    </div>  
+</div>
+
+<div id="content-solo">
+
+	<table id="hazard_table">
+		<thead>
+			<tr>
+				<th>Number</th>
+				<th>Name</th>
+				{% for hazard_class in hazard_classes %}
+					{% if hazard_class in filter_hazards %}
+						<th class="filter">
+					{% else %}
+						<th>
+					{% endif %}
+					
+					{{ hazard_class.human_readable_name }}
+				</th>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for flavor, hazard_dict in flavor_list %}
+			<tr>
+				<td data-small_flavor_hazard_label="">
+				    <a href="{{ flavor.get_absolute_url }}">{{ flavor.number }}</a>
+				    <span class="hidden_tooltip small_flavor_hazard_label">{% small_flavor_hazard_label flavor %}</span>
+				</td>
+				<td>{{ flavor.name }}</td>
+				{% for hazard_class in hazard_classes %}
+				
+					{% if hazard_class in filter_hazards %}
+						<td class="filter">
+					{% else %}
+						<td>
+					{% endif %}
+				
+				    {{ hazard_dict|my_dictlookup:hazard_class }}
+				    </td>
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+    
+{% endblock %}

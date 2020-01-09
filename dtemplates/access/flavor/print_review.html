@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% load flat_review_table %}
+{% load humanize %}
+{% load blades %}
+{% load related_links %}
+
+{% block htmlhead %}
+<script type="text/javascript" src="/static/js/lib/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="/static/js/lib/jtextfill.js?v=25"></script>
+<link href="/static/css/print_review.css?v=25" type="text/css" rel="stylesheet">
+<link href="/static/css/print_review_screen.css?v=25" type="text/css" rel="stylesheet" media="screen">
+<script>
+	jQuery(document).ready(function(){
+		//jQuery("input").attr('readonly',true);
+		jQuery("input").click(function() {
+			return false;
+		});
+		jQuery("input").keypress(function() {
+			return false;
+		});
+	});
+</script>
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+{% block main %}
+
+<div class="float-container">
+	<div id="title-left" class="jtextfill">
+		<span id="name">{{flavor}}</span>
+	</div>
+</div>
+<hr>
+<div class="float-container">
+	<div class="left-memo">
+		<div class="product-memo"><span class="label">Ingredient Statement</span>
+			<a href="/access/ingredient_statement/{{ flavor.number }}">
+				{% if ingredient_statement %}
+					{% if not ingredient_statement.verified %}
+						{{ ingredient_statement.ingredient_statement }} <strong style="color:red;">NOT VERIFIED</strong>
+					{% else %}
+						{{ ingredient_statement.ingredient_statement }}
+					{% endif %}
+				{% else %}
+					None
+				{% endif %}
+			</a>
+		</div>
+		<div class="product-memo">
+			<span class="label">Memo</span>
+			{{flavor.productmemo}}
+		</div>
+		<div class="product-memo">
+			<span class="label">Pricing Memo</span>
+			{{flavor.pricing_memo}}
+		</div>
+		<div class="product-memo">
+			<span class="label">Mixing Instructions</span>
+			{{flavor.mixing_instructions}}
+		</div>
+	</div>
+	<div class="right-memo">
+		{% print_blades_side flavor %}
+	</div>
+	{% print_blades flavor %}
+
+</div>
+
+<div id="product_tabs">
+</div>
+
+<hr>
+<div class="float-container fieldset-container">
+
+<div class="testform ccps">
+	<fieldset>
+		<legend>CCPs</legend>
+		{{info_form.ccp1}}
+		{{info_form.ccp1.label}}<br>
+		{{info_form.ccp2}}
+		{{info_form.ccp2.label}}<br>
+		{{info_form.ccp4}}
+		{{info_form.ccp4.label}}<br>
+		{{info_form.ccp5}}
+		{{info_form.ccp5.label}}<br>
+		{{info_form.ccp6}}
+		{{info_form.ccp6.label}}<br>
+	</fieldset>
+</div>
+<div class="testform properties">
+	<fieldset>
+		<legend>Properties</legend>
+		{{info_form.organic}}
+		{{info_form.organic.label}}<br>
+		{{info_form.diacetyl}}
+		{{info_form.diacetyl.label}}<br>
+		{{info_form.no_pg}}
+		{{info_form.no_pg.label}}<br>
+		{{info_form.nutri_on_file}}
+		{{info_form.nutri_on_file.label}}<br>
+		{{info_form.reactionextraction}}
+		{{info_form.reactionextraction.label}}<br>
+		{{info_form.prop65}}
+		{{info_form.prop65.label}}<br><br>
+		{{info_form.microtest.label}}
+		<div class="formvalue">
+			{% if flavor.microtest %}
+			{{flavor.microtest}}
+			{% else %}
+			No
+			{% endif %}
+		</div>
+	</fieldset>
+</div>
+<div class="testform specs">
+	<fieldset>
+		<legend>Label Declarations</legend>
+		{{info_form.allergen.label}}
+		<div class="formvalue">
+			{% if flavor.allergen %}
+			{{flavor.allergen}}
+			{% else %}
+			<br>
+			{% endif %}
+		</div>
+		GMO
+		<div class="formvalue">
+			{% if flavor.missing_gmo_data %}
+                Missing Data
+            {% else %}
+                {{ flavor.gmo_print_review }}
+			{% endif %}
+		</div>
+		{{info_form.kosher.label}}
+		<div class="formvalue">
+			{% if flavor.kosher %}
+			{{flavor.kosher}}
+			{% else %}
+			<br>
+			{% endif %}
+		</div>
+		{{info_form.sulfites_ppm.label}}
+		<div class="formvalue">
+			{% if flavor.sulfites_ppm %}
+			{{flavor.sulfites_ppm}}
+			{% else %}
+			0.0
+			{% endif %}
+		</div>
+	</fieldset>
+</div>
+<div class="testform specs">
+	<fieldset>
+		<legend>Specs</legend>
+		Solubility
+		<div class="formvalue">
+			{% if flavor.solubility %}
+			{{flavor.solubility}}
+			{% else %}
+			Missing Data
+			<br>
+			{% endif %}
+		</div>
+		{{info_form.flashpoint.label}}
+		<div class="formvalue">
+			{{flavor.flashpoint}}°F
+		</div>
+		Specific Gravity
+		<div class="formvalue">
+			{% if flavor.spg %}
+			{{flavor.spg}}
+			{% else %}
+			<br>
+			{% endif %}
+		</div>
+		Organoleptics
+		<div class="formvalue">
+			{% if flavor.organoleptics %}
+			{{flavor.organoleptics}}
+			{% else %}
+			<br>
+			{% endif %}
+		</div>
+		Color & Appearance
+		<div class="formvalue">
+			{% if flavor.color %}
+			{{flavor.color}}
+			{% else %}
+			<br>
+			{% endif %}
+		</div>
+	</fieldset>
+</div>
+<div class="testform specs last-fieldset">
+	<fieldset>
+		<legend>Other</legend>
+		{{info_form.kosher_id.label}}
+		<div class="formvalue">
+			{% if flavor.kosher_id %}
+			{{flavor.kosher_id}}
+			{% else %}
+			<br>
+			{% endif %}
+		</div>
+		{{info_form.yield_field.label}}
+		<div class="formvalue">
+			{% if flavor.yield_field %}
+			{{flavor.yield_field}}
+			{% else %}
+			<br>
+			{% endif %}
+		</div>
+		{{info_form.batfno.label}}
+		<div class="formvalue">
+			{% if flavor.batfno %}
+			{{flavor.batfno}}
+			{% else %}
+			<br>
+			{% endif %}
+		</div>
+		Risk Assessment Memo
+		<div class="formvalue">
+			{% if flavor.risk_assessment_memo %}
+			{{flavor.risk_assessment_memo}}
+			{% else %}
+			<br>
+			{% endif %}
+		</div>
+	</fieldset>
+</div>
+</div>
+
+{% endblock %}

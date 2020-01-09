@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load blades %}
+{% load related_links %}
+{% block content %}
+
+<script type="text/javascript" src="/static/js/po_review.js?v=25"></script>
+
+<div id="content-right">
+	{% blades tsr %}
+</div>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{tsr}}</span>
+</div>
+{% related_links tsr %}
+
+<div class="tsr_customer"><span class="label">Customer</span>{{tsr.customer}}</div>
+<div class="tsr_contact"><span class="label">Contact</span>{{tsr.contact}}</div>
+<div class="project_description"><span class="label">Project Description</span>{{tsr.description}}</div>
+
+<div class="content-table">
+	<table>
+		<caption>Line Items</caption>
+		<thead>
+			<th>Product</th>
+			<th>Usage Instructions</th>
+		</thead>
+		<tbody>
+		{% for tsrli in tsr.tsrlineitem_set.all reversed %}
+		<tr>
+			<td>{{ tsrli.product }}</td>
+			<td>{{ tsrli.usage }}</td>
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</div>
+</div>
+
+
+
+
+
+<form id="exportform" action="/access/table_to_csv" method="post" target="_blank">
+	{% csrf_token %}
+<input type="hidden" id="exportdata" name="exportdata" />
+<input type="hidden" id="flavor_number" name="flavor_number" value="{{ flavor.number }}" />
+</form>
+{% endblock %}
+

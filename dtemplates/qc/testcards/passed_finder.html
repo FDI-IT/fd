@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+<!--{ load passed_finder %}-->
+
+{% block htmlhead %}
+{{ block.super }}
+<script type="text/javascript" src="/static/js/passed_finder.js?v=25"></script>
+{% endblock  %}
+
+{% load related_links %}
+{% block content %}
+
+<!--<div id="content-right">
+
+</div>-->
+
+<div>
+	<form method="post" action="{{ form_action_url }}">
+	{% csrf_token %}
+	<div id="testcard_gallery">
+		{% for tc in testcards %}
+		<div id="testcard{{ forloop.counter}}" class="image_select">
+			<!-- tc.thumbnail -->
+			<img class="image_actual" src="{{ tc.thumbnail.url }}">
+			<div class="select_overlay"></div>
+			<input class="cbox" type="checkbox" name="testcards" value="{{tc.pk}}">
+			<input class="hidden_cbox" type="checkbox" name="all_testcards" value="{{tc.pk}}" checked="checked">
+		</div>
+		{% endfor %}
+	</div>
+	<input type="submit" name="submit" value="Submit" id="passed_finder_submit_button">
+	</form>
+</div>
+
+{% endblock %}

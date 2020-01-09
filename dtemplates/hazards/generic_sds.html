@@ -1,0 +1,404 @@
+{% extends "hazards/base.html" %}
+
+{% block staticfiles %}
+	{{ block.super }}
+	<link rel="stylesheet" href="{{ STATIC_URL }}css/safety_data_sheet.css">
+{% endblock %}}
+
+{% block content %}
+	<div class='content'>
+		{% block company_name %} {% endblock %}
+
+	    <h1>
+	    	<strong> Safety Data Sheet </strong>
+	    	<h6>Version #: {% now "Y" %} &nbsp; Revision date: 07-25-2016 &nbsp; Issue date: 07-25-2016</h6>
+	    </h1>
+	    
+	    <h4 class='section_header'>1. PRODUCT AND COMPANY IDENTIFICATION</h4>
+	    
+	    {% block product_info %}
+		    <div class='section_body'>
+		    	<h4 class='subsection_header'> 1.1 &emsp; Product Identifiers </h4>
+			    <h4> Product Name: {{ product_name }}</h4>
+		    </div>
+		{% endblock %}
+	        
+	    {% block hazard_info %}
+	    <h4 class='section_header'>2. HAZARDS IDENTIFICATION</h4>
+	       
+	    <div class='section_body'>
+	    	<h4 class='subsection_header'> 2.1 &emsp; Classification of the substance or mixture </h4>
+
+			{% if sds_info.hazards %}
+			
+				<ul style="list-style-type: none;">	
+					{% for hazard in sds_info.hazards %}
+						<li> {{ hazard }} </li>
+					{% endfor %}
+				</ul>
+				
+			{% else %}
+			
+				No hazards identified for this product.
+			
+			{% endif %}
+			
+		
+			<h4 class='subsection_header'> 2.2 &emsp; GHS Label Elements, including Precautionary Statements </h4>
+		
+			<h4> Pictograms </h4>
+				
+				{% if sds_info.pictograms %}
+				
+					<div style='margin-left: 4em'>
+					{% for pictogram_code in sds_info.pictograms %}
+						<img src="{{ STATIC_URL }}images/pictograms/{{pictogram_code}}.png" style="width:4em;">
+					{% endfor %}
+					</div>
+					
+				{% else %}
+					None
+				{% endif %}
+				
+			<h4> Signal Words </h4>
+			
+				{% if sds_info.signal_words %}
+					<ul style="list-style-type: none;">
+						{% for signal_word in sds_info.signal_words %}
+							<li> {{ signal_word }}</li>
+						{% endfor %}
+					</ul>
+				
+				{% else %}
+					None
+				{% endif %}
+		
+			<h4> Hazard Statements </h4>
+			
+			{% if sds_info.hazard_statements %}
+				<ul style="list-style-type: none;">
+					{% for hcode, statement in sds_info.hazard_statements %}
+						<li>
+							{{ hcode }}: {{ statement }}
+						</li>
+					{% endfor %}
+				</ul>
+			{% else %}
+				None
+			{% endif %}
+			
+			{% if incomplete_pcodes %}
+				
+				<form action="" method="POST" >
+                {{ sds_info.formset.management_form }}
+                {% csrf_token %}
+		
+				<h4> Precautionary Statements </h4>
+				<ul style="list-style-type: none;">
+					{% for pcode, statement in sds_info.precautionary_statements %}
+						<li> {{ pcode }}: {{ statement|safe }}</li>
+					{% endfor %}
+				</ul>	
+				
+                <input class="submit" id="formula-submit-button" type="submit" value="Submit"/>
+                </form>
+            
+            {% else %}
+            
+            	<h4> Precautionary Statements </h4>
+            	{% if sds_info.precautionary_statements %}
+					<ul style="list-style-type: none;">
+						{% for pcode, statement in sds_info.precautionary_statements %}
+							<li> {{ pcode }}: {{ statement|safe }}</li>
+						{% endfor %}
+					</ul>	   	
+            	{% else %}
+            		None
+            	{% endif %}
+            
+            {% endif %}
+		</div>
+		{% endblock %}
+		
+	    <h4 class='section_header'>3. COMPOSITION/INFORMATION ON INGREDIENTS</h4>
+	       
+	    <div class='section_body'>
+	    	<h4 class='subsection_header'> 3.1 &emsp; Substances </h4>
+	    	<ul style="list-style-type: none;">
+				<li>Formula: {% block ingredient_statement %}{% endblock %} Proprietary flavor mixture.  Chemical names and exact percentages of this mixture have been witheld as trade secrets.</li>
+				<li>Molecular weight: Proprietary flavor mixture.  Chemical names and exact percentages of this mixture have been witheld as trade secrets.</li>
+				<li>CAS-No.: N/A</li>
+				<li>EC-No.: N/A</li>
+			</ul>
+			
+			<h4><b>Hazardous components</b></h4>
+            {% block hazardous_components %}{% endblock %}
+            {% if 'GHS02' in sds_info.pictograms and sds_info.pictograms|length == 1 %}
+                The flammable hazard and precautionary statements are based on the flashpoint of the entire mixture.
+            {% endif %}
+            Proprietary flavor mixture.  Chemical names and exact percentages of this mixture have been witheld as trade secrets.
+		</div>
+		
+		<h4 class='section_header'>4. FIRST AID MEASURES</h4>
+		
+		<div class='section_body'>
+			<h4 class='subsection_header'>4.1 &emsp; Description of first aid measures</h4>
+			
+			{% if sds_info.hazards %}
+			
+				<h4>General Advice</h4>
+				Consult a physician.  Show this safety data sheet to the doctor in attendance.
+				
+				<h4>If inhaled</h4>
+				If breathed in, move person into fresh air.  If not breathing, give artificial respiration.  Consult a physician.
+				
+				<h4>In case of skin contact</h4>
+				Wash off with soap and plenty of water.  Consult a physician.
+				
+				<h4>In case of eye contact</h4>
+				Rinse thoroughly with plenty of water for at least 15 minutes and consult a physician.
+				
+				<h4>If swallowed</h4>
+				Never give anything by mouth to an unconscious person.  Rinse mouth with water.  Consult a physician.
+				
+			{% else %}
+			
+				Not applicable - This product is not hazardous.
+			
+			{% endif %}
+	
+			<h4 class='subsection_header'>4.2 &emsp; Most important symptoms and effects, both acute and delayed</h4>
+			{% if sds_info.hazards %}
+				The most important known symptoms and effects are described in the labeling (see section 2.2) and/or in section 11
+			{% else %}
+				This product is not hazardous.
+			{% endif %}
+			
+			<h4 class='subsection_header'>4.3 &emsp; Indication of any immediate medical attention and special treatment needed</h4>
+			No data available
+			
+		</div>
+		
+		<h4 class='section_header'>5. FIREFIGHTING MEASURES</h4>
+		
+		<div class='section_body'>
+			<h4 class='subsection_header'>5.1 &emsp; Extinguishing media</h4>
+			
+			<h4>Suitable extinguishing media</h4>
+			{% if sds_info.hazards %}
+				Use water spray, alcohol-resistant foam, dry chemical or carbon dioxide.
+			{% else %}
+				This product is not hazardous.
+			{% endif %}			
+			
+			<h4 class='subsection_header'>5.2 &emsp; Special hazards arising from the substance or mixture</h4>
+			No data available
+			
+			<h4 class='subsection_header'>5.3 &emsp; Advice for firefighters</h4>
+			{% if sds_info.hazards %}
+				Wear self-contained breathing apparatus for firefighting if necessary.
+			{% else %}
+				This product is not hazardous.
+			{% endif %}
+		
+			<h4 class='subsection_header'>5.4 &emsp; Further information</h4>
+			No data available
+		</div>
+		
+		<h4 class='section_header'>6. ACCIDENTAL RELEASE MEASURES</h4>
+		
+		<div class='section_body'>
+			<h4 class='subsection_header'>6.1 &emsp; Personal precautions, protective equipment and emergency procedures</h4>
+			{% if sds_info.hazards %}
+				Use personal protective equipment.  Avoid breathing vapours, mist or gas.  Ensure adequate ventilation.
+				For personal protection see section 8.
+			{% else %}
+				This product is not hazardous.
+			{% endif %}	
+	
+			<h4 class='subsection_header'>6.2 &emsp; Environmental precautions</h4>
+			Prevent further leakage or spillage if safe to do so.  Do not let product enter drains.
+			
+			<h4 class='subsection_header'>6.3 &emsp; Methods and materials for containment and cleaning up</h4>
+			Keep in suitable, closed containers for disposal.
+			
+			<h4 class='subsection_header'>6.4 &emsp; Reference to other sections</h4>
+			For disposal see section 13.
+		</div>
+		
+		<h4 class='section_header'>7. HANDLING AND STORAGE</h4>
+		
+		<div class='section_body'>
+			<h4 class='subsection_header'>7.1 &emsp; Precautions for safe handling</h4>
+			{% if sds_info.hazards %}
+				Avoid contact with skin and eyes.  Avoid inhalation of vapour or mist.
+				For precautions see section 2.2.
+			{% else %}
+				This product is not hazardous.
+			{% endif %}	
+
+			<h4 class='subsection_header'>7.2 &emsp; Conditions for safe storage, including any incompatabilities</h4>
+			Keep container tightly closed in a dry and well-ventilated place.
+			
+			<h4 class='subsection_header'>7.3 &emsp; Specific end use(s)</h4>
+			Apart from the uses mentioned in section 1.2 no other specific uses are stipulated.
+		</div>
+
+		<h4 class='section_header'>8. EXPOSURE CONTROLS/PERSONAL PROTECTION</h4>
+		
+		<div class='section_body'>
+			<h4 class='subsection_header'>8.1 &emsp; Control parameters</h4>
+			<h4>Components with workplace control parameters</h4>
+			Proprietary flavor mixture.  Chemical names and exact percentages of this mixture have been witheld as trade secrets.
+			
+			<h4 class='subsection_header'>8.2 &emsp; Exposure controls</h4>
+			<h4>Appropriate engineering controls</h4>
+			Handle in accordance with good industrial hygiene and safety practice.  Wash hands before breaks and at the end of workday.
+		</div>	
+	
+		<h4 class='section_header'>9. PHYSICAL AND CHEMICAL PROPERTIES</h4>
+		
+		<div class='section_body'>
+			<h4 class='subsection_header'>9.1 &emsp; Information on basic physical and chemical properties</h4>
+			<ul style="list-style-type: none;">
+				<li>a) Appearance: {% block appearance %}{% endblock %}</li>
+				<li>b) Odor: {% block odor %}{% endblock %}</li>
+				<li>c) Odor Threshold: No data available</li>
+				<li>d) pH: No data available</li>
+				<li>e) Melting point/freezing point: No data available</li>
+				<li>f) Initial boiling point and boiling range: No data available</li>
+				<li>g) Flash point: {% block flashpoint %}{% endblock %}</li>
+				<li>h) Evaporation rate: No data available</li>
+				<li>i) Flammability (solid, gas): No data available</li>
+				<li>j) Upper/lower flammability or explosive units: No data available</li>
+				<li>k) Vapor pressure: No data available</li>
+				<li>l) Vapor density: No data available</li>
+				<li>m) Relative density: No data available</li>
+				<li>n) Water solubility: No data available</li>
+				<li>o) Partition coefficient: n-octanol/water: No data available</li>
+				<li>p) Auto-ignition temperature: No data available</li>
+				<li>q) Decomposition temperature: No data available</li>
+				<li>r) Viscosity: No data available</li>
+				<li>s) Explosive properties: No data available</li>
+				<li>t) Oxidizing properties: No data available</li>
+			</ul>
+			
+			<h4 class='subsection_header'>9.2 &emsp; Other safety information</h4>
+			No data available
+		</div>
+
+		<h4 class='section_header'>10. STABILITY AND REACTIVITY</h4>
+		
+		<div class='section_body'>
+			<h4 class='subsection_header'>10.1 &emsp; Reactivity</h4>
+			No data available
+			
+			<h4 class='subsection_header'>10.2 &emsp; Exposure controls</h4>
+			Stable under recommended storage conditions.
+			
+			<h4 class='subsection_header'>10.3 &emsp; Possibility of hazardous reactions</h4>
+			No data available
+			
+			<h4 class='subsection_header'>10.4 &emsp; Conditions to avoid</h4>
+			No data available
+			
+			<h4 class='subsection_header'>10.5 &emsp; Incompatible materials</h4>
+			No data available
+			
+			<h4 class='subsection_header'>10.6 &emsp; Hazardous decomposition products</h4>
+			No data available
+		</div>	
+
+		<h4 class='section_header'>11. TOXICOLOGICAL INFORMATION</h4>
+		
+		<div class='section_body'>
+			<h4 class='subsection_header'>11.1 &emsp; Information on toxicological effects</h4>
+			
+			<h4>Acute toxicity</h4>
+			
+			{% if sds_info.acute_toxicity_data %}
+				<ul style="list-style-type: none;">
+				{% for class, category, ld50 in sds_info.acute_toxicity_data %}
+					<li>{{ class }}, Category {{ category }}, LD50: {{ ld50 }}</li>
+				{% endfor %}
+				</ul>
+			{% else %}
+				No data available
+			{% endif %} 
+		</div>
+
+		<h4 class='section_header'>12. ECOLOGICAL INFORMATION</h4>
+				
+		<div class='section_body'>
+			<h4 class='subsection_header'>12.1 &emsp; Toxicity</h4>
+			No data available
+			
+			<h4 class='subsection_header'>12.2 &emsp; Persistence and degradability</h4>
+			No data available
+			
+			<h4 class='subsection_header'>12.3 &emsp; Bioaccumulative potential</h4>
+			No data available
+			
+			<h4 class='subsection_header'>12.4 &emsp; Mobility in soil</h4>
+			No data available
+			
+			<h4 class='subsection_header'>12.5 &emsp; Results of PBT and vPvB assessment</h4>
+			No data available
+			
+			<h4 class='subsection_header'>12.6 &emsp; Other adverse effects</h4>
+			No data available
+		</div>	
+
+		<h4 class='section_header'>13. DISPOSAL CONSIDERATIONS</h4>
+		
+		<div class='section_body'>
+			<h4 class='subsection_header'>13.1 &emsp; Waste treatment methods</h4>
+			
+			<h4>Product</h4>
+			Contact a licensed professional waste disposal service to dispose of this material.
+			
+			<h4>Contaminated packaging</h4>
+			Dispose of as unused product.
+		
+		</div>
+
+		<h4 class='section_header'>14. TRANSPORT CONSIDERATIONS</h4>
+		
+		<div class='section_body'>
+			<h4>DOT(US)</h4>
+            {% block DOT %} No data available. {% endblock %}
+
+            <h4>IMDG</h4>
+            {% block IMDG %} No data available. {% endblock %}
+
+            <h4>IATA</h4>
+            {% block IATA %} No data available. {% endblock %}
+		</div>		
+		
+		<h4 class='section_header'>15. REGULATORY INFORMATION</h4>
+		
+		<div class='section_body'>
+			<h4>SARA 302 Components</h4>
+			No data available.
+			
+			<h4>SARA 313 Components</h4>
+			No data available.
+			
+			<h4>SARA 311/312 Components</h4>
+			No data available.
+		</div>
+					
+		<h4 class='section_header'>16. OTHER INFORMATION</h4>
+		
+		<div class='section_body'>
+	
+			<h4>Further Information</h4>
+			The information described above has been compiled by proprietary software, and it constitutes the most recent knowledge.
+			If any new information becomes available, we reserve the right to change the SDS and/or update it appropriately.
+			If you have any questions, you can contact Kemtech at 800-424-9300, or call Flavor Dynamics directly at 908-822-8855.
+
+		</div>				
+
+	</div>
+
+{% endblock %}

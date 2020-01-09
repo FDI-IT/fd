@@ -1,0 +1,56 @@
+
+
+h3.center {
+	text-align: center;
+}
+
+table.center {
+	margin-left: auto;
+	margin-right: auto;
+	width:66%;
+	margin-bottom:26px;
+}
+
+td {
+	text-align: center;
+}
+
+td.left {
+	text-align: left;
+}
+
+td.fit-content {
+	white-space: nowrap;
+}
+
+div.center {
+	text-align: center;
+}
+
+input.center{
+	text-align: center;
+}
+
+h3.redtext{
+	color: #FF0000;
+}
+
+button.move-btn-up {
+    margin-top: -0.2em;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type=number] {
+    -moz-appearance:textfield;
+}
+
+table.centerTable th, td {
+	text-align:center;
+}
+

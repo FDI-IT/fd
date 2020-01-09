@@ -1,0 +1,63 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link href="/static/css/batchsheet_base.css?v=25" type="text/css" rel="stylesheet">
+	<link href="/static/css/batchsheet_print.css?v=25" type="text/css" rel="stylesheet" media="print">
+	<link href="/static/css/jquery-ui-1.8.2.custom.css" type="text/css" rel="stylesheet">
+
+	<script type="text/javascript" src="/static/js/lib/jquery-1.7.1.min.js?v=25"></script>
+	<script type="text/javascript" src="/static/js/lib/jquery-ui-1.8.18.custom.min.js?v=25"></script>
+	<script type="text/javascript" src="/static/js/lib/jquery.tablesorter.min.js?v=25"></script>
+	<script type="text/javascript" src="/static/js/batchsheet.js"></script>
+  <script type="text/javascript" src="/static/js/lib/jquery.waitforimages.min.js"></script>
+    <title>
+    	Batch Sheets
+    </title>
+
+</head>
+
+<body>
+	<div class="top_form_bar">
+		<ul>
+		{{ batch_sheet_form.as_ul }}
+		<li>
+			<button class="batchsheet_button" id="next_lot_link">Print With Lot Number</button>
+		</li>
+		<li>
+			<button class="batchsheet_button" id="print_link">Print</button>
+		</li>
+		<li>
+			<a href="#" id="refresh_link"><img src="/static/images/Icons/16x16/refresh.png" title="Reset Batchsheet"></a>
+		</li>
+		</ul>
+	</div>
+
+	<div id="bubble_container" class="do_not_print">
+
+	</div>
+
+	<div id="sidebar">
+	</div>
+
+	<div id="batchsheet" class="do_not_print">
+	</div>
+
+	<div id="print_warning">
+		<h1>Please use the print button provided in the application toolbar.</h1>
+	</div>
+
+	<div id="update_dialog"></div>
+
+	<div id="create_dialog"></div>
+
+	<div id="next_lot_dialog"></div>
+
+	<div id="print_existing_dialog"></div>
+
+</body>
+</html>

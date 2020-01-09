@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="title">
+	<div id="title-left">
+		<span id="name">Upload Ingredient CAS/FEMA data</span>
+		<span id="number"></span>
+	</div>
+	<div id="title-right">
+	</div>
+	<div id="related-links">
+	<ul>
+		
+	</ul>
+	</div>
+</div>
+
+<div id="content-main">
+	<p> Upload the "Primary Names" spreadsheet first</p>
+	<form enctype='multipart/form-data' action='/access/upload_cas_fema/' method='post'>
+		{% csrf_token %}
+	<!-- {{ formset.management_form }}
+		<p>First enter the "Primary Names" Spreadsheet</p>
+		{% for form in formset.forms %}
+			{{form.as_p}}
+		{% endfor %} -->
+		
+		{{ form.as_p }}
+		
+		<input type='submit' value='Submit'/>
+	</form>
+</div>
+
+
+ <!-- 
+<div id="content-main">
+	<p>Below select "Primary Names File"</p>
+	<form enctype="multipart/form-data" action="/access/upload_cas_fema/" method="post">
+		{{form1.as_p}}
+		<p>Below select the "label_changed.xls" file</p>
+		{{form2.as_p}}
+		<input type="submit" value="Submit" />
+	</form>
+</div> -->
+
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div>
+{{ status_msg }}
+<form method="get" action="" id="experimental_label-form">
+    {{ form.as_p }}
+    <p><input type="submit" value="Submit" /></p>
+</form>
+
+<p><h2>If you are redirected to the page that reviews this experimental num, then some required data is missing that prevents a label from being printed properly.</h2></p>
+</div>
+
+
+
+{% endblock %}

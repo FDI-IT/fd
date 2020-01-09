@@ -1,0 +1,329 @@
+from datetime import date
+from django import forms
+from django.forms.formsets import BaseFormSet
+from django.forms import widgets
+from django.forms.extras.widgets import SelectDateWidget
+from django.db import connection
+from django.core.exceptions import ValidationError
+from django.utils.safestring import mark_safe
+from cgi import escape
+
+import re
+
+from access.models import Flavor, Ingredient
+
+from newqc.models import Retain, RMRetain, TestCard, Lot, ReceivingLog, ProductInfo, STATUS_CHOICES, UNITS_CHOICES, COA, TestResult, KOSHER_GROUP_CHOICES
+from newqc import controller
+
+class AddObjectsBatch(forms.Form):
+    number_of_objects = forms.IntegerField(label="Number of objects", min_value=1)
+
+def validate_flavor_number(num):
+    if Flavor.objects.filter(number = num).exists() == False:
+        raise ValidationError(u"Please input a valid flavor number.")
+
+def validate_lot_number(num):
+#     if Lot.objects.filter(number = num).exists() == False:
+#         raise ValidationError(mark_safe("<a href='/qc/lots/'>Please enter a valid lot number."))
+    if num.isdigit() == False:
+        raise ValidationError("Lot number must be an integer.")
+#     if Lot.objects.filter(number = num).count() > 1:
+#         num = str(num)
+#         raise ValidationError(mark_safe("<a href='/admin/newqc/lot/?q=%s'>Multiple lots exist with this lot number." % escape(num)))
+
+
+class FlavorNumberField(forms.IntegerField):
+    default_validators = [validate_flavor_number]
+
+class LotNumberField(forms.CharField):
+    default_validators = [validate_lot_number]
+
+class NewFlavorRetainForm(forms.Form):
+
+    object_number = forms.IntegerField(label="", min_value=1,
+                                       widget=forms.HiddenInput, )
+    flavor_number = FlavorNumberField(label="", min_value=1)
+    lot_number = LotNumberField(label="")
+
+    template_path = 'qc/add_retains.html'
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        flavor_number = cleaned_data.get("flavor_number")
+        lot_number = cleaned_data.get("lot_number")
+
+        try:
+            lots = Lot.objects.filter(number=lot_number).filter(flavor__number=flavor_number)
+            if lots.count() == 1:
+                lot_pk = lots[0].pk
+            else:
+                raise ValidationError(mark_safe("The given lot number exists but does not correspond to the given flavor."))
+        except Lot.DoesNotExist:
+            raise ValidationError(mark_safe("A lot with that number does not exist. <a href='/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a>"))
+
+
+        if flavor_number and lot_number: #only do this if both fields are valid so far
+            raise_error = True
+            lots = Lot.objects.filter(number = lot_number)
+            if Lot.objects.filter(number = lot_number).exists() == True:
+                for lot in lots:
+                    if lot.flavor.number == flavor_number:
+                        raise_error = False
+                if raise_error == True:
+                    raise ValidationError(mark_safe("The given lot number does not correspond to the given flavor number. <a href='/access/%s/#ui-tabs-6' style='color: #330066'>Find Lot</a> | <a href='/qc/lots/%s/' style='color: #330066'>Find Flavor </a>" % (escape(str(flavor_number)), escape(str(lot_pk)))))
+            else:
+                raise ValidationError(mark_safe("<a href='/access/%s/#ui-tabs-6' style='color: #330066'>Invalid lot number." % escape(str(flavor_number))))
+
+        return cleaned_data
+
+
+
+    @staticmethod
+    def prepare_formset_kwargs(number_of_objects):
+        next_object_number = Retain.get_next_object_number()
+        for new_object_number in range(next_object_number, next_object_number+number_of_objects):
+            yield {'object_number':new_object_number}
+
+
+    def create_from_cleaned_data(self):
+        cd = self.cleaned_data
+        lot_number = cd['lot_number']
+        f = Flavor.objects.get(number=cd['flavor_number'])
+        l = Lot.objects.get(number=lot_number, flavor=f)
+
+        return Retain(
+                retain=cd['object_number'],
+                lot=l,
+                date=date.today(),
+                status="Pending",
+            )
+
+# class NewReceivingLogForm(forms.Form):
+#     r_number = forms.IntegerField(label="", min_value=1, widget=forms.HiddenInput)
+#     pin = forms.IntegerField(label="", min_value=1)
+#     supplier = forms.CharField(label="", max_length=40)
+#     description = forms.CharField(label="", max_length=120)
+#     quantity_of_packages = forms.DecimalField(label="",max_digits=4, decimal_places=1)
+#     package_size = forms.DecimalField(label="",max_digits=6, decimal_places=3)
+#     units = forms.ChoiceField(label="",choices=UNITS_CHOICES)
+#     lot = forms.CharField(label="",max_length=40)
+#     po_number = forms.IntegerField(label="",min_value=1)
+#     trucking_co = forms.CharField(label="",max_length=40)
+#     kosher_group = forms.CharField(label="",max_length=40)
+#     template_path = 'qc/add_receiving_log.html'
+#
+#     @staticmethod
+#     def prepare_formset_kwargs(number_of_objects):
+#         next_r_number = ReceivingLog.get_next_r_number()
+#         for new_r_number in range(next_r_number, next_r_number+number_of_objects):
+#             yield {'r_number':new_r_number}
+#
+#
+#
+#     def create_from_cleaned_data(self):
+#         return ReceivingLog(**self.cleaned_data)
+
+
+def validate_rnumber(rnum):
+    checkRNum = re.compile(r"^[Rr]?[-\s]?[0-9]+$")
+
+    m = checkRNum.match(rnum)
+
+    if m is None:
+        raise ValidationError(u"Please input a valid R Number.")
+
+
+
+class RNumberField(forms.CharField):
+    default_error_messages = {
+        'invalid': (u'Enter a valid R Number.'),
+    }
+    default_validators = [validate_rnumber]
+
+class NewRMRetainForm(forms.Form):
+    object_number = RNumberField(label="R Number")
+    pin = forms.IntegerField(min_value=1)
+    lot = forms.CharField()
+    supplier = forms.CharField()
+
+    template_path = 'qc/add_rm_retains.html'
+
+    @staticmethod
+    def prepare_formset_kwargs(number_of_objects):
+        for x in range(0,number_of_objects):
+            yield {}
+
+
+    def create_from_cleaned_data(self):
+        cd = self.cleaned_data
+
+        num = re.compile(r"[0-9]+$")
+        temp = num.search(cd['object_number'])
+
+        return RMRetain(
+                date=date.today(),
+                pin=cd['pin'],
+                supplier=cd['supplier'],
+                lot=cd['lot'],
+                r_number=temp.group(),
+                status="Pending"
+            )
+
+
+class ResolveRetainForm(forms.ModelForm):
+    class Meta:
+        model = Retain
+        exclude = ('retain', 'lot', 'sub_lot', 'amount', 'content_type', 'object_id', 'product')
+
+class ResolveLotForm(forms.ModelForm):
+    class Meta:
+        model = Lot
+        exclude = ('date', 'number', 'sub_lot', 'amount', 'flavor')
+
+
+class ResolveTestCardForm(forms.ModelForm):
+    class Meta:
+        model = TestCard
+        exclude = ('large', 'preview', 'image_hash', 'thumbnail', 'import_log')
+        widgets = {
+            'notes':forms.TextInput,
+            'retain':forms.HiddenInput,
+            'status':forms.Select,
+        }
+
+class SimpleResolveTestCardForm(ResolveTestCardForm):
+    class Meta(ResolveTestCardForm.Meta):
+        pass
+
+    def save(self, commit=True):
+        instance = super(SimpleResolveTestCardForm, self).save(commit=False)
+        if commit:
+            instance.retain.status = instance.status
+            instance.retain.notes = " ".join((instance.retain.notes, instance.notes))
+            instance.retain.save()
+            instance.retain.lot.status = instance.status
+            instance.retain.lot.save()
+            instance.save()
+        return instance
+
+
+class ProductInfoForm(forms.ModelForm):
+    class Meta:
+        model = ProductInfo
+        exclude = ('retain_on_file','original_card','flash_point','specific_gravity',)
+        widgets = {
+            'testing_procedure':forms.TextInput,
+            'product_notes':forms.TextInput,
+            'flavor':forms.HiddenInput,
+        }
+
+class RetainStatusForm(forms.ModelForm):
+
+    class Meta:
+        model = Retain
+        fields = ('status', 'notes')
+
+class LotFilterSelectForm(forms.Form):
+    cursor = connection.cursor()
+    cursor.execute('select distinct newqc_lot.status from newqc_lot')
+    status_choices = list(STATUS_CHOICES)
+    for choice in cursor.fetchall():
+        new_choice = (choice[0],choice[0])
+        if new_choice not in STATUS_CHOICES:
+            status_choices.append(new_choice)
+    status = forms.MultipleChoiceField(
+            widget = widgets.CheckboxSelectMultiple,
+            required=False,
+            choices=status_choices
+        )
+
+
+class TestResultForm(forms.Form):
+
+    pk = forms.IntegerField(initial=0)
+    name = forms.CharField(max_length=48, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+    specification = forms.CharField(max_length=48, widget = forms.TextInput(attrs={'readonly':'readonly'}))
+    result = forms.CharField(max_length=48, required=False)
+
+
+class LotResolverForm(forms.Form):
+    status = forms.CharField(max_length=255)
+
+class RetainResolverForm(forms.Form):
+    retain_pk = forms.IntegerField(widget=forms.HiddenInput)
+    status = forms.CharField(max_length=255)
+    comment = forms.CharField(max_length=500)
+
+class TestCardResolverForm(forms.Form):
+    testcard_pk = forms.IntegerField(widget=forms.HiddenInput)
+    status = forms.CharField(max_length=255)
+    comment = forms.CharField(max_length=500)
+
+class RawMaterialQCForm(forms.Form):
+    #put required=True for everything?
+    form_title = forms.CharField(max_length=100)
+    form_number = forms.CharField(max_length=100)
+    product_name = forms.CharField(max_length=100)
+
+    fdi_pin = forms.IntegerField()
+    record_number = forms.CharField(max_length=50)
+
+    po_number = forms.IntegerField()
+    supplier_name = forms.CharField(max_length=100)
+    supplier_lot_number = forms.CharField(max_length=100)
+
+    date_received = forms.DateTimeField()
+    coa_received = forms.BooleanField()
+
+    kosher_group = forms.CharField(max_length=25)
+    kosher_approved=forms.BooleanField()
+
+    amount_received = forms.CharField(max_length=100)
+
+    trucker_name = forms.CharField(max_length=50)
+
+class ReceivingLogStaticForm(forms.Form):
+    #this is the form for the receivinglog fields which are the same for all the receivinglogs of in the same POLI
+    trucking_company = forms.CharField(label="Trucking Company", max_length=60)
+    trucking_company.widget.attrs['class'] = 'form-control'
+
+    supplier = forms.CharField(label="Supplier", max_length=60)
+    supplier.widget.attrs['class'] = 'form-control'
+
+    manufacturer = forms.CharField(label="Manufacturer")
+    manufacturer.widget.attrs['class'] = 'form-control'
+    #kosher_approved = forms.BooleanField(label="Kosher Approved")
+
+class ReceivingLogDynamicForm(forms.Form):
+#     edit_existing_receiving_log = forms.BooleanField(label="Edit Existing Receiving Log", required=False)
+    r_number = forms.IntegerField(label="R#", initial=RMRetain.get_next_r_number)
+    r_number.widget.attrs['class'] = 'form-control'
+    r_number.widget.attrs['readonly'] = True
+
+    date_received = forms.DateField(label="Date Received", initial=date.today, widget=SelectDateWidget())
+    date_received.widget.attrs['class'] = 'form-control'
+
+    amount_received = forms.DecimalField(label="Amt Received")
+    amount_received.widget.attrs['class'] = 'form-control'
+
+    supplier_lot = forms.CharField(label="Supplier Lot", max_length=60)
+    supplier_lot.widget.attrs['class'] = 'form-control'
+
+    cp3_received = forms.BooleanField(label="CP3 Received", required=False)
+
+    #this field keeps track of whether the receiving log already exists
+    #if it is True, we know to change existing data for an RM and not to use a new r_number
+    already_created = forms.BooleanField(required=False)
+    already_created.widget = forms.HiddenInput()
+
+def validate_pin_number(str):
+    if Ingredient.objects.filter(id=str).exists() == False:
+        raise ValidationError('Please enter a valid pin number.')
+
+class PinNumberField(forms.CharField):
+    default_validators = [validate_pin_number]
+
+class RMInventoryForm(forms.Form):
+    pin = PinNumberField(label="PIN #")
+    amount = forms.DecimalField(label="Amount (lbs)")
+    quantity = forms.IntegerField(label="Quantity (lbs)")

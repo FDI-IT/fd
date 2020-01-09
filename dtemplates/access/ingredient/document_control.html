@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+  table{
+    width:100%;
+  }
+  tr:nth-child(odd){
+    background-color: #f2f2f2;
+  }
+  tr:hover{
+    background-color: #ddd;
+  }
+
+  table, th, td {
+     border: 1px solid black;
+  }
+  th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #3c90ce;
+    color: white;
+  }
+  .link{
+    float: right;
+  }
+  .head{
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .expiring{
+    background-color: #ffff4d90 !important;
+  }
+  .expired{
+    background-color: #ff4d4d90 !important;
+  }
+  .ok{
+    background-color: #00ff9990;
+  }
+
+  .incomplete{
+    background-color: #ffff4d90;
+  }
+  p{
+    font-size: 15px;
+  }
+  .multiple_docs td, th{
+    border:none;
+  }
+  .multiple_docs{
+    /* background-color: white !important; */
+    border:none;
+    padding: 0px;
+  }
+  .multiple_docs tr:hover{
+    background-color: #ddd;
+  }
+  .multiple_docs tr:nth-child(odd){
+    background-color: #f2f2f2;
+  }
+  .applicabledocs{
+    height: 100%;
+    border: none;
+  }
+  .upload tr{
+    background-color: white;
+  }
+  .rednotification{
+    border: 1px solid red;
+    width: 100%;
+    /* font-weight: bold; */
+    text-align: center;
+  }
+  .greennotification{
+    border: 1px solid #66ff33;
+    width: 100%;
+    /* font-weight: bold; */
+    text-align: center;
+  }
+  h3{
+    float: left;
+    width: 100%;
+  }
+  ul{
+    list-style: none;
+  }
+  iframe{
+    -webkit-transform:scale(1);
+    -moz-transform-scale(1);
+  }
+
+</style>
+<!-- <p>{{link|safe}}</p> -->
+<!-- <h1>{{rm.product_name}}</h1> -->
+{% if messages %}
+
+
+  <div>
+  <br>
+    <!-- <h3>Notice</h3> -->
+  {% for m in messages %}
+    {{m|safe}}
+  {% endfor %}
+  <br>
+  </div>
+
+
+{% endif  %}
+<p>{{message}}</p>
+<!-- display all rm codes for pin number -->
+{% if ingredients %}
+  <table>
+    <th colspan="2">All RM Codes for {{product}}</th>
+  {% for i in ingredients %}
+
+    <tr>
+      <!-- <td></td> -->
+
+      <td>
+        <a href ="/access/document_control/{{i.id}}/{{i.rawmaterialcode}}/"> {{i.supplier.suppliercode}} | {{i.rawmaterialcode}}</a>
+      </td>
+
+    </tr>
+  {% endfor%}
+</table>
+{% endif %}
+
+
+{% if latest %}
+<h2>Document List | {{rm}}</h2>
+  <table>
+    <th>Type</th><th>Status</th><th>Action</th><th>View</th><th>Expiration</th><th>Date Uploaded</th>
+    {% for l, d in latest.items %}
+      <tr>
+        <td id = 'doctype' name = 'doctype'>
+          {{d.1}}
+        </td>
+        {% if d.0 %}
+              <!-- <td>d.get_doctype_display()</td> -->
+          {% if d.0.verified %}
+
+              <td name = 'okstatus'>OK</td>
+                <td>
+                  <a href ="/access/document_control/{{rm.id}}/{{rm.rawmaterialcode}}/{{d.0.doctype}}/">Upload New</a>
+                </td>
+              <td>
+                <a href ="{{d.0.uploadfile.url}}" target="_blank">View</a>
+              </td>
+              <td>
+                <!-- {{d.expiration.days}} -->
+                {% if d.0.days_until_expiration > 0 %}
+                  <span id="expiration">{{d.0.days_until_expiration}}</span>
+                  days until this document expires ({{d.0.expiration}})
+                {% else %}
+                  <span id="expiration">Expired.</span>
+                {% endif %}
+              </td>
+              <td>
+                {{d.0.documententry}}
+              </td>
+          {% elif d.0.dv_count >= 2 %}
+              <td name = 'incompletestatus'>
+                Review
+              </td>
+              <td>
+                  <a href ="/access/document_control/{{rm.id}}/{{rm.rawmaterialcode}}/{{d.0.doctype}}">Upload New</a> |
+                {% if admin and not request.user.username in d.0.get_verifiers %}
+
+                  <a href ="/access/document_verification/{{d.0.id}}">Review By Admin</a>
+                {% else %}
+                  Review By Admin
+                {% endif %}
+
+              </td>
+              <td>
+                  <a href ="{{d.0.uploadfile.url}}" target="_blank">View</a>
+              </td>
+              <td>
+                {% if d.0.days_until_expiration > 0 %}
+                  <span id="expiration">{{d.0.days_until_expiration}}</span>
+                  days until this document expires ({{d.0.expiration}})
+                {% else %}
+                  <span id="expiration">Expired.</span>
+                {% endif %}
+              </td>
+              <td>
+                {{d.0.documententry}}
+              </td>
+          {% else %}
+              <td name='incompletestatus'>
+                Unverified | {{d.0.dv_count}} Verfication(s)
+              </td>
+              <td>
+                <!-- <a href ="/access/document_control/{{d.rawmaterial.id}}/{{d.rawmaterial.rawmaterialcode}}/{{d.doctype}}" target="_blank">Upload New</a> | -->
+
+                {% if not request.user.username in d.0.get_verifiers %}
+                <a href ="/access/document_control/{{rm.id}}/{{rm.rawmaterialcode}}/{{d.0.doctype}}">Upload New</a> |
+                  <a href ="/access/document_verification/{{d.0.id}}">Verify</a>
+                {% else %}
+                  Verify
+                {% endif %}
+
+              </td>
+              <td>
+                  <a href ="{{d.0.uploadfile.url}}" target="_blank">View</a>
+              </td>
+              <td>
+                {% if d.0.days_until_expiration > 0 %}
+                  <span id="expiration">{{d.0.days_until_expiration}}</span>
+                  days until this document expires ({{d.0.expiration}})
+                {% else %}
+                  <span id="expiration">Expired.</span>
+                {% endif %}
+              </td>
+              <td>
+                {{d.0.documententry}}
+              </td>
+            {% endif %}
+        {% else %}
+
+              <td>
+                No document on record
+              </td>
+              <td colspan="4">
+                <a href ="{{missing_doc}}/{{l}}" >Upload</a>
+                <!-- <a href ="/access/document_control/{{d.rawmaterial.id}}/{{d.rawmaterial.rawmaterialcode}}/{{d.doctype}}" target="_blank">Upload New</a> -->
+              </td>
+              <!-- <td></td>
+              <td></td>
+              <td></td> -->
+
+
+        {% endif %}
+      </tr>
+    {% endfor %}
+  </table>
+
+  <br>
+
+  <br>
+
+  {% if coa %}
+  <h2>Certificate of Analysis</h2>
+  <table>
+    <th>Staus</th>
+    <th>View</th>
+    <th>Date Uploaded</th>
+    <th>Expiration</th>
+    <th>R Number</th>
+    <th>Supplier</th>
+    <th>Lot Number </th>
+    <th> PO Number </th>
+    <th> Status </th>
+    <!-- <th>Certificate Of Analysis</th><th>Action</th> -->
+    <tr>
+      <td colspan='9'>
+        <a href ="/access/document_control/{{rm.id}}/{{rm.rawmaterialcode}}/COA" >Upload New</a>
+      </td>
+    </tr>
+    {% for c in coa %}
+      {% if c.verified %}
+        <tr>
+          <td name = 'okstatus'>
+            OK
+          </td>
+          <td>
+            <a href="{{c.uploadfile.url}}" target="_blank">View</a>
+          </td>
+          <td>
+            {{c.documententry}}
+          </td>
+          <td>
+            {{c.expiration}}
+          </td>
+          <td>
+            R{{c.get_rmretain.r_number}}
+          </td>
+          <td>
+            {{c.get_rmretain.supplier}}
+          </td>
+          <td>
+            {{c.get_rmretain.lot}}
+          </td>
+          <td>
+            {{c.get_rmretain.po}}
+          </td>
+          <td>
+            {{c.get_rmretain.status}}
+          </td>
+        </tr>
+      {% elif c.dv_count >= 2 %}
+        <tr>
+          <td name = 'incompletestatus'>
+            {% if admin and not request.user.username in c.get_verifiers%}
+              <a href ="/access/document_verification/{{c.id}}">Review By Admin</a>
+            {% else %}
+              Review By Admin
+            {% endif %}
+
+          </td>
+          <td>
+            <a href="{{c.uploadfile.url}}" target="_blank">View</a>
+          </td>
+          <td>
+            {{c.documententry}}
+          </td>
+          <td>
+            {{c.expiration}}
+          </td>
+          <td colspan="5"></td>
+        </tr>
+      {% else %}
+        <tr>
+          <td name = 'incompletestatus'>
+            {% if not request.user.username in c.get_verifiers %}
+              <a href ="/access/document_verification/{{c.id}}">Verify</a>
+            {% else %}
+              Verify
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{c.uploadfile.url}}" target="_blank">View</a>
+          </td>
+          <td>
+            {{c.documententry}}
+          </td>
+          <td>
+            {{c.expiration}}
+          </td>
+          <td colspan="5"></td>
+        </tr>
+      {% endif %}
+    {% endfor %}
+  </table>
+
+  {% else %}
+  <h2>Certificate of Analysis</h2>
+  <table>
+    <!-- <th>Certificate Of Analysis</th> -->
+    <tr>
+      <td>
+        No COA on record
+      </td>
+      <td>
+        <!-- <a href ="/access/document_control/{{d.rawmaterial.id}}/{{d.rawmaterial.rawmaterialcode}}/{{d.doctype}}" target="_blank">Document On Record</a> -->
+        <a href ="{{missing_doc}}/COA" >Upload</a>
+      </td>
+    </tr>
+  </table>
+  {% endif %}
+
+{% endif %}
+
+{% if documents %}
+
+{% endif %}
+
+
+
+<br>
+{% if doctype and not confirmdocupload%}
+    <h1> Document Upload | {{rm}} | <span name="doctype">{{doctype}}</h1>
+    <!-- Document Upload | Ingredient Name | Document Type -->
+    <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+      <table class="upload">
+
+        <tr>
+          <td>Select File</td>
+          <td ><input type="file" id='id_{{doctype}}' name='{{doctype}}' required/></td>
+          <td rowspan="1"class="multiple_docs">
+
+            <table name="multiple_docs" class='applicabledocs'>
+              <th colspan="2">Other Applicable Document Types</th>
+              {% for i in doctypes %}
+                {% if not i == doctype %}
+                  <tr>
+                    <td name ="doctype">
+                      {{i}}
+                    </td>
+                    <td>
+                      <input type="checkbox" name="{{i}}" id="{{i}}"/>
+                    </td>
+                  </tr>
+
+                {% endif %}
+              {% endfor %}
+            </table>
+          </td>
+        </tr>
+
+
+        <tr>
+          <td colspan="3"><input type="submit" name = "confirm"/></td>
+          <!-- <input="hidden" name="redirect" value="/access/document_control/{{rm.id}}/{{rm.rawmaterialcode}}/"> -->
+        </tr>
+
+      </table>
+    </form>
+
+{% endif %}
+
+{% if confirmdocupload %}
+<h1> Document Upload | {{rm}} | <span name="doctype">{{doctype}}</span></h1>
+
+<p>{{uploadmessage}}</p>
+<form method ="POST" >
+  {% csrf_token %}
+  <table>
+    <tr>
+      <td>Document Date</td>
+      <td><input type="date" id='expiration' name='expiration' required/></td>
+    </tr>
+    <tr>
+      <td>
+        Is this the correct document to upload?
+      </td>
+      <td>
+        <input type = "submit" name='yes' value="Yes"/>
+        <input type = "submit" name='{{confirmdocupload.id}}' onclick='filldate();' value="No"/>
+      </td>
+  </table>
+
+
+
+</form>
+<br>
+<h3>Document Preview</h3>
+<br>
+
+<iframe src='{{confirmdocupload.uploadfile.url}}'  style="height: 100vh; width: 100%;"></iframe>
+
+
+{% endif %}
+
+
+<!-- script to highlight expiring documents -->
+<script>
+  function filldate() {
+    document.getElementById('expiration').value= '2000-01-01';
+
+  }
+
+  var oks = document.getElementsByName("okstatus");
+  for (i=0; i<oks.length;i++){
+      oks[i].classList.add("ok");
+  }
+
+  var notoks = document.getElementsByName('incompletestatus');
+  for (i=0; i<notoks.length;i++){
+      notoks[i].classList.add("incomplete");
+  }
+
+
+  expiring = document.getElementsByTagName('span');
+  for (i=0; i<expiring.length;i++){
+    if (parseInt(expiring[i].innerHTML) < 1 || expiring[i].innerText == 'Expired.'){
+      expiring[i].parentElement.classList.add("expired");
+    }
+    else if (parseInt(expiring[i].innerHTML) <= 30){
+      expiring[i].parentElement.classList.add("expiring");
+    }
+  }
+
+
+
+</script>
+
+{% endblock %}

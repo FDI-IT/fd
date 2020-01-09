@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% load blades %}
+
+{% block htmlhead %}
+{{ block.super }}
+<script type="text/javascript" src="/static/js/tsrli_entry.js?v=25"></script>
+{% endblock  %}
+
+{% block content %}
+    <div id="content-right">
+		{% blades tsr %}
+	</div>
+<div id="content-main">
+<div id="title-left">
+	<span id="name"><a href="{{tsr.get_absolute_url}}">{{tsr}}</a></span>
+</div>
+
+    <div id="content-main">
+		{% if status_message %}
+		<h1>{{ status_message }}</h1>
+		{% endif %}
+		
+		{% include "access/tsr/tsr_form.html" %}
+    </div>
+
+</div>
+{% endblock %}

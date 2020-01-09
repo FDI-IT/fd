@@ -1,0 +1,33 @@
+<script type="text/javascript">
+function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 100 + 'px';
+  }
+</script>
+
+<head>
+	<link rel="stylesheet" type="text/css" href="/static/css/mattcss.css" />
+</head>
+
+<h3> 100 Most Similar Flavors </h3>
+
+	<table>
+		<thead>
+			<tr>
+				<th>
+					Flavor
+				</th>
+				<th>
+					Score 
+				</th>
+			</tr>
+		</thead>
+		
+		<tbody>
+		{% for similar_flavor, score in similar_flavor_list %}
+			<tr>
+				<td class="spec_name" width ="25%"> <a href="{{ similar_flavor.get_absolute_url }}"> {{ similar_flavor }} </a></td>
+				<td class="score" width ="25%"> {{ score }} </td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>

@@ -1,0 +1,39 @@
+<table width="100%">
+	<caption>Retain History</caption>
+	<thead>
+		<tr class="header_row">
+			<th width="80px">Date</th>
+			<th width="70px">RNum</th>
+			<th width="50px">Supplier</th>
+			<th width="60px">Lot</th>
+			<th width="70px">Status</th>
+			<th width="70px">PO</th>
+			<th width="70px">Amt. Received</th>
+			<th>Notes</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for retain in rm_retains %}
+		<tr>
+			<td>{{ retain.date|date:"Y-m-d" }}</td>
+			<td><a href="{{ retain.get_admin_url }}">{{ retain.r_number }}</a></td>
+			<td>{{ retain.supplier }}</td>
+			<td>{{ retain.lot }}</td>
+			<td>{{ retain.status }}</td>
+			<td>
+				{% if retain.po %}
+					<a href="/access/purchase_orders/{{ retain.po }}">{{ retain.po }}</a>
+				{% else %}
+					Not Found
+				{% endif %}
+			</td>
+			<td>
+				{% if retain.po %}
+					{{ retain.amount_received }}
+				{% endif %}
+			</td>
+			<td>{{ retain.notes }}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>

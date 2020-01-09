@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load dashboard %}
+{% block toolbar %}
+{{ block.super }}
+{% endblock toolbar %}
+
+{% block content %}
+    <div id="content-right">
+    
+		<ul>
+		{% for month in month_list %}
+			<li><a href="/salesorders/lineitem/{{ month|date:'Y/m' }}/">{{ month|date:'F Y' }}</a></li>
+		{% endfor %}
+		</ul>
+	</div>
+    <div id="content-main">
+    <div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+	<a id="select_all" href="#">Select All</a> | <a id="select_none" href="#">Clear</a>
+    <form name="lineitem_selections" action="/salesorders/batch_print/" method="post">
+    {% csrf_token %}
+    <table class="sorttable" class="retaintable" width="100%">
+    	
+	<tr class="qcheaders">
+	    <th title="Sales Order Number">SO<br>Number</th>
+	    <th title="Order Date" class="{sorter: 'isoDate'}">Order<br>Date</th>
+	    <th title="Customer">Customer</th>
+		<th title="Product" class="{sorter: 'link-digit'}">Product</th>
+		<th title="Quantity Ordered (lbs)" class="{sorter: 'link-digit'}">Quantity<br>(lbs)</th>
+		<th title="Unit Price" class="{sorter: 'link-digit'}">Unit<br>Price</th>
+		<th title="Ship Date" class="{sorter: 'text'}">Ship<br>Date</th>
+		<th title="Due Date" class="{sorter: 'isoDate'}">Due<br>Date</th>
+		<th title="Total Sale Price" class="{sorter: 'link-digit'}">Total<br>Sale Price</th>
+	</tr>
+	{% for lineitem in object_list %}
+	    <tr>
+	    <td><!-- <a href="{{ lineitem.get_admin_url }}"> -->{{ lineitem.salesordernumber.number }}</a></td>
+		<td>{{ lineitem.salesordernumber.create_date|date:"m-d" }}</td>
+		<td title="{{lineitem.salesordernumber.customer.companyname}}"><!-- <a href=""> -->{{ lineitem.salesordernumber.customer.companyname|slice:"0:11" }}{% if lineitem.salesordernumber.customer.companyname|length > 11 %}...{% endif %}</a></td>
+		<td title="{{lineitem.flavor}}"><a href="/access/{{lineitem.flavor.number}}/">{{ lineitem.flavor.prefix }}-{{ lineitem.flavor.number }} {{ lineitem.flavor.natart }} {{ lineitem.flavor.name|slice:"0:18" }}{% if lineitem.flavor.name|length > 18 %}...{% endif %} {{ lineitem.flavor.label_type }}</a></td>
+		<td>{{ lineitem.quantity|floatformat:1 }}</td>
+		<td>${{ lineitem.unit_price|floatformat:2 }}</td>
+		<td>{{ lineitem.ship_date|date:"m-d" }}</td>
+		<td>{{ lineitem.due_date|date:"m-d" }}</td>
+		<td>${{ lineitem.total_sale_price|floatformat:2 }}</td>
+	    </tr>
+	{% endfor %}
+    </table>
+	</form>
+	<div class="pagination">
+	    <span class="step-links">
+	        {% if page_obj.has_previous %}
+	            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+	        {% endif %}
+	
+	        <span class="current">
+	            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+	        </span>
+	
+	        {% if page_obj.has_next %}
+	            <a href="?page={{ page_obj.next_page_number }}">next</a>
+	        {% endif %}
+	    </span>
+	</div>
+    </div>
+{% endblock %}

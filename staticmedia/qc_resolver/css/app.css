@@ -1,0 +1,182 @@
+/* app css stylesheet */
+
+body {
+  padding-top: 20px;
+}
+
+.panel-danger {
+	border: 2px solid red;
+}
+
+input[type="date"] {
+	width: 7em;
+    height: 2em;
+}
+
+.info-background {
+	background-color: #5bc0de;
+}
+
+.invalid_field {
+	/*box-shadow:0 0 0.5em red;*/
+	border: 2px solid red;
+}
+
+.valid.false {
+	background: red;
+}
+
+.error {
+	color: red;
+}
+
+.phone-images {
+  background-color: white;
+  width: 450px;
+  height: 450px;
+  overflow: hidden;
+  position: relative;
+  float: left;
+}
+
+.subfilter {
+	padding-left: 2em;
+}
+
+.lots {
+  list-style: none;
+}
+
+.thumb {
+  float: left;
+  margin: -0.5em 1em 1.5em 0;
+  padding-bottom: 1em;
+  height: 100px;
+  width: 100px;
+}
+
+.lots li {
+  clear: both;
+  height: 115px;
+  padding-top: 15px;
+}
+
+.testcard-panel {
+  margin-bottom: -1.4em !important;
+}
+
+.resolve-btn {
+	position: relative;
+    top: 2em;
+}
+
+.align-right {
+	text-align: center;
+	display: block;
+}
+
+.vertical-align {
+  display: flex;
+  flex-direction: row;
+}
+
+.vertical-align > [class^="col-"],
+.vertical-align > [class*=" col-"] {
+  display: flex;
+  align-items: center;     /* Align the flex-items vertically */
+  justify-content: center; /* Optional, to align inner flex-items 
+                              horizontally within the column  */
+}
+
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.highlight {
+	background-color: #00CCFF;
+	readonly: "False";
+}
+
+.submit-button {
+	margin: 1em;
+}
+
+
+/** Detail View **/
+img.testcard {
+  padding: 2em;
+  width: 200% !important;
+}
+
+.testcard-thumbs {
+  height: 100px;
+  width: 100px;
+  padding: 1em;
+}
+
+.testcard-thumbs:hover {
+  cursor: pointer;
+}
+
+.expand-collapse-btn:hover {
+	cursor: pointer;
+}
+
+.object-heading {
+	font-size: 1.5em;
+}
+
+.loading-text {
+	font-size: 2.0em;
+	margin: 1em;
+}
+
+ul.specs {
+  clear: both;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+ul.specs > li{
+  display: inline-block;
+  width: 200px;
+  vertical-align: top;
+}
+
+ul.specs > li > span{
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+ul.specs dt {
+  font-weight: bold;
+}
+
+h1 {
+  border-bottom: 1px solid gray;
+}
+
+
+/* Summary Modal */
+
+.strike {
+	text-decoration: line-through;
+	color: red;
+	margin-right: 0.5em;
+}
+
+.new {
+	color: green;
+}
+
+.float-left {
+	float: left !important;
+}
+
+.margin-1em {
+	margin: 1em;
+}
+

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+
+<div id="title">
+	<div id="title-left">
+		<span id="name">Invoice Summary - {{d}}</span>
+		<span id="number"></span>
+	</div>
+	<div id="title-right">
+	</div>
+	<div id="related-links">
+	<ul>
+		
+	</ul>
+	</div>
+</div>
+
+<div id="content-main">
+<table>
+	<caption>Date Summary</caption>
+	<thead>
+		<tr>
+			<th>Invoice</th>
+			<th>Flavor</th>
+			<th>Quantity</th>
+			<th>Raw Material Cost</th>
+			<th>Quantity Cost</th>
+		</tr>
+	</thead>
+	{% for line_item in queryset %}
+	<tr>
+		<td>{{line_item.invoice.number}}</td>
+		<td><a href="/access/{{line_item.flavor.number}}/">{{line_item.flavor}}</a></td>
+		<td>{{line_item.quantity}}</td>
+		<td>${{line_item.rawmaterialcost|floatformat:2}}</td>
+		<td>${{line_item.quantity_cost|floatformat:2}}</td>
+	</tr>
+	{% endfor %}
+</table>
+</div>
+
+
+
+<div id="content-right">
+	
+</div>
+
+{% endblock %}
+

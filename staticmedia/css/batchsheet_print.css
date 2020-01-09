@@ -1,0 +1,64 @@
+@page {size:landscape}
+
+html{
+	height:auto;
+}
+
+body{
+	height:auto;
+	margin:0px;
+}
+
+#batchsheet {
+	margin:0px;
+	padding:0px;
+	width:98%;
+	border-width:1px;
+}
+
+div.top_form_bar {
+	display:none;
+}
+
+#sidebar{
+	display:none;
+	height:auto;
+}
+
+#print_warning {
+	display:block;
+}
+
+div.newpage {
+    page-break-before: always;
+}
+
+div.do_not_print {
+	display:none;
+}
+
+/*
+#batchsheet {
+	border-style:solid;
+	border-width:1px;
+	position:absolute;
+	top:0px;
+	left:0px;
+	padding:0px;
+	margin:0px;
+	width:99%;
+}*/
+
+/* Comment this out because batchsheets were printing out in two pages in IE*/
+/*#batch_sheet_memo {
+	page-break-before:always;
+}*/  
+
+img.sort_img {
+	display:none;
+}
+
+tfoot {
+	display: table-row-group;
+}
+

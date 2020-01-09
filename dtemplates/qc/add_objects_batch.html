@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form action="" method="GET">
+	{{ addobjectsbatch.management_form }}
+	{{ addobjectsbatch.as_p }}
+	<input id="retain-submit-button" type="submit" value="Add Retains" />
+    </form>
+{% endblock %}

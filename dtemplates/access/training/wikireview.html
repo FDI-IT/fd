@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+  <link rel="stylesheet" type="text/css" href='/static/css/training.css'/>
+</head>
+<p><a href="http://fdiwiki.flavordynamics.lan/wiki/index.php/Security" target="_blank"> Click here</a> to open the link to the security wiki and read it through.</p>
+
+{{alert}}
+<div>
+    Directions:
+    <ol>
+      <li><a href="http://fdiwiki.flavordynamics.lan/wiki/index.php/Security" target="_blank"> Click here</a> to open the wiki.</li>
+      <li>Read through it</li>
+      <li>Find outside inspectors and the name of the file to read as published by FEMA</li>
+    </ol>
+    <br>
+  <form method='POST'>
+    {% csrf_token %}
+    Questions:
+    <ol>
+    <!-- <li>Any sign of tampering of product or equipment you should alert <input type='text' name='wiki_1' required/>.</li>
+    <li>If you see any suspicious criminal activity, alert the manager who will alert <input type='text' name='wiki_2' required/>.</li>
+    <li>Outside contractors in unauthorized areas or if you receive unexpected mail or packages alert <input type='text' name='wiki_3' required/>.</li>
+    <li>Truckers are the only people other than employees and routine outside contractors (Once signed in) that can enter the side doors <input type='radio' name='wiki_4' value='True' required/>True <input type='radio' name='wiki_4' value='False'/>False </li>
+    <li>Truckers can use the men’s locker room lavatories? <input type='radio' name='wiki_5' value='True' required/>True<input type='radio' name='wiki_5' value='False'/>False</li>
+    <li>Any government inspector can review a record as long as they show a badge <input type='radio' name='wiki_6' value='True' required/>True <input type='radio' name='wiki_6' value='False'/>False</li>
+    <li>Any non-personal visitor coming into the building must sign a secrecy agreement for the first time.  <input type='radio' name='wiki_7' value='True' required />True<input type='radio' name='wiki_7' value='False'/>False</li> -->
+    {% for q in questions %}
+      <li>{{q.0}}
+        <ul>
+          {% for key, a in q.1.items %}
+
+            <li><input type='{{q.2}}' name='{{section}}{{ forloop.parentloop.counter0 }}' value="{{a}}" required/>{{a}}</li>
+          {% endfor %}
+        </ul>
+
+      </li>
+
+
+    {% endfor %}
+    </ol>
+    <input type='submit'>
+  </form>
+</div>
+
+
+{% endblock %}

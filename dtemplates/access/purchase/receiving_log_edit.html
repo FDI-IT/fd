@@ -1,0 +1,144 @@
+{% extends "bootstrap_base.html" %}
+
+{% block htmlhead %}
+	{{ block.super }}
+	<script src="{{ STATIC_URL }}js/receiving_log_edit.js"></script>
+	<link href="{{ STATIC_URL }}css/mattcss.css?v=25" type="text/css" rel="stylesheet" media="screen">
+	
+{% endblock %}
+{% block content %}
+
+<div id="content-main">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h1> Purchase Order {{ po.number }} <small>{{ poli.raw_material }}</small> </h1>
+					</div>
+				
+					<div class="panel-body">
+						<div class="container-fluid">
+							<div class="row">
+								<div class="col-sm-2">
+									<div class="panel panel-info">
+										<div class="panel-heading">
+											<h2>P.O. Info</h2>
+										</div>
+										<div class="panel-body">
+											<dl>
+												<dt>PO Number</dt><dd>{{ po.number }}</dd>
+												<dt>Raw Material</dt><dd>{{ raw_material }}</dd>
+												<dt>Due Date</dt><dd>{{ poli.due_date }}</dd>
+												<dt>Quantity Requested</dt><dd>{{ poli.quantity }}</dd>
+												<dt>Package Size Requested</dt><dd>{{ poli.package_size }}</dd>
+												<dt>Allergens</dt><dd>{{ raw_material.allergen }}</dd>
+												<dt>Microsensitive</dt><dd>{{ raw_material.microsensitive }}</dd>
+											</dl>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-10">
+									
+									<div class="panel panel-primary">
+										<div class="panel-heading">
+											<h2>Receiving Log(s)</h2>
+										</div>
+										<div class="panel-body">
+											<form method="POST">
+											{% csrf_token %}
+											{{ management_form }}
+											
+											{% if poli.closed %}
+												<div class="checkbox">
+													<div id="receiving-log-closed" class="alert alert-danger" role="alert">
+														<label class="checkbox-inline">
+													    	<input type="checkbox" id="toggle-fields"><b>This order has been closed.  Check this box if you would like to edit existing data and/or reopen this order.</b>
+													    </label>
+												    </div>
+												</div>
+											{% else %}
+												<div id="receiving-log-open" style="display:none"> This div should be hidden. </div>
+											{% endif %}
+											
+											{{ form.non_field_errors }}
+											{% for field in form %}
+												{{ field.errors }}
+											{% endfor %}
+											
+											<div id="receiving-log-static-fields">
+												<table class="table">
+													<tr>
+														<td class="form-group">{{ staticform.supplier.label_tag }}{{ staticform.supplier }}{{ staticform.supplier.errors }}</td>
+   														<td class="form-group">{{ staticform.manufacturer.label_tag }}{{ staticform.manufacturer }}{{ staticform.manufacturer.errors }}</td>
+														<td class="form-group">{{ staticform.trucking_company.label_tag }}{{ staticform.trucking_company }}{{ staticform.trucking_company.errors }}</td>
+													</tr>
+												</table>
+											</div>
+											
+											<div id="receiving-log-dynamic-fields">
+												{% for form in formset %}
+                                                    <div class="container-fluid">
+                                                        <div class="col-sm-12">
+                                                            {% if form.already_created.value == True %}
+                                                                <div class="panel panel-primary receiving-log-row already-created">
+                                                            {% else %}
+                                                                <div class="panel panel-primary receiving-log-row new-receiving-log">
+                                                            {% endif %}
+                                                                <div class="panel-heading">
+                                                                    Receiving Log {{ forloop.counter }}
+                                                                </div>
+                                                                <div class="panel-body">
+                                                                    <table class="table">
+                                                                        {{ form.already_created }}
+                                                                        <td class="col-sm-2 form-group r-number-field">{{ form.r_number.label_tag }}{{ form.r_number }}{{ form.r_number.errors }}</td>
+                                                                        <td class="col-sm-5 form-group">{{ form.date_received.label_tag }}<div class="form-inline">{{ form.date_received }}</div>{{ form.date_received.errors }}</td>
+                                                                        <td class="col-sm-2 form-group amount-received-field">{{ form.amount_received.label_tag }}{{ form.amount_received }}{{ form.amount_received.errors }}</td>
+                                                                        <td class="col-sm-2 form-group">{{ form.supplier_lot.label_tag }}{{ form.supplier_lot }}{{ form.supplier_lot.errors }}</td>
+                                                                        {% if raw_material.microsensitive == 'True' %}
+                                                                            <td class="col-sm-1 form-group">
+                                                                                {{ form.cp3_received.label_tag }}
+                                                                                {{ form.cp3_received }}{{ form.cp3_received.errors }}
+                                                                            </td>
+                                                                        {% endif %}
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+												{% endfor %}										
+											</div>
+
+                                            <div class="total-tracker alert alert-warning text-center" role="alert">
+                                                <strong>
+                                                    <p class="total-amount-received-value" style="display:inline-block">0</p> lbs Received /
+                                                    <p class="total-amount-requested-value" style="display:inline-block">{{ total_amount_requested|floatformat }}</p> lbs Requested
+                                                </strong>
+                                            </div>
+
+                                            <div id="form-buttons">
+                                                <input onclick="return validate_submit(this)" name="submit-close" type="submit" class="btn btn-success" type="submit" value="Submit & Close"/>
+                                                <input onclick="return validate_submit(this)" name="submit-open" type="submit" class="btn btn-warning" type="submit" value="Submit & Leave Open"/>
+                                                <input id="add-receiving-log" class="btn pull-right btn-info" value="Add Receiving Log"/>
+                                            </div>
+
+											</form>	
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+									
+					</div>
+
+                    <div class="panel-footer">
+				        <a role="button" href="/access/purchase_orders/{{ po.number }}" class="btn btn-default"> &lt;&lt; Back to Purchase Order Items </a>
+			        </div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

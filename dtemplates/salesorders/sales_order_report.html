@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+	{% if status_message %}
+	<h1>{{ status_message }}</h1>
+	{% endif %}
+	
+	<div id="sales-order-list"> 
+		<table width="100%">
+			<thead><tr>
+				<thead><tr>
+				<th>Number</th>
+				<th>Customer</th>
+				<th>Product</th>
+				<th>Quantity</th>
+				<th>Unit Price</th>
+				<th>Order date</th>
+				<th>Ship Date</th>
+				<th>Due Date</th>
+				<th>Total Sale Price</th>
+			</tr></thead>
+			</tr></thead>
+			<tbody>
+		    {% for sales_order in sales_orders %}
+		    	{% for li in sales_order.lineitem_set.all %}
+			    	{% if forloop.first %}
+			    	<tr id="{{ sales_order.number }}">
+			    	<td class="main_row"><a href="/salesorders/{{sales_order.number}}/" target="_blank">{{ sales_order.number }}</a></td>
+			    	<td class="main_row"><a href="/salesorders/customer/{{sales_order.customer.pk}}/" target="_blank">{{ sales_order.customer }}</a></td>
+			    	{% else %}
+			    	<tr id="{{ sales_order.number }}">
+			    	<td class="sub_row"></td>
+			    	<td class="sub_row"></td>
+			    	{% endif %}
+			    	<td><a href="/access/{{ li.flavor.number }}/">{{ li.flavor }}</a></td>
+			    	<td>{{ li.quantity|floatformat:0 }}</td>
+			    	<td>{{ li.unit_price|floatformat:2 }}</td>
+			    	<td>{{ sales_order.create_date|date:'m-d' }}</td>
+			    	<td>{{ li.ship_date|date:'m-d' }}</td>
+			    	<td>{{ li.due_date|date:'m-d' }}</td>
+			    	<td>{{ li.quantity_price|floatformat:2}}</td>
+			    </tr>
+			    {% if forloop.last %}
+			     <tr class="spacer_row"><td class="sub_row"></td></tr>
+			    {% endif %}
+		    	{% endfor %}
+		    {% endfor %}
+		    </tbody>
+		</table>
+
+	</div>
+{% endblock %}
+

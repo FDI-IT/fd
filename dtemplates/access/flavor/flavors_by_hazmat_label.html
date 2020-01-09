@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load my_dictlookup %}
+{% load hazard_labels %}
+{% block htmlhead %}
+{{ block.super }}
+<script>
+jQuery(document).ready(function(){	
+	$( "#hazard_table" ).tablesorter({
+			headers: {
+			0: {
+				sorter: 'link-digit'
+			},
+			1: {
+				sorter: 'digit'
+			},
+			2: {
+				sorter: 'digit'
+			},
+			3: {
+				sorter: 'digit'
+			},
+			4: {
+				sorter: 'digit'
+			},
+			5: {
+				sorter: 'digit'
+			},
+			6: {
+				sorter: 'digit'
+			},
+			7: {
+				sorter: 'digit'
+			},
+			8: {
+				sorter: 'digit'
+			},
+			9: {
+				sorter: 'digit'
+			}
+	}});
+	
+	$( document ).tooltip({
+	    items: "[data-small_flavor_hazard_label]",
+	    content: function() {
+	        var element = $( this );
+	        var ret_val = element.find('span.small_flavor_hazard_label')[0].innerHTML;
+	        return ret_val;
+	    }
+	});
+});
+</script>
+{% endblock %}
+
+
+{% block content %}
+<h1>{{queries}}</h1>
+<div id="content-solo">
+	<table id="hazard_table">
+		<thead>
+			<tr>
+				<th>Number of flavors</th>
+				{% for hazard_class_human_readable, hazard_class_python in hazard_classes %}
+				<th>{{ hazard_class_human_readable }}</th>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for label_named_tuple, flavor_list in flavors_by_hazmat_label.iteritems %}
+			<tr>
+				<td data-small_flavor_hazard_label="">
+					<a href="/access/unique_hazard_combinations/?{% for k, in y %}{% endfor %}">
+						{{flavor_list|length}}
+					</a>
+					<span class="hidden_tooltip small_flavor_hazard_label">{% small_flavor_hazard_label flavor_list.0 %}</span>
+				</td>
+				{% for hazard_category in label_named_tuple %}
+				<td>{{ hazard_category }}</td>
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+    
+{% endblock %}

@@ -1,0 +1,308 @@
+from decimal import Decimal, ROUND_HALF_UP
+
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django import template
+from django.db.models import Sum, Q
+from django.template import RequestContext
+from django.urls import reverse
+
+from access.models import Flavor, FormulaTree, Ingredient, FormulaException, FormulaCycleException, FlavorSpecification, JIList, flavor_field_to_doctype_dict, LeafWeight, DOC_TYPES
+from access.utils import coster_headers
+from itertools import chain
+from reversion.models import Revision
+
+from salesorders.models import SalesOrderNumber
+
+
+register = template.Library()
+
+
+@register.filter(name='has_group')
+def has_group(user, group_name):
+    group = Group.objects.get(name=group_name)
+    return group in user.groups.all()
+
+@register.inclusion_tag('access/flavor/consolidated.html')
+def consolidated(flavor, weight_factor=1):
+    return {'flavor':flavor}
+
+@register.inclusion_tag('access/flavor/consolidated_indivisible.html')
+def consolidated_indivisible(flavor, weight_factor=1):
+    return {'flavor':flavor}
+
+@register.inclusion_tag('access/flavor/documentation.html')
+def documentation(flavor):
+
+    header_labels = dict(DOC_TYPES)
+
+    relevant_document_types = set(flavor_field_to_doctype_dict.values())
+
+    headers = "<th>Ingredient</th>"
+    for doctype in relevant_document_types:
+        headers += "<th>%s</th>" % header_labels[doctype]
+
+    html = "<thead><tr>%s</tr></thead>" % headers
+
+    for lw in LeafWeight.objects.filter(root_flavor=flavor).order_by('-weight'):
+        html += "<tr>"
+
+        html += "<td><a href='/access/document_control/%s/%s'>%s</td>" % (lw.ingredient.id, lw.ingredient.rawmaterialcode, lw.ingredient)
+
+        for doctype in relevant_document_types:
+            status = lw.ingredient.get_document_status(doctype)
+
+            dash = "/static/images/black-dash.png"
+            checkmark = "/static/images/black-checkmark.png"
+            null = "/static/images/null.png"
+            warning = "/static/images/warning.png"
+
+            if status == 'Verified':
+                bg_color = '#bbffbb'
+                image = "<image src=%s width='20' height='20'><image src=%s width='20' height='20'>" % (checkmark, checkmark)
+            else:
+                bg_color = '#ffa2a2'
+                if status == "No Documents":
+                    image = "<image src=%s width='20' height='20'>" % null
+                if status == 'Unverified':
+                    image = "<image src=%s width='20' height='20'><image src=%s width='20' height='20'>" % (dash, dash)
+                elif status == 'Single Verification':
+                    image = "<image src=%s width='20' height='20'><image src=%s width='20' height='20'>" % (checkmark, dash)
+                elif status == 'Verification Mismatch':
+                    image = "<image src=%s width='20' height='20'><image src=%s width='20' height='20'>" % (checkmark, checkmark)
+                elif status == 'Expired':
+                    image = "<image src=%s width='20' height='20'>" % warning
+            html += "<td align='middle' style='background-color:%s'>%s</td>" % (bg_color, image)
+
+        html += "</tr>"
+
+    return {"html":html}
+
+@register.inclusion_tag('access/flavor/explosion.html')
+def explosion(flavor, weight_factor=1):
+    fts = FormulaTree.objects.filter(root_flavor=flavor)[1:]
+    close_div_stack = []
+    hypertext_tokens = []
+    hypertext_tokens.append(
+        """
+        <table id="explosion-divs">
+        <thead>
+            <tr>
+                <th width=53%>Name</th>
+                <th>Amount</th>
+                <th>Unit Cost</th>
+                <th>Relative Cost</th>
+                <th>Last Update</th>
+            </tr>
+        </thead>
+        </table>
+        """
+    )
+    depth=0
+    for ft in fts:
+        look_at_stack = True
+        while(1):
+            if look_at_stack == False:
+                break
+            try:
+                if ft.lft > close_div_stack[-1]:
+                    hypertext_tokens.append("</div>\n")
+                    close_div_stack.pop()
+                    depth = depth -1
+                else:
+                    look_at_stack = False
+            except IndexError:
+                break
+
+        if ft.rgt > ft.lft+1:
+            link_token = '<a href="#t=Explosion" onclick="return hideftrow(this)">[+]</a> '
+            row_class = 'ft-expander-row'
+            label_type = 'Flavor'
+            my_pin = ""
+        else:
+            link_token = ''
+            row_class = 'ft-simple-row'
+            label_type = 'Raw material'
+            my_pin = ft.node_ingredient.id
+
+
+        hypertext_tokens.append(
+            """<div class="%s" data-ingredient_id="%s" data-nat_art="%s" data-ingredient_pin="%s" data-ingredient_name="%s"><span class="ingredient_name recur_depth_%s">%s%s</span> <span class="ingredient-details">
+                                                                        <span class="ftamount" data-ogw="%s">%s</span>
+                                                                        <span class="ftunitcost">%s</span>
+                                                                        <span class="ftrelcost">%s</span>
+                                                                        <span class="ftupdate">%s</span>
+                                        </span></div>\n""" % (row_class,
+                                                              ft.node_ingredient.id,
+                                                              ft.node_ingredient.art_nati,
+                                                              my_pin,
+                                                              ft.node_ingredient.name,
+                                                              depth,
+                                                              link_token,
+                                                              ft.node_ingredient.name,
+                                                              ft.weight,
+                                                              ft.weight,
+                                                              ft.node_ingredient.unitprice,
+                                                              Decimal(str(ft.weight*ft.node_ingredient.unitprice/1000)).quantize(Decimal('0.00')),
+                                                              ft.node_ingredient.purchase_price_update.date(),)
+            )
+
+        if ft.rgt > ft.lft+1:
+            close_div_stack.append(ft.rgt)
+            hypertext_tokens.append('<div class="ft-spacer">\n')
+            depth=depth+1
+    for close_div in close_div_stack:
+        hypertext_tokens.append("</div>\n")
+    return {"flavor":flavor,
+            "ft": "".join(hypertext_tokens),
+            "stack_leftovers": close_div_stack,
+            "headers":coster_headers}
+
+@register.inclusion_tag('access/flavor/rm_documentation.html')
+def rm_documentation(flavor):
+    pass
+
+@register.inclusion_tag('access/flavor/production_lots.html')
+def production_lots(flavor):
+    object_list = flavor.lot_set.all()
+    return {'object_list':object_list,}
+
+@register.inclusion_tag('access/flavor/retains.html')
+def retains(product):
+    object_list = product.sorted_retain_superset()
+    return {'object_list':object_list,}
+
+@register.inclusion_tag('access/ingredient/raw_material_pin.html')
+def raw_material_pin(flavor):
+    g = flavor.gazinta.all()[0]
+    ingredients = Ingredient.objects.filter(id=g.id)
+    return {'ingredients':ingredients,}
+
+@register.inclusion_tag('access/flavor/gzl_ajax.html')
+def gzl_ajax(flavor):
+    return {'gt':FormulaTree.objects.filter(node_flavor=flavor).exclude(root_flavor=flavor).values('root_flavor__number').annotate(Sum('weight')).order_by('-weight'),}
+
+@register.inclusion_tag('history_audit/revision_history.html')
+def revision_history(flavor):
+
+    revision_rows = []
+
+    resultant_objects = Revision.objects.filter(version__object_id = flavor.pk).filter(version__content_type__id=23).distinct().order_by('-date_created')
+
+    for r in resultant_objects:
+        v = r.version_set.all().get(object_id=flavor.pk)
+        try:
+            object = v.content_type.model_class().objects.get(pk=v.object_id)
+            url = reverse('admin:%s_%s_change' %(object._meta.app_label, object._meta.model_name), args=[object.id]) + 'history'
+            version_url = url
+        except:
+            version_url = 0
+
+        revision_rows.append((r.date_created, v, version_url, r.version_set.all().count(), r.comment, r.user, r.id))
+
+
+    return {
+        'revision_rows': revision_rows,
+    }
+
+
+@register.inclusion_tag('access/flavor/review_specsheet.html')
+def spec_sheet(flavor):
+
+    #get all customers who have specifications for this flavor (all customers that have ordered it?)
+
+    #get all customers who ordered this flavor, and the number of customer specs they have for it
+
+    customer_list = []
+    customer_spec_counts = []
+    customer_report_urls = []
+    customer_specsheet_urls = []
+
+    for so in SalesOrderNumber.objects.all():
+        for soli in so.lineitem_set.all():
+            if soli.flavor == flavor:
+                customer_list.append(so.customer)
+
+    for customer in customer_list:
+        count = FlavorSpecification.objects.filter(customer = customer).count()
+        customer_spec_counts.append(count)
+        customer_report_urls.append(reverse('salesorders.views.customer_report', args=[customer.pk]))
+
+        #i do this so i can display 'same as below' on the spec sheet tab if the customer doesn't have any customerspecs
+        if count == 0:
+            customer_specsheet_urls.append(None)
+        else:
+            customer_specsheet_urls.append(reverse('salesorders.views.customer_spec_sheet', args=[customer.pk, flavor.number]))
+
+    customer_table = []
+    customer_table = list(zip(customer_list, customer_spec_counts, customer_report_urls, customer_specsheet_urls))
+
+    #make customer_table None so we dont display anything in the template if there aren't any customers
+    if customer_table == []:
+        customer_table = None
+
+
+    #get general specs for that flavor
+    specs = FlavorSpecification.objects.filter(flavor = flavor, micro = False, replaces = None, customer = None)
+    micro_specs = FlavorSpecification.objects.filter(flavor = flavor, micro = True, replaces = None, customer = None)
+
+
+    return {'flavor': flavor,
+            'specs': specs,
+            'micro_specs': micro_specs,
+            'customer_table': customer_table}
+
+@register.inclusion_tag('access/flavor/customer_info.html')
+def customer_info(flavor):
+
+    #get all customers who have specifications for this flavor (all customers that have ordered it?)
+
+    #get all customers who ordered this flavor, and the number of customer specs they have for it
+
+    customer_list = []
+    customer_spec_counts = []
+    customer_report_urls = []
+    customer_specsheet_urls = []
+
+    for so in SalesOrderNumber.objects.all():
+        for soli in so.lineitem_set.all():
+            if soli.flavor == flavor:
+                customer_list.append(so.customer)
+
+    for customer in customer_list:
+        count = FlavorSpecification.objects.filter(customer = customer).count()
+        customer_spec_counts.append(count)
+        customer_report_urls.append(reverse('salesorders.views.customer_report', args=[customer.pk]))
+
+        #i do this so i can display 'same as below' on the spec sheet tab if the customer doesn't have any customerspecs
+        if count == 0:
+            customer_specsheet_urls.append(None)
+        else:
+            customer_specsheet_urls.append(reverse('salesorders.views.customer_spec_sheet', args=[customer.pk, flavor.number]))
+
+    customer_table = []
+    customer_table = list(zip(customer_list, customer_spec_counts, customer_report_urls, customer_specsheet_urls))
+
+    #make customer_table None so we dont display anything in the template if there aren't any customers
+    if customer_table == []:
+        customer_table = None
+
+    return {'flavor': flavor,
+            'customer_table': customer_table}
+
+@register.inclusion_tag('access/flavor/similar_flavors.html')
+def similar_flavors(flavor):
+
+    #get 100 most similar flavors; using django Q objects to use an 'OR' filter
+    most_similar_flavors = JIList.objects.filter(Q(a=flavor.number) | Q(b=flavor.number)).order_by('-score')[:100]
+
+    similar_flavor_list = []
+
+    for ji_object in most_similar_flavors:
+        if ji_object.a == flavor.number:
+            similar_flavor_list.append((Flavor.objects.get(number=ji_object.b), round(ji_object.score*100, 2)))
+        else: #ji_object.b == flavor.number:
+            similar_flavor_list.append((Flavor.objects.get(number=ji_object.a), round(ji_object.score*100, 2)))
+
+
+    return {'flavor': flavor,
+            'similar_flavor_list': similar_flavor_list}

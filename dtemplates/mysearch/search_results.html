@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load qstring %}
+{% load mainsearch %}
+
+{% block content %}
+
+<div id="content-solo">
+<div class="hideable">
+	<a id="showhidetoggle" href="#" onclick="toggle_visible();">Show search options</a>
+	<form action="/mysearch/" id="mainsearch" method="GET">
+		<div id="advanced-search" class="hidden">
+			<div>{% mainsearch %}<input type="submit" value="Filter Results"></div>
+			<ul class="filterselect_list">
+				<li></li>
+				{{ filterselect.as_ul }}
+	    		
+	    	</ul>
+		</div>
+	</form>
+</div>
+<div id="pagination-bar">
+	{% include "pagination_bar.html" %}
+</div>
+<div id="object-list">
+	{% if rows %}
+	<table width="100%">
+		<thead><tr>
+			{% autoescape off %}
+			{% for header in headers %}
+				{% if header.0 == get.order_by %}			
+				<th {{header.2}}><a href="?order_by=-{{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></th>
+				{% else %}
+				<th {{header.2}}><a href="?order_by={{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></th>
+				{% endif %}
+			{% endfor %}
+			{% endautoescape %}
+		</tr></thead>
+		<tbody>
+	    {% for object, fields in rows %}
+	    <tr id="{{ object.pk }}">
+	    	{% for field in fields %}
+			<td>
+				<a href="{{ object.get_absolute_url }}">
+					{% if field %}
+					{% if field|lower == 'true' %}<img src="/static/images/Icons/16x16/accept.png">{% else %}{{field}}{% endif %}
+				</a>{% endif %}
+			</td>
+			{% endfor %}
+	    </tr>
+	    {% endfor %}
+	    </tbody>
+	    {% if resultant_objs.count != 0 %}
+		<tfoot><tr>
+			{% autoescape off %}
+			{% for header in headers %}
+				{% if header.0 == get.order_by %}			
+				<td {{header.2}}><a href="?order_by=-{{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></td>
+				{% else %}
+				<td {{header.2}}><a href="?order_by={{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></td>
+				{% endif %}
+			{% endfor %}
+			{% endautoescape %}
+		</tr></tfoot>
+		{% endif %}
+	</table>
+	{% else %}
+	<p>No rows available</p>
+	{% endif %}
+	{% include "pagination_bar.html" %}
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+<div class="ghs_label>
+<div class="pictograms">
+	<h3>Pictograms</h3>
+	<ul>
+    {% for pictogram_code in flavor.merged_hcode_info.pictogram_code %}
+    <li><img src="/static/hazard_calculator/images/pictograms/{{pictogram_code}}.png" width="20%">
+    {% endfor %}
+    </ul>
+</div>
+
+<div class="signal_words">
+     <h3>Signal Words</h3>
+     <ul>
+     {% for signal_word in flavor.merged_hcode_info.signal_word  %}
+     <li>{{ signal_word }}</li>
+     {% endfor %}
+     </ul>
+</div>
+<div class="hazard_statements">
+     <h3>Hazard Statements</h3>
+     <ul>
+     {% for statement in flavor.merged_hcode_info.statement  %}
+     <li>{{ statement }}</li>
+     {% endfor %}
+     </ul>
+</div>
+</div>

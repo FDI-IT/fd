@@ -1,0 +1,198 @@
+PinNum,Shrt_Desc,FlavorContent,Carbohydrt,Water,Protein,Total Fat,Ash,AlcoholContent,Total Weight 
+34,Anchovy Powder 1107,0,42.9,6.93,34.5,4.77,15.1,0,104.2
+50,Tastee Apple  Flakes,0,44.48,8.5,0,0,0,0,52.98
+71, Beeswax Absolute,0,0,0,0,0,0,0,0
+113,High Acid Buttermilk Powder,0,49.38,4.17,23,4.8,2.791,0,84.141
+150,CARAMEL COLOR DS400 LIQUID,0,43.7,49,0,0,0.1,0,92.8
+155,Caramel Powder 680,0,85,3,0,0,1.2,0,89.2
+169,CE-7465 Nat. Bleu Cheese Enhancer Flavor,0,0,0,0,90,0,0,90
+176, celery seed powder,0,40,0,0,21.9,9.3,0,71.2
+190, CharDex Hickory,0,76,6.5,0,0,0.4,0,82.9
+191, Chardex Mesquite,0,76,6.5,0,0,0.4,0,82.9
+201, Chicory Root SE Roasted,68.7699966,20.98,0,0.73,0.1,2.06,0,92.6399966
+230, Clove Powder,0,69.41,0,6,14.5,5,0,94.91
+234,CMC 7H0F,0,75,7,0,0,25,0,107
+238, Cocoa Essence Dark,57,0.1,43,0.1,0.1,0.1,47,147.4
+239, Cocoa Extract U88,0,91.8,0,0,0,0,0,91.8
+240,Cocoa Powder 200 DP-11,0,35.3,3,23.3,11,0,0,72.6
+251, Corn Syrup Solids 42D Frodex,0,96,0,0,0,0,0,96
+266, L Cysteine,0,0,0,67.5,0,0,0,67.5
+321,Ethyl Alcohol,0,0,5,0,0,0,100,105
+356," Coffee, SD Dark Roast",0,41.1,3.1,12.2,0.5,8.8,0,65.7
+377, Foengreek SE,0,65,30,0,0,0,0,95
+378, Foenugreek SE Unroasted,0,69.78,11.14,9.62,2.33,1.24,0,94.11
+392, Garlic Powder,0,80.6,4.26,10.2,1.08,0,0,96.14
+413,White Grape Juice Concentrate 68 Brix,0,62,32,1.31,0.38,0,0,95.69
+445, Honey Buds,0,97.6,0,0.236,0,0,0,97.836
+450, HVP 004,0,20,0,35,0.5,0,0,55.5
+451, HVP CS,0,11.3,4,37.3,0.5,50.36,0,103.46
+460, I+G,0,0,0,0,0,0,0,0
+474, Naturetone 3463,0,80,0,0,0,0,0,80
+490, Lemon Oil CP Calif 1x,0,0,0,0,0,0,0,0
+494, Licorice SE,0,35,25,0,0,0,0,60
+507, Lobster Extract Powder #1900,0,49.1,4,25,0,0,0,78.1
+514,"Flour, Wheat",0,72.8,0,12.5,1,0,0,86.3
+517, Maltol,0,0,0,0,0,0,0,0
+586, Molasses TCT,0,63.9,24.4,2.08,0.1,0,0,90.48
+630, Onion Powder,0,81,4.5,10,1,8,0,104.5
+645, Oregano Powder,0,64.9,8,12,6.4,0,0,91.3
+653, Paprika Oleoresin,0,0,0,0,0,0,0,0
+661, Parsley Powder,0,42.2,0.15,31.4,5.01,0,0,78.76
+668," Pear Juice Conc. 70 Brix, Code 10",0,50.75,35,1.17,0,1.87,0,88.79
+675, Green Bell Pepper Powder,0,69.5,4.5,17.4,2.89,8.97,0,103.26
+676, Black Pepper Powder,0,66.5,8,10,10.2,0,0,94.7
+678, White Pepper Powder,0,68.61,11.42,10.4,2.12,1.59,0,94.14
+692,Pineapple Juice Conc. 65 Brix,0,67,36.9,1.95,0.16,0,0,106.01
+695,Potassium Sorbate,0,0,0.1,0,0,0,0,0.1
+696, L-Proline,0,0,3,100,0,0,0,103
+704, PRUNE JUICE CONCENTRATE,0,67,0,1.1,0.2,0,0,68.3
+713, Red #40 Granular,0,0,8,0,0,0,0,8
+727, Rum Ether,0,21.9,11.4,0,0,11,26.8999996,71.1999996
+742, Shrimp Extract Powder 430-50-13,0,0,0,19.59,6.41,0,0,26
+745, Charsol c-6,0,1,68,0,2,0.2,0,71.2
+749, Solu Smoke Special Mesquite,0,5,20,0,11,0,0,36
+750, Sodium Benzoate,0,0,0,0,0,0,0,0
+752,Sodium Citrate,0,0,1,0,0,0,0,1
+772, Coyote Stablizieer HL Gum,0,61,8,0,0,0,0,69
+797, Savorome 32201,0,46,4,30,0.5,0,0,80.5
+803, Soy Sauce Powder Shoyu,0,45.1,4.9,16.3,0.002,36.6,0,102.902
+832, Tuna Extract Powder,0,29.4,4,34.4,0,21.38,0,89.18
+852, Vanilla Extract 1x Bourbon,0,33.08,64.53,0.12,0.01,0.61,27.6000004,125.9500004
+853, Vanilla Extract 1x Java,0,33.08,64.53,0.12,0.01,0.61,27.6000004,125.9500004
+862, Naturetone 3455 (Vinegar Powder),0,83,2,0.5,0.5,0,0,86
+864, Apple Cider Vinegar,0,93,0,0.57,0.039,0,0,93.609
+875, Xanthan Gum 55395,0,0,14,1,1,8,0,24
+876, Whole Yeast Zyest #027,0,26,2.7,51,7,35.8,0,122.5
+881, Torula Yeast,0,22.2,7,50,0.3,0,0,79.5
+898,Sodium Benzoate 25% in Water,0,0,75,0,0,21.01,0,96.01
+918,Butter Starter Distillate 15X #104,0,0,0,0,0,0,0,0
+948, Coffee Solid Extract,11.7799997,44.82,31.3,5.2,0.21,3.79,0,97.0999997
+952, Corn Syryp High Fructose 42,0,100,29,0,0,0.05,0,129.05
+984, Tamarind SE,0,75,30,0,0,0,0,105
+1108, Lemon Juice Concentrate,0,44,48,3,2,0,0,97
+1118,Dehydrated Cheddar Uncolored 36112,0,0,2.89,36.17,48.14,8.03,0,95.23
+1164, Cocoa Essence White w/ sugar,28.1000004,48.3,1,0.1,0.1,0.1,16.2999992,93.9999996
+1225,St. Johns Bread Unroasted,0,73,23.1,0,0,1.14,0,97.24
+1262,Raspberry Juice Concentrate,0,65,35,0.23,2.8,0,0,103.03
+1290,Prunce Juice Conc.,0,0,0,0,0.2,2,0,2.2
+1325,Yeast Levure Inactive LBI2253 Whole Lyfe 953A,0,45,0,45,2.3,4.8,0,97.1
+1381, Chili powder,0,56.5,8.5,14.3,12.4,0,0,91.7
+1406, Fish Extract 4000,0,15,57,25,0.7,12,0,109.7
+1468, Balsam Peru Resnoid,0,0,0,0,0,0,0,0
+1545, Flavor Whey SW 40,0,53.82,0,30,1.79,0,0,85.61
+1577,"Cherry (Dark,Sweet) Juice Conc.",0,43,0,2,0,0,0,45
+1602,Ascorbic Acid,0,0,0,0,0,0,0,0
+1656,Blueberry Juice Conc,0,65,0,0,0,0,0,65
+1659, Yeast Extrarome P165,0,15.5,0,36.9,0.7,42.5,0,95.6
+1684, Mushroom Powder,0,80,3,10,0.5,0,0,93.5
+1714, Tomato Powder Cold Break,0,60,3,15.1,1.9,0,0,80
+1741, Coffee Flavor 502410A,0,0,0,0,0,0,0,0
+1776, Annatto Powder 8100,0,0,15,3,1,0,0,19
+1807, Yeast Zyest,0,16,7,40,6,0,0,69
+1903,Mushroom Concentrate,0,0,0,0,0,0,0,0
+1913,Cranberry Juice Concentrate,0,96.6,0,0.5,0.5,0,0,97.6
+1956,L-Glutamic Acid  #20356,0,0,0.1,0,0,0,0,0.1
+1981, Chartor Hickory,0,24,5,40,5,6.7,0,80.7
+1983, Neobee #1053,0,0,0.5,0,96,0,0,96.5
+1993,L-Glutamine #32740,0,0,0.3,0,0,0.1,0,0.4
+2072, Emulpur,0,0,0,0,0,0,0,0
+2079,Deltarome 2101,0,18,0,30,0.5,0,0,48.5
+2081, Deltarome 2202,0,26,0,30,0.5,0,0,56.5
+2083, Savorome 3204,0,46,0,30,0.5,0,0,76.5
+2123, Tomato Essence Liquid,0,82.5,0,2,0,0,0,84.5
+2199,Savorome 3205,0,57,0,19,0.5,0,0,76.5
+2209,Deltarome 2126,0,13,0,30,0.5,0,0,43.5
+2373,Gum Tragacanth,0,0,0,2.5,0,0,0,2.5
+2380,Onion Granulated,0,80.5,4.26,10.2,1.08,0,0,96.04
+2481,Roasted Onion SD Powder,0,90,0.49,5,4,3,0,102.49
+2498,Cocoa Extract,0,0,0,0,0,0,0,0
+2774,Spray Dried Honey,0,95,0,0.18,0,0,0,95.18
+2866,Vanillin ex tumeric,0,0,0,0,0,0,0,0
+2885,Koko Cream 185,0,51,0,35,1,0,0,87
+2924,Natural Caramelized Flavor 110861,0,35,46,0,0,0,0,81
+2925,Cocoa Butter Distillate,0,8,0.1,0.1,0.1,0.1,0,8.4
+2928,Olive Oil Isolate Natural,0,0,0,0,0,0,0,0
+2936,Concord Grape Juice Conc.,0,65,0,0,0,0,0,65
+2955,Celeriac Powder,0,95,4.9,6,1,0,0,106.9
+2956,Teriyaki Dry Powder,0,66.2,6,13,0.7,16.9,0,102.8
+2957,Yeast 8004,0,6.5,0,58,1,15.42,0,80.92
+2958,Natural Butter Type Flavor 10% in SBO,0,0,0,0,97.51,0,0,97.51
+2983,Cheddease 275 White Kosher,0,40,0,23,17,0,0,80
+3026, Milk Whole Blend 26%,0,0,2.3,26.7,26,6.2,0,61.2
+3046,Charsol H-10 Hickory,0,0,75,0,0,0.1,0,75.1
+3076, Natural Strawberry Essence,0,0,0,0,0,0,0,0
+3083, Grapefruit Oil CA Pink,0,0,0,0,0,0,0,0
+3230,Chartor Mesquite,0,24,5,40,5,6.7,0,80.7
+3285, Charmaize Mesquite,0,63,5,7,0.9,0.4,0,76.3
+3299, Yeast Spectra 40D,0,13,5,55,2,0,0,75
+3334, Molasses Quik Flo Light,0,96,0,0,0,0,0,96
+3340, Malt Extract Light,0,89.9,3.5,5.3,0,1.6,2.70000005,103.00000005
+3375, Coffee 100% Arabica,0,25.2,0,0,0.1,0,0,25.3
+3413, Cornmint Oil Terpeneless,0,0,0,0,0,0,0,0
+3454,Squid Extract 975-0444,0,39.58,1.95,21.92,2.06,32.37,0,97.88
+3480,Peanut Oil 504505,0,0,0,0,94,0,0,94
+3481, Cassia Oleo,0,0,0,0,0,0,0,0
+3485, Foenugreek Solid Extract,0,57.04,23.71,9.2,2.58,2.04,0,94.57
+3512, Chicken Stock 34511,0,0,4.3,94.4,0.7,6.7,0,106.1
+3515, Natural Chicken Fat Placte 111145,0,31.5,2.451,8.914,15.32,28.71,0,86.895
+3555,Pork Stock W/ Broth,0,0,4.6,98.7,0.7,4.7,0,108.7
+3610,Charzyme Hickory,0,62,5,11,1.5,1.3,0,80.8
+3631, Yeast Extract 1035,0,10.3,4,46,1,19.5,0,80.8
+3646,Deltarome 51108,0,13,0,30,0.5,0,0,43.5
+3677, Mexene Chili Powder,0,56.5,8.5,14.3,12.4,0,0,91.7
+3681, Chipolte Chili Powder,0,56.5,8.5,14.3,12.4,0,0,91.7
+3683, Dry Sesame Oil Powder,0,18,0,8.5,70,0,0,96.5
+3691, Habanero Chili Powder,0,56.5,8.5,14.3,12.4,0,0,91.7
+3692, Oak Extract 10x,0,0,0,0,0,0,0,0
+3697, Yeast Extract paste 1002,0,5,3.21,38.88,0.04,30.97,0,78.1
+3698, Beef Stock #3003,0,0,31,62.5,0.9,0,0,94.4
+3699, Natural Caramelized Beef Type Flavor,0,7.75,87.8,1.39,0.077,0,0,97.017
+3705, Molasses Quik Flo Dark,0,91,1,0,0,3,0,95
+3708, Gujillo Chili Powder,0,56.5,8.5,14.3,12.4,0,0,91.7
+3710, Onion Powder 10x,0,0,0,0,0,0,0,0
+3762, Natural Chicken Type Flavor 70077,0,45.46,2.259,11.6,11.12,15.19,0,85.629
+3804, Corn Syrup 26/42,0,78,0,0,0,0,0,78
+3805, Clam Extract Powder 1100,0,27,5,54,0.099,10.8,0,96.899
+3833,Natural Beef Fondations Flavor 81010,0,61.79,12.11,0.193,0.027,18.67,0,92.79
+3853, Natural Mexican Pot Roast Type Flavor,0,60.4,4.8,6.4,4.3,0,0,75.9
+3873, Champagne Flavor,0,0,0,0,0,0,0,0
+3891,Burgundy Wine Powder,0,99.7,0,3.2,0,2.08,0,104.98
+4015,Red Raspberry Essence 150X,0,0,0,0,0,0,0,0
+4098,Fish Powder 4100,0,15,57,25,0.7,12,0,109.7
+4125,Microcrystalline Cellulose,0,90,0,0,0,0,0,90
+4166,Natural Apple Type Flavor Concentrate,0,0,0,0,0,0,0,0
+4185,Rosemary Oil 10% in Soybean Oil,0,0,0,0,90,0,0,90
+4209,Coffee Beans,0,0,0,0,0,0,0,0
+4244,Chocolate Extract #18,0,3,0,0,0,0,0,3
+4764,Chocolate Flavor 1709406555,0,0,0,0,0,0,0,0
+4843,Yogurt Blend FFE8605,0,50.83,5,33,0.8,7.9,0,97.53
+4900,Grape Skin Ext. (enocianina),0,18,73,3,0.1,3,0,97.1
+4910,Tea Essence R-Tea 10000,0,1,0,1,0,0,0,2
+4912,Molasses Barbadous,0,14,0,0,0,0,0,14
+4924,Lime Juice Conc. 351,0,43.97,0,2.67,0.71,0,0,47.35
+4943,Lemon Juice Conc. 2309,0,35,0,2,1,0,0,38
+5004,Paprika Auaresin 02-040-19,0,0,0,0,0,0,0,0
+5014,Coffee Freeze Dried,0,41.1,3.1,12.2,0.5,8.8,0,65.7
+5063,Chipotle Oleoresin,0,0,0,0,0,0,0,0
+5177,Coffee Solid Extract 27-3-098-0,0,44.82,31.3,5.2,0.21,3.79,0,85.32
+5241,Charsol Mesquite MP-15-005        No Sugars,0,7,68,0,2,0.2,0,77.2
+5280,Smoke Aro P-50,0,8,2,0,23,0.1,0,33.1
+5478,Cocoa Powder 10E4,0,9.5,3.5,23.1,10.5,9.2,0,55.8
+5543,Roastin' 2002,0,0,2,0,100,3,0,105
+5555,Espresso SD Coffee,0,41.1,3.1,12.2,0.25,8.8,0,65.45
+5562,Charsol C-10,0,0,75,0,0,0.1,0,75.1
+5563,Charsol Applewood 2502,0,0,55,0,0,0.1,0,55.1
+5640,Cinnamon Powder,0,80,0,4,3,0,0,87
+5724,Red Raspberry Juice Concentrate 65 Brix,0,53,23,3.2,3,0,0,82.2
+5851,White Cheddar Cheese Blend FFE-5532,0,50,4,20,14,0,0,88
+5912,Sodium Alginate,0,70,0,0,0,0,0,70
+5991,Natural Cheddar Cheese Flavor WONF,0,44.68,4.35,18.15,8.264,9.142,0,84.586
+6110,Caramel Color 1x Acid Proof AP100 Liquid,0,58,36.6,0,0,2.4,0,97
+6860,Yeast Extract Low Salt 1000,0,7.27,6,69.19,0.27,13.11,0,95.84
+6894,Black Tea Extract WONF,0,7.7,65,0,0,0,30,102.7
+7205,Sam Adams Boston Lager,41.5600014,5.26,92.69,0.58,0,0,1.42999995,141.52000135
+7216,Inactive Dried Brewers Yeast,11.5,40,8.37,46.5,2,0,0,108.37
+7480,Yeast Extract Prime Lyfe 170A,0,21.5,0,63,0.1,11,0,95.6
+7563,Chardex Applewood 6023-GF,0,56.2,6,0.2,0.2,0.6,0,63.2
+9250,EMC Replacer,1,67.75,4.162,11.24,0.261,7.266,0,91.679
+7395,Molasses Quick Flo,0,16,0,0,0,0,0,16

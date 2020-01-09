@@ -1,0 +1,93 @@
+ {% extends "base.html" %}
+
+ {% block content %}
+
+<style>
+  table{
+    border-collapse:collapse;
+/*     border:0px; */
+  }
+  td, th{
+    border:0px;
+    margin: auto;
+  }
+
+</style>
+
+
+{{flavor}}<br>
+<!-- {{original}}<br> -->
+<a href="/access/{{new}}" target="_blank">{{new}}</a><br>
+<!-- {{unitprice}}
+{{exclusive_customer}} -->
+
+{% if request.user.is_superuser %}
+  <form method = "POST" action="" onsubmit="return check();">
+   {% csrf_token %}
+   <table>
+      <th>Renumber Tool</th>
+      <tr>
+        <td>New Price</td>
+        <td>
+           <input type="number" id="unitprice" name = "unitprice" step="0.01"/>
+           <!-- <input type="text" id="unitprice" name="unitprice" onkeypress="return isNumber(event);"/> -->
+        </td>
+        <td>
+           Customer Exclusive?: <input type = "checkbox" id = "exclusive_customer" onclick="toggle();"/>
+        </td>
+      </tr>
+
+
+      <tr id = "exclusivity">
+        <td>Customer </td>
+        <td>
+         <!-- <input type = "text" id = "customer" disabled/> -->
+         <input id = "customer" name="customer" list = "customer_list" disabled/>
+         <datalist id = "customer_list">
+             {% for i in customers %}
+                 <option value = "{{i.companyname}}">
+
+
+             {% endfor %}
+         </datalist>
+       </td>
+
+      </tr>
+  </table>
+  <br>
+  <input type = "submit" value="Renumber"/>
+</form>
+
+{% else %}
+  <p>You are not authorized to use this tool</p>
+
+{% endif %}
+
+<script>
+
+  function toggle(){
+    if(document.getElementById("exclusive_customer").checked){
+      document.getElementById("customer").disabled = false;
+    }
+
+    else {
+      document.getElementById("customer").disabled = true;
+    }
+  }
+
+  function check(){
+    if(document.getElementById("unitprice").value == 0 || document.getElementById("price").value == null){
+      alert("No number entered into box");
+      return false;
+    }
+    else if (document.getElementById("exclusive_customer").checked && (document.getElementById("customer").value == 0 || document.getElementById("customer").value == null)) {
+      alert("No customer entered");
+      return false;
+    }
+
+    return true;
+  }
+
+
+</script>
+ {% endblock %}

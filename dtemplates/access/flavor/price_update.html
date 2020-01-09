@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{flavor}}</span>
+</div>
+
+<div id="formula_form">
+{{ status_msg }}
+<form method="post" action="">
+	{% csrf_token %}
+    {{ mgmt_form }}
+    
+    <ul>
+    {% for form in ingredient_formset.forms %}
+    {% if form.instance.id %}
+    	<li>
+        <span class="form-label">{{ form.instance }}</span>
+        <span class="form-field">
+        {% for field in form %}
+        	{{ field }}
+        {% endfor %}
+        </span>
+        </li>
+    {% endif %}
+    {% endfor %}
+    </ul>
+    <p><input type="submit" value="Update Prices" /></p>
+</form>
+</div>
+</div>
+
+{% endblock %}

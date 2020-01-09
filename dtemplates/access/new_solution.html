@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style type="text/css"><!--
+.errorlist {
+display:none;
+}
+--></style>
+
+<div id="title">
+	
+</div>
+
+<div id="content-main">
+	{% if status_message %}
+		<h1>{{ status_message }}</h1>
+	{% endif %}
+	<form action="" method="POST" id="new_solution_form">{% csrf_token %}
+		{{ form.as_p }}
+		
+		<p><input id="submit-button" type="submit" value="Submit" />
+	</form>
+	
+</div>
+
+<div id="content-right">
+	
+</div>
+{% endblock %}

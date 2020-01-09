@@ -1,0 +1,535 @@
+# Create your views here.
+import operator
+import logging
+import io
+import ast
+import json
+
+from collections import defaultdict
+from decimal import Decimal
+
+from django import forms
+from django.forms.models import formset_factory, modelformset_factory
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseRedirect, HttpResponse, QueryDict
+from django.template import RequestContext
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Max
+from django.urls import reverse
+
+from hazards.tasks import calculate_flavor_hazards, calculate_flavor_hazards_with_work, get_ellipsis_pcodes
+from hazards.models import GHSIngredient, HazardClass, HazardCategory
+from hazards.forms import FormulaRow, NameForm
+from hazards.initial_data import pcode_dict
+
+def get_formula_list_from_formset(formset):
+    formula_list = []
+    for form in formset.forms:
+        try:
+            fli = FormulaLineItem(cas=form.cleaned_data['cas'],
+                               weight=form.cleaned_data['weight'])
+            formula_list.append(fli)
+        except KeyError:
+            '''
+            This happens whenever there are blank rows that the user does not fill out.
+            Just skip these rows and do nothing.
+            '''
+            pass
+
+    return formula_list
+
+def formula_list_to_json(formula_list):
+    json_formula_list = json.dumps([fli.as_json() for fli in formula_list], use_decimal=True)
+    return json_formula_list
+
+
+def formula_entry(request):
+    page_title = "GHS Formula Entry"
+
+    FormulaFormSet = formset_factory(FormulaRow, extra=5, can_delete=True)
+
+    if request.method == 'POST':
+
+        #obtain the product's name from the name form
+        name_form = NameForm(request.POST, prefix='name')
+        if name_form.is_valid():
+            name = name_form.cleaned_data['name']
+        else:
+
+            e = name_form.errors
+            a=1/0
+
+        #obtain the formula list from the posted formset
+        formset = FormulaFormSet(request.POST, prefix='formula')
+        if formset.is_valid():
+            formula_list = get_formula_list_from_formset(formset)
+        else:
+            a=1/0 #testing
+
+        sds_object = GHSProduct(
+                                name = name,
+                                formula_list = formula_list_to_json(formula_list) #serialized
+                     )
+        sds_object.save()
+
+        #redirect to the hazard calculator page for the newwly created product
+        return HttpResponseRedirect(reverse('hazards.views.hazard_calculator', kwargs={'product_id': sds_object.id}))
+
+    # if request.method != get or post
+    formset = FormulaFormSet(prefix='formula')
+
+    try:
+        max_id = (GHSProduct.objects.all().aggregate(Max('id'))['id__max'] + 1)
+    except:
+        max_id = 1
+
+    name_form = NameForm(initial={'name': 'GHS Product %s' % max_id}, prefix='name')
+
+    return render(
+        request,
+        'hazards/hazard_calculator.html',
+        {
+            'nav_bar': 'formula_entry',
+            'page_title': page_title,
+            'name_form': name_form,
+            'formset': formset.forms,
+            'management_form': formset.management_form,
+        },
+    )
+
+
+def hazard_calculator(request, sds_object=None, product_id=None, ingredient_id=None):
+    '''
+    UPDATE - no more separate GHS project
+
+
+    '''
+
+    '''
+    This view uses an 'sds_object' to display the hazards of that object to the user.  The
+        object may be a GHS Product, a GHS Ingredient, or an object created by the user.
+
+    If a user wants to view the hazards for a GHS Product (which they created via the
+        formula entry view), or a GHS Ingredient (an ingredient imported from a GHS
+        hazards document), they can use the urls /hazard_calculator/ghs_product/<product_id>
+        and /hazard_calculator/ghs_ingredient/<cas_number>, respectively.  The if statements
+        below will then set the sds_object to be the corresponding object.
+
+    A user also has the option to pass in their own sds_object, as long as it contains a 'name'
+        attribute and the following two functions:
+        1. 'get_hazard_formula_list' - returns a list of FormulaLineItems corresponding to that
+                object's formula.
+        2. 'get_sds_url' - OPTIONAL: returns the url for viewing that object's sds.
+                A user might want to create their own sds view if they choose to
+                user their own object.  If this function is not defined, a generic view
+                will be used for the SDS.
+
+    '''
+
+
+    page_title = "GHS Hazard Calculator"
+
+    #get formula, name, and sds url of the object
+    formula_list = sds_object.get_hazard_formula_list()
+    product_name = sds_object.name
+#     try:
+    sds_url = sds_object.get_sds_url()
+#     except:
+#         sds_url = create_sds_url(calculate_flavor_hazards(formula_list), product_name)
+
+    #if the user edited precautionary statements, change/create the corresponding models
+#     if request.method == 'POST' and "ELLIPSES" in request.POST:
+#         '''
+#         Check the postdata to see if the user changed any precautionary statements.
+#         If so, process the data accordingly.
+#         Note: 'ELLIPSES' is the 'name' element of the submit button.
+#         '''
+#         ellipsis_formset = EllipsisInfoFormSet(request.POST, prefix='ellipsis')
+#         if ellipsis_formset.is_valid():
+#             for form in ellipsis_formset:
+#                 try:
+#                     ellipsis_info = EllipsisInfo.objects.get(
+#                                             object_id=sds_object.id,
+#                                             content_type=ContentType.objects.get_for_model(sds_object),
+#                                             pcode = form.cleaned_data['pcode'],
+#                                             index = form.cleaned_data['index']
+#                                             )
+#                 except: #one does not exist
+#                     ellipsis_info = EllipsisInfo(
+#                                         pcode = form.cleaned_data['pcode'],
+#                                         index = form.cleaned_data['index'],
+#                                         content_object = sds_object,
+#                                         )
+#
+#                 ellipsis_info.info = str(form.cleaned_data['info'])
+#                 ellipsis_info.save()
+#         else:
+#             formset_errors = ellipsis_formset.errors
+#
+    '''
+    Here we begin calculating the hazards and generating the corresponding tables
+    that will be rendered in the 'results' view.
+    '''
+    hazard_dict = calculate_flavor_hazards_with_work(formula_list)
+
+    #HAZARDS TABLE (sorted list)
+    product_hazards = []
+    for hazard, value in hazard_dict.items():
+        try:
+            hazard_class = HazardClass.objects.get(python_class_name=hazard)
+            product_hazards.append((hazard_class.human_readable_name, value))
+        except:
+            pass
+
+    product_hazards.sort()
+
+    #FORMULA TABLE
+    formula_details = []
+
+    total_weight = Decimal(sum([fli.weight for fli in formula_list]))
+#     for fli in formula_list:
+#         if fli.source_name:  # this happens when there is a CAS mismatch
+#             if 'No CAS' in fli.cas:
+#                 mismatch = 'No CAS'
+#             else:
+#                 mismatch = 'CAS not in document'
+#             formula_details.append((fli.cas, '-', fli.source_name, fli.weight, fli.weight / total_weight * 100, mismatch, fli.source_url))
+#         else:
+#             formula_details.append((fli.cas, GHSIngredient.objects.get(cas=fli.cas).name, fli.source_name, fli.weight, fli.weight / total_weight * 100, None, fli.source_url))
+#
+
+    for fli in formula_list:
+        formula_details.append((fli.ingredient, fli.weight, fli.weight / total_weight * 100, fli.ingredient.hazards_approved))
+
+
+    formula_details.sort(key=operator.itemgetter(3), reverse=True)
+
+    #EDITABLE PRECAUTIONARY STATEMENTS TABLE (AND CORRESPONDING FORM DATA)
+#     ellipsis_table, ellipsis_form_data, incomplete_pcodes = get_ellipsis_form_data(sds_object, ellipsis_formset)
+#     ellipsis_formset = ellipsis_form_data.pop('formset')
+
+
+    return render(
+        request,
+        'hazards/hazard_results.html',
+        {
+            'nav_bar': 'hazard_calculator',
+            'page_title': 'GHS Hazard Results',
+            'formula_list': formula_list,
+            'product_hazards': product_hazards,
+            'formula_details': formula_details,
+            'sds_url': sds_url,
+            'product_name': product_name,
+        },
+     )
+
+
+
+def create_fli_url(fli_list, product_name=None):
+    q = QueryDict('')
+    q = q.copy()
+
+    for fli in fli_list:  # is there a better way to do this
+        if fli.source_name and fli.source_url:
+            q[fli.cas] = [str(fli.weight), fli.source_url, fli.source_name]
+        elif fli.source_url:
+            q[fli.cas] = [str(fli.weight), fli.source_url]
+        else:
+            q[fli.cas] = [str(fli.weight)]
+
+    if product_name:
+        q['product_name'] = product_name
+
+    get_parameter_string = q.urlencode()
+
+    fli_url = '/hazards/hazard_calculator/?%s' % get_parameter_string
+
+    return fli_url
+
+def create_sds_url(hazard_dict, product_name=None):
+    q = QueryDict('')
+    q = q.copy()
+    q.update(hazard_dict)
+
+    if product_name:
+        q['product_name'] = product_name
+
+    get_parameter_string = q.urlencode()
+
+    sds_url = '/hazards/safety_data_sheet/?%s' % get_parameter_string
+
+    return sds_url
+
+def get_merged_hcode_info(category_list):
+
+    merged_hcode_info = defaultdict(set)
+    for category in category_list:
+        hcode_info = category.get_hcode_info()
+        for k, v in hcode_info.items():
+            if k == 'p_codes':
+                merged_hcode_info[k] = merged_hcode_info[k].union(v)
+            else:
+                merged_hcode_info[k].add(v)
+
+    merged_hcode_info['p_codes'] = sorted(list(merged_hcode_info['p_codes']))
+    return merged_hcode_info
+
+
+def get_sds_info(category_list, ld50_dict, sds_object):#formset=None):
+
+    hazards = []
+    hazard_statements = []
+
+    for category in category_list:
+        hazards.append('%s (Category %s), %s' % (category.hazard_class.human_readable_name,
+                                                                  category.category,
+                                                                  category.hcode))
+        hazard_statements.append((category.hcode, category.get_hcode_info()['statement']))
+
+
+    merged_hcode_info = get_merged_hcode_info(category_list)
+
+    precautionary_statements = []
+
+    for pcode in merged_hcode_info['p_codes']:
+
+        statement = pcode_dict[pcode]
+
+#         if '...' in statement:
+#             index = 1   #use a helper function for this?
+#             ellipsis_count = pcode_dict[pcode].count('...')
+#
+#             while index <= ellipsis_count:
+#
+#                 info = EllipsisInfo.objects.get(object_id=sds_object.id,
+#                                                 content_type = ContentType.objects.get_for_model(sds_object),
+#                                                 pcode = pcode,
+#                                                 index = index).info
+#                 statement = statement.replace('...', info, index)
+#                 index += 1
+
+        precautionary_statements.append((pcode, statement))
+
+    pictograms = []
+
+    for pictogram_code in merged_hcode_info['pictogram_code']:
+        pictograms.append(pictogram_code)
+
+    signal_words = []
+
+    for signal_word in merged_hcode_info['signal_word']:
+        signal_words.append(signal_word)
+
+    acute_tox_hazard_info = []
+
+    for cat in category_list:
+        if cat.acute:
+            acute_tox_hazard_info.append((cat.hazard_class.python_hazard_class.human_readable_field ,cat.category, ld50_dict[cat.hazard_class.python_hazard_class.human_readable_ld50]))
+
+    sds_info = {'hazards': hazards,
+                'hazard_statements': hazard_statements,
+                'precautionary_statements': precautionary_statements,
+                'pictograms': pictograms,
+                'signal_words': signal_words,
+                'acute_toxicity_data': acute_tox_hazard_info,}
+                #'formset': formset, }
+
+    return sds_info
+
+
+def safety_data_sheet(request, sds_object=None, product_id=None):
+    """
+    This view prints out a generic safety data sheet for a GHS product.  It only contains information
+    that can be obtained from the calculated hazards and corresponding hazard category/class objects.
+    """
+    if product_id:
+        sds_object = GHSProduct.objects.get(id=product_id)
+        product_name = sds_object.name
+
+        #get hazard_dict from object
+        formula_list = sds_object.get_hazard_formula_list()
+        hazard_dict = calculate_flavor_hazards(formula_list)
+
+    elif request.GET.dict(): #should I keep this?
+        hazard_dict = request.GET.dict()
+        product_name = hazard_dict.pop('product_name', None)
+
+    hazard_category_list = []
+    ld50_dict = {}
+
+    #Convert hazard dict to a list of HazardCategory objects
+    for hazard, category in hazard_dict.items():
+        if 'ld50' in hazard:
+            ld50_dict[hazard] = category
+        elif category != 'No':
+            hazard_category = HazardCategory.objects.filter(hazard_class__python_class_name=hazard).get(category=category)
+            hazard_category_list.append(hazard_category)
+
+
+    sds_info = get_sds_info(hazard_category_list, ld50_dict, sds_object)
+
+
+
+    return render(
+        request,
+        'hazards/generic_sds.html',
+        {
+            'nav_bar': 'safety_data_sheet',
+            'product_name': product_name,
+            'ld50_dict': ld50_dict,
+            'sds_info': sds_info,
+        },
+    )
+
+
+
+
+    # If the url contains a cas number, the view will display the SDS for that ingredient
+
+
+def get_ellipsis_form_data(sds_object, post_formset = None):
+    '''
+    Add documentation here
+    '''
+
+    #here I am attempting to get the merged_pcode_list from the sds_object, so this logic can be
+    # within this helper function, rather than in the view
+    formula_list = sds_object.get_hazard_formula_list()
+    category_list = []
+    for hazard, category in calculate_flavor_hazards(formula_list).items():
+        if 'ld50' not in hazard and category != 'No':
+            category_list.append(HazardCategory.objects.filter(hazard_class__python_class_name=hazard)\
+                                 .get(category=category))
+    merged_hcode_info = get_merged_hcode_info(category_list)
+    merged_pcode_list = merged_hcode_info['p_codes']
+
+
+    #ellipsis_form_data contains pcodes and modified statements (that contain forms to be filled out)
+    ellipsis_form_data = {}
+
+    initial_data = []
+    form_count = 0
+    for pcode in merged_pcode_list:
+        index = 1
+        while index <= pcode_dict[pcode].count('...'):  # append an EllipsisInfo object for each ellipse
+            # initial_data.append(EllipsisInfo(pcode = pcode, index = index))
+            if post_formset: #if the user has posted data, show what they entered, whether it's valid or not
+                if not post_formset[form_count].errors:
+                    info = post_formset[form_count].cleaned_data['info']
+                else:
+                    info = post_formset[form_count]['info'].value()
+            else: #otherwise, if a user has not yet posted anything
+                try: #if an ellipsis info object already exists, find it and use that for initial data
+                    info = EllipsisInfo.objects.get(object_id=sds_object.id,
+                                                    content_type=ContentType.objects.get_for_model(sds_object),
+                                                    index = index,
+                                                    pcode = pcode).info
+                except:
+                    info = None
+
+            initial_data.append({'pcode': pcode, 'info': info, 'index': index})
+
+            index += 1
+            form_count += 1
+
+    EllipsisInfoFormSet = formset_factory(EllipsisInfoForm, extra=0)
+    formset = EllipsisInfoFormSet(initial=initial_data, prefix='ellipsis')
+
+    #incomplete_pcodes will be used to determine whether there are any precautionary statements which
+    #have not yet been filled out.  if there are, the user should not be allowed to print the SDS.
+    incomplete_pcodes = False
+
+    form_count = 0
+    for pcode in merged_pcode_list:
+
+        current_statement = pcode_dict[pcode]
+        editable_statement = pcode_dict[pcode]
+
+
+        pcode_errors = ''
+        if '...' in current_statement:
+            index = 1
+            ellipsis_count = current_statement.count('...')
+            while index <= ellipsis_count:
+                current_form = formset[form_count + (index - 1)]
+
+                editable_statement = editable_statement.replace('...',
+                                              current_form.as_p(),
+                                              index)
+
+                try:
+                    current_statement = current_statement.replace('...',
+                                                EllipsisInfo.objects.get(
+                                                object_id=sds_object.id,
+                                                content_type=ContentType.objects.get_for_model(sds_object),
+                                                pcode = pcode,
+                                                index = index
+                                                ).info,
+                                                index)
+                except:
+                    current_statement = None
+                    incomplete_pcodes = True
+
+                if post_formset and post_formset.errors:
+                    try:
+                        pcode_errors += str(post_formset.errors[form_count + (index - 1)]['info'])
+                    except:
+                        pass #there are no errors for this form
+
+                index += 1
+
+            form_count += ellipsis_count
+
+            ellipsis_form_data[pcode] = [current_statement, editable_statement, pcode_errors]
+
+    #NEED THIS, THE FORMS MUST REMAIN IN THE SAME ORDER
+    #IF YOU JUST ITERATE THROUGH ELLIPSIS_FORM_DATA.ITERITEMS, ORDER WILL CHANGE
+    ellipsis_table = []
+    for pcode in merged_hcode_info['p_codes']:
+        if pcode in ellipsis_form_data:
+            #for pcode, info in ellipsis_form_data.iteritems(): <- NO!!
+            ellipsis_table.append((pcode, ellipsis_form_data[pcode][0], ellipsis_form_data[pcode][1], ellipsis_form_data[pcode][2])) #pcode, statement, saved_statement, errors
+
+    ellipsis_form_data['formset'] = formset
+
+    return ellipsis_table, ellipsis_form_data, incomplete_pcodes
+
+
+
+def product_list(request):
+    return render(
+        request,
+        'hazards/ghsproduct_list.html',
+        {
+            'nav_bar': 'product_list',
+            'object_list': GHSProduct.objects.all(),
+        },
+    )
+
+
+def ingredient_autocomplete(request):
+    """
+    This returns a JSON object that is an array of objects that have
+    the following properties: id, label, value. Labels are shown to
+    the user in the form of a floating dialog.
+    """
+    # this is provided by the jQuery UI widget
+    term = request.GET['term']
+
+    ret_array = []
+
+    term = str(term)
+
+    if GHSIngredient.objects.filter(cas__icontains=term):
+        ingredients = GHSIngredient.objects.filter(cas__icontains=term)
+    else:
+        ingredients = GHSIngredient.objects.filter(name__icontains=term)
+
+
+    for ingredient in ingredients:
+        ingredient_json = {}
+        ingredient_json["cas"] = ingredient.cas
+        ingredient_json["label"] = ingredient.__str__()
+        ingredient_json["value"] = ingredient_json["cas"]
+        ret_array.append(ingredient_json)
+    return HttpResponse(json.dumps(ret_array), content_type='application/json; charset=utf-8')

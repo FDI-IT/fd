@@ -1,0 +1,193 @@
+{% load humanize %}
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+
+    {# this part includes some javascript, css, etc #}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="/static/js/lib/jquery-1.7.1.min.js"></script> 
+	<script type="text/javascript" src="/static/js/lib/jquery.tablesorter.min.js"></script>
+    <link href="/static/css/batch_screen.css?v=25" type="text/css" rel="stylesheet"{# media="screen" #}>
+	{# <link href="/static/css/batch_print.css?v=25" type="text/css" rel="stylesheet" media="print"> #}
+
+    <title>{{ page_title }}</title>
+
+</head>
+
+<body>
+	<table id="outer">
+		<thead>
+			<tr>
+				<th>
+					<span id="titleleft">{{ flavor }}</span>
+					<span id="titlecenter">{{ todays_date|date:"D d-M-y" }}</span>
+					<span id="titleright">Lot number: xxxxxxxx <img src="/access/{{ flavor.number }}/barcode" align="top" /></span></th>
+			</tr>
+		</thead>
+		<tfoot>
+		</tfoot>
+		<tbody>
+			{% if flavor.yield_field %}
+			<tr>
+				<td>
+					Yield: {{ flavor.yield_field }}
+				</td>
+			</tr>
+			{% else %}
+			{% endif %}
+			<tr>
+				<td>
+					<table id="formula">
+						<thead>
+							<tr>
+								<th width="45px"><img src="/static/images/sort.gif"></th>
+								<th width="40px"><img src="/static/images/sort.gif"></th>
+								<th><img src="/static/images/sort.gif"></th>
+								<th width="70px"><img src="/static/images/sort.gif">Batch</th>
+								<th width="105px"><img src="/static/images/sort.gif">Grams</th>
+								<th width="180px" colspan="5">Added</th>
+							</tr>
+							<tr>
+								<th>PIN</th>
+								<th>NA</th>
+								<th>Product Name</th>
+								<th>Amount</th>
+								<th>equivalent</th>
+								<th>1</th>
+								<th>2</th>
+								<th>3</th>
+								<th>4</th>
+								<th>5</th>
+							</tr>
+						</thead>
+						<tfoot></tfoot>
+						<tbody>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div id="memorow">
+						<div class="container">
+							<div class="content">
+								<div class="left">
+									Compounder(s)<br>
+									__________________<br>
+									__________________<br>
+									__________________
+								</div>
+								
+								<div class="main">
+									{{ flavor.productmemo }}
+								</div>
+							</div>
+						</div>
+					
+					
+						<div class="sidebar">
+							Flash point:
+							{% if flavor.flashpoint %}
+								{{ flavor.flashpoint }}
+							{% else %}
+								UNAVAILABLE
+							{% endif %}
+						</div>
+					</div>
+					
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div id="checklistrow">
+						<div class="container">
+							<div class="content">
+								<div class="left">
+									Allergens: {{ flavor.allergen }}
+									{% if flavor.crustacean %}
+										CRUSTACEANS
+									{% else %}
+									{% endif %}
+									{% if flavor.eggs %}
+										EGGS
+									{% else %}
+									{% endif %}
+									{% if flavor.fish %}
+										FISH
+									{% else %}
+									{% endif %}
+									{% if flavor.milk %}
+										DAIRY
+									{% else %}
+									{% endif %}
+									{% if flavor.peanuts %}
+										PEANUTS
+									{% else %}
+									{% endif %}
+									{% if flavor.soybeans %}
+										SOYBEANS
+									{% else %}
+									{% endif %}
+									{% if flavor.treenuts %}
+										TREENUTS
+									{% else %}
+									{% endif %}
+									{% if flavor.wheat %}
+										WHEAT
+									{% else %}
+									{% endif %}
+									{% if flavor.sulfites %}
+										SULFITES
+									{% else %}
+									{% endif %}
+							</div>
+							<div class="main">
+								HACCP: {{ flavor.haccp }}<br>
+								Micro test: {{ flavor.microtest }}
+							</div>
+						</div>
+					</div>
+					<div class="sidebar">
+						{% if flavor.ccp1 %}
+							Sieve CCP 1 Recorded: [ ]<br>
+						{% else %}
+						{% endif %}
+						{% if flavor.ccp2 %}
+							Allergen Cleaning CCP 2 Recorded: [ ]<br>
+						{% else %}
+						{% endif %}
+						{% if flavor.ccp3 %}
+							COA Verification CCP 3 Recorded: [ ]<br>
+						{% else %}
+						{% endif %}
+						{% if flavor.ccp4 %}
+							Label Application CCP 4 Recorded: [ ]<br>
+						{% else %}
+						{% endif %}
+						{% if flavor.ccp5 %}
+							Non Detect GMO CCP 5 Recorded: [ ]<br>
+						{% else %}
+						{% endif %}
+						{% if flavor.ccp6 %}
+							Thermal Kill Step CCP 6 Recorded: [ ]<br>
+						{% else %}
+						{% endif %}
+					</div>
+				</div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					After the entire product run has ended, all utensils and equipment have been<br>
+					inspected for potential contamination by allergens by visual inspection.<br><br>
+					Signed: _______________________________________ Date: ____________________
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	
+</body>
+</html>

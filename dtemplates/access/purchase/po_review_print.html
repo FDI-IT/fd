@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load blades %}
+
+{% block htmlhead %}
+<link href="/static/css/print_review.css?v=25" type="text/css" rel="stylesheet">
+<link href="/static/css/print_review_screen.css?v=25" type="text/css" rel="stylesheet" media="screen">
+
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+{% block main %}
+
+<div class="float-container top-container">
+	<div class="float-left">
+		<img id="mainlogo" src="/static/images/logo.png" class="header_image" width="180px" height="87px">
+	</div>
+	<div class="float-left" class="jtextfill">
+		Flavor Dynamics, Inc.<br>
+		640 Montrose Avenue<br>
+		South Plainfield, NJ 07080<br>
+		Phone: 908-822-8855<br>
+		Fax: 908-822-8547<br>
+		kristyc@flavordynamics.com
+	</div>
+	
+	<div class="float-right">
+		<div class="bold-right-title">PURCHASE ORDER</div><br>
+		<div class="bold-right-subheadding">
+			<div class="label">Date Ordered</div>
+			{{ po.date_ordered }}
+		</div>
+		<div class="bold-right-subheadding">
+			<div class="label">P.O. Number</div>
+			{{ po.number }}
+		</div>
+	</div>
+</div>
+<br>
+<div class="float-container">
+	<div class="half-width-left">
+		{{ po.supplier.suppliername }}<br>
+		{{ po.supplier.address }}<br>
+		{{ po.supplier.city }}, {{ po.supplier.region }} {{ po.supplier.postalcode }}<br>
+		<span class="label-half-width"><b>Phone:</b> {{ po.supplier.phone }}</span><br>
+		<span class="label-half-width"><b>Fax:</b> {{ po.supplier.fax }}</span><br>
+		<span class="label-half-width"><b>Contact:</b> {{ po.supplier.contactname}}
+
+	</div>
+	<div class="float-right">
+		<div class="bold-right-subheadding">
+			<div class="label">Date due</div>
+			{{ po.due_date }}
+		</div>
+		<div class="bold-right-subheadding">
+			<div class="label">Ship via</div>
+			{{ po.shipper}}
+		</div>
+	</div>
+</div>
+<br>
+<div class="float-container">
+	<table id="polis">
+		<thead>
+			<tr>
+				<th>Product<br>I.D.</th>
+				<th width="33%">Name</th>
+				<th>Amount</th>
+				<th>Kosher<br>Code</th>
+				<th>Allergen</th>
+				<th>Micro-<br>sensitivity</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for poli in polis reversed %}
+			<tr>
+				<td>{{ poli.raw_material.id }}</td>
+				<td>{{ poli.raw_material.long_name }}</td>
+				<td>{{ poli.quantity|floatformat:"-3" }} x {{ poli.package_size|floatformat:"-3" }} lbs = {{ poli.total|floatformat:"-3" }} lbs</td>
+				<td>{{ poli.raw_material.kosher_code }}</td>
+				<td>{{ poli.raw_material.allergen }}</td>
+				<td>{{ poli.raw_material.microsensitive }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+<br><br><br>
+<div class="float-container">
+	<h3>Terms</h3>
+	<ul>
+		<li>C of A must accompany shipment or be sent via fax or email prior to receipt of item.</li>
+		<li>All Kosher products must arrive per your Kosher certificate or they will be rejected.</li>
+		<li>Please sign and return this purchase order form for confirmation.</li>
+		<li>By signing this form you agree to the terms of this PO.</li>
+	</ul>
+	<br><br><br><br>
+	<hr>
+	<div class="half-width-left"><i>signature</i></div>
+	<div class="half-width-right"><i>date</i></div>
+</div>
+
+{% endblock %}
+

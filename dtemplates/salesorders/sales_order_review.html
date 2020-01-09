@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="title">
+	<div id="title-left">
+		<span id="name">{{ sales_order.customer }} - {{sales_order.number}} - {{ sales_order.create_date }}</span>
+	</div>
+	<div id="related-links">
+	<ul>
+		
+	</ul>
+	</div>
+</div>
+<div id="flavors-ordered">
+<table width="100%" class="sorttable">
+	<caption>Flavors Ordered</caption>
+	<thead>
+		<tr>
+			<th title="Two-character prefix">Pf</th>
+			<th title="Flavor Number" class="{sorter: 'link-digit'}">Num</th>
+			<th title="Nat-Art Label">N-A</th>
+			<th>Name</th>
+			<th>Type</th>
+			<th title="Last Date When Price Changed">Update</th>
+			<th title="Weight Ordered" class="{sorter: 'link-digit'}">Weight</th>
+			<th title="Total Sale Price" class="{sorter: 'link-digit'}">Sale $</th>
+			<th class="{sorter: 'link-digit'}" title="Total Unit Raw Material Cost">RMC</th>
+			<th title="Sale Price / Raw Material Cost" class="{sorter: 'link-digit'}">Profit Margin</th>
+		</tr>
+	</thead><tbody>
+{% for lineitem in line_items %}
+		<tr>
+			<td>{{ lineitem.flavor.prefix }}</td>
+			<td><a href="/access/{{ lineitem.flavor.number }}">{{ lineitem.flavor.number }}</a></td>
+			<td>{{ lineitem.flavor.natart }}</td>
+			<td>{{ lineitem.flavor.name }}</td>
+			<td>{{ lineitem.flavor.label_type }}</td>
+			<td>{{ lineitem.flavor.lastspdate|date:"Y-m" }}</td>
+			<td><a href="/access/{{ lineitem.flavor.number }}?wf={{ lineitem.quantity }}">{{ lineitem.quantity }}</a></td>
+			<td>{{ lineitem.unit_price }}</td>
+			<td>{{ lineitem.rmc }}</td>
+			<td>{{ lineitem.profitmargin }}</td>
+		</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</form>
+{% endblock %}
+

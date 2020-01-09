@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <table>
+    <tr>
+        {% for header in headers %}
+        <th> {{ header }} </th>
+        {% endfor %}
+    </tr>
+    {% for list in items %}
+    <tr>
+        {% for element in list %}
+            <td> {{ element|safe }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </table>
+
+{% endblock %}

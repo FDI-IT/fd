@@ -1,0 +1,279 @@
+ {% extends "base.html" %}
+
+{% block content %}
+<style>
+  .suggestion{
+    font-size: 15px;
+  }
+</style>
+<form method = "POST" action="">
+  {% csrf_token %}
+  {{search}}
+
+</form>
+
+<div><div>SPG</div><div id = "spg" class="suggestion">{{flavor.spg}} </div></div>
+<div><div>Flashpoint</div><div id = "spg" class="suggestion">{{flavor.flashpoint}} </div></div>
+
+<div>Weight (g) <input type="number" id ="weight" oninput="suggest()"/> g</div>
+<div id = "adjustedweight" class="suggestion"></div>
+
+
+<table>
+  <tr>
+    <td> Smallest </td>
+    <td><input type="checkbox" name="option" id="smallest" onclick="suggest()"/></td>
+  </tr>
+
+  <tr>
+    <td> Largest </td>
+    <td><input type="checkbox" name="option" id="largest"  onclick="suggest()"/></td>
+  </tr>
+
+
+  <tr>
+    <td> Best Fit </td>
+    <td><input type="checkbox" name="option" id="bestfit"  onclick="suggest()"/></td>
+  </tr>
+
+
+  <tr>
+    <td>Canada Pails </td>
+    <td><input type="checkbox" name="option" id="canadapails"  onclick="suggest()"/></td>
+  </tr>
+
+  <tr>
+    <td> Metal </td>
+    <td><input type="checkbox" name="option" id="metal"  onclick="suggest()"/></td>
+  </tr>
+
+  <tr>
+    <td> HM </td>
+    <td><input type="checkbox" name="option" id="nonhm"  onclick="suggest()"/></td>
+  </tr>
+</table>
+
+<div id = "suggestion" class="suggestion">
+</div>
+
+
+
+<script>
+
+var spg = document.getElementById("spg").innerHTML;
+var containers = [2, 8, 25, 40, 120, 240, 440, ];
+var count = [0, 0, 0, 0, 0, 0, 0]
+var container = 440;
+var thresholds = [5, 16.5, 32.5, 80, 180, 340];
+
+function pails(option, weight){
+  console.log(count);
+  if(option == "smallest"){
+    steel(weight);
+  }
+  else if(option == "largest" || option == "bestfit"){
+    if(weight > 40){
+      count[3]++;
+      weight -= 40;
+      pails(option, weight);
+    }
+    else if(weight <= 40 && weight > 25){
+      count[3]++;
+    }
+    else{
+      count[2]++;
+    }
+  }
+
+
+
+}
+
+
+function steel(weight){
+  c = Math.ceil(weight/25);
+  count[containers.indexOf(25)] = c;
+}
+
+// var containers = [2, 8, 25, 40, 120, 240, 440, ];
+
+function hm(option, weight){
+  container = 120;
+  if(option == "largest"){
+
+    for(i = 4; i > 1; i--){
+      if(containers[i] >= weight){
+        container = containers[i];
+        // console.log("hm " + i);
+        //
+        // weight -= container;
+        // if(weight > 0){
+        //   hm(option, weight)
+        // }
+      }
+    }
+
+    count[containers.indexOf(container)]++;
+    console.log("hm " + count);
+    // weight = weight - container;
+
+    if(weight-container > 0){
+      console.log("hm greater than 0");
+      hm("largest", weight-container)
+    }
+  }
+
+  else if(option == "smallest"){
+    c = Math.ceil(weight/8);
+    count[containers.indexOf(8)] = c;
+  }
+
+
+}
+
+function smallest(args, weight){
+    var c = 0;
+    // smallest suggestion
+    // hm only
+    if(args[5].checked && !(args[3].checked || args[4].checked)){
+      hm("smallest", weight);
+
+    }
+    //steel or Pails
+    else if(args[4].checked){
+      steel(weight);
+    }
+    // smallest container, 2lbs
+    else{
+      c = Math.ceil(weight/2);
+      count[containers.indexOf(2)] = c;
+    }
+}
+
+
+function largest(args, weight){
+
+  // pails
+  if(args[3].checked){
+    pails("largest", weight);
+  }
+
+  // hm
+  else if(args[5].checked){
+    hm("largest", weight);
+  }
+
+  //largest, nothin else
+  else{
+      // container = 440;
+      // largest container suggestion
+      for(i = containers.length-1; i >= 0; i--){
+          if(containers[i] > weight)
+            container = containers[i];
+        }
+      count[containers.indexOf(container)] += 1;
+      // defaults to 440 if nothings there
+      weight = weight-container;
+      if(weight > 0){
+        largest(args, weight);
+      }
+  }
+}
+  // document.getElementById("suggestion").innerHTML = "1 "+ container + "lb container.";
+
+
+
+function bestfit(args, weight){
+  var index = 5
+  for(i = containers.length - 1; i > 0; i--){
+    if(containers[i] > weight){
+      if(weight > thresholds[index]){
+        container = containers[i];
+      }
+      else{
+        container = containers[i-1]
+      }
+      index--;
+    }
+  }
+  count[containers.indexOf(container)] += 1;
+  weight-= container;
+  if(weight > 0){
+    bestfit(args, weight);
+  }
+
+
+}
+
+function suggest(){
+  count = [0, 0, 0, 0, 0, 0, 0]
+  container = 440;
+  var options = document.getElementsByName("option");
+  var w = document.getElementById("weight").value;
+  var suggestion = "Suggestion for this <br>";
+  var weight = (parseFloat(w) * parseFloat(spg)).toFixed(2);
+  document.getElementById("adjustedweight").innerHTML = "Adjusted weight, taking into account specific gravity: " + weight;
+  // console.log(weight);
+  // console.log(spg);
+
+
+  // metal
+  if(options[4].checked){
+    steel(weight);
+  }
+
+  // smallest
+  else if(options[0].checked && !options[1].checked && weight > 0){
+    smallest(options, weight);
+    console.log("smallest");
+
+  }
+
+  // largest
+  else if(!options[0].checked && options[1].checked && weight > 0){
+    largest(options, weight);
+    console.log(count);
+
+  }
+
+  else if(!options[0].checked && !options[1].checked && options[2].checked && weight > 0){
+    bestfit(options, weight);
+    console.log(count);
+
+  }
+
+  for(var i = 0; i < count.length; i++){
+    if(count[i] > 0){
+      if(count[i] == 1)
+        suggestion += count[i] + " " + containers[i] + " lb container <br>";
+      else
+        suggestion += count[i] + " " + containers[i] + " lb containers <br>";
+    }
+  }
+
+
+  document.getElementById("suggestion").innerHTML = suggestion;
+}
+
+
+suggest();
+
+
+
+/*
+
+  2
+  8
+  25
+  40
+  120
+  240
+  440
+
+*/
+
+</script>
+
+
+
+{% endblock %}

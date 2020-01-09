@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+
+<head>
+	<link rel="stylesheet" type="text/css" href="/static/css/spec_sheet.css" />
+</head>
+    
+<div id="content-main">
+	
+
+	<h2 class="fdi_print_subtitle">
+		Flavor Specifications 
+		<br> Flavor: <a href="{{ flavor.get_absolute_url }}"> {{ flavor.name }} </a>	
+	</h2>
+	
+	<table class="fdi_specifications_table">
+		<thead>
+			<tr>
+				<th>
+					Name
+				</th>
+				<th>
+					Specification
+				</th>
+				<th>
+					Microbiological
+				</th>
+				<th>
+					Edit
+				</th>
+				<th>
+					Delete
+				</th>
+			</tr>
+		</thead>
+		
+		<tbody>
+		{% for name, spec, micro, edit_url, delete_url in spec_list %}
+			<tr>
+				<td class="spec_name" width ="25%"> {{ name }} </td>
+				<td class="spec" width ="25%"> {{ spec }} </td>
+				<td class="micro" width ="25%"> {{ micro }} </td>
+							
+				<td class="edit-row">
+					<form action = "{{ edit_url }}">
+						{% if flavor.approved %}
+						<input type="submit" value="Edit" disabled>
+						{% else %}
+						<input type="submit" value="Edit">
+						{% endif %}
+					</form>
+				</td>
+				
+				<td class="edit-row">
+					<form action = "{{ delete_url }}">
+						{% if flavor.approved %}
+						<input type="submit" value="X" disabled>
+						{% else %}
+						<input type="submit" value="X">
+						{% endif %}
+					</form>
+				</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+
+	{% if flavor.approved %}	
+	
+		<div align="center">
+			<form action = "{{ add_url }}">
+				<input type="submit" value="Add Specification" disabled>
+			</form>
+		</div>
+
+		<h2> This flavor has been approved.  You must <a href="/admin/access/flavor/{{flavor.pk}}">manually unapprove</a> 
+			the flavor in order to edit or create specifications.
+			<br> Make sure to reapprove the flavor afterward.
+		</h2>
+		
+	{% else %}
+		<div align="center">
+			<form action = "{{ add_url }}">
+				<input type="submit" value="Add Specification">
+			</form>
+		</div>
+	{% endif %}
+
+
+
+</div>
+
+{% endblock %}

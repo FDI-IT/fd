@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div>
+  <form method = "POST">
+    {% csrf_token %}
+    <input list='user' name='user' required>
+    <datalist id='user' name='user'>
+      {% for u in users %}
+        <option value='{{u.username}}'></option>
+      {% endfor %}
+    </datalist>
+
+    <table id='testtable'>
+      <th>Test</th>
+      <th>Completion Date</th>
+      <tr>
+        <td id ='test_type'>
+          <select name='test'>
+
+            {% for t in tests %}
+              <option value="{{t.0}}">{{t.1}}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td id ='c_date' >
+          <input type='date' name='cdate' required/>
+        </td>
+        <td>
+          <button type='button' onclick="adduser();">Add another test</button>
+        </td>
+      </tr>
+    </table>
+
+    <input type='submit'>
+  </form>
+</div>
+
+<script>
+
+  function adduser(){
+    table = document.getElementById('testtable');
+    newrow = document.createElement('tr');
+    empty = document.createElement('td');
+    datalist = document.getElementById('c_date');
+    test = document.getElementById('test_type');
+    copynode = datalist.cloneNode(true);
+    testnode = test.cloneNode(true);
+    // copynode.firstChild. = '';
+    // empty.appendChild(test);
+    // newrow.appendChild(empty);
+    deletebtn = document.createElement('input');
+    deletebtn.setAttribute('type', 'button');
+    deletebtn.setAttribute('onclick', 'deleterow(this);');
+    deletebtn.value = "Delete Row";
+    // deletebtn.setAttribute('value', 'Delete Row');
+
+    empty.appendChild(deletebtn);
+
+    newrow.appendChild(testnode);
+    newrow.appendChild(copynode);
+    newrow.appendChild(deletebtn);
+    table.appendChild(newrow);
+  }
+
+  function deleterow(e){
+    e.parentNode.parentNode.removeChild(e.parentNode);
+    // return false;
+  }
+</script>
+{% endblock %}

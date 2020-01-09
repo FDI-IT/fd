@@ -1,0 +1,101 @@
+{% load qstring %}
+{% load flavor_history_print %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+
+    {# this part includes some javascript, css, etc #}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="/static/js/lib/jquery-1.7.1.min.js"></script> 
+	<script type="text/javascript" src="/static/js/lib/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="/static/js/barcode_refresher.js"></script>     
+	
+	<script type="text/javascript">
+		;(function($) {
+		    $.fn.textfill = function(index, options) {
+		        
+		    }
+		})(jQuery);
+
+		
+		jQuery(document).ready(function() {
+			jQuery('span.datum:contains("New Usage")').closest('li').hide();			
+			jQuery('div.info-section').each( function(index, value) {
+				var jqt = jQuery(this);
+				var new_height = jQuery(this).find('div.qc-info')[0].offsetHeight - 20;
+				jqt.find('fieldset.signatures').height( new_height );
+			});
+			jQuery('div.jqtextfill').each(function (index, value) {
+				console.log(this);
+//				textfill(index, {maxFontPixels:24});
+				var fontSize = 24;
+		        var ourText = jQuery(this).find('span')
+		        var maxHeight = $(this).height();
+		        var maxWidth = $(this).width();
+		        var textHeight;
+		        var textWidth;
+				for (var i=ourText.length-1; i>=0; --i) {
+			        do {
+			            ourText.css('font-size', fontSize);
+			            textHeight = ourText.height();
+			            textWidth = ourText.width();
+			            fontSize = fontSize - 1;
+						console.log(fontSize);
+			        } while ((textHeight > maxHeight || textWidth > maxWidth) && fontSize > 3);
+				}
+		        return this;
+			});
+			window.print();
+		});
+	</script>
+	
+    <link href="/static/css/print_flavor_history.css?v=25" type="text/css" rel="stylesheet">
+
+    <title>{{ page_title }}</title>
+
+</head>
+
+<body>
+	<div id="outermost">
+		{% for retain_pk in retain_pks %}
+		{% if forloop.first %}
+		<div>
+		{% else %}
+		<div class="newpage">
+		{% endif %}
+			{% flavor_history_print retain_pk %}
+		</div>
+		{% endfor %}
+		
+		{% if retain_pks|length > print_checklist_min %}
+			<div class="newpage">
+				<table width="100%">
+					<h1> Flavor Retain Checklist </h1>
+					<thead>
+						<tr>
+							<th width="70px">Target #</th>
+							<th width="100px">Flavor</th>
+							<th>Notes</th>
+							<th width="70px">Alt #</th>
+							<th>Alt Notes</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for retain in retain_checklist %}
+						<tr>
+							<td>{{ retain.1.0.0|date:'y' }}-{{retain.1.0.1}}</td>
+							<td>{{ retain.0.number }}</td>
+							<td>{{ retain.1.0.2 }}</td>
+							<td>{{ retain.1.1.0|date:'y' }}-{{retain.1.1.1}}</td>
+							<td>{{ retain.1.1.2 }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% endif %}
+	</div>
+</table>
+</body>
+</html>

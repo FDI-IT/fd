@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% load related_links %}
+{% block content %}
+
+<script type="text/javascript">
+	jQuery(document).ready(function() {
+		var docuwindow = window.open('{{ preview_image.url }}', 'docuwindow')
+	});
+</script>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{ form.instance }} - {{ form.instance.retain.product}}</span>
+</div>
+
+<div>
+	<form method="post" action="/qc/pending_testcards/">
+	{% csrf_token %}
+		{{ form.as_p }}		
+		<input type="submit" name="submit" value="Submit">
+	</form>
+	
+</div>
+</div>
+
+{% endblock %}

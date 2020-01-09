@@ -1,0 +1,58 @@
+{% extends "bootstrap_base.html" %}
+
+{% block htmlhead %}
+	{{ block.super }}
+	<script src="{{ STATIC_URL }}js/rm_inventory_data_entry.js"></script>
+	<link href="{{ STATIC_URL }}css/mattcss.css?v=25" type="text/css" rel="stylesheet" media="screen">
+
+{% endblock %}
+
+{% block content %}
+
+<div id="content-main">
+	<div class="container">
+        <div class="row">
+			<div class="col-sm-12">
+
+                <div class="alert alert-success" role="alert"><strong>Data entered and submitted successfully!</strong></div>
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h2> Inventory Update Summary </h2>
+                    </div>
+
+                    <div class="panel-body">
+
+                        <table class="table table-hover table-condensed centerTable">
+                            <thead>
+                                <tr>
+                                    <th class="col-sm-2">PIN</th>
+                                    <th class="col-sm-4">Ingredient Name</th>
+                                    <th class="col-sm-3">Total Amount Added (lbs)</th>
+                                    <th class="col-sm-3">Current Amount (lbs)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ingredient, amount_added in inventory_dict.items %}
+                                    <tr class="entry-row">
+                                        <td>{{ ingredient.id }}</td>
+                                        <td>{{ ingredient.long_name }}</td>
+                                        <td>{{ amount_added }}</td>
+                                        <td>{{ ingredient.inventory }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                    <input class="btn btn-success pull-right" type="button" onclick="location.href='/access/ingredient/rm_inventory_data_entry'" value="Enter More Data"/>
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+	</div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+	<script type="text/javascript">
+		jQuery(document).ready( function() {
+			jQuery('td.object-number-cell').each(function(index) {
+				jQuery(this).append(jQuery(this).find('input').val());
+			});	
+		});
+		
+	</script>
+    <form action="" method="POST">
+	{{ formset.management_form }}
+    {% csrf_token %}
+	
+	<table id="retain-rows" width="100%">
+		<thead>
+			<tr>
+				<th width="15%">Retain number</th>
+				<th>Flavor number</th>
+				<th>Lot number</th>
+			</tr>
+		</thead>
+		<tbody>
+	    {% for form in formset.forms %}
+	    	{% if form.errors %}
+	    		<tr bgcolor="#FFDDDD">
+	    			<td colspan = "4"><b> Please correct the error(s) in the following row. {{form.non_field_errors}}</b></td>
+	    		</tr>
+	    	{% endif %}
+			<tr>
+			
+				<td class="object-number-cell">{{ form.object_number }}</td>
+				<td class="number-cell">{{ form.flavor_number }}{{form.flavor_number.errors}}
+					</td>
+				<td class="lot-cell">{{ form.lot_number }}{{form.lot_number.errors}}</td>
+			</tr>
+	    {% endfor %}
+		</tbody>
+	</table>
+	<input id="retain-submit-button" type="submit" value="Submit Retains" />
+    </form>
+{% endblock %}

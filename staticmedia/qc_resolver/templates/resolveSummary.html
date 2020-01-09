@@ -1,0 +1,51 @@
+<div ng-show="!saving">
+	<div class="modal-header text-center info-background">
+		<button type="button" class="close" ng-click="cancel()">x</button>
+		<h3> Review Changes </h3>
+	</div>
+	<div class="modal-body">
+		<div class="row">
+			<div class="col-md-10 col-md-offset-2">
+				<span class="object-heading">Lot {{ new_lot.number }}</span> <br>
+				<strong>Status:</strong> <span class="strike"> {{ new_lot.status != old_lot.status ? old_lot.status : '' }} </span> {{ new_lot.status }} 
+			</div>
+		</div>
+		<div ng-repeat="retain in new_lot.retains">
+			<div class="row">
+				<div class="col-md-9 col-md-offset-3">
+					<span class="object-heading">Retain {{ retain.retain }}</span> <br>
+					<strong>Notes:</strong> <span class="strike"> {{ retain.notes != getOldRetain(retain).notes ? getOldRetain(retain).notes : '' }} </span><span ng-class="{'new': getOldRetain(retain).notes==''}">{{ retain.notes }} </span><br>
+					<!-- {{ old_lot.retains[$index].notes }} {{ old_lot.status }} -->
+					<strong>Status:</strong> <span class="strike"> {{ retain.status != getOldRetain(retain).status ? getOldRetain(retain).status : '' }}</span>{{ retain.status }}
+				</div>
+			</div>
+			<div class="row" ng-repeat="testcard in retain.testcards">
+				<div class="col-md-8 col-md-offset-4">
+					<span class="object-heading">Testcard {{ testcard.id }}</span>
+					<i>{{ testcard.qc_time === null ? 'Scan Time:' + (testcard.scan_time | date: "M/d/yy")  : 'QC Time:' + (testcard.qc_time | date: "M/d/yy")}}</i> <br>
+					<strong>Notes:</strong> <span class="strike"> {{ testcard.notes != getOldTestcard(retain, testcard).notes ? getOldTestcard(retain, testcard).notes : '' }} </span><span ng-class="{'new': getOldTestcard(retain, testcard).notes==''}">{{ testcard.notes }} </span> <br>
+					<strong>Status:</strong> <span class="strike"> {{ testcard.status != getOldTestcard(retain, testcard).status ? getOldTestcard(retain, testcard).status : '' }} </span>{{ testcard.status }}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<div class="resolve-another-box float-left"><input type="checkbox"ng-model="nextLot"> Resolve Another Lot </div>
+		<button type="button" class="btn btn-default" ng-click="cancel()"> Back </button>
+		<button type="button" class="btn btn-primary" ng-click="save()"> Save Changes</button>
+	</div>
+</div>
+
+<div ng-show="saving">
+	<div class="modal-body text-center">
+		<div class="row">
+			<p class="text-center">
+			<div class="margin-1em">
+				<i class="fa fa-spinner fa-spin fa-3x"></i>
+				<span class="loading-text"> <i> Saving... </i></span>
+			</div>	
+			</p>
+		</div>
+	</div>
+</div>
+

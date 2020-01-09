@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load qstring %}
+{% load mainsearch %}
+
+{% block content %}
+
+<div id="content-solo">
+<div id="object-list">
+	<table width="100%">
+		<thead><tr>
+			<th>Flavor</th>
+			<th>Allergen</th>
+		</tr></thead>
+		<tbody>
+	    {% for flavor in flavors %}
+	    <tr>
+	    	<td><a href="{{ flavor.get_absolute_url }}">{{flavor}}</a></td>
+	    	<td>{{flavor.allergen}}</td>
+	    </tr>
+	    {% endfor %}
+	    </tbody>
+	</table>
+</div>
+</div>
+{% endblock %}

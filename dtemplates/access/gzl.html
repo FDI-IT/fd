@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load gzl_table %}
+{% load blades %}
+{% load related_links %}
+{% block content %}
+<script language="JavaScript">
+	jQuery(document).ready(function(){
+		$("#gzl").treeTable();
+	});
+</script>
+
+<div id="content-right">
+	{% blades product %}
+</div>
+
+<div id="content-main">
+<div id="title-left">
+	<span id="name">{{product}}</span>
+</div>
+{% related_links product %}
+
+<div class="product-memo"><span class="label">Memo</span>{{flavor.productmemo}}</div>
+<div class="content-table">
+	<span id="exploded-table">
+		{% gzl_table product %}
+	</span>
+	
+</div>
+</div>
+
+{% endblock %}
+

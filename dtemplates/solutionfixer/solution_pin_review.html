@@ -1,0 +1,23 @@
+
+		<table width="710px" id="rm-by-code">
+			<caption>Solution details</caption>
+			<thead>
+				<tr>
+				{% for header in table_headers %}
+					<th>{{ header }}</th>
+				{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+			{% for solution in related_solutions %}
+				<tr>
+					<td><a href="/access/ingredient/pin_review/{{ solution.ingredient.id }}/">{{ solution.ingredient.id }}</a></td>
+					<td><a href="/access/ingredient/pin_review/{{ solution.my_base.id }}/">{{ solution.my_base }}</a></td>
+					<td><a href="/access/ingredient/pin_review/{{ solution.my_solvent.id }}/">{{ solution.my_solvent }}</a></td>
+					<td>{{ solution.percentage }}</td>
+					<td>{{ solution.status }}</td>
+					<td>{{ solution.ingredient.unitprice }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>	

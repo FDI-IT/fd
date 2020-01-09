@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Part 1: Video Quiz </h3>
+
+<iframe width="1099.5" height="630" src="https://www.youtube.com/embed/uA97kEnK3kw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<form method="post">
+  {% csrf_token %}
+  <ol>
+    {% for q in questions %}
+      <li>
+        {{q.0}}
+        <ul>
+          {% for key, a in q.1.items %}
+            {% if a|length == 2 %}
+              <li><input type='radio' name='wps{{forloop.parentloop.counter0}}' value="{{key}}" required/> {{a}}</li>
+            {% else %}
+              <li><input type='radio' name='wps{{forloop.parentloop.counter0}}' value="{{key}}" required/> {{a}}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ol>
+
+<h3>Part 2: Workplace Safety 101</h3>
+
+<ol>
+  {% for q in questions2 %}
+    <li>
+      {{q.0}}
+      <ul>
+        {% for key, a in q.1.items %}
+          {% if a|length == 2 %}
+            <li><input type='radio' name='wps2{{forloop.parentloop.counter0}}' value="{{key}}" required/> {{a}}</li>
+          {% else %}
+            <li><input type='radio' name='wps2{{forloop.parentloop.counter0}}' value="{{key}}" required/> {{a}}</li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </li>
+  {% endfor %}
+</ol>
+<input type ="submit"/>
+</form>
+{% endblock %}

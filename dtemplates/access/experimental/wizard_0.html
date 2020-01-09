@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block htmlhead %}
+{{ block.super }}
+<script type="text/javascript" src="/admin/jsi18n/"></script>
+<script type="text/javascript" src="/static/admin/js/core.js"></script>
+<script type="text/javascript" src="/static/js/wizard0_experimental_edit.js"></script>
+
+<link rel="stylesheet" type="text/css" href="/static/admin/css/global.css"/>
+<link rel="stylesheet" type="text/css" href="/static/admin/css/widgets.css"/>
+<link href="/static/css/wizard.css?v=25" type="text/css" rel="stylesheet" media="screen">
+{{form.media}}
+{% endblock %}
+
+{% block content %}
+<p>Step {{ step }} of {{ step_count }}</p>
+<div id="content-left-half">
+	
+	<form action="." method="post">{% csrf_token %}
+	{{ wizard.management_form }}
+		
+	{% for hidden in form.hidden_fields %}
+	{{hidden}}
+	{%endfor%}
+	{% for fieldset in form.iter_fieldsets %}
+	<div id="{{ fieldset.extra_content.divid }}">
+		<fieldset>
+			<legend>{{ fieldset.extra_content.legend }}</legend>
+			{% for field in fieldset %}
+			<p class="field-p {% if field.field.required %}required_field{% endif %}"><label class="field">{{ field.label }}</label> {{field}}</p>
+			{% endfor %}
+		</fieldset>
+	</div>	
+	{% endfor %}
+	<input type="hidden" name="{{ step_field }}" value="{{ step0 }}" />
+	{{ previous_fields|safe }}
+	<input type="submit" value="Submit">
+	</form>
+</div>
+<div id="content-right-half">
+	<h1>The product label will appear as follows:</h1>
+	<div id="product-label">
+		<span id="product-label-natart" class="no-user-data-yet">[NatArt]</span>
+		<span id="product-label-name" class="no-user-data-yet">[Name]</span>
+		<span id="product-label-category" class="no-user-data-yet">[Category]</span>
+	</div>
+</div>
+{% endblock %}

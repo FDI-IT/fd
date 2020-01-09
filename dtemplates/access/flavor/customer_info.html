@@ -1,0 +1,50 @@
+<script type="text/javascript">
+function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 100 + 'px';
+  }
+</script>
+
+<head>
+	<link rel="stylesheet" type="text/css" href="/static/css/mattcss.css" />
+</head>
+
+
+{% if customer_table %}
+<h3> Customers who have ordered this flavor: </h3>
+
+	<table>
+		<thead>
+			<tr>
+				<th>
+					Customer
+				</th>
+				<th>
+					Customer Specs
+				</th>
+				<th>
+					Customer Details
+				</th>
+				<th>
+					Customer Spec Sheet
+				</th>
+			</tr>
+		</thead>
+		
+		<tbody>
+		{% for customer, spec_count, customer_url, specsheet_url in customer_table %}
+			<tr>
+				<td class="customer_name" width ="25%"> {{ customer.companyname }} </td>
+				<td class="spec_count" width ="25%"> {{ spec_count }} </td>
+				<td class="micro" width ="25%"> <a href="{{ customer_url }}"> Customer Page </a> </td>
+				{% if specsheet_url %}
+					<td class="micro" width ="25%"> <a href="{{ specsheet_url }}"> View </a> </td>
+				{% else %}
+					<td class="spec_count" width ="25%"> No Changes </td>
+				{% endif %}
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+
+{% endif %}
+

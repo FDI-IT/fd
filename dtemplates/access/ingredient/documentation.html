@@ -1,0 +1,28 @@
+<table width="710px" id="rm-by-code">
+	
+	{% if documentation_list %}
+	
+	<thead>
+		<tr>
+			<th>File</th>
+			<th>Date Modified</th>
+		</tr>
+	</thead>
+	
+	<tbody>
+		{% for file_name, url, date_modified in documentation_list %}
+		<tr align="center">
+			<td> <a href="{{ url }}">{{ file_name }}</a> </td>
+			<td> {{ date_modified }} </td>
+		</tr>
+		{% endfor %}
+	</tbody>
+	
+	{% else %}
+	
+	<caption>No Documents Found</caption>
+	
+	{% endif %}
+
+</table>	
+

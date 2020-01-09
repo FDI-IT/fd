@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load qstring %}
+{% load mainsearch %}
+
+{% block content %}
+
+<div id="content-solo">
+
+<div>
+	<form action="/mysearch/access/alternate_rm/" id="mainsearch" method="GET">
+		<div id="advanced-search" >
+			<div>{% rm_search %}<input type="submit" value="Filter Results"></div>
+			<ul class="filterselect_list">
+				<li></li>
+				{{ filterselect.as_ul }}
+	    		
+	    	</ul>
+		</div>
+	</form>
+</div>
+<div id="pagination-bar">
+	{% include "pagination_bar.html" %}
+	wt: {{ page_title }}
+</div>
+<div id="object-list">
+	{% if rows %}
+	<table width="100%">
+		<thead><tr>
+			{% autoescape off %}
+			{% for header in headers %}
+				{% if header.0 == get.order_by %}			
+				<th {{header.2}}><a href="?order_by=-{{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></th>
+				{% else %}
+				<th {{header.2}}><a href="?order_by={{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></th>
+				{% endif %}
+			{% endfor %}
+			{% endautoescape %}
+		</tr></thead>
+		<tbody>
+	    {% for object, fields in rows %}
+	    <tr id="{{ object.pk }}">
+	    	{% for field in fields %}
+			<td><a href="/access/new_rm/rm/{{ object.pk }}/">{{ field }}</a></td>
+			{% endfor %}
+	    </tr>
+	    {% endfor %}
+	    </tbody>
+		<tfoot><tr>
+			{% autoescape off %}
+			{% for header in headers %}
+				{% if header.0 == get.order_by %}			
+				<th {{header.2}}><a href="?order_by=-{{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></th>
+				{% else %}
+				<th {{header.2}}><a href="?order_by={{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></th>
+				{% endif %}
+			{% endfor %}
+			{% endautoescape %}
+		</tr></tfoot>
+	</table>
+	{% else %}
+	<p>No rows available</p>
+	{% endif %}
+	{% include "pagination_bar.html" %}
+</div>
+</div>
+{% endblock %}

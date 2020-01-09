@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <style>
+      div.mainbody{
+        font-size: 15px;
+      }
+      li{
+        list-style-type: none;
+      }
+      tr, td{
+        border: none;
+      }
+      .hide{
+        display: none;
+      }
+      input[type="text"] {
+        width: 550px;
+      }
+      .flavorSearch input[type="text"]{
+        width: 200px;
+      }
+      td.highlight{
+        color:red;
+        background-color: white;
+      }
+    </style>
+
+    {{warning}}
+    {{specform.errors}}
+    <div class ="mainbody">
+    <form method = 'GET' class="flavorSearch">
+        {% csrf_token %}
+        {{ management_form }}
+        {{ form.number.errors }}
+        {{ form.number }}
+      <input name="submit" type="submit" value="Submit">
+        {{multipleOneoffs|safe}}
+        <br>
+        {{confirmation}}
+    </form>
+
+    <form method = "GET" >
+      <input type = "hidden" id="ing" name="ing" value="{{ing}}">
+
+      {% if initial %}
+        <br>
+        {{message.0}}{{flavor}}{{message.1}}
+        <br><br>
+        <input type="submit" id="newStandard" name="newStandard" value ="Create New Standard"/>
+        <input type="submit" id="newOneOff" name="newOneOff" value ="Create New One Off"/>
+      {% elif links %}
+        <br>
+        {% if standard %}
+          <input type="submit" id="newOneOff" name="newOneOff" value ="Create New One Off"/>
+        {% else %}
+          <input type="submit" id="newStandard" name="newStandard" value ="Create New Standard"/>
+          <input type="submit" id="newOneOff" name="newOneOff" value ="Create New One Off"/>
+        {% endif %}
+      {% endif %}
+    </form>
+
+    <br>
+    {% if not initial%}
+      <p style="font-size: 20px;">{{flavor}}</p>
+    {% endif %}
+    <form method = "POST">
+      {% csrf_token %}
+      <table>
+        {% for field in specform %}
+          {%if field.name in dontTouchThese %}
+            <tr class = "hide">
+              <td class = "hide">{{field.name.as_hidden}}</td>
+              <td class = "hide"> {{field.as_hidden}} </td>
+            </tr>
+          {% elif field.name in readOnly %}
+            {% if field.value == "" or field.value == None or field.value == 0%}
+                <tr>
+                  <td class = "highlight">{{field.label}}</td>
+                  <td class = "highlight">{{field.value}}</td>
+                  <td><input type = "text" name = "{{field.name}}" id ="id_{{field.name}}" value = "{{field.value}}" hidden></td>
+                </tr>
+            {% else %}
+              {% if field.name == "one_off_customer" %}
+                <tr>
+                  <td>{{field.label}}</td>
+                  <td>{{customer}}</td>
+                  <td><input type = "text" name = "{{field.name}}" id ="id_{{field.name}}" value = "{{field.value}}" hidden></td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td>{{field.label}}</td>
+                  <td>{{field.value}}</td>
+                  <td><input type = "text" name = "{{field.name}}" id ="id_{{field.name}}" value = "{{field.value}}" hidden></td>
+                </tr>
+              {% endif %}
+            {% endif %}
+          {% elif field.value == None or field.value == ""%}
+            {% if createNew %}
+              <tr>
+                <td>{{field.label}}</td>
+                <td>{{field}}</td>
+                <!-- <td><input type="checkbox" id="{{field.label}}chk" name="{{field.label}}chk" onclick="toggle('id_{{field.name}}', '{{field.label}}chk')"></td> -->
+              </tr>
+            {% else %}
+              <tr>
+                <td>{{field.label}}</td>
+                <td><input type = "text" name = "{{field.name}}" id ="id_{{field.name}}" ></td>
+                <!-- <td><input type="checkbox" id="{{field.label}}chk" name="{{field.label}}chk" onclick="toggle('id_{{field.name}}', '{{field.label}}chk')" checked/></td> -->
+              </tr>
+            {% endif %}
+          {% elif standard %}
+            <tr>
+              <td>{{field.label}}</td>
+              <td> {{field}} </td>
+            </tr>
+          {% else %}
+            {% if field.name == "one_off_customer" %}
+              <tr>
+                <td>{{field.label}}</td>
+                <td id = "one_off_customer"> {{field}} </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td>{{field.label}}</td>
+                <td> {{field}} </td>
+                <!-- <td><input type="checkbox" id="{{field.label}}chk" name="{{field.label}}chk" onclick="toggle('id_{{field.name}}', '{{field.label}}chk')"/></td> -->
+              </tr>
+            {% endif %}
+          {% endif %}
+
+        {% endfor %}
+
+      </table>
+
+      <br><br>
+      <p style="color:red; font-size: 25px;">{{missingFields|safe}}</p>
+      {% if createNew %}
+        <input type = "submit" id="createNew" name = "createNew" value="Save this SpecSheet"/>
+      {% elif update%}
+        <input type = "submit" id="update" name = "update" value="Update this SpecSheet"/>
+      {% endif %}
+      <input type = "hidden" id="ing" name="ing" value="{{ing}}">
+
+    </form>
+
+    <script>
+
+      function toggle(fieldName, checkBox){
+        var val = document.getElementById(fieldName).value;
+        if(document.getElementById(checkBox).checked){
+          document.getElementById(fieldName).disabled = true;
+          //document.getElementById(fieldName).value = ""
+        }
+        else {
+          document.getElementById(fieldName).disabled = false;
+          //document.getElementById(fieldName).value = val;
+        }
+      }
+
+    </script>
+{% endblock %}
+  </div>

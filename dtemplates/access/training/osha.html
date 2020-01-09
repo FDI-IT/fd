@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+  <link rel="stylesheet" type="text/css" href='/static/css/training.css'/>
+</head>
+<p>
+  What must employers do to protect employees?
+  <ol>
+    <li>
+      The standards establish requirements that employers must follow when employees are exposed to hazardous energy while servicing and maintaining equipment and machinery. Some of the most critical requirements from these standards are outlined below:
+      <ol type='a'>
+        <li>Develop, implement, and enforce an energy control program.</li>
+        <li>Use lockout devices for equipment that can be locked out. Tagout devices may be used in lieu of lockout devices only if the tagout program provides employee protection equivalent to that provided through a lockout program.</li>
+        <li>Ensure that new or overhauled equipment is capable of being locked out.</li>
+        <li>Develop, implement, and enforce an effective tagout program if machines or equipment are not capable of being locked out.</li>
+        <li>Develop, document, implement, and enforce energy control procedures. [See the note to 29 CFR 1910.147(c)(4)(i) for an exception to the documentation requirements.]</li>
+        <li>Use only lockout/tagout devices authorized for the particular equipment or machinery and ensure that they are durable, standardized, and substantial.</li>
+        <li>Ensure that lockout/tagout devices identify the individual users.</li>
+        <li>Establish a policy that permits only the employee who applied a lockout/tagout device to remove it. [See 29 CFR 1910.147(e)(3) for exception.]</li>
+        <li>Inspect energy control procedures at least annually.</li>
+        <li>Provide effective training as mandated for all employees covered by the standard.</li>
+        <li>Comply with the additional energy control provisions in OSHA standards when machines or equipment must be tested or repositioned, when outside contractors work at the site, in group lockout situations,</li>
+      </ol>
+    </li>
+    <li>
+      The facility uses a lever switch to turn on the dry blenders in the powder room.
+      <ol type='a'>
+
+        <li>Lock out systems using locks and keys are used to assure the switch is in the off or circuit open (no electricity running) position.</li>
+        <li>There is no new or overhauled equipment.</li>
+        <li>The equipment can be effectively locked out.</li>
+        <li>The procedure for lockout/tagout is documented in the Portal of the Company.  Employees are trained on how to review this information.</li>
+        <li>The locks used are suitable for the switches.</li>
+        <li>There are only two individuals who use the powder rooms.</li>
+        <li>Same as f.</li>
+        <li>Inspected during the monthly walkthrough.</li>
+        <li>Annual training is documented.</li>
+        <li>Outside contractors are carefully monitored when in the powder room.</li>
+
+      </ol>
+    </li>
+  </ol>
+
+  <p>I have carefully read the above and am in compliance with the policies and procedures of the company.</p>
+</p>
+
+<form method="POST" autocomplete="off">
+  {% csrf_token %}
+  <table>
+    <tr>
+      <td>Signature Checkbox</td>
+      <td><input type="checkbox" 'signature'/></td>
+    </tr>
+    <tr>
+      <td>Enter Username</td>
+      <td><input type='text' name='username' required/></td>
+    </tr>
+    <tr>
+      <td>Enter Password</td>
+      <td><input type='password' name= 'pw' required/></td>
+    </tr>
+    <tr>
+      <td><input type='submit'/></td>
+    </tr>
+  </table>
+</form>
+
+{% endblock %}

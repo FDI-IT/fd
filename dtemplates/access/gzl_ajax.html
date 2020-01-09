@@ -1,0 +1,15 @@
+<table id="gzl">
+	<caption>GZL - Gazinta List</caption>
+    <thead>
+        <tr>
+            <th>Flavor Number</th>
+            <th>Weight</th>
+        </tr>
+    </thead>
+    {% for gazinta in gt %}
+    <tr>
+    	<td><a href="/access/{{ gazinta.root_flavor__number }}">{{ gazinta.root_flavor__number }}</a></td>
+    	<td>{{ gazinta.weight__sum }}</td>
+    </tr>
+    {% endfor %}
+</table>
