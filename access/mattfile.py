@@ -31,7 +31,7 @@ def calculateCost(flav, checklist = None, saved_flavors = {}):
         checklist.append(flav.number)
         first_index = checklist.index(flav.number)
         cycle_list = checklist[first_index:] #cycle_list removes the unnecessary product numbers from checklist
-        cycle_list = list(map(str, cycle_list))  #turns all the integers into strings (to prepare for concatenation)
+        cycle_list = map(str, cycle_list)  #turns all the integers into strings (to prepare for concatenation)
         checklist_str = ", ".join(cycle_list)  #join cycle_list into one string
         
         raise CycleError('Product number %s is an ingredient of itself.  The following cycle occurs: \n %s' % (flav.number, checklist_str))

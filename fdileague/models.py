@@ -22,76 +22,76 @@ class Player(models.Model):
     firstname = models.CharField(max_length=100, blank=True, default="")
     position = models.CharField(max_length=5, choices=POSITIONS, blank=True, null=True, default="")
     url = models.CharField(max_length=50)
-
-    def __str__(self):
+    
+    def __unicode__(self):
         return "%s %s" % (self.firstname, self.lastname)
     class Meta:
         ordering = ['lastname', 'firstname']
-
+        
     @property
     def image_url(self):
         image_path = "%s-%s" % (self.firstname, self.lastname)
         return "http://www.fdileague.com/images/Faces/%s.jpg" % image_path.replace(' ','').replace('.','')
-
+    
 class YearScore(models.Model):
-    player = models.ForeignKey('Player',on_delete=models.CASCADE)
+    player = models.ForeignKey('Player')
     year = models.SmallIntegerField()
     score = models.SmallIntegerField()
-
+    
     class Meta:
         ordering = ['-year']
-    def __str__(self):
+    def __unicode__(self):
         return "%s %s %s %s" % (selself.player, self.year, self.score)
-
+    
 class Game(models.Model):
     html_file = models.FileField(upload_to="fdileague")
     game_date = models.DateField()
     week = models.CharField(max_length=20)
-    home_team = models.ForeignKey('Team', related_name="home_games",on_delete=models.CASCADE)
-    away_team = models.ForeignKey('Team', related_name="away_games",on_delete=models.CASCADE)
-    teamstats_home = models.ForeignKey('TeamStats', related_name='tsh',on_delete=models.CASCADE)
-    teamstats_away = models.ForeignKey('TeamStats', related_name='tsa',on_delete=models.CASCADE)
+    home_team = models.ForeignKey('Team', related_name="home_games")
+    away_team = models.ForeignKey('Team', related_name="away_games")
+    teamstats_home = models.ForeignKey('TeamStats', related_name='tsh')
+    teamstats_away = models.ForeignKey('TeamStats', related_name='tsa')
     # passing_receiving
     # defense_returns
     # kicking_punting
     class Meta:
         ordering = ['-game_date',]
-    def __str__(self):
+    def __unicode__(self):
         return "%s at %s - %s" % (self.away_team.full_name, self.home_team.full_name, self.game_date)
-
+    
 class Team(models.Model):
     year = models.DateField()
     city_slug = models.TextField()
     name = models.TextField()
     full_name = models.TextField()
-
+    
     class Meta:
         ordering = ['-year', 'full_name']
-    def __str__(self):
+    def __unicode__(self):
         return "%s %s" % (self.year.year, self.full_name,)
-
+    
 class Scoring(models.Model):
-    game = models.ForeignKey('Game',on_delete=models.CASCADE)
+    game = models.ForeignKey('Game')
     quarter = models.CharField(max_length=10)
     team = models.CharField(max_length=15)
     type = models.CharField(max_length=20, blank=True, default="")
     summary = models.TextField()
     points = models.SmallIntegerField(null=True,)
-    scorer = models.ForeignKey('Player', null=True, related_name="scorer_set",on_delete=models.CASCADE)
+    scorer = models.ForeignKey('Player', null=True, related_name="scorer_set")
     yardage = models.SmallIntegerField(null=True)
-    qb = models.ForeignKey('Player', null=True, related_name="qb_set",on_delete=models.CASCADE)
-    extra_point = models.ForeignKey('Player', null=True, related_name="extrapoint_set",on_delete=models.CASCADE)
+    qb = models.ForeignKey('Player', null=True, related_name="qb_set")
+    extra_point = models.ForeignKey('Player', null=True, related_name="extrapoint_set")
     reason = models.TextField(blank=True, default="")
     away_score = models.SmallIntegerField()
     home_score = models.SmallIntegerField()
     index = models.SmallIntegerField()
-
-    def __str__(self):
+    
+    def __unicode__(self):
         return "%s %s" % (self.quarter, self.summary,)
-
+    
     class Meta:
         ordering = ['-game__game_date','index']
-
+    
 class TeamStats(models.Model):
     first_downs = models.SmallIntegerField()
     rushes = models.SmallIntegerField()
@@ -111,12 +111,12 @@ class TeamStats(models.Model):
     turnovers = models.SmallIntegerField()
     penalties = models.SmallIntegerField()
     penalties_yards = models.SmallIntegerField()
-
-
-
+    
+    
+    
 class PRR(models.Model):
-    player = models.ForeignKey('Player',on_delete=models.CASCADE)
-    game = models.ForeignKey('Game',on_delete=models.CASCADE)
+    player = models.ForeignKey('Player')
+    game = models.ForeignKey('Game')
     team = models.CharField(max_length=5)
     index=models.PositiveSmallIntegerField()
     p_cmp = models.SmallIntegerField(null=True)
@@ -133,13 +133,13 @@ class PRR(models.Model):
     re_yds = models.SmallIntegerField(null=True)
     re_td = models.SmallIntegerField(null=True)
     re_lng = models.SmallIntegerField(null=True)
-
+    
     class Meta:
         ordering = ['index']
-
+                                         
 class DR(models.Model):
-    player = models.ForeignKey('Player',on_delete=models.CASCADE)
-    game = models.ForeignKey('Game',on_delete=models.CASCADE)
+    player = models.ForeignKey('Player')
+    game = models.ForeignKey('Game')
     team = models.CharField(max_length=5)
     index=models.PositiveSmallIntegerField()
     sk = models.SmallIntegerField(null=True)
@@ -161,13 +161,13 @@ class DR(models.Model):
     puntreturn_yr = models.DecimalField(decimal_places=1, max_digits=4, null=True)
     puntreturn_td = models.SmallIntegerField(null=True)
     puntreturn_lng = models.SmallIntegerField(null=True)
-
+    
     class Meta:
         ordering = ['index']
-
+    
 class KP(models.Model):
-    player = models.ForeignKey('Player',on_delete=models.CASCADE)
-    game = models.ForeignKey('Game',on_delete=models.CASCADE)
+    player = models.ForeignKey('Player')
+    game = models.ForeignKey('Game')
     team = models.CharField(max_length=5)
     index=models.PositiveSmallIntegerField()
     pat_xpm = models.SmallIntegerField(null=True)
@@ -178,6 +178,7 @@ class KP(models.Model):
     p_yds = models.SmallIntegerField(null=True)
     p_yp= models.DecimalField(decimal_places=1, max_digits=4, null=True)
     p_lng = models.SmallIntegerField(null=True)
-
+    
     class Meta:
         ordering = ['index']
+    

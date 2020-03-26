@@ -10,17 +10,17 @@
 from django.db import models
 
 class FlavorbaseRawmaterial(models.Model):
-    product_ptr = models.ForeignKey(FlavorbaseProduct,on_delete=models.CASCADE)
+    product_ptr = models.ForeignKey(FlavorbaseProduct)
     class Meta:
-        db_table = 'flavorbase_rawmaterial'
+        db_table = u'flavorbase_rawmaterial'
 
 class FlavorbaseProduct(models.Model):
     id = models.IntegerField(primary_key=True)
-    real_type = models.ForeignKey(DjangoContentType,on_delete=models.CASCADE)
+    real_type = models.ForeignKey(DjangoContentType)
     number = models.IntegerField()
     name = models.CharField(max_length=100)
     class Meta:
-        db_table = 'flavorbase_product'
+        db_table = u'flavorbase_product'
 
 class FormsMeetinglog(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -32,54 +32,54 @@ class FormsMeetinglog(models.Model):
     action_items = models.TextField()
     signatures = models.TextField()
     class Meta:
-        db_table = 'forms_meetinglog'
+        db_table = u'forms_meetinglog'
 
 class AuthGroupPermissions(models.Model):
     id = models.IntegerField(primary_key=True)
-    group = models.ForeignKey(AuthGroup,on_delete=models.CASCADE)
-    permission = models.ForeignKey(AuthPermission,on_delete=models.CASCADE)
+    group = models.ForeignKey(AuthGroup)
+    permission = models.ForeignKey(AuthPermission)
     class Meta:
-        db_table = 'auth_group_permissions'
+        db_table = u'auth_group_permissions'
 
 class AuthMessage(models.Model):
     id = models.IntegerField(primary_key=True)
-    user = models.ForeignKey(AuthUser,on_delete=models.CASCADE)
+    user = models.ForeignKey(AuthUser)
     message = models.TextField()
     class Meta:
-        db_table = 'auth_message'
+        db_table = u'auth_message'
 
 class AuthUserUserPermissions(models.Model):
     id = models.IntegerField(primary_key=True)
-    user = models.ForeignKey(AuthUser,on_delete=models.CASCADE)
-    permission = models.ForeignKey(AuthPermission,on_delete=models.CASCADE)
+    user = models.ForeignKey(AuthUser)
+    permission = models.ForeignKey(AuthPermission)
     class Meta:
-        db_table = 'auth_user_user_permissions'
+        db_table = u'auth_user_user_permissions'
 
 class DjangoAdminLog(models.Model):
     id = models.IntegerField(primary_key=True)
     action_time = models.DateTimeField()
-    user = models.ForeignKey(AuthUser,on_delete=models.CASCADE)
-    content_type = models.ForeignKey(DjangoContentType,on_delete=models.CASCADE)
+    user = models.ForeignKey(AuthUser)
+    content_type = models.ForeignKey(DjangoContentType)
     object_id = models.TextField()
     object_repr = models.CharField(max_length=200)
     action_flag = models.SmallIntegerField()
     change_message = models.TextField()
     class Meta:
-        db_table = 'django_admin_log'
+        db_table = u'django_admin_log'
 
 class AuthUserGroups(models.Model):
     id = models.IntegerField(primary_key=True)
-    user = models.ForeignKey(AuthUser,on_delete=models.CASCADE)
-    group = models.ForeignKey(AuthGroup,on_delete=models.CASCADE)
+    user = models.ForeignKey(AuthUser)
+    group = models.ForeignKey(AuthGroup)
     class Meta:
-        db_table = 'auth_user_groups'
+        db_table = u'auth_user_groups'
 
 class DjangoComments(models.Model):
     id = models.IntegerField(primary_key=True)
-    content_type = models.ForeignKey(DjangoContentType,on_delete=models.CASCADE)
+    content_type = models.ForeignKey(DjangoContentType)
     object_pk = models.TextField()
-    site = models.ForeignKey(DjangoSite,on_delete=models.CASCADE)
-    user = models.ForeignKey(AuthUser,on_delete=models.CASCADE)
+    site = models.ForeignKey(DjangoSite)
+    user = models.ForeignKey(AuthUser)
     user_name = models.CharField(max_length=50)
     user_email = models.CharField(max_length=75)
     user_url = models.CharField(max_length=200)
@@ -89,26 +89,26 @@ class DjangoComments(models.Model):
     is_public = models.BooleanField()
     is_removed = models.BooleanField()
     class Meta:
-        db_table = 'django_comments'
+        db_table = u'django_comments'
 
 class DjangoCommentFlags(models.Model):
     id = models.IntegerField(primary_key=True)
-    user = models.ForeignKey(AuthUser,on_delete=models.CASCADE)
-    comment = models.ForeignKey(DjangoComments,on_delete=models.CASCADE)
+    user = models.ForeignKey(AuthUser)
+    comment = models.ForeignKey(DjangoComments)
     flag = models.CharField(max_length=30)
     flag_date = models.DateTimeField()
     class Meta:
-        db_table = 'django_comment_flags'
+        db_table = u'django_comment_flags'
 
 class DjangoSession(models.Model):
     session_key = models.CharField(max_length=40, primary_key=True)
     session_data = models.TextField()
     expire_date = models.DateTimeField()
     class Meta:
-        db_table = 'django_session'
+        db_table = u'django_session'
 
 class FlavorbaseFlavor(models.Model):
-    product_ptr = models.ForeignKey(FlavorbaseProduct,on_delete=models.CASCADE)
+    product_ptr = models.ForeignKey(FlavorbaseProduct)
     prefix = models.CharField(max_length=2)
     appearance = models.CharField(max_length=100)
     organoleptic_properties = models.CharField(max_length=100)
@@ -116,21 +116,21 @@ class FlavorbaseFlavor(models.Model):
     flash_point = models.FloatField()
     specific_gravity = models.FloatField()
     notes = models.TextField()
-    renumber = models.ForeignKey('self',on_delete=models.CASCADE)
+    renumber = models.ForeignKey('self')
     class Meta:
-        db_table = 'flavorbase_flavor'
+        db_table = u'flavorbase_flavor'
 
 class QcRetain(models.Model):
     id = models.IntegerField(primary_key=True)
     retain = models.SmallIntegerField()
     date = models.DateField()
-    lot = models.ForeignKey(ProductionLot,on_delete=models.CASCADE)
+    lot = models.ForeignKey(ProductionLot)
     status = models.CharField(max_length=25)
     notes = models.TextField()
-    content_type = models.ForeignKey(DjangoContentType,on_delete=models.CASCADE)
+    content_type = models.ForeignKey(DjangoContentType)
     object_id = models.IntegerField()
     class Meta:
-        db_table = 'qc_retain'
+        db_table = u'qc_retain'
 
 class ProductionLot(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -139,15 +139,15 @@ class ProductionLot(models.Model):
     date = models.DateField()
     status = models.CharField(max_length=25)
     amount = models.DecimalField(max_digits=6, decimal_places=2)
-    flavor = models.ForeignKey(FlavorbaseFlavor,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(FlavorbaseFlavor)
     class Meta:
-        db_table = 'production_lot'
+        db_table = u'production_lot'
 
 class Supplier(models.Model):
     id = models.IntegerField(primary_key=True)
     supplier_name = models.CharField(max_length=50)
     class Meta:
-        db_table = 'supplier'
+        db_table = u'supplier'
 
 class ExperimentalFormulas(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -162,7 +162,7 @@ class ExperimentalFormulas(models.Model):
     machinebatch = models.IntegerField(db_column='MachineBatch') # Field name made lowercase.
     rawmaterialcode = models.IntegerField(db_column='RawMaterialCode') # Field name made lowercase.
     class Meta:
-        db_table = 'Experimental Formulas'
+        db_table = u'Experimental Formulas'
 
 class Customers(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -205,7 +205,7 @@ class Customers(models.Model):
     email = models.CharField(max_length=50, db_column='EMail') # Field name made lowercase.
     customertype = models.CharField(max_length=10, db_column='CustomerType') # Field name made lowercase.
     class Meta:
-        db_table = 'Customers'
+        db_table = u'Customers'
 
 class ExperimentalProducts(models.Model):
     productid = models.IntegerField(primary_key=True, db_column='ProductID') # Field name made lowercase.
@@ -231,7 +231,7 @@ class ExperimentalProducts(models.Model):
     experimental = models.CharField(max_length=50, db_column='Experimental') # Field name made lowercase.
     lastspdate = models.DateTimeField(db_column='LastSPDate') # Field name made lowercase.
     class Meta:
-        db_table = 'Experimental Products'
+        db_table = u'Experimental Products'
 
 class Experimentallog(models.Model):
     experimentalnum = models.IntegerField(primary_key=True, db_column='ExperimentalNum') # Field name made lowercase.
@@ -275,28 +275,28 @@ class Experimentallog(models.Model):
     chef_assist = models.BooleanField(db_column='Chef Assist', default=False) # Field renamed to remove spaces. Field name made lowercase.
     flavor_coat = models.BooleanField(db_column='Flavor Coat', default=False) # Field renamed to remove spaces. Field name made lowercase.
     class Meta:
-        db_table = 'ExperimentalLog'
+        db_table = u'ExperimentalLog'
 
 class DjangoSite(models.Model):
     id = models.IntegerField(primary_key=True)
     domain = models.CharField(max_length=100)
     name = models.CharField(max_length=50)
     class Meta:
-        db_table = 'django_site'
+        db_table = u'django_site'
 
 class AuthGroup(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(unique=True, max_length=80)
     class Meta:
-        db_table = 'auth_group'
+        db_table = u'auth_group'
 
 class AuthPermission(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=50)
-    content_type = models.ForeignKey(DjangoContentType,on_delete=models.CASCADE)
+    content_type = models.ForeignKey(DjangoContentType)
     codename = models.CharField(max_length=100)
     class Meta:
-        db_table = 'auth_permission'
+        db_table = u'auth_permission'
 
 class Incoming(models.Model):
     incomingid = models.IntegerField(primary_key=True, db_column='IncomingID') # Field name made lowercase.
@@ -306,7 +306,7 @@ class Incoming(models.Model):
     incid = models.CharField(max_length=50, db_column='IncID') # Field name made lowercase.
     incmemo = models.TextField(db_column='IncMemo') # Field name made lowercase.
     class Meta:
-        db_table = 'Incoming'
+        db_table = u'Incoming'
 
 class ProductsSpecialInformation(models.Model):
     flavornumber = models.IntegerField(primary_key=True, db_column='FlavorNumber') # Field name made lowercase.
@@ -348,7 +348,7 @@ class ProductsSpecialInformation(models.Model):
     diacetyl = models.BooleanField(db_column='Diacetyl', default=False) # Field name made lowercase.
     entered = models.DateTimeField(db_column='Entered', default=False) # Field name made lowercase.
     class Meta:
-        db_table = 'Products - Special Information'
+        db_table = u'Products - Special Information'
 
 class LegacyPurchases(models.Model):
     poentry = models.IntegerField(primary_key=True, db_column='POEntry') # Field name made lowercase.
@@ -366,7 +366,7 @@ class LegacyPurchases(models.Model):
     packagesize = models.DecimalField(decimal_places=3, max_digits=7, db_column='PackageSize') # Field name made lowercase.
     pomemo2 = models.TextField(db_column='POMEMO2') # Field name made lowercase.
     class Meta:
-        db_table = 'Purchases'
+        db_table = u'Purchases'
 
 class RawMaterials(models.Model):
     productid = models.IntegerField(db_column='ProductID') # Field name made lowercase.
@@ -408,14 +408,14 @@ class RawMaterials(models.Model):
     transfat = models.BooleanField(db_column='TransFat', default=False) # Field name made lowercase.
     rawmaterialcode = models.IntegerField(primary_key=True, db_column='RawMaterialCode') # Field name made lowercase.
     class Meta:
-        db_table = 'access_ingredient'
+        db_table = u'access_ingredient'
 
 class FlavorsFormulae(models.Model):
     id = models.IntegerField(primary_key=True)
     flavornumber = models.IntegerField(db_column='FlavorNumber') # Field name made lowercase.
     productid = models.IntegerField(db_column='ProductID') # Field name made lowercase.
-    flavor = models.ForeignKey(Products,on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(RawMaterials,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(Products)
+    ingredient = models.ForeignKey(RawMaterials)
     flavoramount = models.DecimalField(decimal_places=3, max_digits=7, db_column='FlavorAmount') # Field name made lowercase.
     totalweight = models.DecimalField(decimal_places=3, max_digits=7, db_column='TotalWeight') # Field name made lowercase.
     flavorextendedprice = models.DecimalField(decimal_places=3, max_digits=7, db_column='FlavorExtendedPrice') # Field name made lowercase.
@@ -425,7 +425,7 @@ class FlavorsFormulae(models.Model):
     machinebatch = models.IntegerField(db_column='MachineBatch') # Field name made lowercase.
     rawmaterialcode = models.IntegerField(db_column='RawMaterialCode') # Field name made lowercase.
     class Meta:
-        db_table = 'Flavors - Formulae'
+        db_table = u'Flavors - Formulae'
 
 class Products(models.Model):
     productid = models.IntegerField(primary_key=True, db_column='ProductID') # Field name made lowercase.
@@ -452,7 +452,7 @@ class Products(models.Model):
     experimental = models.CharField(max_length=50, db_column='Experimental') # Field name made lowercase.
     lastspdate = models.DateTimeField(db_column='LastSPDate') # Field name made lowercase.
     class Meta:
-        db_table = 'Products'
+        db_table = u'Products'
 
 class Shipto(models.Model):
     shiptoid = models.IntegerField(primary_key=True, db_column='ShipToID') # Field name made lowercase.
@@ -467,14 +467,14 @@ class Shipto(models.Model):
     shiptocontacttitle = models.CharField(max_length=50, db_column='ShipToContactTitle') # Field name made lowercase.
     shiptoname = models.CharField(max_length=50, db_column='ShipToName') # Field name made lowercase.
     class Meta:
-        db_table = 'ShipTo'
+        db_table = u'ShipTo'
 
 class Shippers(models.Model):
     shipperid = models.IntegerField(primary_key=True, db_column='ShipperID') # Field name made lowercase.
     shipper_name = models.CharField(max_length=40, db_column='Shipper Name') # Field renamed to remove spaces. Field name made lowercase.
     phone = models.CharField(max_length=24, db_column='Phone') # Field name made lowercase.
     class Meta:
-        db_table = 'Shippers'
+        db_table = u'Shippers'
 
 class Suppliers(models.Model):
     id = models.IntegerField(primary_key=True, db_column='ID') # Field name made lowercase.
@@ -494,7 +494,7 @@ class Suppliers(models.Model):
     homepage = models.CharField(max_length=255, db_column='HomePage') # Field name made lowercase.
     email = models.CharField(max_length=255, db_column='EMail') # Field name made lowercase.
     class Meta:
-        db_table = 'Suppliers'
+        db_table = u'Suppliers'
 
 class AuthUser(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -509,26 +509,26 @@ class AuthUser(models.Model):
     last_login = models.DateTimeField()
     date_joined = models.DateTimeField()
     class Meta:
-        db_table = 'auth_user'
+        db_table = u'auth_user'
 
 class ReversionRevision(models.Model):
     id = models.IntegerField(primary_key=True)
     date_created = models.DateTimeField()
-    user = models.ForeignKey(AuthUser,on_delete=models.CASCADE)
+    user = models.ForeignKey(AuthUser)
     comment = models.TextField()
     class Meta:
-        db_table = 'reversion_revision'
+        db_table = u'reversion_revision'
 
 class ReversionVersion(models.Model):
     id = models.IntegerField(primary_key=True)
-    revision = models.ForeignKey(ReversionRevision,on_delete=models.CASCADE)
+    revision = models.ForeignKey(ReversionRevision)
     object_id = models.TextField()
-    content_type = models.ForeignKey(DjangoContentType,on_delete=models.CASCADE)
+    content_type = models.ForeignKey(DjangoContentType)
     format = models.CharField(max_length=255)
     serialized_data = models.TextField()
     object_repr = models.TextField()
     class Meta:
-        db_table = 'reversion_version'
+        db_table = u'reversion_version'
 
 class DjangoContentType(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -536,7 +536,7 @@ class DjangoContentType(models.Model):
     app_label = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     class Meta:
-        db_table = 'django_content_type'
+        db_table = u'django_content_type'
 
 class HaccpWatertest(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -544,35 +544,35 @@ class HaccpWatertest(models.Model):
     zone = models.SmallIntegerField()
     test_result = models.DecimalField(max_digits=2, decimal_places=1)
     class Meta:
-        db_table = 'haccp_watertest'
+        db_table = u'haccp_watertest'
 
 class HaccpReceivinglog(models.Model):
     id = models.IntegerField(primary_key=True)
     entry_date = models.DateTimeField()
     receiving_number = models.IntegerField()
     pin_number = models.IntegerField()
-    supplier_id = models.ForeignKey(Supplier,on_delete=models.CASCADE)
+    supplier_id = models.ForeignKey(Supplier)
     description_of_goods = models.CharField(max_length=50)
     package_quantity = models.IntegerField()
     supplier_lot_number = models.CharField(max_length=25)
     po_number = models.IntegerField()
     truck = models.CharField(max_length=25)
-    kosher_group = models.ForeignKey(HaccpKoshergroup,on_delete=models.CASCADE)
+    kosher_group = models.ForeignKey(HaccpKoshergroup)
     notes = models.TextField()
     class Meta:
-        db_table = 'haccp_receivinglog'
+        db_table = u'haccp_receivinglog'
 
 class HaccpKoshergroup(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=2)
     class Meta:
-        db_table = 'haccp_koshergroup'
+        db_table = u'haccp_koshergroup'
 
 class HaccpTobaccobeetletest(models.Model):
-    qualitytest_ptr = models.ForeignKey(HaccpQualitytest,on_delete=models.CASCADE)
+    qualitytest_ptr = models.ForeignKey(HaccpQualitytest)
     test_result = models.SmallIntegerField()
     class Meta:
-        db_table = 'haccp_tobaccobeetletest'
+        db_table = u'haccp_tobaccobeetletest'
 
 class SouthMigrationhistory(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -580,17 +580,18 @@ class SouthMigrationhistory(models.Model):
     migration = models.CharField(max_length=255)
     applied = models.DateTimeField()
     class Meta:
-        db_table = 'south_migrationhistory'
+        db_table = u'south_migrationhistory'
 
 class HaccpThermometertest(models.Model):
-    qualitytest_ptr = models.ForeignKey(HaccpQualitytest,on_delete=models.CASCADE)
+    qualitytest_ptr = models.ForeignKey(HaccpQualitytest)
     test_result = models.SmallIntegerField()
     class Meta:
-        db_table = 'haccp_thermometertest'
+        db_table = u'haccp_thermometertest'
 
 class HaccpQualitytest(models.Model):
     id = models.IntegerField(primary_key=True)
     test_date = models.DateField()
     zone = models.SmallIntegerField()
     class Meta:
-        db_table = 'haccp_qualitytest'
+        db_table = u'haccp_qualitytest'
+

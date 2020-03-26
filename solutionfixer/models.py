@@ -5,34 +5,34 @@ from access.models import Ingredient, Flavor, Formula
 
 # Create your models here.
 class Solution(models.Model):
-    ingredient = models.OneToOneField(Ingredient, related_name='ing_obj', db_index=True,on_delete=models.CASCADE)
-    my_base = models.ForeignKey(Ingredient, null=True, blank=True, related_name='my_base', db_index=True,on_delete=models.CASCADE)
-    my_solvent = models.ForeignKey(Ingredient, null=True, blank=True, related_name='my_solvent', db_index=True,on_delete=models.CASCADE)
+    ingredient = models.OneToOneField(Ingredient, related_name='ing_obj', db_index=True)
+    my_base = models.ForeignKey(Ingredient, null=True, blank=True, related_name='my_base', db_index=True)
+    my_solvent = models.ForeignKey(Ingredient, null=True, blank=True, related_name='my_solvent', db_index=True)
     percentage = models.DecimalField(max_digits=4, decimal_places=2, null=True)
-    status = models.ForeignKey('SolutionStatus', blank=True, null=True,on_delete=models.CASCADE)
-
-    def __str__(self):
+    status = models.ForeignKey('SolutionStatus', blank=True, null=True)
+    
+    def __unicode__(self):
         return "%s - %s %s %s" % (self.ingredient.id,
                                    self.ingredient.art_nati,
                                    self.ingredient.prefix,
                                    self.ingredient.product_name)
-
+    
     class Meta:
 
         ordering = ['ingredient']
-
+        
     def calculate_price(self):
         if self.my_base!=None and self.my_solvent!=None:
             concentration_decimal = Decimal(self.percentage)/100
             component_price = self.my_base.unitprice * concentration_decimal
             solvent_price = self.my_solvent.unitprice * (1-concentration_decimal)
             unit_price = (component_price + solvent_price).quantize(Decimal('0.000')) #make it 3 decimal places
-
+            
             return unit_price
-
+        
         else:
             return False #will return false if the solution is missing a base and/or a solvent
-
+        
     def update_ingredient_price(self):
         unit_price = self.calculate_price()
         if unit_price:
@@ -40,36 +40,36 @@ class Solution(models.Model):
             return True
         else:
             return False #will return false if the solution is missing a base and/or a solvent
-
+    
     def update_fields(self):
         #TODO: this function will update certain fields based on the base and solvent
         #prop65, O.C., GMO, Kosher, Micro, Allergen
-
+        
         pass
-
+    
 class SolutionStatus(models.Model):
     status_name = models.CharField(max_length=20)
     status_order = models.PositiveSmallIntegerField()
-
-    def __str__(self):
+    
+    def __unicode__(self):
         return "%s" % (self.status_name)
-
+    
     class Meta:
         ordering = ['status_order']
-
+        
 class SolutionMatchCache(models.Model):
     my_pk = models.AutoField(primary_key=True)
     id = models.IntegerField()
     value = models.IntegerField()
     label = models.CharField(max_length=150)
-    solution = models.ForeignKey('Solution',on_delete=models.CASCADE)
+    solution = models.ForeignKey('Solution')
 
-
+    
 class ProcessSolutions:
-
+    
     def __init__(self):
         self.solutions = Solution.objects.filter(status__id=3)
-
+    
     def process(self):
         for solution in self.solutions:
             ing = solution.ingredient
@@ -133,3 +133,14 @@ def convert_solution_into_formula(solution):
         ingredient.save()
 
         #solution.delete() #Is there any tracability if something screws up with the conversion?  Should I delete after converting?  Are there any repercussions for not deleting the solution
+
+
+
+
+
+
+
+
+
+
+

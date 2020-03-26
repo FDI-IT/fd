@@ -1,4 +1,4 @@
-import csv, codecs, io
+import csv, codecs, cStringIO
 import unicodedata
 
 # PASTED FROM CSV DOCS!
@@ -12,7 +12,7 @@ class UTF8Recoder:
     def __iter__(self):
         return self
 
-    def __next__(self):
+    def next(self):
         return self.reader.next().encode("utf-8")
 
 class UnicodeReader:
@@ -26,9 +26,9 @@ class UnicodeReader:
         f = UTF8Recoder(f, encoding)
         self.reader = csv.reader(f, dialect=dialect, **kwds)
 
-    def __next__(self):
-        row = next(self.reader)
-        return [str(s, "utf-8") for s in row]
+    def next(self):
+        row = self.reader.next()
+        return [unicode(s, "utf-8") for s in row]
 
     def __iter__(self):
         return self
@@ -41,7 +41,7 @@ class UnicodeWriter:
 
     def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
         # Redirect output to a queue
-        self.queue = io.StringIO()
+        self.queue = cStringIO.StringIO()
         self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
         self.stream = f
         self.encoder = codecs.getincrementalencoder(encoding)()
@@ -70,7 +70,7 @@ def unicode_csv_reader(unicode_csv_data, dialect=csv.excel, **kwargs):
                             dialect=dialect, **kwargs)
     for row in csv_reader:
         # decode UTF-8 back to Unicode, cell by cell:
-        yield [str(cell, 'utf-8') for cell in row]
+        yield [unicode(cell, 'utf-8') for cell in row]
 
 def utf_8_encoder(unicode_csv_data):
     for line in unicode_csv_data:

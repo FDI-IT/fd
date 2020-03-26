@@ -3,7 +3,7 @@ from access.scratch import *
 jj = Flavor.objects.get(number=9700)
 boolean_field = jj._meta.fields[-1]
 tt = type(boolean_field)
-print(tt)
+print tt
 def trim():
     FormulaTree.objects.all().delete()
     LeafWeight.objects.all().delete()
@@ -23,14 +23,14 @@ def trim():
         
     for f in Flavor.objects.all():
         if f.pk in f_pks:
-            print(f)
+            print f
         else:
             f.formula_set.all().delete()
             f.delete()
             
     for i in Ingredient.objects.all():
         if i.pk in i_pks:
-            print(i)
+            print i
         else:
             i.delete()
     
@@ -49,12 +49,12 @@ def trim():
         LegacyPurchase,
     )
     for m in models:
-        print("Deleting %s..." % m)
+        print "Deleting %s..." % m
         m.objects.all().delete()
         
 
-    print(i_pks)
-    print(f_pks)
+    print i_pks
+    print f_pks
     
 def check_boolean_fields(obj):
     save_me = False

@@ -9,7 +9,7 @@ from django.utils.functional import wraps
 from django.template import RequestContext
 from django.contrib.auth.decorators import permission_required
 from django.forms.formsets import formset_factory
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 
 from django.views.generic.list import ListView
 
@@ -72,7 +72,7 @@ def sales_order_report(request):
         except:
             so_by_due_date[li.due_date] = [so,]
     
-    due_dates = list(so_by_due_date.keys())
+    due_dates = so_by_due_date.keys()
     due_dates.sort()
     for dd in due_dates:
         sales_orders.extend(so_by_due_date[dd])
@@ -200,7 +200,7 @@ def customer_spec_list(request, customer_pk, flavor_number):
         delete_urls.append(reverse('salesorders.views.delete_customer_spec', args=[customer_pk, flavor_number, spec.id]))
     
         
-    customer_spec_list = list(zip(customer_spec_list, customer_spec_urls, delete_urls))
+    customer_spec_list = zip(customer_spec_list, customer_spec_urls, delete_urls)
     
     return render(
         request,
@@ -353,7 +353,7 @@ def sales_order_review(request, sales_order):
         request,
         'salesorders/sales_order_review.html',
         {
-            'window_title': "Sales Order %s" % sales_order.__str__(),
+            'window_title': "Sales Order %s" % sales_order.__unicode__(),
             'sales_orders':sales_orders,
             'help_link': help_link,
             'sales_order': sales_order,
@@ -376,7 +376,7 @@ def sales_order_by_product(request, status_message=None):
             orders[order.flavor] = [order]
            # 
     summarized_orders = []
-    for flavor, details in list(orders.items()):
+    for flavor, details in orders.items():
         total = Decimal('0')
         for detail in details:
             total += detail.quantity
@@ -497,7 +497,7 @@ def ingredients_required(request, status_message=None):
     icli = IngredientCounterLI(LineItem.objects.filter(salesordernumber__open=True))
     icli.aggregate_ingredients()
     total_cost = 0
-    for ingredient, flavor_order in list(icli.ingredients.items()):
+    for ingredient, flavor_order in icli.ingredients.items():
         total_cost += flavor_order.total_cost()
     return render(
         request,

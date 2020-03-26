@@ -1,5 +1,5 @@
 from django.utils.functional import Promise
-from django.utils.encoding import force_text
+from django.utils.encoding import force_unicode
 # try:
 #     from json import JSONEncoder
 # except ImportError:
@@ -11,5 +11,5 @@ except ImportError:
 class LazyEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Promise):
-            return force_text(obj)
+            return force_unicode(obj)
         return obj

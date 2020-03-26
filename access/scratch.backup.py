@@ -25,7 +25,7 @@ def find_usage(ingredient_pk, gazinta_lists, flavor_valid):
     l = len(formula_queue)
     while(formula_queue):
         i += 1
-        print("iter count: %s | queue length: %s" % (i, l))
+        print "iter count: %s | queue length: %s" % (i, l)
                 
         fr = formula_queue.popleft()
         l -= 1
@@ -56,7 +56,7 @@ def find_usage(ingredient_pk, gazinta_lists, flavor_valid):
 
 def update_cost(usage, delta):
     flavor_deltas = {}
-    for f_id, ing_list in usage.items():
+    for f_id, ing_list in usage.iteritems():
         sum = 0
         for x in ing_list:
             sum += x['amount']
@@ -201,13 +201,13 @@ def subtree_match(flavor):
 def find_characteristic_wrong_subtree():
     last_comparer = 1000
     for flavor in Flavor.objects.filter(valid=True):
-        print(flavor)
+        print flavor
         nodes = FormulaTree.objects.filter(root_flavor=flavor)
         if subtree_match(flavor):
             pass
         else:
             c = nodes.count()
-            print(c)
+            print c
             if nodes.count() < last_comparer:
                 last_bad = flavor
                 

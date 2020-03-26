@@ -57,7 +57,7 @@ def find_usage(ingredient_pk, gazinta_lists, flavor_valid):
     l = len(formula_queue)
     while(formula_queue):
         i += 1
-        print("iter count: %s | queue length: %s" % (i, l))
+        print "iter count: %s | queue length: %s" % (i, l)
 
         fr = formula_queue.popleft()
         l -= 1
@@ -88,7 +88,7 @@ def find_usage(ingredient_pk, gazinta_lists, flavor_valid):
 
 def update_cost(usage, delta):
     flavor_deltas = {}
-    for f_id, ing_list in usage.items():
+    for f_id, ing_list in usage.iteritems():
         sum = 0
         for x in ing_list:
             sum += x['amount']
@@ -233,8 +233,8 @@ def build_trees(flavors, start, end):
 
 def test_gc():
     import gc
-    print(gc.collect())
-    print(gc.collect())
+    print gc.collect()
+    print gc.collect()
     SAMPLE_SIZE = 1000
     flavors = Flavor.objects.filter(valid=True)
 
@@ -242,19 +242,19 @@ def test_gc():
     end = 2
 
     while (start < SAMPLE_SIZE):
-        print(" ****************************************** ")
-        print("Start: %s, End: %s" % (start, end))
+        print " ****************************************** "
+        print "Start: %s, End: %s" % (start, end)
         build_trees(flavors, start, end)
         start = end + 1
         end = end * 2
-        print(gc.collect())
+        print gc.collect()
 
 
 
 def build_all_trees():
     FormulaTree.objects.all().delete()
     for f in Flavor.objects.filter(valid=True):
-        print(f)
+        print f
         build_tree(f)
 
 def prep_test():
@@ -264,10 +264,10 @@ def prep_test():
 def test_slice():
     flavors = Flavor.objects.filter(valid=True).filter(name__icontains="lor")
     for f in flavors:
-        print(f)
+        print f
         build_tree(f)
     for f in flavors:
-        print(f)
+        print f
         build_leaf_weights(f)
 
 
@@ -276,7 +276,7 @@ def synchronize_price(f, verbose=False):
     """This depends on all gazintas being up to date.
     """
     if verbose:
-        print(f)
+        print f
     rmc = 0
     lastspdate = datetime(1990,1,1)
     for formula_line_item in f.formula_set.all():
@@ -330,7 +330,7 @@ def leaf_node_tester():
             sum += leaf.weight
 
         if sum > ceil or sum < floor:
-            print("%s -- %s" % (f, sum))
+            print "%s -- %s" % (f, sum)
 
 def consolidated_leafs(flavor):
     leaf_ingredients = leaf_nodes(flavor)
@@ -342,7 +342,7 @@ def consolidated_leafs(flavor):
 
 def build_leaf_weights(flavor):
     cls = flavor.consolidated_leafs
-    for i,w in cls.items():
+    for i,w in cls.iteritems():
         lw = LeafWeight(root_flavor=flavor,
                         ingredient=i,
                         weight=w)
@@ -352,19 +352,19 @@ def build_all_leaf_weights():
     LeafWeight.objects.all().delete()
     bad_total_flavors = []
     for f in Flavor.objects.filter(valid=True):
-        print(f)
+        print f
         try:
             build_leaf_weights(f)
         except FormulaException:
             bad_total_flavors.append(f)
-    print("bad total flavors")
-    print(bad_total_flavors)
+    print "bad total flavors"
+    print bad_total_flavors
 
 
 
 def build_indivisible_leaf_weights(flavor):
     indivisible_leafs = flavor.consolidated_indivisible_leafs
-    for i, w in indivisible_leafs.items():
+    for i, w in indivisible_leafs.iteritems():
         ilw = IndivisibleLeafWeight(root_flavor=flavor,
                                    ingredient=i,
                                    weight=w)
@@ -374,38 +374,38 @@ def build_all_indivisible_leaf_weights():
     IndivisibleLeafWeight.objects.all().delete()
     bad_total_flavors = []
     for f in Flavor.objects.filter(valid=True):
-        print(f)
+        print f
         try:
             build_indivisible_leaf_weights(f)
         except FormulaException:
             bad_total_flavors.append(f)
-        print("finished")
-    print("bad_total_flavors")
-    print(bad_total_flavors)
+        print "finished"
+    print "bad_total_flavors"
+    print bad_total_flavors
 
 def deep_flavor_search():
     formulas = {}
     formulas_by_length = defaultdict(list)
     formula_pairs = []
     for f in Flavor.objects.filter(valid=True):
-        print(f)
+        print f
         formula = LeafWeight.objects.filter(root_flavor=f).values_list('ingredient_id','weight').order_by('ingredient__pk')
         formula_len = len(formula)
         formulas_by_length[formula_len].append(f)
         formulas[f] = formula
 
-    for k, v in formulas_by_length.items():
-        print(k)
+    for k, v in formulas_by_length.iteritems():
+        print k
         v = sorted(v, key=lambda f: formulas[f][0])
         formulas_by_length[k]=v
         for i in range(0, len(v)-2):
-            print(v[i])
+            print v[i]
             lf = formulas[v[i]]
             rf = formulas[v[i+1]]
             formula_match = True
             for j in range(0, k-1):
                 if lf[j] == rf[j]:
-                    print("match: %s" % repr(lf[j]))
+                    print "match: %s" % repr(lf[j])
                 else:
                     formula_match = False
                     break
@@ -425,9 +425,9 @@ def dfs_sanity_check():
     for f in Flavor.objects.filter(valid=True):
         if f.formula_set.all().count() == 1:
             if f.productmemo[:7] != "Same as":
-                print("%s: %s" % (f, f.productmemo))
+                print "%s: %s" % (f, f.productmemo)
                 ing = f.formula_set.all()[0]
-                print(ing.gazinta())
+                print ing.gazinta()
                 weird_flavors.append(f)
 
     return weird_flavors
@@ -568,7 +568,7 @@ def update_all_costs(verbose=False):
             if flavor in flavors_updated:
                 return flavors_updated[flavor.id]
             if verbose:
-                print(flavor)
+                print flavor
             total_rmc = 0
             for formula_row in flavor.formula_set.all():
                 ingredient = formula_row.ingredient
@@ -643,43 +643,43 @@ def test():
 #     ]
 
 i_aller_dict = {
- 'Yes-Cereals (Gluten)': 'wheat',
- 'Yes-Crustacean Shellfish': 'crustacean',
- 'Yes-Crustaceans': 'crustacean',
- 'Yes-Eggs': 'eggs',
- 'Yes-Fish': 'fish',
- 'Yes-Milk': 'milk',
- 'Yes-Peanuts': 'peanuts',
- 'Yes-Peanuts/Legumes': 'peanuts',
- 'Yes-Soy/Legumes': 'soybeans',
- 'Yes-Soybeans': 'soybeans',
- 'Yes-Sulfites': 'sulfites',
- 'Yes-Tree Nuts': 'treenuts',
- 'Yes-Wheat(Gluten)': 'wheat',}
+ u'Yes-Cereals (Gluten)': 'wheat',
+ u'Yes-Crustacean Shellfish': 'crustacean',
+ u'Yes-Crustaceans': 'crustacean',
+ u'Yes-Eggs': 'eggs',
+ u'Yes-Fish': 'fish',
+ u'Yes-Milk': 'milk',
+ u'Yes-Peanuts': 'peanuts',
+ u'Yes-Peanuts/Legumes': 'peanuts',
+ u'Yes-Soy/Legumes': 'soybeans',
+ u'Yes-Soybeans': 'soybeans',
+ u'Yes-Sulfites': 'sulfites',
+ u'Yes-Tree Nuts': 'treenuts',
+ u'Yes-Wheat(Gluten)': 'wheat',}
 
 aller_dict = {
-    '': None,
-    'Non': None,
-    'None': None,
-    'Yes-Cereals (Gluten)': 'wheat',
-    'Yes-Crustacean Shellfish': 'crustacean',
-    'Yes-Crustaceans': 'crustacean',
-    'Yes-Eggs': 'eggs',
-    'Yes-Fish': 'fish',
-    'Yes-Milk': 'milk',
-    'Yes-Multiple-see comments': "CHECK ALLERGENS.",
-    'Yes-Peanuts': 'peanuts',
-    'Yes-Peanuts/Legumes': 'peanuts',
-    'Yes-Seeds': 'sesame',
-    'Yes-Soy/Legumes': 'soybeans',
-    'Yes-Soybeans': 'soybeans',
-    'Yes-Sulfites': 'sulfites',
-    'Yes-Tree Nuts': 'treenuts',
-    'Yes-Wheat(Gluten)': 'wheat',
-    'no': None,
-    'none': None,
-    'yes': "CHECK ALLERGENS.",
-    'CHECK ALLERGENS.': "CHECK ALLERGENS."}
+    u'': None,
+    u'Non': None,
+    u'None': None,
+    u'Yes-Cereals (Gluten)': 'wheat',
+    u'Yes-Crustacean Shellfish': 'crustacean',
+    u'Yes-Crustaceans': 'crustacean',
+    u'Yes-Eggs': 'eggs',
+    u'Yes-Fish': 'fish',
+    u'Yes-Milk': 'milk',
+    u'Yes-Multiple-see comments': "CHECK ALLERGENS.",
+    u'Yes-Peanuts': 'peanuts',
+    u'Yes-Peanuts/Legumes': 'peanuts',
+    u'Yes-Seeds': 'sesame',
+    u'Yes-Soy/Legumes': 'soybeans',
+    u'Yes-Soybeans': 'soybeans',
+    u'Yes-Sulfites': 'sulfites',
+    u'Yes-Tree Nuts': 'treenuts',
+    u'Yes-Wheat(Gluten)': 'wheat',
+    u'no': None,
+    u'none': None,
+    u'yes': "CHECK ALLERGENS.",
+    u'CHECK ALLERGENS.': "CHECK ALLERGENS."}
 #setattr(model_instance,
 #                        model_field.attname,
 #                        parsed_csv_field)
@@ -728,19 +728,19 @@ def parse_ingredient_allergens():
     allergenic_flavors = []
 
     for allergen in Ingredient.boolean_allergens + Ingredient.text_allergens:
-        print(allergen)
+        print allergen
         # in django queries, '' is equivalent to False, so we're filtering out anything where allergen=False or allergen=''
         # this works because we're excluding the false boolean fields and the '' text fields
         for i in Ingredient.objects.exclude(allergen=''):
-            print(i)
+            print i
             for lw in LeafWeight.objects.filter(ingredient=i).select_related():
-                print(lw.root_flavor)
+                print lw.root_flavor
                 setattr(lw.root_flavor, allergen, i.allergen)
                 lw.root_flavor.save()
                 allergenic_flavors.append(lw.root_flavor)
 
     for allergenic_flavor in allergenic_flavors:
-        print(allergenic_flavor)
+        print allergenic_flavor
         flavor_allergens = []
         for allergen in Ingredient.boolean_allergens + Ingredient.text_allergens:
             if getattr(allergenic_flavor, allergen):
@@ -791,7 +791,7 @@ def parse_sulfites():
     changed_flavors = []
     for i in Ingredient.objects.filter(sulfites_ppm__gt=0):
         for lw in LeafWeight.objects.filter(ingredient=i).select_related():
-            print(lw)
+            print lw
             lw.root_flavor.sulfites_ppm = (i.sulfites_ppm * lw.weight / ONE_THOUSAND) + lw.root_flavor.sulfites_ppm
             changed_flavors.append(lw.root_flavor)
     for f in changed_flavors:
@@ -807,8 +807,8 @@ def parse_diacetyl():
 
     for lw in LeafWeight.objects.filter(ingredient__pk__in=DIACETYL_PKS):
         if lw.root_flavor.diacetyl == True:
-            print("FALSE NEGATIVE")
-            print(lw.root_flavor)
+            print "FALSE NEGATIVE"
+            print lw.root_flavor
             lw.root_flavor.diacetyl = False
             #lw.root_flavor.save()
 
@@ -826,7 +826,7 @@ def get_col_info(model):
 
 def synchronize_prices():
     for f in Flavor.objects.filter(valid=True):
-        print(f.leaf_cost)
+        print f.leaf_cost
 
 
 
@@ -1047,7 +1047,7 @@ def recalculate_guts(flavor):
     flavor.diacetyl = not my_diacetyl
     flavor.no_pg = not my_pg
 
-    solvents_by_weight = sorted(iter(my_solvents.items()), key=operator.itemgetter(1))
+    solvents_by_weight = sorted(my_solvents.iteritems(), key=operator.itemgetter(1))
     solvents_by_weight.reverse()
     for solvent_number, solvent_amount in solvents_by_weight:
         if solvent_amount > 0:

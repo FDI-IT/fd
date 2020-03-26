@@ -16,7 +16,7 @@ def fill_spec(flavor_spec_name, experimental_spec_name, compare_list):
                 **experimental_filter_kwargs)
     for f in qs:
         e = f.experimental_log.order_by(experimental_spec_name)[0]
-        print(e)
+        print e
         setattr(f, flavor_spec_name, getattr(e, experimental_spec_name))
         f.save()
         

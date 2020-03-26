@@ -22,7 +22,7 @@ log_entry = '"%s","%s","%s"\n'
 lot_re = re.compile('-')
 
 def chunker(seq, size):
-    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+    return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
 
 
 class QCCard:
@@ -81,7 +81,7 @@ class QCCard:
         
         for special_cell in chunker(self.special_cells, 2):
             cell_name, loc = special_cell
-            self.flavor_info[cell_name] = '%s' % (s.cell(*loc).value)
+            self.flavor_info[cell_name] = u'%s' % (s.cell(*loc).value)
 
 def delete_all_cards():
     all_lots = Lot.objects.all().delete()
@@ -153,7 +153,7 @@ def get_retain_row(card, s, retain_row, flavor_info):
     existing_lots = Lot.objects.filter(number=new_lot_num, flavor=flavor, sub_lot=new_sub_lot_num)
     if existing_lots.count() > 0:
         lot = existing_lots[0]
-        print("Dupe lot %s-%s found in flavor %s in %s" % (str(new_lot_num), str(new_sub_lot_num), str(flavor.number), card.path))
+        print "Dupe lot %s-%s found in flavor %s in %s" % (str(new_lot_num), str(new_sub_lot_num), str(flavor.number), card.path)
     else:
         lot = Lot(
             flavor=flavor,                                 
@@ -225,7 +225,7 @@ def get_lot_tuple( lot_num_cell ):
             lot_number = int(lot_num_cell[:lot_match.start()])
             sub_lot_number = int(lot_num_cell[lot_match.end():])
         else:
-            print("Error getting lot tuple")
+            print "Error getting lot tuple"
             raise
     return (lot_number, sub_lot_number)
 

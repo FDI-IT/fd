@@ -10,7 +10,7 @@ from django.contrib import admin
 from django.forms import widgets
 from django.db import connection, models
 from django.core.exceptions import ValidationError
-from django.forms.widgets import SelectDateWidget
+from django.forms.extras.widgets import SelectDateWidget
 
 from formfieldset.forms import FieldsetMixin
 
@@ -20,19 +20,19 @@ from solutionfixer.models import SolutionStatus, Solution, convert_solution_into
 
 def validate_ingredient_number(number):
     if Ingredient.objects.filter(id=number).count() == 0:
-        raise ValidationError('PIN %s is not in the database.' % number)
+        raise ValidationError(u'PIN %s is not in the database.' % number)
 
 def validate_formula_ingredient_number(number):
     try:
         Ingredient.get_formula_ingredient(number)
     except:
-        raise ValidationError('%s is not a valid ingredient number' % number)
+        raise ValidationError(u'%s is not a valid ingredient number' % number)
 
 def validate_flavor_number(number):
     try:
         Flavor.objects.get(number=number)
     except:
-        raise ValidationError('%s is not a valid flavor number.' % number)
+        raise ValidationError(u'%s is not a valid flavor number.' % number)
 
 class FormulaIngredientField(forms.CharField):
     default_validators = [validate_formula_ingredient_number]
@@ -292,7 +292,7 @@ class BaseFormulaFormSet(BaseModelFormSet):
             except KeyError:
                 pass
         if total != 1000:
-            raise forms.ValidationError("Formula does not add up to 1000")
+            raise forms.ValidationError, "Formula does not add up to 1000"
 
     def __init__(self, *args, **kwargs):
         super(BaseFormulaFormSet, self).__init__(*args, **kwargs)
@@ -714,7 +714,7 @@ def make_new_rm_form_wizard(request):
                 setattr(i, 'sulfites', True)
             setattr(i, 'sulfites_ppm', sulfites_ppm)
             for form in form_list:
-                for k,v in form.cleaned_data.items():
+                for k,v in form.cleaned_data.iteritems():
                     setattr(i,k,v)
 
             i.id = get_next_rawmaterialcode()
@@ -838,7 +838,7 @@ class NewExForm1(FormRequiredFields, FieldsetMixin):
 
         experimental.product_category_id = self.cleaned_data.pop("product_category")
 
-        for k,v in self.cleaned_data.items():
+        for k,v in self.cleaned_data.iteritems():
             kvlist.append((k,v))
             setattr(experimental, k, v)
         experimental.na = False
@@ -894,7 +894,7 @@ def make_new_ex_form_wizard(request):
         def done(self, form_list, form_dict=None):
             ex = ExperimentalLog()
             for form in form_list[1:]:
-                for k,v in form.cleaned_data.items():
+                for k,v in form.cleaned_data.iteritems():
                     setattr(ex,k,v)
             form_list[0].process_data(ex)
             ex.experimentalnum = get_next_experimentalnum()
@@ -1098,7 +1098,7 @@ def make_flavorspec_form(flavor):
             cleaned_data = self.cleaned_data
             pk = cleaned_data.get("pk")
             name = cleaned_data.get("name").lstrip().rstrip() #get rid of accidental spaces before and after name
-            delete = cleaned_data.get('DELETE')
+            delete = cleaned_data.get(u'DELETE')
 
             if delete == False:
                 if FlavorSpecification.objects.filter(flavor=flavor).filter(name=name).exclude(pk=pk).exists():

@@ -25,13 +25,13 @@ class Command(BaseCommand):
         outfile = os.path.join(backup_dir, 'backup_%s.sql' % time.strftime('%y%m%d%S'))
 
         if self.engine == 'mysql':
-            print('Doing Mysql backup to database %s into %s' % (self.db, outfile))
+            print 'Doing Mysql backup to database %s into %s' % (self.db, outfile)
             self.do_mysql_backup(outfile)
         elif self.engine in ('postgresql_psycopg2', 'postgresql'):
-            print('Doing Postgresql backup to database %s into %s' % (self.db, outfile))
+            print 'Doing Postgresql backup to database %s into %s' % (self.db, outfile)
             self.do_postgresql_backup(outfile)
         else:
-            print('Backup in %s engine not implemented' % self.engine)
+            print 'Backup in %s engine not implemented' % self.engine
 
     def do_mysql_backup(self, outfile):
         args = []

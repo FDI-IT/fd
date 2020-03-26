@@ -1,7 +1,7 @@
 # Create your views here.
 import operator
 import logging
-import io
+import cStringIO
 import ast
 import json
 
@@ -15,7 +15,7 @@ from django.http import HttpResponseRedirect, HttpResponse, QueryDict
 from django.template import RequestContext
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Max
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 
 from hazards.tasks import calculate_flavor_hazards, calculate_flavor_hazards_with_work, get_ellipsis_pcodes
 from hazards.models import GHSIngredient, HazardClass, HazardCategory
@@ -174,7 +174,7 @@ def hazard_calculator(request, sds_object=None, product_id=None, ingredient_id=N
 
     #HAZARDS TABLE (sorted list)
     product_hazards = []
-    for hazard, value in hazard_dict.items():
+    for hazard, value in hazard_dict.iteritems():
         try:
             hazard_class = HazardClass.objects.get(python_class_name=hazard)
             product_hazards.append((hazard_class.human_readable_name, value))
@@ -265,7 +265,7 @@ def get_merged_hcode_info(category_list):
     merged_hcode_info = defaultdict(set)
     for category in category_list:
         hcode_info = category.get_hcode_info()
-        for k, v in hcode_info.items():
+        for k, v in hcode_info.iteritems():
             if k == 'p_codes':
                 merged_hcode_info[k] = merged_hcode_info[k].union(v)
             else:
@@ -358,7 +358,7 @@ def safety_data_sheet(request, sds_object=None, product_id=None):
     ld50_dict = {}
 
     #Convert hazard dict to a list of HazardCategory objects
-    for hazard, category in hazard_dict.items():
+    for hazard, category in hazard_dict.iteritems():
         if 'ld50' in hazard:
             ld50_dict[hazard] = category
         elif category != 'No':
@@ -396,7 +396,7 @@ def get_ellipsis_form_data(sds_object, post_formset = None):
     # within this helper function, rather than in the view
     formula_list = sds_object.get_hazard_formula_list()
     category_list = []
-    for hazard, category in calculate_flavor_hazards(formula_list).items():
+    for hazard, category in calculate_flavor_hazards(formula_list).iteritems():
         if 'ld50' not in hazard and category != 'No':
             category_list.append(HazardCategory.objects.filter(hazard_class__python_class_name=hazard)\
                                  .get(category=category))
@@ -529,7 +529,7 @@ def ingredient_autocomplete(request):
     for ingredient in ingredients:
         ingredient_json = {}
         ingredient_json["cas"] = ingredient.cas
-        ingredient_json["label"] = ingredient.__str__()
+        ingredient_json["label"] = ingredient.__unicode__()
         ingredient_json["value"] = ingredient_json["cas"]
         ret_array.append(ingredient_json)
     return HttpResponse(json.dumps(ret_array), content_type='application/json; charset=utf-8')

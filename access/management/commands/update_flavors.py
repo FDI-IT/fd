@@ -79,9 +79,9 @@ class Command(BaseCommand):
             except ValidationError as e:
                 self.exception_count += 1
                 transaction.savepoint_rollback(sid)
-                print("%s %s -> %s" % (str(Flavor), 
+                print "%s %s -> %s" % (str(Flavor), 
                                    str(self.model_munger.line_num()), 
-                                   csv_row))
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row,
                                      model_exception_writer, 
@@ -105,17 +105,17 @@ class Command(BaseCommand):
         
         model_exception_writer.close()
         
-        print("Resembles: %s" % self.resemble_count)
-        print("Different: %s" % len(self.different_count))
-        print("Exceptions: %s" % self.exception_count)
-        print("New: %s" % self.new_count)
+        print "Resembles: %s" % self.resemble_count
+        print "Different: %s" % len(self.different_count)
+        print "Exceptions: %s" % self.exception_count
+        print "New: %s" % self.new_count
         
         
     def process_row(self, csv_row):
         new_model_instance = Flavor()
         #for each field in the row, set the model attribute
         for (csv_index, model_field) in self.model_field_map:
-            csv_field = str.strip(csv_row[csv_index])         
+            csv_field = unicode.strip(csv_row[csv_index])         
             parsed_csv_field = \
                 parse_csv_field(model_field.db_type(), csv_field)
             setattr(new_model_instance,
@@ -138,10 +138,10 @@ class Command(BaseCommand):
             new_model_instance.save()
         else:    
             self.different_count.append(difference_field)
-            print("Difference in %s - old: %s | new: %s" % (
+            print u"Difference in %s - old: %s | new: %s" % (
                                             old_model_instance,
                                             getattr(old_model_instance, difference_field),
-                                            getattr(new_model_instance, difference_field)))
+                                            getattr(new_model_instance, difference_field))
             if self.debug:
                 import pdb; pdb.set_trace()
             new_model_instance.pk = old_model_instance.pk

@@ -14,14 +14,14 @@ class FormulaNode():
     def get_flavor(self):
         return Flavor.objects.get(id=self.id)
         
-    def __str__(self):
+    def __unicode__(self):
         f = Flavor.objects.get(id=self.id)
-        return f.__str__()
+        return f.__unicode__()
     
     def __str__(self):
         f = Flavor.objects.get(id=self.id)
-        #return str(f.__str__())
-        return str("%s - %s" % (f.__str__(), self.counter))
+        #return str(f.__unicode__())
+        return str("%s - %s" % (f.__unicode__(), self.counter))
         
 class GazintaTree():
     
@@ -36,7 +36,7 @@ class GazintaTree():
     def expand_node(self, node):
         
         starbunch = [node,]
-        starbunch.extend(list(map(FormulaNode, node.get_flavor().get_gazintas())))
+        starbunch.extend(map(FormulaNode, node.get_flavor().get_gazintas()))
         self.g.add_star(starbunch)
         
     def expand_leaves(self):

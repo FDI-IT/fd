@@ -57,7 +57,7 @@ def usage_range_check(usage_level_value):
     if '-' in usage_level_value:
         usage_level_value = usage_level_value.translate(translate_table)
         usage_level_list = usage_level_value.split('-')
-        print(usage_level_list)
+        print usage_level_list
         if len(usage_level_list) == 2:
             usage_level_list = sorted(usage_level_list)
             try:
@@ -78,7 +78,7 @@ def usage_number_check(usage_level_value):
 FLAVOR_NUMBER = 7
 def parse_row(row):
     flavor_number = row[FLAVOR_NUMBER].value
-    print(flavor_number)
+    print flavor_number
     try:
         f = Flavor.objects.get(number=flavor_number)
     except Flavor.DoesNotExist:
@@ -127,7 +127,7 @@ def parse_row(row):
         else:
             memo = memo_value
             
-        print('app: %s -- usage level: "%s" -- memo: "%s"' % (app[APP_NAME], usage_level, memo))
+        print 'app: %s -- usage level: "%s" -- memo: "%s"' % (app[APP_NAME], usage_level, memo)
         application = Application(flavor=f,
                 application_type=app[APP_OBJ],
                 usage_level=usage_level,

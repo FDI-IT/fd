@@ -1,5 +1,5 @@
 """
-Describes all of the data related to HACCP forms and logs
+Describes all of the data related to HACCP forms and logs 
 """
 
 
@@ -9,16 +9,19 @@ from access.models import Customer, Flavor
 
 class CustomerComplaint(models.Model):
     date = models.DateTimeField(auto_now_add=True)
-    customer = models.ForeignKey(Customer,on_delete=models.PROTECT)
-    flavor_object = models.ForeignKey(Flavor,blank=True,null=True,on_delete=models.PROTECT)
+    customer = models.ForeignKey(Customer)
+    flavor_object = models.ForeignKey(Flavor,blank=True,null=True)
     flavor_number = models.PositiveIntegerField()
     lot = models.PositiveIntegerField()
     description = models.TextField()
     conclusion = models.TextField()
 
-    def __str__(self):
-        return "%s -- %s -- %s" % (self.date.date(), self.customer, self.description[:50])
+    class Meta:
+        ordering = ['-date',]
 
+    def __unicode__(self):
+        return "%s -- %s -- %s" % (self.date.date(), self.customer, self.description[:50])
+    
     def save(self, *args, **kwargs):
         try:
             self.flavor_object = Flavor.objects.get(number=self.flavor_number)
@@ -28,17 +31,17 @@ class CustomerComplaint(models.Model):
 
 class CorrectiveAction(models.Model):
     date = models.DateTimeField(auto_now_add=True)
-    customer = models.ForeignKey(Customer, blank=True, null=True,on_delete=models.PROTECT)
-    description = models.TextField("Description of Occurrence/Assesment of Consequences")
+    customer = models.ForeignKey(Customer, blank=True, null=True)
+    description = models.TextField("Description of Occurrence/Assesment of Consequences")    
     root_cause = models.TextField()
     recommendations = models.TextField("Recommendations/Person Responsible")
     action_plan = models.TextField("Action Plan/Time Scale")
     validation = models.TextField("Verification")
     comments = models.TextField(blank=True)
-
-    def __str__(self):
+    
+    def __unicode__(self):
         return "%s -- %s -- %s" % (self.date.date(), self.customer, self.description[:50])
-
+    
 class CIPM(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
@@ -46,16 +49,17 @@ class CIPM(models.Model):
     action_plan = models.TextField()
     validation = models.TextField()
     comments = models.TextField(blank=True)
-
+    
     class Meta:
+        ordering = ['-date',]
         #verbose_name = "Continuous Improvement and Preventative Maintenance" #THIS FIELD IS >50 CHARS TOO LONG FOR AUTH_PERMISSION NAME FIELD
                                                                                 #CHECK POSTGRES LOGS
         verbose_name = "CIPM" #changed this for now, for some reason still checks for 50 chars even though i changed the 'name' field to varchar(100)
         verbose_name_plural = "CIPMs"
-
-    def __str__(self):
+        
+    def __unicode__(self):
         return "%s -- %s" % (self.date.date(), self.description[:50])
-
+    
     def url(self):
         return '/haccp/cipm/%s/' % self.pk
 
@@ -63,66 +67,66 @@ class WaterTest(models.Model):
     test_date = models.DateField()
     zone = models.PositiveSmallIntegerField()
     test_result = models.DecimalField(max_digits=2, decimal_places=1)
-
-    def __str__(self):
+    
+    def __unicode__(self):
         return "%s - Zone #%s - %s" % (self.test_date, self.zone, self.test_result)
-
+    
     class Meta:
         ordering = ['-test_date']
-
+        
 class QualityTest(models.Model):
     test_date = models.DateField()
     zone = models.PositiveSmallIntegerField()
-
-
+    
+    
     class Meta:
         ordering = ['-test_date']
 
 
 class TobaccoBeetleTest(QualityTest):
     test_result = models.PositiveSmallIntegerField() #TODO change this to be more semantic or include some meta info
-
-    def __str__(self):
+    
+    def __unicode__(self):
         return "%s - Zone #%s - %s" % (self.test_date, self.zone, self.test_result)
-
+    
 class ThermometerTest(QualityTest):
     test_result = models.PositiveSmallIntegerField() #TODO change this to be more semantic or include some meta info
-
-    def __str__(self):
+    
+    def __unicode__(self):
         return "%s - Zone #%s - %s" % (self.test_date, self.zone, self.test_result)
-
+    
 
 ###################################################
 
 class KosherGroup(models.Model):
     name = models.CharField(max_length=2)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
 
 class ReceivingLog(models.Model):
     entry_date = models.DateTimeField()
     receiving_number = models.PositiveIntegerField()
     pin_number = models.PositiveIntegerField()
-    supplier_id = models.ForeignKey('Supplier',on_delete=models.PROTECT)
+    supplier_id = models.ForeignKey('Supplier')
     description_of_goods = models.CharField(max_length=50)
     package_quantity = models.PositiveIntegerField()
     supplier_lot_number = models.CharField(max_length=25)
     po_number = models.PositiveIntegerField()
     truck = models.CharField(max_length=25)
-    kosher_group = models.ForeignKey('KosherGroup', blank=True, null=True,on_delete=models.PROTECT)
+    kosher_group = models.ForeignKey('KosherGroup', blank=True, null=True)
     notes = models.TextField(blank=True)
 
-    def __str__(self):
-        return str(self.entry_date.year)[2:5] + "-R" + str(self.receiving_number) + " - Pin #" + str(self.pin_number) + " - " + self.description_of_goods + " - " + self.supplier_id.__str__()
+    def __unicode__(self):
+        return str(self.entry_date.year)[2:5] + "-R" + str(self.receiving_number) + " - Pin #" + str(self.pin_number) + " - " + self.description_of_goods + " - " + self.supplier_id.__unicode__()
 
 class Supplier(models.Model):
     id = models.IntegerField(primary_key=True)
     supplier_name = models.CharField(max_length=50)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.supplier_name
 
     class Meta:
         ordering = ['supplier_name']
-        db_table = 'supplier'
+        db_table = u'supplier'

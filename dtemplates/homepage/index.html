@@ -1,1 +1,20 @@
 {% extends "base.html" %}
+
+
+{% block content %}
+  {% if unfinished_training_log %}
+    <h3>Unfinished/Expired Training</h3>
+    <ul>
+    {% for u in unfinished_training_log %}
+      <li>
+        {% if not u.0 in no_link_tests %}
+          <a href="/access/training_test/{{u.0}}" target="_blank">{{u.1}}</a>
+        {% else %}
+          {{u.1}}
+
+        {% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}

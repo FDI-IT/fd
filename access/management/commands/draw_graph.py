@@ -41,7 +41,7 @@ def draw_graph(flavor):
     g = nx.DiGraph()
     onodes = FormulaTree.objects.filter(root_flavor=flavor)
     root = onodes[0]
-    print(root)
+    print root
     g.add_node(root.row_id)
     g.node[root.row_id]['label'] = "%s" % flavor
     for onode in onodes.filter(~Q(parent_id=None)):

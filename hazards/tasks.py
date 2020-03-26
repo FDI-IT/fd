@@ -239,7 +239,7 @@ def get_relevant_component_rows(accumulator, hazard_class):
             category,
             ld50,
             ingredient.cas,
-            ingredient.__str__(),
+            ingredient.__unicode__(),
             fli.weight,
             str(fli.weight/accumulator.total_weight * 100) + '%',
             duplicate
@@ -457,7 +457,7 @@ def import_row(sheet, row):
 
         ingredient_hazard_dict = parse_ghs_hazard_category_cell(g_dict['ghs_hazard_category'], cas_number)
 
-        for hazard, value_dict in ingredient_hazard_dict.items():
+        for hazard, value_dict in ingredient_hazard_dict.iteritems():
 
             #print hazard, value
 
@@ -557,7 +557,7 @@ def handle_duplicate_hazards(hazard_list, cas_number):
         else:
             duplicate_dict[hazard].append(value_dict['category'])
 
-    for hazard, potential_categories in duplicate_dict.items():
+    for hazard, potential_categories in duplicate_dict.iteritems():
         if len(potential_categories) > 1:
 
             if hazard == 'TOSTSingleHazard' and potential_categories == ['3NE', '3RI']:
@@ -570,7 +570,7 @@ def handle_duplicate_hazards(hazard_list, cas_number):
                 lowest_index = 1000000 #any number > 7 will work
                 for category in potential_categories:
 
-                    index = list(HazardClassDict[hazard].keys()).index(category)
+                    index = HazardClassDict[hazard].keys().index(category)
 
                     if index < lowest_index:
                         lowest_index = index
@@ -580,7 +580,7 @@ def handle_duplicate_hazards(hazard_list, cas_number):
                     except:
                         pass
 
-                most_hazardous_category = list(HazardClassDict[hazard].keys())[lowest_index]
+                most_hazardous_category = HazardClassDict[hazard].keys()[lowest_index]
 
                 #append the hazard with its most hazardous category
                 hazard_list.append((hazard, {'category': most_hazardous_category, 'ld50': None}))
@@ -593,12 +593,12 @@ def import_initial_data():
     HazardCategory.objects.all().delete()
     HazardClass.objects.all().delete()
 
-    for hazard_class_name, category_info_dict in HazardClassDict.items():
+    for hazard_class_name, category_info_dict in HazardClassDict.iteritems():
         hazard_class = HazardClass(python_class_name = hazard_class_name,
                          human_readable_name = hazard_classes.__dict__[hazard_class_name].human_readable_field)
         hazard_class.save()
 
-        for category, hazard_category_info in category_info_dict.items():
+        for category, hazard_category_info in category_info_dict.iteritems():
 
             for subcategory in hazard_category_info.subcategories:
 
@@ -631,7 +631,7 @@ def evaluate_summation_row_strings():
 def get_ellipsis_pcodes():
     
     pcode_list = []
-    for pcode, statement in pcode_dict.items():
+    for pcode, statement in pcode_dict.iteritems():
         if '...' in statement:
             pcode_list.append(pcode)
             
@@ -641,19 +641,19 @@ def pcode_test():
     for hcode in HCodeDict:
         for pcode in HCodeDict[hcode]['p_codes']:
             if pcode not in pcode_dict:
-                print('%s: %s' % (hcode, pcode))
+                print '%s: %s' % (hcode, pcode)
                 
 def get_hazard_from_statement(statement):
     
-    for hcode, data in HCodeDict.items():
+    for hcode, data in HCodeDict.iteritems():
         if data['statement'] == statement:
             statement_hcode = hcode
             break
     
     hazard_category_list = []
             
-    for hazard_class, data in HazardClassDict.items():
-        for category, info in data.items():
+    for hazard_class, data in HazardClassDict.iteritems():
+        for category, info in data.iteritems():
             if info.hcode == statement_hcode:
                 #hazard_category_list.append(hazard_class)
                 hazard_class_name = hazard_class

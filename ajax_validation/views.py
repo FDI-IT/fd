@@ -24,23 +24,23 @@ def validate(request, *args, **kwargs):
             errors = {}
             formfields = {}
             for f in form.forms:
-                for field in list(f.fields.keys()):
+                for field in f.fields.keys():
                     formfields[f.add_prefix(field)] = f[field]
-                for field, error in f.errors.items():
+                for field, error in f.errors.iteritems():
                     errors[f.add_prefix(field)] = error
             if form.non_form_errors():
                 errors['__all__'] = form.non_form_errors()
         else:
             errors = form.errors
-            formfields = dict([(fieldname, form[fieldname]) for fieldname in list(form.fields.keys())])
+            formfields = dict([(fieldname, form[fieldname]) for fieldname in form.fields.keys()])
 
         # if fields have been specified then restrict the error list
         if request.POST.getlist('fields'):
             fields = request.POST.getlist('fields') + ['__all__']
-            errors = dict([(key, val) for key, val in errors.items() if key in fields])
+            errors = dict([(key, val) for key, val in errors.iteritems() if key in fields])
 
         final_errors = {}
-        for key, val in errors.items():
+        for key, val in errors.iteritems():
             if '__all__' in key:
                 final_errors[key] = val
             elif not isinstance(formfields[key].field, forms.FileField):

@@ -51,7 +51,7 @@ def get_flavors_using_raw_material_primary(ingredient_list, exclude_ingredient=N
         else:
             #this statement should never be hit because there will either be two key ngredients or one exclude_ingredient
             flavor_set.add(current_flavor)
-            print(2/0)
+            print 2/0
     return flavor_set
 
 
@@ -59,7 +59,7 @@ def print_experimentals_with_recent_retains():
     experimental_list = []
 
     for ex in ExperimentalLog.objects.exclude(flavor=None):
-        if Retain.objects.filter(lot__flavor__in=ex.flavor.loaded_renumber_list).filter(date__gte=datetime(2013,0o1,0o1)).count() > 2:
+        if Retain.objects.filter(lot__flavor__in=ex.flavor.loaded_renumber_list).filter(date__gte=datetime(2013,01,01)).count() > 2:
             experimental_list.append(ex)
 
     w = csv.writer(open('experimental_list.csv', 'wb'), delimiter=",", quotechar='"')
@@ -78,7 +78,7 @@ def print_suppliers():
 
     supplier_dict = {}
 
-    for poli in PurchaseOrderLineItem.objects.filter(date_received__gte=datetime(2014,0o1,0o1)):
+    for poli in PurchaseOrderLineItem.objects.filter(date_received__gte=datetime(2014,01,01)):
         if poli.po.supplier not in supplier_dict:
             supplier_dict[poli.po.supplier] = poli.date_received
         else:
@@ -90,7 +90,7 @@ def print_suppliers():
     w.writerow(['Supplier', 'Contact Name', 'Last Purchase Date'])
 
     #cas_number_discrepancy_list.sort(key=lambda x: x[1], reverse=True)
-    supplier_list = sorted(list(supplier_dict.items()), key=lambda x: x[1], reverse=True)
+    supplier_list = sorted(supplier_dict.items(), key=lambda x: x[1], reverse=True)
 
     for supplier, last_purchase_date in supplier_list:
         w.writerow([unicodedata.normalize('NFKD', supplier.suppliername).encode('ascii','ignore'),
@@ -189,7 +189,7 @@ def print_products_by_pr(threshold):
                 if fl.unitprice != 0 and fl.unitprice/fl.rawmaterialcost < threshold :
                     flavor_list.append(fl)
             except:
-                print("Flavor %s, up: %s, rmc: %s" % (fl, fl.unitprice, fl.rawmaterialcost))
+                print "Flavor %s, up: %s, rmc: %s" % (fl, fl.unitprice, fl.rawmaterialcost)
 
     w = csv.writer(open('profitratio_list.csv', 'wb'), delimiter=",", quotechar='"')
     w.writerow(['#', 'Name', 'Profit Ratio', 'Parent Flavor', 'Most Recent Lot'])
@@ -316,13 +316,13 @@ def print_flavor_hazard_report_2(filter_terms, filter_numbers):
 #                         else:
 #                             hazardous_ingredients[most_hazardous_ingredient] += 1
 
-                        print("threshold: %s, haz: %s" % (threshold_str, most_hazardous_ingredient))
+                        print "threshold: %s, haz: %s" % (threshold_str, most_hazardous_ingredient)
                         hazardous_ingredients.add((threshold_str, most_hazardous_ingredient, term))
-                        print(hazardous_ingredients)
+                        print hazardous_ingredients
 
             if hazard_report_rows:
                 average_difference = difference_sum/term_count
-                print(flavor, hazard_report_rows)
+                print flavor, hazard_report_rows
                 hazard_report_flavors.append((flavor, term_count, hazard_report_rows, average_difference))
 
     hazard_report_flavors = sorted(hazard_report_flavors, key=lambda item: (item[1], item[3]))
@@ -440,13 +440,13 @@ def print_flavor_hazard_report(filter_terms):
 #                         else:
 #                             hazardous_ingredients[most_hazardous_ingredient] += 1
 
-                        print("threshold: %s, haz: %s" % (threshold_str, most_hazardous_ingredient))
+                        print "threshold: %s, haz: %s" % (threshold_str, most_hazardous_ingredient)
                         hazardous_ingredients.add((threshold_str, most_hazardous_ingredient, term))
-                        print(hazardous_ingredients)
+                        print hazardous_ingredients
 
             if hazard_report_rows:
                 average_difference = difference_sum/term_count
-                print(flavor, hazard_report_rows)
+                print flavor, hazard_report_rows
                 hazard_report_flavors.append((flavor, term_count, hazard_report_rows, average_difference))
 
     hazard_report_flavors = sorted(hazard_report_flavors, key=lambda item: (item[1], item[3]))
@@ -494,10 +494,10 @@ def get_solution_cas_numbers():
                 if base_ing.cas != '':
                     i.cas = base_ing.cas
                     i.save()
-                    print("Ingredient %s CAS number successfully changed to %s" % (i, i.cas))
+                    print "Ingredient %s CAS number successfully changed to %s" % (i, i.cas)
 
             except:
-                print("Solution %s has no base id" % sol)
+                print "Solution %s has no base id" % sol
 
 def remove_solution_cas_numbers():
 
@@ -509,7 +509,7 @@ def remove_solution_cas_numbers():
                 sol.cas = ''
                 count += 1
 
-    print("Removed the CAS number of %s solutions." % count)
+    print "Removed the CAS number of %s solutions." % count
 
 
 
@@ -534,7 +534,7 @@ def import_additional_cas_numbers(document_path, username):
                     #Only change the cas if it hasn't already been changed
                     if raw_material.cas != '00-00-1':
                         raw_material.cas = new_cas
-                        print('Changing cas of %s to %s' % (raw_material, new_cas))
+                        print 'Changing cas of %s to %s' % (raw_material, new_cas)
                         reversion.set_comment("Changing CAS to non-hazardous CAS number 00-00-1.  Old CAS: %s" % row[3])
                         raw_material.save()
                         count += 1
@@ -545,7 +545,7 @@ def import_additional_cas_numbers(document_path, username):
 #                     raw_material.save()
 #                     count_2 += 1
 
-    print("Total number of cas numbers changed to '00-00-1': %s" % count)
+    print "Total number of cas numbers changed to '00-00-1': %s" % count
 
 def get_lot_data(flavor, year):
 
@@ -605,7 +605,7 @@ def print_end_of_year_report(year):
 
     for fl in Flavor.objects.filter(sold=True).exclude(unitprice=None):
         if fl.id not in renumber_set:
-            print(fl)
+            print fl
             renumber_set.update(fl.loaded_renumber_list)
             flavor, total_weight, total_sale, total_lot_count, avg_weight, renumber_lot_distribution = get_lot_data(fl, year)
 
@@ -616,7 +616,7 @@ def print_end_of_year_report(year):
 
     final_list = []
     for row in rows:
-        final_list.append(list(map(str, row)))
+        final_list.append(map(unicode, row))
 
     print_list(final_list, '%s_yearly_report' % year)
 
@@ -632,8 +632,8 @@ def print_retain_costs(year):
 
     bottle_price = Decimal(0.48)
 
-    product_retain_list.append(['Retain #', 'Flavor', 'Raw Material Cost (per lb)',
-                                'Half Ounce Cost', 'Bottle Price', 'Total Price'])
+    product_retain_list.append([u'Retain #', u'Flavor', u'Raw Material Cost (per lb)',
+                                u'Half Ounce Cost', u'Bottle Price', u'Total Price'])
 
     for retain in Retain.objects.filter(date__year=year).order_by('retain'):
         half_ounce_price = retain.lot.flavor.rawmaterialcost/32
@@ -643,22 +643,22 @@ def print_retain_costs(year):
         bottle_total += bottle_price
         grand_total += total_price
 
-        product_retain_list.append([str(retain.retain),
-                                    str(retain.lot.flavor),
-                                    str(retain.lot.flavor.rawmaterialcost),
-                                    str(half_ounce_price),
-                                    str(bottle_price),
-                                    str(total_price)])
+        product_retain_list.append([unicode(retain.retain),
+                                    unicode(retain.lot.flavor),
+                                    unicode(retain.lot.flavor.rawmaterialcost),
+                                    unicode(half_ounce_price),
+                                    unicode(bottle_price),
+                                    unicode(total_price)])
 
-    product_retain_list.append(['','','',str(rmc_total), str(bottle_total), str(grand_total)])
+    product_retain_list.append([u'',u'',u'',unicode(rmc_total), unicode(bottle_total), unicode(grand_total)])
 
     rm_retain_list = []
     rmc_total = 0
     bottle_total = 0
     grand_total = 0
 
-    rm_retain_list.append(['Retain #', 'Ingredient', 'Raw Material Cost (per lb)',
-                            'Half Ounce Cost', 'Bottle Price', 'Total Price'])
+    rm_retain_list.append([u'Retain #', u'Ingredient', u'Raw Material Cost (per lb)',
+                            u'Half Ounce Cost', u'Bottle Price', u'Total Price'])
 
     for rmretain in RMRetain.objects.filter(date__year=year).order_by('r_number'):
         half_ounce_price = rmretain.related_ingredient.unitprice/32
@@ -668,14 +668,14 @@ def print_retain_costs(year):
         bottle_total += bottle_price
         grand_total += total_price
 
-        rm_retain_list.append([str(rmretain.r_number),
-                               rmretain.related_ingredient.__str__(),
-                               str(rmretain.related_ingredient.unitprice),
-                               str(half_ounce_price),
-                               str(bottle_price),
-                               str(total_price)])
+        rm_retain_list.append([unicode(rmretain.r_number),
+                               rmretain.related_ingredient.__unicode__(),
+                               unicode(rmretain.related_ingredient.unitprice),
+                               unicode(half_ounce_price),
+                               unicode(bottle_price),
+                               unicode(total_price)])
 
-    rm_retain_list.append(['','','',str(rmc_total), str(bottle_total), str(grand_total)])
+    rm_retain_list.append([u'',u'',u'',unicode(rmc_total), unicode(bottle_total), unicode(grand_total)])
 
     print_list(product_retain_list, 'product_retain_costs.csv')
     print_list(rm_retain_list, 'rm_retain_costs.csv')
@@ -707,13 +707,41 @@ def print_unique_rms_in_OTCO_products():
                 rm_dict[lw.ingredient]['product_list'].append(fl.number)
 
     rm_list = []
-    for k, v in list(rm_dict.items()):
+    for k, v in rm_dict.items():
         rm_list.append([k.id,k.art_nati, k.prefix, k.product_name, v['rm_total_amount'], v['product_list']])
 
     rm_list = sorted(rm_list, key=lambda x: -x[4])
 
     final_list = []
     for row in rm_list:
-        final_list.append([str(x) for x in row])
+        final_list.append(map(lambda x:unicode(x), row))
 
     print_list('unique_rms_in_otco_products.csv', final_list)
+
+def print_rms_with_old_docs():
+
+    ingredients_with_docs = []
+
+    for ingredient in Ingredient.objects.exclude(suppliercode='FDI'):
+
+        documentation_path = '/var/www/static_root/Documentation/%s/' % ingredient.id
+        static_path = '/static/Documentation/%s/' % ingredient.id
+        documentation_list = []
+
+        for root, dirnames, filenames in os.walk(documentation_path):
+            for filename in filenames:
+                documentation_list.append(filename)
+            break  # break because we only want the files in the top level folder, not the ones in subdirectories
+
+        if documentation_list:
+            ingredients_with_docs.append([ingredient, documentation_list, len(documentation_list)])
+
+    pl = []
+    for i, dl, len in ingredients_with_docs:
+        pl.append([i.id, i.art_nati, '%s %s' % (i.prefix, i.product_name), documentation_list.join(', '), len])
+
+    final = []
+    for row in pl:
+        final.append(row.map(lambda x: unicode(x), row))
+
+    print_list(final, 'all_RMs_with_docs_in_old_system.csv')

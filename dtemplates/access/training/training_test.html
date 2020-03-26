@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<head>
+  <link rel="stylesheet" type="text/css" href='/static/css/training.css'/>
+</head>
+<!-- link for spanish version of tests -->
+{% if '_sp' in test_type and section in spanish_version %}
+    <a href='../../training_test/{{section}}/'>English Version</a>
+{% elif section in spanish_version %}
+    <a href='../../training_test/{{section}}_sp/'>Spanish Version</a>
+{% endif %}
+
+<p>{{message}}</p>
+{{test_material|safe}}
+{% if questions %}
+    <form method='POST' autocomplete="off">
+    {% csrf_token %}
+    {% if not test_type == "colorblind" %}
+          <ol>
+          {% for q in questions %}
+            <li> {{q.question}}
+              <ul>
+                {% if q.answer_options %}
+                  {% for a in q.answer_options%}
+                    <li>
+                      <input type='radio' name='{{q.id}}' id='{{q.test_type}}{{forloop.parentloop.counter0}}{{a.0}}' value={{a.0}} required>
+                      <label for='{{q.test_type}}{{forloop.parentloop.counter0}}{{a.0}}'>{{a.1}}</label>
+                    </li>
+                  {% endfor %}
+
+                {% else %}
+                    <li>
+                      <input type='text' name='{{q.id}}' required/>
+                    </li>
+                {% endif %}
+              </ul>
+            </li>
+
+          {% endfor %}
+          </ol>
+      {% else %}
+        <table class = 'cbtable'>
+          <tr>
+          {% for q in questions %}
+            {% if forloop.counter|divisibleby:3 %}
+              <td class='cbtdlast'>
+                <input class='cbinput' type='text' name='{{q.id}}' required/>
+              </td>
+            </tr>
+            <tr>
+            {% else %}
+              <td>
+                <input class='cbinput' type='text' name='{{q.id}}' required/>
+              </td>
+            {% endif %}
+          {% endfor %}
+          </tr>
+        </table>
+      {% endif %}
+
+          <input type='submit'/>
+    </form>
+{% endif %}
+
+
+<!-- signature form  -->
+{% if test_type in signature_test  %}
+  <form method="POST" autocomplete="off">
+      {% csrf_token %}
+      <table>
+        <tr>
+          <td>Signature Checkbox</td>
+          <td><input type="checkbox" 'signature'/></td>
+        </tr>
+        <tr>
+          <td>Enter Username</td>
+          <td><input type='text' name='username' required/></td>
+        </tr>
+        <tr>
+          <td>Enter Password</td>
+          <td><input type='password' name= 'pw' required/></td>
+        </tr>
+        <tr>
+          <td><input type='submit'/></td>
+        </tr>
+      </table>
+    </form>
+
+{% endif  %}
+
+{% endblock %}

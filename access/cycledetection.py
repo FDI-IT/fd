@@ -14,14 +14,14 @@ class FormulaNode():
     def get_flavor(self):
         return Flavor.objects.get(id=self.id)
         
-    def __str__(self):
+    def __unicode__(self):
         f = Flavor.objects.get(id=self.id)
-        return f.__str__()
+        return f.__unicode__()
     
     def __str__(self):
         f = Flavor.objects.get(id=self.id)
-        #return str(f.__str__())
-        return str("%s - %s" % (f.__str__(), self.counter))
+        #return str(f.__unicode__())
+        return str("%s - %s" % (f.__unicode__(), self.counter))
         
 class FormulaTree(): #unique nodes
     
@@ -36,7 +36,7 @@ class FormulaTree(): #unique nodes
     def expand_node(self, node):
         
         starbunch = [node,]
-        starbunch.extend(list(map(FormulaNode, node.get_flavor().get_gazintas())))
+        starbunch.extend(map(FormulaNode, node.get_flavor().get_gazintas()))
         self.g.add_star(starbunch)
         
     def expand_leaves(self):
@@ -64,17 +64,17 @@ class CycleDetection():
         self.re_init()
         for flavor in Flavor.objects.all().order_by('number'):
             if not flavor.number in self.visited_flavors:
-                print("Checking: %s" % flavor)
+                print "Checking: %s" % flavor
                 self.inner_check_flavor(flavor, {})
             else:
-                print("Skipping: %s" % flavor)
+                print "Skipping: %s" % flavor
 
-        print("Cycled flavors-")   
-        print(self.cycled_flavors)             
+        print "Cycled flavors-"   
+        print self.cycled_flavors             
         #for cycle in self.cycled_flavors.values():
         #    self.parse_cycled_flavor(cycle)
-        print("Other exceptions-")
-        print(self.other_exceptions)
+        print "Other exceptions-"
+        print self.other_exceptions
                 
     def check_flavor(self, flavor, parent_flavors={}):
         """Traverses a single flavor and checks to see if any gazintas
@@ -82,10 +82,10 @@ class CycleDetection():
         then a FormulaCycleException is raised.
         """
         self.re_init()
-        print("Checking: %s" % flavor)
+        print "Checking: %s" % flavor
         self.inner_check_flavor(flavor, parent_flavors)
-        print(self.cycled_flavors)
-        print(self.other_exceptions)
+        print self.cycled_flavors
+        print self.other_exceptions
         
     def inner_check_flavor(self, flavor, parent_flavors):
         """Traverses a flavor and checks to see if any gazintas are in
@@ -95,15 +95,15 @@ class CycleDetection():
         valid data.       
         """
         if self.debug:
-            print("Visited: %s" % self.visited_flavors) 
+            print "Visited: %s" % self.visited_flavors 
         try:
             for gazinta in self.get_fresh_gazintas(flavor):
                 if self.debug:
-                    print("%s in %s" % (gazinta.number, self.visited_flavors))
-                    print(gazinta.number in self.visited_flavors)
+                    print "%s in %s" % (gazinta.number, self.visited_flavors)
+                    print gazinta.number in self.visited_flavors
                 if gazinta.number in parent_flavors:
                     raise FormulaCycleException(gazinta)
-                print("Checking gazinta: %s" % gazinta)
+                print "Checking gazinta: %s" % gazinta
                 gazinta_parents = parent_flavors.copy()
                 gazinta_parents[flavor.number] = gazinta.number
                 self.inner_check_flavor(gazinta, gazinta_parents)
@@ -133,7 +133,7 @@ class CycleDetection():
         the flavor to the list of visited flavors.
         """
         if flavor.id in self.visited_flavors:
-            print("Skipping: %s" % flavor)
+            print "Skipping: %s" % flavor
             return False
         else:
             return True
@@ -142,11 +142,11 @@ class CycleDetection():
         """Returns a list of gazintas in a flavor filtered through the
         freshness check.
         """
-        return list(filter(self.freshness_check, self.get_gazintas(flavor)))
+        return filter(self.freshness_check, self.get_gazintas(flavor))
     
     def parse_cycled_flavor(self, cycle_dict):
-        values = list(cycle_dict.values())
-        keys = list(cycle_dict.keys())
+        values = cycle_dict.values()
+        keys = cycle_dict.keys()
         root = None
         for key in keys:
             if not key in values:
@@ -160,4 +160,4 @@ class CycleDetection():
         except KeyError as e:
             pass
         for fid in path:
-            print("%s ->" % Flavor.objects.get(id=fid))
+            print "%s ->" % Flavor.objects.get(id=fid)

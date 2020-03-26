@@ -17,7 +17,7 @@ class BatchAddLots():
             try:
                 lot_flavor = Flavor.objects.get(number=form.cleaned_data['flavor_number'])
             except KeyError:
-                print("LKJASLDFJAF ERROR")
+                print "LKJASLDFJAF ERROR"
             
             extra_weight = form.cleaned_data['extra_weight']
             amount = form.cleaned_data['amount'] + extra_weight
@@ -54,7 +54,7 @@ class BatchAddLots():
                 s = SalesOrderNumber(number=SalesOrderNumber.get_next_internal_number(),
                                      customer=fdi_customer)
                 s.save()
-                for k,v in extra_weight_lots.items():
+                for k,v in extra_weight_lots.iteritems():
                     li = LineItem(salesordernumber=s,
                                   flavor=k.flavor,
                                   quantity=v,

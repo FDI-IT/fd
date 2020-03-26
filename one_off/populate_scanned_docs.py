@@ -120,7 +120,7 @@ def scanned_doc_pre_key_function(scanned_doc):
 def convert_datetime_dict_values_to_int(datetime_dict):
     """Converts FILENAME_DATE_RE matches to a format usable by datetime
     """
-    for k,v in datetime_dict.items():
+    for k,v in datetime_dict.iteritems():
         datetime_dict[k] = int(v)
     return datetime_dict
 

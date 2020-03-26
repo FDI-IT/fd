@@ -35,7 +35,7 @@ def extract_data_from_spec_sheets(spec_sheet_directory='/srv/samba/tank/Master T
     
     #iterate through all the files in master template files
     for file_name in file_walker(spec_sheet_directory):
-        print(file_name)
+        print file_name
         extract_data_from_spec_sheet(spec_sheet_directory, file_name, additional_info)
         
     return additional_info
@@ -158,7 +158,7 @@ def extract_data_from_spec_sheet(spec_sheet_directory, file_name, additional_inf
                     else:
                         ssi = SpecSheetInfo(flavor=flavor)
                     
-                    for key, value in data_dictionary.items():
+                    for key, value in data_dictionary.iteritems():
                         #save all the extracted data into the SpecSheetInfo object
                         #if it is the date field, convert it from an xldate to datetime.date format
                         if key not in additional_info['possible_fields']:

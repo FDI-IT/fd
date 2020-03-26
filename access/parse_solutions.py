@@ -67,7 +67,7 @@ class SolutionFixer():
             except:
                 pass
         
-        return list(filter(self.name_filter, name_words))
+        return filter(self.name_filter, name_words)
         
     def compare_names(self, lhs, rhs):
         counter = 0
@@ -118,8 +118,8 @@ def test():
         if compare_count > 0:
             first_solution_matches[compare_count] = first_solution_matches.get(compare_count, []) + [sol]
             
-    for k, v in first_solution_matches.items():
-        print("KEY: %s" % k)
+    for k, v in first_solution_matches.iteritems():
+        print "KEY: %s" % k
         for ing in v:
             pass
             #print ing

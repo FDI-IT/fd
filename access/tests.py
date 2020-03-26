@@ -9,7 +9,7 @@ from access.models import Flavor, Ingredient, Formula
 from access.views import *
 
 from access.scratch import recalculate_guts
-from .urls import urlpatterns
+from urls import urlpatterns
 
 from reversion.models import Version, Revision
 from newqc.models import Lot, Retain
@@ -21,7 +21,7 @@ from hazards.tasks import import_initial_data
 
 def show_urls(urllist, depth=0):
     for entry in urllist:
-        print("  " * depth, entry.regex.pattern)
+        print "  " * depth, entry.regex.pattern
         if hasattr(entry, 'url_patterns'):
             show_urls(entry.url_patterns, depth + 1)
 
@@ -158,9 +158,9 @@ class PostViewTest(TestCase):
         lot.save()
         
         response = self.client.post('/qc/add_retains/?number_of_objects=1', 
-                                   {'form-TOTAL_FORMS': '1',
-                                    'form-INITIAL_FORMS': '0',
-                                    'form-MAX_NUM_FORMS': '',
+                                   {'form-TOTAL_FORMS': u'1',
+                                    'form-INITIAL_FORMS': u'0',
+                                    'form-MAX_NUM_FORMS': u'',
                                     'form-0-object_number': Retain.get_next_object_number(),
                                     'form-0-flavor_number': self.flavor.number,
                                     'form-0-lot_number': lot.number,})
@@ -174,9 +174,9 @@ class PostViewTest(TestCase):
     def test_formula_entry(self):
         
         response = self.client.post('/access/%s/formula_entry/' % self.flavor.number,
-                                    {'form-TOTAL_FORMS': '2',
-                                     'form-INITIAL_FORMS': '0',
-                                     'form-MAX_NUM_FORMS': '',
+                                    {'form-TOTAL_FORMS': u'2',
+                                     'form-INITIAL_FORMS': u'0',
+                                     'form-MAX_NUM_FORMS': u'',
                                      'form-0-ingredient_number': self.ingredient1.id,
                                      'form-0-amount': 400,
                                      'form-0-ingredient_pk': self.ingredient1.pk,
@@ -210,12 +210,12 @@ class PostViewTest(TestCase):
         #need to create two raw materials with the same id and different suppliers/prices
           
         response = self.client.post('/access/ingredient/activate/%s/' % self.ingredient3.pk, {})
-        print(response.status_code)
+        print response.status_code
 #         print response['Location']
   
         for ing in Ingredient.objects.filter(id=1):
             ing.save()
-            print(ing.id, ing.pk, ing.unitprice, ing.discontinued)
+            print ing.id, ing.pk, ing.unitprice, ing.discontinued
           
         #do not use references to the ingredients created above, they do not get updated...  
 #         print self.ingredient1.id, self.ingredient1.pk, self.ingredient1.unitprice, self.ingredient1.discontinued
@@ -260,10 +260,10 @@ class PostViewTest(TestCase):
         
         ]
         
-        print("Testing URLS...")
+        print "Testing URLS..."
         for url in test_url_list + search_urls:
             response = self.client.get(url)
-            print(url) 
+            print url 
             self.assertEqual(response.status_code, 200)
         
     def test_reversion(self):

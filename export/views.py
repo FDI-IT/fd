@@ -16,7 +16,7 @@ def export_home(request):
     
 def get_export_keys():
     export_dict = base_export_dict.copy() #this ensures that the keys are in the right order
-    return list(export_dict.keys())
+    return export_dict.keys()
 
 def get_export_values(attribute_dict):
     export_dict = base_export_dict.copy()
@@ -27,11 +27,11 @@ def get_export_values(attribute_dict):
         export_values.append(export_dict[key])
         
     #return export_values
-    return list(export_dict.values())
+    return export_dict.values()
 
 
 def create_export_dict(attribute_dict):
-    export_dict = dict(list(base_export_dict.items()) + list(attribute_dict.items()))
+    export_dict = dict(base_export_dict.items() + attribute_dict.items())
     return export_dict
     
     
@@ -83,7 +83,7 @@ def single_export(request, flavor_id):
         'short_description' : "A flavor with the taste and aroma of %s" % fl.name,
     })
   
-    export_keys = list(base_export_dict.keys())
+    export_keys = base_export_dict.keys()
     export_values = get_export_values(attribute_dict)
 
     

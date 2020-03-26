@@ -84,26 +84,26 @@ class SolutionModelForm(ModelForm):
     def as_tr(self, hidden=False):
         html_bits = []
 #        if hidden:
-#            html_bits.append(u'<tr id="%s" style="display: none"><td>%s</td>' % (self.prefix,self.instance.__str__()))
+#            html_bits.append(u'<tr id="%s" style="display: none"><td>%s</td>' % (self.prefix,self.instance.__unicode__()))
 #        else:
-        html_bits.append('<tr id="%s" class="%s"><td><a href="/access/ingredient/pin_review/%s/">%s</a></td>' % (self.prefix,
+        html_bits.append(u'<tr id="%s" class="%s"><td><a href="/access/ingredient/pin_review/%s/">%s</a></td>' % (self.prefix,
                                                                   self.instance.status.status_name,
                                                                   self.instance.ingredient.id,
-                                                                  self.instance.__str__()))
+                                                                  self.instance.__unicode__()))
         for_loop_is_first = True
         for field in self.visible_fields():
-            html_bits.append('<td>')
+            html_bits.append(u'<td>')
             if (for_loop_is_first == True):
                 for_loop_is_first = False
                 for hidden_field in self.hidden_fields():
-                    html_bits.append(hidden_field.__str__())
-                html_bits.append(self['my_base'].__str__())
-                html_bits.append(self['my_solvent'].__str__())
-                html_bits.append('<span class="solution_id" style="display:none;">%s</span>' %
+                    html_bits.append(hidden_field.__unicode__())
+                html_bits.append(self['my_base'].__unicode__())
+                html_bits.append(self['my_solvent'].__unicode__())
+                html_bits.append(u'<span class="solution_id" style="display:none;">%s</span>' %
                                  self.instance.id)
-            html_bits.append(field.__str__())
-            html_bits.append('</td>')
-        html_bits.append('</tr>')
+            html_bits.append(field.__unicode__())
+            html_bits.append(u'</td>')
+        html_bits.append(u'</tr>')
         rendered_string = ''.join(html_bits)
         return rendered_string
         

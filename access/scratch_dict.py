@@ -63,13 +63,13 @@ def has_children(ingredient_list, parent_id):
 @transaction.atomic
 def test_build_tree():
     FormulaTree.objects.all().delete()
-    for f in list(fkf.keys())[:500]:
+    for f in fkf.keys()[:500]:
         build_tree(f)
 
     
 def build_leaf_weights(flavor):
     cls = flavor.consolidated_leafs
-    for i,w in cls.items():
+    for i,w in cls.iteritems():
         lw = LeafWeight(root_flavor=flavor,
                         ingredient=i,
                         weight=w)
@@ -79,7 +79,7 @@ def build_leaf_weights(flavor):
 @transaction.atomic
 def test_build_lws():
     LeafWeight.objects.all().delete()
-    for f in list(fkf.keys())[:500]:
+    for f in fkf.keys()[:500]:
         build_leaf_weights(Flavor.objects.get(pk=f))
 
 

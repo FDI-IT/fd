@@ -3,7 +3,7 @@ Templatetags/filters for working with query strings
 
 version: 0.3
 """
-from urllib.parse import urlencode
+from urllib import urlencode
 from django import template
 from django.http import QueryDict
 
@@ -114,7 +114,7 @@ def _qdict_del_keys(qdict, del_qstring):
 
 def _qdict_set_keys(qdict, set_qstring):
     set_qdict = QueryDict(set_qstring)
-    for key, values in list(set_qdict.items()):
+    for key, values in set_qdict.items():
         qdict[key] = set_qdict[key]
     return qdict
 

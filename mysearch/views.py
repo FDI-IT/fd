@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect
 from mysearch.forms import MainSearch
 
@@ -29,7 +29,7 @@ search_spaces = {
 
 def get_filter_kwargs(qdict):
     filter_kwargs = []
-    for key in list(qdict.keys()):
+    for key in qdict.keys():
         if key == 'page':
             pass
         elif key == 'search_string':

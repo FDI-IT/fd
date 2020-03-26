@@ -32,6 +32,6 @@ def populate_results():
                 
         test_date += delta
         if test_date in vacation_dates:
-            print(test_date)
+            print test_date
             test_date += delta
         

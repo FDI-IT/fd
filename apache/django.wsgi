@@ -3,7 +3,6 @@ import sys
 import django
 
 sys.path.append('/var/www/django/fd')
-sys.path.append('/var/www/.virtualenvs/fd2/lib/python3.6/site-packages')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 os.environ["CELERY_LOADER"] = "django"
 

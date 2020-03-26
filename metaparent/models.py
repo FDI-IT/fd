@@ -8,10 +8,10 @@ class InheritanceCastModel(models.Model):
     """
     An abstract base class that provides a ``real_type`` FK to ContentType.
 
-    For use in trees of inherited models, to be able to downcast parent
+    For use in trees of inherited models, to be able to downcast parent 
     instances to their child types
     """
-    real_type = models.ForeignKey(ContentType, editable=False, null=True,on_delete=models.CASCADE)
+    real_type = models.ForeignKey(ContentType, editable=False, null=True)
 
     def save(self, *args, **kwargs):
         if not self.id:

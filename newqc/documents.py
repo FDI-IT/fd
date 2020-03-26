@@ -1,7 +1,7 @@
 """
 Bar code documents
 """
-import os, errno, logging, io
+import os, errno, logging, cStringIO
 import subprocess
 import shutil
 import zbar
@@ -39,8 +39,8 @@ LOG_FILE_HANDLER.setLevel(logging.INFO)
 LOG_FILE_HANDLER.setFormatter(LOG_FORMATTER)
 
 # configure the barcode scanner
-scanner = zbar.Scanner()
-# scanner.parse_config('enable')
+scanner = zbar.ImageScanner()
+scanner.parse_config('enable')
 
 # configure file destination directories
 EXC_DIRECTORY = '/srv/samba/tank/scans/exc/'
@@ -54,10 +54,10 @@ for MY_DESTINATION_DIR in (EXC_DIRECTORY, COMPLETE_PATH, HASH_EXISTS_DIRECTORY):
             pass
         else:
             raise
-
+        
 def safe_move_to_exc_directory(src):
     move_no_overwrite(src, EXC_DIRECTORY)
-
+    
 class NoSymbolTargetException(Exception):
     def __init__(self, *args, **kwargs):
         super(NoSymbolTargetException, self).__init__(*args, **kwargs)
@@ -65,7 +65,7 @@ class NoSymbolTargetException(Exception):
 class ImportBCDoc():
     def __init__(self, img_path):
         """Importing a barcode document.
-
+        
         Given a path.
 
         #. Set up logging
@@ -78,10 +78,10 @@ class ImportBCDoc():
         #. Tear down logging
         """
         self.setup_logging()
-
+        
         self.path = img_path
         self.logger.info("Importing %s" % self.path)
-
+        
         try:
             self.hash = sha_hash(img_path)
         except Exception as e:
@@ -92,26 +92,26 @@ class ImportBCDoc():
             self.process_error("%s: %s -- Unable to hash %s" % (
                 type(e), repr(e), self.path))
             return
-
+        
         if self.hash is None:
             self.process_error("%s has no hash!" % self.path)
             return
-
+            
         if ScannedDoc.objects.filter(image_hash=self.hash).exists():
             self.process_hash_exists()
             return
-
+        
         try:
             self.image = Image.open(self.path)
         except Exception as e:
             self.process_error("%s Unable to Image.open('%s') -- %s" % (
                 type(e), self.path, repr(e)))
             return
-
+        
         # this could possibly raise some exceptions that I haven't
         # though of yet -- potentially unsafe section
         self.symbol_list = self.zbar_scan()
-
+       
         try:
             self.bc_type, self.bc_key, self.timestamp = self.get_barcode_target()
             ReferredObjectType, DocumentType = type_map[self.bc_type]
@@ -124,7 +124,7 @@ class ImportBCDoc():
             DocumentType = ScannedDoc
         finally:
             self.sd_create_kwargs = self.generate_scanneddoc_kwargs()
-
+           
             self.my_doc = DocumentType.create_from_referred_object_from_bc_key(
                 self.bc_key, self.sd_create_kwargs)
             self.my_doc.save()
@@ -136,7 +136,7 @@ class ImportBCDoc():
                 s.save()
             self.logger.info("Saved %s:%s from %s" % (
                 str(DocumentType), self.my_doc.pk, self.path))
-
+            
 
     def move_scanned_image(self):
         self.dst = move_no_overwrite(self.path, COMPLETE_PATH)
@@ -147,7 +147,7 @@ class ImportBCDoc():
         self.logger.error(error_message)
         self.dst = safe_move_to_exc_directory(self.path)
         self.logger.error("%s moved to $s" % (self.path, self.dst))
-
+        
     def process_no_symbol(self, message):
         self.logger.warn(process_error)
 
@@ -158,17 +158,17 @@ class ImportBCDoc():
         self.dst = move_no_overwrite(self.path, move_path)
         self.logger.warn("Existing hash found, moving %s to %s" % (
             self.path, self.dst))
-
+        
     def setup_logging(self):
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
         self.logger.addHandler(LOG_FILE_HANDLER)
-        self.log_stream = io.StringIO()
+        self.log_stream = cStringIO.StringIO()
         self.stream_handler = logging.StreamHandler(self.log_stream)
         self.stream_handler.setLevel(logging.INFO)
         self.stream_handler.setFormatter(LOG_FORMATTER)
         self.logger.addHandler(self.stream_handler)
-
+        
     def flush_import_log(self):
         self.stream_handler.flush()
         import_log = self.log_stream.getvalue()
@@ -195,8 +195,8 @@ class ImportBCDoc():
         sd = ScannedDoc(
                 **self.model_instance_create_kwargs
             )
-        return sd
-
+        return sd 
+ 
     def generate_thumbnail(self):
         width, height = self.image.size
         if width > height:
@@ -205,12 +205,12 @@ class ImportBCDoc():
             tn = self.image.resize((380,490), Image.ANTIALIAS)
         tn_path = os.path.join(
                 '/tmp',
-
+    
                 '%s-tn.png' % self.hash)
         tn.save(tn_path)
         thumbnail_file = File(open(tn_path,'r'))
         return thumbnail_file
-
+    
     def zbar_scan(self):
         """Parses all the found symbols and fills symbol_list
         with models.ScannedSymbol
@@ -220,22 +220,22 @@ class ImportBCDoc():
         raw = converted_image.tobytes()
         scanned_image = zbar.Image(width, height, 'Y800', raw)
         scanner.scan(scanned_image)
-
+        
         symbol_list = []
-
+        
         for zbar_symbol in scanned_image.symbols:
             sd = ScannedSymbol(zbar_symbol=zbar_symbol)
             symbol_list.append(sd)
             self.logger.info("Found barcode: %s" % sd)
-
+        
         return symbol_list
-
+        
     def get_barcode_target(self):
         if len(self.symbol_list) == 0:
             message = "No barcodes found"
             self.logger.info(message)
             raise NoSymbolTargetException(message)
-
+       
         for s in self.symbol_list:
             bc_split = s.symbol_data.split('-')
             if len(bc_split) == 2: #if the length is 2, there's no timestamp (type is not RETAIN)
@@ -245,9 +245,9 @@ class ImportBCDoc():
             if len(bc_split) == 3: #if the length is 3, it's RETAIN type with a timestamp
                 if bc_split[0] in type_map:
                     return bc_split
-
-
-
+            
+                
+        
         message = "No target found in symbol list"
         self.logger.info(message)
         return ("SCANNED_DOC", None)

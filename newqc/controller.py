@@ -3,7 +3,7 @@ class SimpleTestCardException(Exception):
         self.value = value
         
     def __str__(self):        
-        return ("Multiple testcards detected for retain %s" % str(self.value))
+        return ("Multiple testcards detected for retain %s" % unicode(self.value))
      
 
 def testcard_simple_status_to_pass(tc):

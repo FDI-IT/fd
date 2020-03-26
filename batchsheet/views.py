@@ -177,13 +177,13 @@ def batchsheet_print(request, flavor):
             packaging_requirements = batch_sheet_form.cleaned_data['packaging_requirements']
 
             if qv != True:
-                c = {'flavor':"%s -- NOT APPROVED -- %s" % (flavor.__str__(), qv)}
+                c = {'flavor':u"%s -- NOT APPROVED -- %s" % (flavor.__unicode__(), qv)}
                 json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)
             elif len(dci) != 0:
-                c = {'flavor':"%s -- NOT APPROVED -- Contains discontinued ingredients: %s" % (flavor.__str__(), ", ".join(dci))}
+                c = {'flavor':u"%s -- NOT APPROVED -- Contains discontinued ingredients: %s" % (flavor.__unicode__(), ", ".join(dci))}
                 json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)
             elif flavor.approved == False:
-                c = {'flavor':"%s -- NOT APPROVED" % flavor.__str__()}
+                c = {'flavor':u"%s -- NOT APPROVED" % flavor.__unicode__()}
                 json_dict['batchsheet'] = loader.get_template('batchsheet/batchsheet_print.html').render(c)
             else:
                 try:
@@ -283,7 +283,7 @@ def update_lots(request, lot_pk, amount, extra=1): #change this - if updating on
 
 
             display_info = build_confirmation_rows(formset)
-            confirmation_rows = list(zip(formset.forms, display_info))
+            confirmation_rows = zip(formset.forms, display_info)
 
 
             return render(
@@ -320,7 +320,7 @@ def update_lots(request, lot_pk, amount, extra=1): #change this - if updating on
 
 
         else:
-            print('AKJSHF')
+            print 'AKJSHF'
 
 
 def lot_update_confirmation(request, lot_list=None): #go straight here if clicking url from add_lots
@@ -414,7 +414,7 @@ def lot_notebook(request):
 def get_discontinued_orders(request):
 
     discontinued_list= {}
-    flavor_numbers = list(map(int, request.GET.getlist('flavor_numbers[]')))
+    flavor_numbers = map(int, request.GET.getlist('flavor_numbers[]'))
 
     for flavor_number in flavor_numbers:
         flavor = Flavor.objects.get(number=flavor_number)
@@ -444,7 +444,7 @@ def sales_order_list(request, status_message=None):
             orders[order.flavor] = [order]
 
     summarized_orders = []
-    for flavor, details in list(orders.items()):
+    for flavor, details in orders.items():
 
         total = Decimal('0')
         for detail in details:

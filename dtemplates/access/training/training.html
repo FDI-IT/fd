@@ -8,6 +8,12 @@
 </style>
 {{message}}
 
+{% if messages %}
+{% for m in messages %}
+  <h3>{{m}}</h3>
+{% endfor %}
+{% endif %}
+
 <table>
   <th>
     Training Documents
@@ -22,10 +28,10 @@
     {% else %}
       {% if i.0 in fs and not i.0 in training %}
         <td>{{i.1}}</td>
-        <td><a href="../food_safety/{{i.0}}">Not Completed</a></td>
+        <td><a href="../training_test/{{i.0}}">Not Completed</a></td>
       {% elif not i.0 in training %}
         <td>{{i.1}}</td>
-        <td><a href="../{{i.0}}">Not Completed</a></td>
+        <td><a href="../training_test/{{i.0}}">Not Completed</a></td>
       {% endif %}
     {% endif %}
   </tr>
@@ -34,14 +40,7 @@
 </table>
 
 <script>
-  // function sensory_link(e){
-  //   if(e.checked){
-  //     console.log("YUH!");
-  //     var link = document.createElement("a")
-  //     link.setAttribute("href", '../s')
-  //   }
-  //
-  // }
+
 </script>
 
 

@@ -2,7 +2,7 @@
 from decimal import Decimal
 from datetime import datetime, timedelta, date
 import re
-import queue
+import Queue
 import os
 from operator import itemgetter
 import collections
@@ -277,12 +277,12 @@ def get_next_experimentalnum():
         return 1
 
 class FormulaTree(models.Model):
-    root_flavor = models.ForeignKey('Flavor', related_name="formula_rows", db_index=True, on_delete=models.CASCADE)
+    root_flavor = models.ForeignKey('Flavor', related_name="formula_rows", db_index=True)
     lft = models.PositiveSmallIntegerField()
     rgt = models.PositiveSmallIntegerField()
-    formula_row = models.ForeignKey('Formula', null=True, blank=True,on_delete=models.CASCADE)
-    node_ingredient = models.ForeignKey('Ingredient', null=True, blank=True, db_index=True,on_delete=models.CASCADE)
-    node_flavor = models.ForeignKey('Flavor', null=True, blank=True,on_delete=models.CASCADE)
+    formula_row = models.ForeignKey('Formula', null=True, blank=True)
+    node_ingredient = models.ForeignKey('Ingredient', null=True, blank=True, db_index=True)
+    node_flavor = models.ForeignKey('Flavor', null=True, blank=True)
     row_id = models.PositiveSmallIntegerField(null=True, blank=True)
     parent_id = models.PositiveSmallIntegerField(null=True, blank=True)
     weight = models.DecimalField(decimal_places=3,
@@ -327,22 +327,22 @@ class FormulaTree(models.Model):
     def relative_cost(self):
         return self.get_exploded_cost()
 
-    def __str__(self):
-        return "%s: l%s r%s parent%s" % (self.root_flavor.__str__(), self.lft, self.rgt, self.parent_id)
+    def __unicode__(self):
+        return "%s: l%s r%s parent%s" % (self.root_flavor.__unicode__(), self.lft, self.rgt, self.parent_id)
 
 class LeafWeight(models.Model):
-    root_flavor = models.ForeignKey('Flavor', related_name="leaf_weights", db_index=True,on_delete=models.CASCADE)
-    ingredient = models.ForeignKey('Ingredient', db_index=True,on_delete=models.CASCADE)
+    root_flavor = models.ForeignKey('Flavor', related_name="leaf_weights", db_index=True)
+    ingredient = models.ForeignKey('Ingredient', db_index=True)
     weight = models.DecimalField(decimal_places=3, max_digits=7)
     quant_weight = models.IntegerField(null=True)
 
 class IndivisibleLeafWeight(models.Model):
-    root_flavor = models.ForeignKey('Flavor', related_name="indivisible_leaf_weights", db_index=True,on_delete=models.CASCADE)
-    ingredient = models.ForeignKey('Ingredient', db_index=True,on_delete=models.CASCADE)
+    root_flavor = models.ForeignKey('Flavor', related_name="indivisible_leaf_weights", db_index=True)
+    ingredient = models.ForeignKey('Ingredient', db_index=True)
     weight = models.DecimalField(decimal_places=3, max_digits=7)
     quant_weight = models.IntegerField(null=True)
 
-    def __str__(self):
+    def __unicode__(self):
         return "%s, %s" % (self.ingredient, self.weight)
 
 
@@ -364,8 +364,8 @@ class Formula(models.Model):
     # Points to the Ingredient table, which actually may be a flavor or rawmat
     acc_ingredient = models.PositiveIntegerField()
 
-    flavor = models.ForeignKey('Flavor',on_delete=models.CASCADE)
-    ingredient = models.ForeignKey('Ingredient',on_delete=models.CASCADE)
+    flavor = models.ForeignKey('Flavor')
+    ingredient = models.ForeignKey('Ingredient')
     amount = models.DecimalField(decimal_places=3,
             max_digits=7,
             )
@@ -392,11 +392,11 @@ class Formula(models.Model):
     # import tables so that foreign-key dependencies are met
 
     class Meta:
-        db_table = 'access_integratedformula'
+        db_table = u'access_integratedformula'
         ordering = ['acc_flavor',]
 
-    def __str__(self):
-        return "%s-%s: %s %s lbs" % (self.flavor.prefix, self.flavor.number, self.ingredient.__str__(), self.amount)
+    def __unicode__(self):
+        return "%s-%s: %s %s lbs" % (self.flavor.prefix, self.flavor.number, self.ingredient.__unicode__(), self.amount)
 
     def get_exploded_weight(self, weight_factor):
         return Decimal(self.amount * weight_factor)
@@ -413,7 +413,7 @@ class Formula(models.Model):
                 rmc = g.rawmaterialcost
             else:
                 if g.rawmaterialcost is None or y is None:
-                    print("Updating %s" % g)
+                    print "Updating %s" % g
                     g.update_cost()
                 rmc = g.rawmaterialcost * y / Decimal('100')
 
@@ -540,6 +540,7 @@ class IngredientSuperClass(models.Model):
     yellow_5 = models.BooleanField('Yellow 5', blank=True, default=False)
 
     salmonella = models.NullBooleanField(default=False)
+
     vegan = models.NullBooleanField(default=False)
     organic_compliant = models.NullBooleanField(default=False)
     organic_certified = models.NullBooleanField(default=False)
@@ -614,7 +615,7 @@ class Ingredient(IngredientSuperClass):
             'Flavor',
             null=True,
             blank=True,
-            related_name="gazinta",on_delete=models.CASCADE)
+            related_name="gazinta")
     discontinued = models.BooleanField(
             db_column='Discontinued',
             blank=True,
@@ -637,7 +638,7 @@ class Ingredient(IngredientSuperClass):
             max_length=50,
             db_column='SupplierCode',
             blank=True)
-    supplier = models.ForeignKey('Supplier', blank=True, default=None, null=True,on_delete=models.CASCADE)
+    supplier = models.ForeignKey('Supplier', blank=True, default=None, null=True)
 
     fldr = models.CharField(
             max_length=50,
@@ -826,7 +827,7 @@ class Ingredient(IngredientSuperClass):
 
     @staticmethod
     def anonymize():
-        supplier_code_queue = queue.Queue()
+        supplier_code_queue = Queue.Queue()
         supplier_codes = ("abt", 'cna','kerry','vigon','FDI')
         for word in supplier_codes:
             supplier_code_queue.put(word)
@@ -854,7 +855,7 @@ class Ingredient(IngredientSuperClass):
             q.put(lorem_one)
             q.put(lorem_two)
             q.put(lorem_three)
-            print(rm)
+            print rm
 
     @property
     def url(self):
@@ -972,7 +973,7 @@ class Ingredient(IngredientSuperClass):
     @property
     def prefixed_name(self):
         if self.prefix != "":
-            return "%s %s" % (self.prefix, self.product_name)
+            return u"%s %s" % (self.prefix, self.product_name)
         else:
             return self.product_name
 
@@ -980,8 +981,8 @@ class Ingredient(IngredientSuperClass):
     def short_prefixed_name(self):
         if len(self.prefixed_name) > 18:
             if self.prefix != "":
-                s = "%s %s" % (self.prefix, self.product_name)
-                return "%s..." % s[:18]
+                s = u"%s %s" % (self.prefix, self.product_name)
+                return u"%s..." % s[:18]
             else:
                 return "%s..." % self.product_name[:18]
         else:
@@ -990,7 +991,7 @@ class Ingredient(IngredientSuperClass):
     @property
     def short_remainder_name(self):
         if len(self.prefixed_name) > 18:
-            return "...%s %s" % (self.prefixed_name[18:], self.part_name2)
+            return u"...%s %s" % (self.prefixed_name[18:], self.part_name2)
         else:
             return self.part_name2
 
@@ -1173,23 +1174,23 @@ class Ingredient(IngredientSuperClass):
     def resembles(self, ingredient):
         if self.id != ingredient.id:
             return "id"
-        if str(self.product_name) != str(ingredient.product_name):
+        if unicode(self.product_name) != unicode(ingredient.product_name):
             return "product_name"
-        if str(self.part_name2) != str(ingredient.part_name2):
+        if unicode(self.part_name2) != unicode(ingredient.part_name2):
             return "part_name2"
-        if str(self.description) != str(ingredient.description):
+        if unicode(self.description) != unicode(ingredient.description):
             return "description"
         if self.discontinued != ingredient.discontinued:
             return "discontinued"
-        if str(self.prefix) != str(ingredient.prefix):
+        if unicode(self.prefix) != unicode(ingredient.prefix):
             return "prefix"
         if self.flavornum != ingredient.flavornum:
             return "flavornum"
         if self.solution != ingredient.solution:
             return "solution"
-        if str(self.solvent) != str(ingredient.solvent):
+        if unicode(self.solvent) != unicode(ingredient.solvent):
             return "solvent"
-        if str(self.suppliercode) != str(ingredient.suppliercode):
+        if unicode(self.suppliercode) != unicode(ingredient.suppliercode):
             return "suppliercode"
         return True
 
@@ -1265,12 +1266,11 @@ class Ingredient(IngredientSuperClass):
 
     class Meta:
         ordering = ['id']
-        default_permissions = ('add', 'change', 'delete')
-        # permissions = (
-        #         ("changeprice_ingredient","Can change the price of raw materials"),
-        #         ('view_ingredient',"Can view ingredients")
-        # )
-        db_table = 'access_ingredient'
+        permissions = (
+                ("changeprice_ingredient","Can change the price of raw materials"),
+                ('view_ingredient',"Can view ingredients")
+        )
+        db_table = u'access_ingredient'
 
     def save(self, *args, **kwargs):
         self.allergen = self.get_allergen_text()
@@ -1319,7 +1319,7 @@ class Ingredient(IngredientSuperClass):
     def gazinta(self):
         return self.sub_flavor
 
-    def __str__(self):
+    def __unicode__(self):
         if self.discontinued == True:
             return "DISCONTINUED: %s - %s %s %s" % (self.id,
                                    self.art_nati,
@@ -1421,7 +1421,7 @@ class Ingredient(IngredientSuperClass):
                     formula_list = self.get_solution_formula_list()
                     hazard_dict = calculate_flavor_hazards(formula_list)
 
-                    for hazard, category in hazard_dict.items():
+                    for hazard, category in hazard_dict.iteritems():
                         if category != 'No' and type(category) != Decimal:
                             try:
                                 category = HazardCategory.objects.filter(hazard_class__python_class_name=hazard)\
@@ -1465,10 +1465,10 @@ class Ingredient(IngredientSuperClass):
 
     def add_hazards_by_hcode(self, hcode_list):
         for hcode in hcode_list:
-            for hazard, category_dict in HazardClassDict.items():
-                for category, hci in category_dict.items():
+            for hazard, category_dict in HazardClassDict.iteritems():
+                for category, hci in category_dict.iteritems():
                     if hcode not in ['H303','H313','H316','H320','H333'] and hcode == hci.hcode:
-                        print("Processing hcode: %s" % hcode)
+                        print "Processing hcode: %s" % hcode
                         #if the raw material aleady has a certain hazard, we will overwrite it.
 
                         if hci.subcategories != (''):
@@ -1479,11 +1479,11 @@ class Ingredient(IngredientSuperClass):
 
                         if self.hazard_set.filter(hazard_class=hazard_class).exists():
                             old_category = self.hazard_set.get(hazard_class=hazard_class)
-                            print("Removing category: %s" % old_category)
+                            print "Removing category: %s" % old_category
                             old_fdi_ici = self.fdiingredientcategoryinfo_set.filter(category=old_category)
                             old_fdi_ici.delete()
 
-                        print(hazard_category)
+                        print hazard_category
 
                         #have to create an FDIIngredientCategoryInfo object - if it needs an ld50, use the threshold
                         fdi_ici = FDIIngredientCategoryInfo(
@@ -1493,7 +1493,7 @@ class Ingredient(IngredientSuperClass):
                         )
                         fdi_ici.save()
 
-                        print("Added new category: %s" % hazard_category)
+                        print "Added new category: %s" % hazard_category
 
         self.hazards_approved = True
         self.save()
@@ -1506,13 +1506,13 @@ class Ingredient(IngredientSuperClass):
                 if hc.hcode != None:
                     try: #some hcodes have no hazards - we don't want to create a label object for these (and we can't because there is not enough info)
                         hcode_info = hc.get_hcode_info()
-                        for k,v in hcode_info.items():
+                        for k,v in hcode_info.iteritems():
                             if k == 'p_codes':
                                 self._hcode_info[k] = self._hcode_info[k].union(v)
                             else:
                                 self._hcode_info[k].add(v)
                     except:
-                        print("Skipping hcode %s: not hazardous" % hc.hcode)
+                        print "Skipping hcode %s: not hazardous" % hc.hcode
 
         return self._hcode_info
 
@@ -1631,8 +1631,8 @@ class Ingredient(IngredientSuperClass):
 
 class FDIIngredientCategoryInfo(models.Model):
     #this contains information specific to an ingredient+category pair (ld50)
-    ingredient = models.ForeignKey(Ingredient,on_delete=models.CASCADE)
-    category = models.ForeignKey(HazardCategory,on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient)
+    category = models.ForeignKey(HazardCategory)
     ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, null=True, blank=True)
 
 
@@ -1643,10 +1643,10 @@ class FormulaLineItem(models.Model):
     A list of a FormulaLineItem objects will be passed into the main function of this app.
     """
 
-    def __str__(self):
-        return "%s-%s" % (self.ingredient, self.weight)
+    def __unicode__(self):
+        return u"%s-%s" % (self.ingredient, self.weight)
 
-    ingredient = models.ForeignKey(Ingredient,on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient)
     weight = models.DecimalField(decimal_places=3, max_digits=7)
 
 class FormulaInfo(models.Model):
@@ -1724,7 +1724,7 @@ class FormulaInfo(models.Model):
     spraydried = models.BooleanField("Spray Dried",
         blank=True,
         default=False)
-    flavorcoat = models.BooleanField("Flavorcoat®",blank=True,default=False)
+    flavorcoat = models.BooleanField(u"Flavorcoat®",blank=True,default=False)
 
     concentrate = models.BooleanField(default=False,blank=True)
     oilsoluble = models.BooleanField("Oil soluble",default=False,blank=True)
@@ -1749,7 +1749,7 @@ class Flavor(FormulaInfo):
             Ingredient,
             through='Formula')
 
-    renumber_of = models.ForeignKey('self', related_name='renumbers', null=True,on_delete=models.CASCADE)
+    renumber_of = models.ForeignKey('self', related_name='renumbers', null=True)
 
     hazard_set = models.ManyToManyField(HazardCategory, through='FlavorCategoryInfo')
 
@@ -1952,12 +1952,11 @@ class Flavor(FormulaInfo):
                 yield ft.node_flavor
 
     class Meta:
-        db_table = 'access_integratedproduct'
+        db_table = u'access_integratedproduct'
         ordering = ['-valid','number']
-        default_permissions = ('add', 'change', 'delete')
-        # permissions = (
-        #         ('view_flavor',"Can view flavors"),
-        # )
+        permissions = (
+                ('view_flavor',"Can view flavors"),
+        )
     import_order = 0
 
     @property
@@ -2071,7 +2070,7 @@ class Flavor(FormulaInfo):
         dci = []
         for lw in self.leaf_weights.all():
             if lw.ingredient.discontinued == True:
-                dci.append(lw.ingredient.__str__())
+                dci.append(lw.ingredient.__unicode__())
         return dci
 
     def quick_validate(self, descend=True):
@@ -2079,7 +2078,7 @@ class Flavor(FormulaInfo):
         for fr in self.formula_set.all():
             sum+= fr.amount
         if sum != 1000:
-            return "%s-%s formula does not add up to 1000 parts." % (self.prefix, self.number)
+            return u"%s-%s formula does not add up to 1000 parts." % (self.prefix, self.number)
 
         if descend == False:
             return True
@@ -2133,8 +2132,8 @@ class Flavor(FormulaInfo):
     def get_fdnum(self):
         return "%s-%s" % (self.prefix, self.number)
 
-    def __str__(self):
-        return "%s-%s %s %s %s" % (self.prefix,
+    def __unicode__(self):
+        return u"%s-%s %s %s %s" % (self.prefix,
                                    self.number,
                                    self.natart,
                                    self.name,
@@ -2405,7 +2404,7 @@ class Flavor(FormulaInfo):
             lorem_two = q.get()
             lorem_three = q.get()
             lorem_four = q.get()
-            print(f)
+            print f
             f.name = "%s %s" % (lorem_one, lorem_two)
             f.label_type = "Flavor"
             f.productmemo = "%s %s %s %s" % (lorem_one, lorem_two, lorem_three, lorem_four)
@@ -2417,7 +2416,7 @@ class Flavor(FormulaInfo):
             q.put(lorem_three)
             q.put(lorem_four)
 
-            print(f)
+            print f
 
     @property
     def get_max_depth(self):
@@ -2516,7 +2515,7 @@ class Flavor(FormulaInfo):
 
     @property
     def sorted_consolidated_leafs(self):
-        cons_leafs = sorted(iter(self.consolidated_leafs.items()), key=itemgetter(1), reverse=True)
+        cons_leafs = sorted(self.consolidated_leafs.iteritems(), key=itemgetter(1), reverse=True)
         cons_formulae = []
         for ingredient, amount in cons_leafs:
             cons_formulae.append(Formula(ingredient=ingredient,amount=amount))
@@ -2524,7 +2523,7 @@ class Flavor(FormulaInfo):
 
     @property
     def sorted_consolidated_indivisible_leafs(self):
-        cil=sorted(iter(self.consolidated_indivisible_leafs.items()), key=itemgetter(1), reverse=True)
+        cil=sorted(self.consolidated_indivisible_leafs.iteritems(), key=itemgetter(1), reverse=True)
         cons_indivisible_formulae = []
         for ingredient, amount in cil:
             cons_indivisible_formulae.append(Formula(ingredient=ingredient, amount=amount))
@@ -2708,7 +2707,7 @@ class Flavor(FormulaInfo):
                 ingredient_key = formula_row[0].ingredient.rawmaterialcode
                 unique_ingredients[ingredient_key] = 1
 
-        return list(unique_ingredients.keys())
+        return unique_ingredients.keys()
 
     def get_gazintas(self):
         gazintas = []
@@ -2725,7 +2724,7 @@ class Flavor(FormulaInfo):
         formula_objects = {}
         for f in Flavor.objects.all():
             formula_objects[f] = Formula.objects.filter(flavor=f)
-        print("TEST")
+        print "TEST"
         if update_time == None:
             update_time = datetime.now()
         def cost_traversal(flavor):
@@ -2750,7 +2749,7 @@ class Flavor(FormulaInfo):
                              ingredient.amount /
                              1000)
                 if verbose:
-                    print('"%s","%s","%s","%s"' % (ingredient.ingredient.id, ingredient.ingredient.product_name, ingredient.amount, cost_diff))
+                    print '"%s","%s","%s","%s"' % (ingredient.ingredient.id, ingredient.ingredient.product_name, ingredient.amount, cost_diff)
                 cost += cost_diff
             flavor.rawmaterialcost = cost
             #flavor.lastspdate = update_time
@@ -2869,7 +2868,7 @@ class Flavor(FormulaInfo):
 
         total = 0
 
-        for val in list(self.get_hazards().values()):
+        for val in self.get_hazards().values():
             if val != 'No':
                 total = total + 1
 
@@ -2994,7 +2993,7 @@ class Flavor(FormulaInfo):
         hazard_dict = calculate_flavor_hazards(formula_list)
         hazard_dict = update_hazard_dict_with_flammable_hazards(hazard_dict, self.flashpoint)
 
-        for hazard, category in hazard_dict.items():
+        for hazard, category in hazard_dict.iteritems():
             if category != 'No' and type(category) != Decimal:
                 try:
                     category = HazardCategory.objects.filter(hazard_class__python_class_name=hazard)\
@@ -3044,7 +3043,7 @@ class Flavor(FormulaInfo):
 
     def get_hazards_url(self):
         try:
-            return create_fli_url(self.get_hazard_formula_list(), self.__str__())
+            return create_fli_url(self.get_hazard_formula_list(), self.__unicode__())
         except NoFormulaError as e:
             return e.__str__()
 
@@ -3058,7 +3057,7 @@ class Flavor(FormulaInfo):
             for hc in self.hazard_set.all():
                 if hc.hcode != None:
                     hcode_info = hc.get_hcode_info()
-                    for k,v in hcode_info.items():
+                    for k,v in hcode_info.iteritems():
                         if k == 'p_codes':
                             self._hcode_info[k] = self._hcode_info[k].union(v)
                         else:
@@ -3193,7 +3192,7 @@ class Flavor(FormulaInfo):
                 ingredients_missing_data.append(lw.ingredient)
 
         if ingredients_missing_data:
-            ingredient_urls = ", ".join((['<a href=%s>%s</a>' % (x.url, x.id) for x in ingredients_missing_data]))
+            ingredient_urls = ", ".join((map(lambda x: '<a href=%s>%s</a>' % (x.url, x.id), ingredients_missing_data)))
             return_string = 'Missing GMO data for the following ingredients: %s' % ingredient_urls
 
             return return_string
@@ -3229,11 +3228,11 @@ class Flavor(FormulaInfo):
         gmo_set = LeafWeight.objects.filter(root_flavor=self).values_list('ingredient__new_gmo', flat=True)
         if 'Genetically Modified' in gmo_set:
             genetically_modified_list = LeafWeight.objects.filter(root_flavor=self, ingredient__new_gmo="Genetically Modified")
-            ingredient_urls = ", ".join((['<a href=%s>%s</a>' % (x.ingredient.url, x.ingredient.id) for x in genetically_modified_list]))
+            ingredient_urls = ", ".join((map(lambda x: '<a href=%s>%s</a>' % (x.ingredient.url, x.ingredient.id), genetically_modified_list)))
             return 'Genetically Modified because: %s' % ingredient_urls
         elif 'GMO Non-Detect' in gmo_set:
             non_detect_list = LeafWeight.objects.filter(root_flavor=self, ingredient__new_gmo="GMO Non-Detect")
-            ingredient_urls = ", ".join((['<a href=%s>%s</a>' % (x.ingredient.url, x.ingredient.id) for x in non_detect_list]))
+            ingredient_urls = ", ".join((map(lambda x: '<a href=%s>%s</a>' % (x.ingredient.url, x.ingredient.id), non_detect_list)))
             return 'GMO Non-Detect because: %s' % ingredient_urls
         else:
             return 'GMO Free'
@@ -3248,7 +3247,7 @@ class Flavor(FormulaInfo):
         organic_compliant_set = LeafWeight.objects.filter(root_flavor=self).values_list('ingredient__organic_compliant', flat=True)
         if False in organic_compliant_set:
             non_organic_list = LeafWeight.objects.filter(root_flavor=self, ingredient__organic_compliant=False)
-            ingredient_urls = ", ".join((['<a href=%s>%s</a>' % (x.ingredient.url, x.ingredient.id) for x in non_organic_list]))
+            ingredient_urls = ", ".join((map(lambda x: '<a href=%s>%s</a>' % (x.ingredient.url, x.ingredient.id), non_organic_list)))
             return "False because: %s" % ingredient_urls
         else:
             return True
@@ -3262,7 +3261,7 @@ class Flavor(FormulaInfo):
                 ingredients_missing_data.append(lw.ingredient)
 
         if ingredients_missing_data:
-            ingredient_urls = ", ".join((['<a href=%s>%s</a>' % (x.url, x.id) for x in ingredients_missing_data]))
+            ingredient_urls = ", ".join((map(lambda x: '<a href=%s>%s</a>' % (x.url, x.id), ingredients_missing_data)))
             return_string = 'Missing Organic Compliant data for the following ingredients: %s' % ingredient_urls
 
             return return_string
@@ -3284,7 +3283,7 @@ class Flavor(FormulaInfo):
         vegan_set = LeafWeight.objects.filter(root_flavor=self).values_list('ingredient__vegan', flat=True)
         if False in vegan_set:
             non_vegan_list = LeafWeight.objects.filter(root_flavor=self, ingredient__vegan=False)
-            ingredient_urls = ", ".join((['<a href=%s>%s</a>' % (x.ingredient.url, x.ingredient.id) for x in non_vegan_list]))
+            ingredient_urls = ", ".join((map(lambda x: '<a href=%s>%s</a>' % (x.ingredient.url, x.ingredient.id), non_vegan_list)))
             return "False because: %s" % ingredient_urls
         else:
             return True
@@ -3298,7 +3297,7 @@ class Flavor(FormulaInfo):
                 ingredients_missing_data.append(lw.ingredient)
 
         if ingredients_missing_data:
-            ingredient_urls = ", ".join((['<a href=%s>%s</a>' % (x.url, x.id) for x in ingredients_missing_data]))
+            ingredient_urls = ", ".join((map(lambda x: '<a href=%s>%s</a>' % (x.url, x.id), ingredients_missing_data)))
             return_string = 'Missing Organic Compliant data for the following ingredients: %s' % ingredient_urls
 
             return return_string
@@ -3401,15 +3400,15 @@ class NoFormulaError(Exception):
             return "Flavor %s has no formula; cannot calculate hazards" % self.num
 
 class FlavorIterOrder(models.Model):
-    flavor = models.ForeignKey(Flavor,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(Flavor)
 
-    def __str__(self):
-        return self.flavor.__str__()
+    def __unicode__(self):
+        return self.flavor.__unicode__()
 
 class ProductCategory(models.Model):
     name = models.CharField(max_length=100)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
 
 class ExperimentalLog(models.Model):
@@ -3488,7 +3487,7 @@ class ExperimentalLog(models.Model):
     liquid = models.BooleanField(db_column='Liquid', default=False)
     dry = models.BooleanField(db_column='Dry', default=False)
     spraydried = models.BooleanField(db_column='Spray Dried', default=False) # Field renamed to remove spaces.lc
-    flavorcoat = models.BooleanField("Flavorcoat®", db_column="Flavor Coat", default=False)
+    flavorcoat = models.BooleanField(u"Flavorcoat®", db_column="Flavor Coat", default=False)
     concentrate = models.BooleanField(db_column='Concentrate', default=False)
     oilsoluble = models.BooleanField("Oil soluble", db_column='OilSoluble', default=False)
 
@@ -3554,10 +3553,10 @@ class ExperimentalLog(models.Model):
     retain_number = models.PositiveIntegerField(db_column='RetainNumber', null=True, blank=True)
     retain_present = models.BooleanField(db_column='RetainPresent', default=False)
 
-    flavor = models.ForeignKey('Flavor', related_name='experimental_log', blank=True, null=True,on_delete=models.CASCADE)
+    flavor = models.ForeignKey('Flavor', related_name='experimental_log', blank=True, null=True)
     location_code_old = models.CharField(blank=True, default="", max_length=20)
     exclude_from_reporting = models.BooleanField(default=False)
-    def __str__(self):
+    def __unicode__(self):
         return "%s-%s %s %s %s %s" % (self.experimentalnum, self.initials,
                                 self.natart, self.product_name, self.label_type, self.datesent_short)
 
@@ -3629,7 +3628,7 @@ class ExperimentalLog(models.Model):
 
     def clean_incompatible_categories(self):
         errors = []
-        for p, incompatible_p in self.incompatible_categories.items():
+        for p, incompatible_p in self.incompatible_categories.iteritems():
             if getattr(self, p) == True:
                 for ip in incompatible_p:
                     if getattr(self, ip) == True:
@@ -3651,7 +3650,7 @@ class ExperimentalLog(models.Model):
                 if getattr(self, prop) == True:
                     has_one = True
             if not has_one:
-                errors.append(str(category))
+                errors.append(unicode(category))
         if len(errors) > 0:
             return ["Missing property in required categories for experimental %s: %s" % (self.experimentalnum, " ".join(errors)),]
         else:
@@ -3682,7 +3681,7 @@ class ExperimentalLog(models.Model):
         check_tail_indices(tokens, label_tokens)
 
         if self.flavorcoat == True:
-            label_tokens.append("Flavorcoat®")
+            label_tokens.append(u"Flavorcoat®")
         else:
             label_tokens.append("Flavor")
 
@@ -3712,7 +3711,7 @@ class ExperimentalLog(models.Model):
             lorem_two = q.get()
             lorem_three = q.get()
             lorem_four = q.get()
-            print(e)
+            print e
             e.product_name = "%s %s" % (lorem_one, lorem_two)
             e.customer = lorem_three
             e.memo = "%s %s %s %s" % (lorem_one, lorem_two, lorem_three, lorem_four)
@@ -3851,7 +3850,7 @@ class ExperimentalLog(models.Model):
             return self.rawmaterialcost
 
     class Meta:
-        db_table = 'ExperimentalLog'
+        db_table = u'ExperimentalLog'
         ordering = ['experimentalnum']
     headers = (
                     ('experimentalnum','Number', 'width="80px"'),
@@ -3895,9 +3894,9 @@ class ShipTo(models.Model):
     import_order = 99
 
     class Meta:
-        db_table = 'ShipTo'
+        db_table = u'ShipTo'
 
-    def __str__(self):
+    def __unicode__(self):
         return self.shiptoname
 
 class Shipper(models.Model):
@@ -3910,9 +3909,9 @@ class Shipper(models.Model):
     import_order = 99
 
     class Meta:
-        db_table = 'Shippers'
+        db_table = u'Shippers'
 
-    def __str__(self):
+    def __unicode__(self):
         return self.shipper_name
 
 def next_id():
@@ -3930,13 +3929,50 @@ def get_default_ship_to():
     else:
         return None
 
-class Supplier(models.Model):
+class Company(models.Model):
+
+    code = models.CharField(max_length=255, blank=True)
+    name = models.CharField(max_length=255, )
+    contactname = models.CharField(max_length=255, blank=True)
+    contacttitle = models.CharField(max_length=255, blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=255, blank=True)
+    region = models.CharField(max_length=255, blank=True)
+    postalcode = models.CharField(max_length=255, blank=True)
+    country = models.CharField(max_length=255, blank=True)
+    phone = models.CharField(max_length=255, blank=True)
+    fax = models.CharField(max_length=255, blank=True)
+    homepage = models.CharField(max_length=255, blank=True)
+    email = models.CharField(max_length=255, blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+class Supplier(Company):
+    pass
+
+    @property
+    def suppliername(self):
+        return self.name
+
+    @property
+    def suppliercode(self):
+        return self.code
+
+    def __unicode__(self):
+        return self.name
+
+class SupplierTemp(models.Model):
     """
     Vendors which supply FDI with raw materials for products.
     """
-    id = models.PositiveIntegerField(primary_key=True, db_column='ID', default=next_id)
+    # id = models.PositiveIntegerField(primary_key=True, db_column='ID', default=next_id)
+    # supplierid = models.PositiveIntegerField(db_column='SupplierID', blank=True, null=True) #FIX this isn't unique in the source, convert to use the serial pk
+    # rawmaterialcode = models.PositiveIntegerField(db_column='RawMaterialCode', blank=True, null=True)
+
     suppliercode = models.CharField(max_length=255, db_column='SupplierCode', blank=True)
     suppliername = models.CharField(max_length=255, db_column='SupplierName')
+
     contactname = models.CharField(max_length=255, db_column='ContactName', blank=True)
     contacttitle = models.CharField(max_length=255, db_column='ContactTitle', blank=True)
     address = models.CharField(max_length=255, db_column='Address', blank=True)
@@ -3946,19 +3982,35 @@ class Supplier(models.Model):
     country = models.CharField(max_length=255, db_column='Country', blank=True)
     phone = models.CharField(max_length=255, db_column='Phone', blank=True)
     fax = models.CharField(max_length=255, db_column='Fax')
-    supplierid = models.PositiveIntegerField(db_column='SupplierID', blank=True, null=True) #FIX this isn't unique in the source, convert to use the serial pk
-    rawmaterialcode = models.PositiveIntegerField(db_column='RawMaterialCode', blank=True, null=True)
     homepage = models.CharField(max_length=255, db_column='HomePage', blank=True)
     email = models.CharField(max_length=255, db_column='EMail', blank=True)
 
-    import_order = 99
-
     class Meta:
-        db_table = 'Suppliers'
+        db_table = u'Suppliers'
         ordering=['suppliername']
 
-    def __str__(self):
+    def __unicode__(self):
         return self.suppliername
+
+    # TEMPORARY FUNCTION
+    def convert_to_supplier(self):
+        Supplier.objects.create(
+            id = self.id,
+            code = self.suppliercode,
+            name = self.suppliername,
+            contactname = self.contactname,
+            contacttitle = self.contacttitle,
+            address = self.address,
+            city = self.city,
+            region = self.region,
+            postalcode = self.postalcode,
+            country = self.country,
+            phone = self.phone,
+            fax = self.fax,
+            homepage = self.homepage,
+            email = self.email,
+        )
+
 
     def get_absolute_url(self):
         return "/access/purchase/supplier/%s/" % self.pk
@@ -3981,6 +4033,13 @@ class Supplier(models.Model):
                     break
             super(Supplier,self).save(*args,**kwargs)
 
+class Manufacturer(Company):
+
+    suppliers = models.ManyToManyField('Supplier')
+
+    def __unicode__(self):
+        return self.name
+
 
 class ExperimentalFormula(models.Model):
     """
@@ -3991,8 +4050,8 @@ class ExperimentalFormula(models.Model):
     #
     # NO SPECIFIED PRIMARY KEY -- USE 'id'
     #
-    experimental_log = models.ForeignKey('ExperimentalLog',on_delete=models.CASCADE)
-    ingredient = models.ForeignKey('Ingredient',on_delete=models.CASCADE)
+    experimental_log = models.ForeignKey('ExperimentalLog')
+    ingredient = models.ForeignKey('Ingredient')
     amount = models.DecimalField(decimal_places=3,
                                        max_digits=7,)
 
@@ -4012,7 +4071,7 @@ class ExperimentalFormula(models.Model):
                 rmc = g.rawmaterialcost
             else:
                 if g.rawmaterialcost is None or y is None:
-                    print("Updating %s" % g)
+                    print "Updating %s" % g
                     g.update_cost()
                 rmc = g.rawmaterialcost * y / Decimal('100')
 
@@ -4218,11 +4277,11 @@ class Customer(models.Model):
 
     import_order = 99
 
-    def __str__(self):
+    def __unicode__(self):
         return self.companyname
 
     class Meta:
-        db_table = 'Customers'
+        db_table = u'Customers'
         ordering=['companyname']
 
     @staticmethod
@@ -4230,14 +4289,14 @@ class Customer(models.Model):
         for f in Customer.objects.all():
             lorem_one = q.get()
             lorem_two = q.get()
-            print(f)
+            print f
             f.companyname = "%s %s" % (lorem_one, lorem_two)
             f.save()
 
             q.put(lorem_one)
             q.put(lorem_two)
 
-            print(f)
+            print f
 class ExperimentalProduct(models.Model):
     """
     Experimental products.
@@ -4272,7 +4331,7 @@ class ExperimentalProduct(models.Model):
     import_order = 99
 
     class Meta:
-        db_table = 'Experimental Products'
+        db_table = u'Experimental Products'
 
 class Incoming(models.Model):
     """
@@ -4291,7 +4350,7 @@ class Incoming(models.Model):
     import_order = 99
 
     class Meta:
-        db_table = 'Incoming'
+        db_table = u'Incoming'
 
 
 def get_default_ship_to():
@@ -4324,9 +4383,9 @@ class TSRLISortedManager(models.Manager):
 
 class TSRLineItem(models.Model):
     objects = TSRLISortedManager()
-    tsr = models.ForeignKey('TSR',on_delete=models.CASCADE)
+    tsr = models.ForeignKey('TSR')
 
-    content_type = models.ForeignKey(ContentType, null=True, blank=True,on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, null=True, blank=True)
     object_id = models.PositiveIntegerField(null=True, blank=True)
     product = fields.GenericForeignKey('content_type', 'object_id')
 
@@ -4336,8 +4395,8 @@ class TSRLineItem(models.Model):
 
 class TSR(models.Model):
     date_in = models.DateField(default=date.today)
-    assigned_to = models.ForeignKey(User, related_name="assigned_TSRs",on_delete=models.CASCADE)
-    entered_by = models.ForeignKey(User, related_name="entered_TSRs",on_delete=models.CASCADE)
+    assigned_to = models.ForeignKey(User, related_name="assigned_TSRs")
+    entered_by = models.ForeignKey(User, related_name="entered_TSRs")
     number = models.PositiveIntegerField(unique=True)
     date_out = models.DateField(null=True, blank=True)
 
@@ -4352,7 +4411,7 @@ class TSR(models.Model):
     shipping_method = models.CharField(max_length=20,
                                        choices=SHIPPING_METHOD_CHOICES)
 
-    customer = models.ForeignKey('Customer',on_delete=models.CASCADE)
+    customer = models.ForeignKey('Customer')
     contact = models.CharField(max_length=40)
     title = models.CharField(max_length=40, blank=True)
     telephone = models.CharField(max_length=20)
@@ -4414,7 +4473,7 @@ class TSR(models.Model):
 
     description = models.TextField(max_length=200, verbose_name="Project Description")
 
-    def __str__(self):
+    def __unicode__(self):
         return "%s - %s - %s" % (self.number, self.customer, str(self.date_in))
 
     def get_related_links(self):
@@ -4479,9 +4538,9 @@ class TSR(models.Model):
 
 class PurchaseOrder(models.Model):
     number = models.PositiveIntegerField(blank=True, default=next_po_number) #, default=next_po_number)
-    shipper = models.ForeignKey('Shipper', default=38,on_delete=models.CASCADE)
-    ship_to = models.ForeignKey('ShipTo', default=get_default_ship_to,on_delete=models.CASCADE)
-    supplier = models.ForeignKey('Supplier',on_delete=models.CASCADE)
+    shipper = models.ForeignKey('Shipper', default=38)
+    ship_to = models.ForeignKey('ShipTo', default=get_default_ship_to)
+    supplier = models.ForeignKey('Supplier')
     date_ordered = models.DateField(auto_now_add=True)
     memo = models.TextField(blank=True, default=" ALL KOSHER PRODUCTS MUST ARRIVE PER YOUR KOSHER CERTIFICATE OR THEY WILL BE REJECTED.")
     memo2 = models.TextField(blank=True, default="C OF A MUST ACCOMPANY SHIPMENT OR BE FAXED PRIOR TO RECEIVING ITEM")
@@ -4499,7 +4558,7 @@ class PurchaseOrder(models.Model):
                 ('qc_date','QC Date', ''),
             )
 
-    def __str__(self):
+    def __unicode__(self):
         return "%s - %s - %s" % (self.number, str(self.due_date), self.supplier)
 
     class Meta:
@@ -4545,7 +4604,7 @@ class PurchaseOrder(models.Model):
     def text_search(search_string):
         return PurchaseOrder.objects.filter(
             #Q(memo__icontains=search_string) |
-            Q(supplier__suppliername__icontains=search_string) |
+            Q(supplier__name__icontains=search_string) |
             Q(purchaseorderlineitem__raw_material__rawmaterialcode__icontains=search_string) |
             Q(purchaseorderlineitem__raw_material__id__icontains=search_string) |
             Q(purchaseorderlineitem__raw_material__product_name__icontains=search_string) |
@@ -4583,15 +4642,15 @@ class POLISortedManager(models.Manager):
 
 class PurchaseOrderLineItem(models.Model):
     objects = POLISortedManager()
-    po = models.ForeignKey('PurchaseOrder',on_delete=models.CASCADE)
-    raw_material = models.ForeignKey('Ingredient',on_delete=models.CASCADE)
+    po = models.ForeignKey('PurchaseOrder')
+    raw_material = models.ForeignKey('Ingredient')
     memo = models.TextField(blank=True)
     memo2 = models.TextField(blank=True)
     quantity = models.DecimalField(decimal_places=2, max_digits=7,default=0)
     due_date = models.DateField(default=seven_days_from_now)
     package_size = models.DecimalField(decimal_places=3, max_digits=7,default=0)
     purchase_price = models.DecimalField(decimal_places=3, max_digits=10, default=0)
-    legacy_purchase = models.OneToOneField('LegacyPurchase',on_delete=models.CASCADE)
+    legacy_purchase = models.OneToOneField('LegacyPurchase')
     closed = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
@@ -4643,7 +4702,7 @@ class PurchaseOrderLineItem(models.Model):
     def total_amount_requested(self):
         return self.quantity * self.package_size
 
-    def __str__(self):
+    def __unicode__(self):
         return "%s - %s - %s" % (self.po, self.raw_material, self.quantity)
 
     class Meta:
@@ -4688,17 +4747,17 @@ class LegacyPurchase(models.Model):
     import_order = 99
 
     class Meta:
-        db_table = 'Purchases'
+        db_table = u'Purchases'
         ordering=['ponumber']
 
-    def __str__(self):
-        return str(self.ponumber)
+    def __unicode__(self):
+        return unicode(self.ponumber)
 
 
 def get_lorem_queue():
     loremfile = open('/var/www/django/fd/loremipsum.txt', 'r')
     lorems = loremfile.read().split(',')
-    q = queue.Queue()
+    q = Queue.Queue()
     for word in lorems[0:len(lorems)-1]:
         q.put(word)
     return q
@@ -4726,14 +4785,14 @@ class IngredientDescription(Ingredient):
         proxy=True
 
 class Renumber(models.Model):
-    a = models.ForeignKey('Flavor', related_name="renum_a_set",on_delete=models.CASCADE)
-    b = models.ForeignKey('Flavor', related_name="renum_b_set",on_delete=models.CASCADE)
-    customer = models.ForeignKey('Customer', blank=True, null=True,on_delete=models.CASCADE)
+    a = models.ForeignKey('Flavor', related_name="renum_a_set")
+    b = models.ForeignKey('Flavor', related_name="renum_b_set")
+    customer = models.ForeignKey('Customer', blank=True, null=True)
 
 class Solvent(models.Model):
-    ingredient = models.OneToOneField('Ingredient', primary_key=True, related_name="solvent_listing",on_delete=models.CASCADE)
-    def __str__(self):
-        return str(self.ingredient)
+    ingredient = models.OneToOneField('Ingredient', primary_key=True, related_name="solvent_listing")
+    def __unicode__(self):
+        return unicode(self.ingredient)
 
     @staticmethod
     def get_name_from_name(solvent_number):
@@ -4812,22 +4871,22 @@ class AntisepticIngredient(models.Model):
     pin = models.PositiveSmallIntegerField()
     concentration = models.PositiveSmallIntegerField()
 
-    def __str__(self):
+    def __unicode__(self):
         return "%s -- %s%%" % (self.pin, self.concentration)
 
 class DigitizedFormula(models.Model):
-    experimental_log = models.ForeignKey('ExperimentalLog',on_delete=models.CASCADE)
+    experimental_log = models.ForeignKey('ExperimentalLog')
     ingredient_id = models.PositiveSmallIntegerField(blank=True,null=True)
     raw_row = models.TextField(blank=True,null=True)
 
 class LocationCode(models.Model):
     location_code = models.CharField(max_length=20)
-    content_type = models.ForeignKey(ContentType,on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = fields.GenericForeignKey('content_type','object_id')
 
-    def __str__(self):
-        return "%s" % (self.location_code)
+    def __unicode__(self):
+        return u"%s" % (self.location_code)
 
     number_re = re.compile('\d+')
 
@@ -4847,36 +4906,36 @@ class LocationCode(models.Model):
             return inventory_slot
 
 class MagentoFlavor(models.Model):
-    def __str__(self):
+    def __unicode__(self):
         return 'MagentoFlavor: %s' % self.flavor
 
-    flavor = models.ForeignKey(Flavor,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(Flavor)
     sku = models.CharField(blank=True, max_length=20)
     description = models.TextField(blank=True)
     price = models.CharField(blank=True, max_length=10)
     short_description = models.TextField(blank=True)
 
 class FlavorSpecification(models.Model):
-    flavor = models.ForeignKey('Flavor',on_delete=models.CASCADE)
+    flavor = models.ForeignKey('Flavor')
     name = models.CharField(max_length=48) #change this, override save method to enforce uniqueness
     specification = models.CharField(max_length=48)
     micro = models.BooleanField(default=False)
-    customer = models.ForeignKey(Customer, blank=True, null=True,on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, blank=True, null=True)
     replaces = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 
-    # def __str__(self):
+    # def __unicode__(self):
     #     return 'Flavor: %s, Name: %s, Specification: %s' % (self.flavor, self.name, self.specification)
 
 class ReconciledFlavor(models.Model):
-    flavor = models.ForeignKey('Flavor',on_delete=models.CASCADE)
+    flavor = models.ForeignKey('Flavor')
     reconciled = models.BooleanField(default=False)
     scraped_data = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
-    reconciled_by = models.ForeignKey(User,on_delete=models.CASCADE)
+    reconciled_by = models.ForeignKey(User)
 
-    # def __str__(self):
+    # def __unicode__(self):
     #     return 'Flavor: %s, Reconciled By: %s' % (self.flavor, self.reconciled_by.username)
 
 
@@ -4999,57 +5058,57 @@ def update_prices_and_get_updated_flavors(old_ingredient, new_ingredient):
 
 
 class FlavorCategoryInfo(models.Model):
-    flavor = models.ForeignKey(Flavor,on_delete=models.CASCADE)
-    category = models.ForeignKey(HazardCategory,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(Flavor)
+    category = models.ForeignKey(HazardCategory)
     ld50 = models.DecimalField(decimal_places = 3, max_digits = 10, null=True, blank=True)
 
 # FLAVOR label objects
 
 class PrecautionaryStatement(models.Model):
-    flavor = models.ForeignKey(Flavor,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(Flavor)
     code = models.CharField(max_length=40)
     statement = models.TextField()
 
 class HazardStatement(models.Model):
-    flavor = models.ForeignKey(Flavor,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(Flavor)
     statement = models.TextField()
 
 class GHSPictogram(models.Model):
-    flavor = models.ForeignKey(Flavor,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(Flavor)
     pictogram_code = models.CharField(max_length=40)
     pictogram_location = models.CharField(max_length=150)
 
 class GHSSignalWord(models.Model):
-    flavor = models.ForeignKey(Flavor,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(Flavor)
     signal_word = models.CharField(max_length=40)
 
 #RAW MATERIAL label objects
 
 class RMPrecautionaryStatement(models.Model):
-    ingredient = models.ForeignKey(Ingredient,on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient)
     code = models.CharField(max_length=40)
     statement = models.TextField()
 
 class RMHazardStatement(models.Model):
-    ingredient = models.ForeignKey(Ingredient,on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient)
     statement = models.TextField()
 
 class RMPictogram(models.Model):
-    ingredient = models.ForeignKey(Ingredient,on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient)
     pictogram_code = models.CharField(max_length=40)
     pictogram_location = models.CharField(max_length=150)
 
 class RMSignalWord(models.Model):
-    ingredient = models.ForeignKey(Ingredient,on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient)
     signal_word = models.CharField(max_length=40)
 
 
 class SSI(models.Model):
     #this class represents the data collected from a product spec sheet
 
-    flavor = models.ForeignKey(Flavor, blank=True,null=True,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(Flavor, blank=True,null=True)
 
-    one_off_customer = models.ForeignKey('Customer',blank=True,null=True,on_delete=models.CASCADE)
+    one_off_customer = models.ForeignKey('Customer',blank=True,null=True)
     # one_off_supplier = models.CharField(max_length=1000, blank=True, null=True)
 
     #   verified = models.BooleanField(blank=True, default=False)
@@ -5105,10 +5164,10 @@ class SpecSheetInfo(SSI):
 # from newqc.models import Lot
 # from salesorders.models import LineItem
 class COA(SSI):
-    lot = models.ForeignKey('newqc.Lot',related_name="lot",on_delete=models.CASCADE)
-    line = models.ForeignKey('salesorders.LineItem',on_delete=models.CASCADE)
-    origin_lot = models.ForeignKey('newqc.Lot',related_name="origin_lot",blank=True,null=True,on_delete=models.CASCADE)
-    sp = models.ForeignKey('SpecSheetInfo',on_delete=models.CASCADE)
+    lot = models.ForeignKey('newqc.Lot',related_name="lot")
+    line = models.ForeignKey('salesorders.LineItem')
+    origin_lot = models.ForeignKey('newqc.Lot',related_name="origin_lot",blank=True,null=True)
+    sp = models.ForeignKey('SpecSheetInfo')
 
     # def save(self, *args, **kwargs):
         # if self.lot.flavor == self.specsheetinfo_ptr.flavor:
@@ -5120,7 +5179,7 @@ class COA(SSI):
 
 class IngredientStatement(models.Model):
 
-    flavor = models.ForeignKey(Flavor,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(Flavor)
     verified = models.BooleanField(blank=True, default=False)
     edited = models.BooleanField(blank=True, default=False)
 
@@ -5167,7 +5226,7 @@ def consolidate_leaf_weight_solutions(lws):
             super_consolidated_leaf_weight_dict[lw.ingredient] += lw.weight
 
     #convert the dictionary into a list
-    super_consolidated_leaf_weight_list = list(super_consolidated_leaf_weight_dict.items())
+    super_consolidated_leaf_weight_list = super_consolidated_leaf_weight_dict.items()
 
     return super_consolidated_leaf_weight_list
 
@@ -5183,7 +5242,7 @@ def test_blah(flavor):
 
     mct = EyeDamageHazard.get_mixture_calculation_table()
 
-    cat_list = list(HazardClassDict['EyeDamageHazard'].keys())
+    cat_list = HazardClassDict['EyeDamageHazard'].keys()
     simple_cats = list(simple_cat_list(cat_list))
 
     fli_list = flavor.get_hazard_formula_list()
@@ -5398,14 +5457,14 @@ class IngredientInventoryLog(models.Model):
         3. Creation of a batchsheet/lot and then it's corresponding retain
     '''
 
-    ingredient = models.ForeignKey(Ingredient,on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient)
     date = models.DateField(default=date.today)
     delta = models.DecimalField(max_digits=10, decimal_places=4)
     comment = models.CharField(max_length=255, blank=True, null=True)
 
     #The 3 fields below set up the generic foreign key for this object
     #It will point to a batchsheet, a receiving log, or nothing
-    content_type = models.ForeignKey(ContentType, null=True, blank=True,on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, null=True, blank=True)
     object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey('content_type', 'object_id')
 
@@ -5438,7 +5497,7 @@ def check_weight(): # import any nutri info from a csv file
         reader = csv.DictReader(csvfile)
         rreader = csv.reader(csvcopy)
         next(rreader, None)
-        zipped = list(zip(reader, rreader))
+        zipped = zip(reader, rreader)
         writer = csv.writer(csvout)
 
         for row, rrow in zipped:
@@ -5449,11 +5508,11 @@ def check_weight(): # import any nutri info from a csv file
             if weight < 98 or weight > 102:
                 count += 1
                 writer.writerow((row['PinNum'],row['Shrt_Desc'],row['FlavorContent'],row['Carbohydrt'],row['Water'],row['Protein'],row['Total Fat'],row['Ash'],row['AlcoholContent'],weight))
-                print(row['Shrt_Desc'], row['PinNum'], weight)
+                print row['Shrt_Desc'], row['PinNum'], weight
             # else:
             #     print row['PinNum'], weight
 
-        print(count)
+        print count
 
 
 def import_nutri():
@@ -5576,13 +5635,13 @@ def import_nutri_from_file(): # import any nutri info from a csv file
             except:
                 invalid_pin_numbers.append(row['PinNum'])
 
-    print(invalid_pin_numbers)
+    print invalid_pin_numbers
 
             # print (row['PinNum'], row['Trans_Fat'], row['Shrt_Desc'], row['Water'])
 
 
 class NutriInfoSuperClass(models.Model):
-    ingredient = models.ForeignKey('Ingredient',on_delete=models.CASCADE)
+    ingredient = models.ForeignKey('Ingredient')
     Shrt_Desc   = models.TextField()
     Trans_Fat   = models.DecimalField('Trans Fat', decimal_places=3,max_digits=11, default=0)
     Water       = models.DecimalField(decimal_places=3,max_digits=11,default=0)
@@ -5708,7 +5767,7 @@ def scrape_renumbers():
         i = Formula.objects.filter(flavor = f)
         if len(i) == 1 and i[0].ingredient.sub_flavor and i[0].amount == 1000:
             count+=1
-            print((i[0]))
+            print (i[0])
     return count
 
 # def create_directory(url):
@@ -5757,17 +5816,23 @@ DOC_TYPES = (
     ('form20ar', 'Form #020 Audit Report'),
     ('form20c', 'Form #020 Certification'),
     ('form40', 'Form #040'),
+    ('mform20','Form #020 - Manufacturer'),
+    ('mform20ar','Form #020 Audit Report - Manufacturer'),
+    ('mform20c','Form #020 Certification - Manufacturer'),
+    ('mLOG','Letter of Guarantee - Manufacturer'),
+    ('mLOG', 'Letter Of Guarantee - Manufacturer'),
+    ('mform40', 'Form#40 - Manufacturer'),
 )
 
 class Documents(models.Model):
 
-    rawmaterial = models.ForeignKey('Ingredient', blank=True, null=True, default=None,on_delete=models.CASCADE)
+    rawmaterial = models.ForeignKey('Ingredient', blank=True, null=True, default=None)
     doctype = models.CharField(choices=DOC_TYPES, max_length=30, default="")
     uploadfile = models.FileField(upload_to=set_file_path, unique=False)
-    uploader = models.ForeignKey(User, blank=True, null=True,on_delete=models.CASCADE)
+    uploader = models.ForeignKey(User, blank=True, null=True)
     expiration = models.DateField(blank=True, null=True, default=date.today)
     documententry = models.DateField(default=date.today)
-
+    manufacturer = models.ForeignKey('Manufacturer', blank=True, null=True,default=None)
 
     log_rms  = ArrayField(
         models.CharField(max_length=25, null=True, blank=True, default=""),
@@ -5775,7 +5840,6 @@ class Documents(models.Model):
         null=True,
         default=[]
     )
-
 
     def save(self, *args, **kwargs):
         if not DocumentVerification.objects.filter(document = self, final=True).exists():
@@ -5824,13 +5888,13 @@ class Documents(models.Model):
     # def __init__(self)
 
 class DocumentVerification(models.Model):
-    document = models.ForeignKey("Documents", related_name='verifications',on_delete=models.CASCADE)
-    verifier = models.ForeignKey(User, blank=False, null=False,on_delete=models.CASCADE)
+    document = models.ForeignKey("Documents", related_name='verifications')
+    verifier = models.ForeignKey(User, blank=False, null=False)
     date = models.DateField(default=date.today)
-    temp_ingredient = models.ForeignKey('IngredientTemp', default=None, blank=True, null=True,on_delete=models.CASCADE)
-    temp_nutri = models.ForeignKey("NutriInfoTemp", default=None, blank=True, null=True,on_delete=models.CASCADE)
+    temp_ingredient = models.ForeignKey('IngredientTemp', default=None, blank=True, null=True)
+    temp_nutri = models.ForeignKey("NutriInfoTemp", default=None, blank=True, null=True)
     final = models.BooleanField(default=False)
-    rm_retain = models.ForeignKey("newqc.RMRetain", default=None, blank=True, null=True,on_delete=models.CASCADE)
+    rm_retain = models.ForeignKey("newqc.RMRetain", default=None, blank=True, null=True)
 
     # expiration refers to eitherthe document date(True) or the expiration(False) of the document, depending on is_documentdate
     expiration = models.DateField(blank=False, null=True, default=None)
@@ -5851,7 +5915,7 @@ class DocumentVerification(models.Model):
 
 
 class IngredientTemp(IngredientSuperClass):
-    user = models.ForeignKey(User, blank=True, null=True,on_delete=models.CASCADE)
+    user = models.ForeignKey(User, blank=True, null=True)
     temp_rmcode = models.PositiveIntegerField(blank=True, null=True, )
     # salmonella = models.NullBooleanField(default=False)
 
@@ -5885,7 +5949,7 @@ class IngredientTemp(IngredientSuperClass):
     # docverification = models.ForeignKey('DocumentVerification', blank=False, null=False)
 
 class NutriInfoTemp(NutriInfoSuperClass):
-    user = models.ForeignKey(User, blank=True,on_delete=models.CASCADE)
+    user = models.ForeignKey(User, blank=True)
     # temp_ing = models.ForeignKey('IngredientTemp')
     class Meta:
         unique_together = ('user', 'ingredient')
@@ -5897,7 +5961,7 @@ def remove_duplicates():
     for p in pins:
         i = Ingredient.objects.filter(id=p)
         if i.count() == 2 and i[0].suppliercode == i[1].suppliercode:
-            print(str(i[0].id) + " " + str(i[0].rawmaterialcode) + " " + str(i[1].rawmaterialcode))
+            print str(i[0].id) + " " + str(i[0].rawmaterialcode) + " " + str(i[1].rawmaterialcode)
             i.filter(discontinued = True)
             i.delete()
 
@@ -5944,53 +6008,55 @@ def fix_suppliers(): # fix supplier codes
             for ing in i:
                 ing.save()
 
-        print(delete)
-        print(blank)
+        print delete
+        print blank
         # for d in delete:
         #     print d
         #
         # for b in blank:
         #     print b
 
+TEST_TYPES = (
+    ('gbpp', 'Glass and Brittle Plastic Policy'),#sign
+    ('wiki', 'Wiki Review'),
+    # ('foodsafety', 'Food Safety Handbook Test'),
+    ('hazcom', 'Hazcom 2012 SDS Training'),
+    ('handbook', 'Employee Handbook Confirmation'),#sign
+    ('colorblind', 'Color Blind Test'),
+    ('fooddefense', 'Food Defense Plan Training'),
+    ('facemask', 'Face Mask Fit Test'),#admin
+    ('sensory', 'Sensory Evaluation Training'),#admin
+    ('ccp', 'CCP and Allergen HACCP Questionaire'),
+    ('osha', 'OSHA Lockout Tagout'),#sign
+    ('firedrill', 'Fire Drill'),#admin
+    ('fltv', 'Forklift Training Video'),
+    ('fltdt', 'Forklift Drivers Test'),#admin
+    ('wpsafety', 'Workplace Safety'),
+
+
+    ('bacteria', 'Bacteria Review'),
+    ('foodborne', 'Foodborne Illness Review', ),
+    ('personalhygiene', 'Personal Hygiene Review' ),
+    ('haccp', 'HACCP Review'),
+    ('sanitation', 'Sanitation Review'),
+    ('time', 'Time and Temperature Controls Review'),
+    ('foreign', 'Foreign Material Detection Review'),
+    ('cross', 'Cross Contamination Review'),
+    ('allergens', 'Allergens Review'),
+    ('pest', 'Pest Control Review'),
+    ('security', 'Security Review'),
+
+    ('survey', 'Food Safety Survey')
+
+)
 class Training(models.Model):
-        TEST_TYPES = (
-            ('gbpp', 'Glass and Brittle Plastic Policy'),#sign
-            ('wiki', 'Wiki Review'),
-            # ('foodsafety', 'Food Safety Handbook Test'),
-            ('hazcom', 'Hazcom 2012 SDS Training'),
-            ('handbook', 'Employee Handbook Confirmation'),#sign
-            ('colorblind', 'Color Blind Test'),
-            ('fooddefense', 'Food Defense Plan Training'),
-            ('facemask', 'Face Mask Fit Test'),#admin
-            ('sensory', 'Sensory Evaluation Training'),#admin
-            ('ccp', 'CCP and Allergen HACCP Questionaire'),
-            ('osha', 'OSHA Lockout Tagout'),#sign
-            ('firedrill', 'Fire Drill'),#admin
-            ('fltv', 'Forklift Training Video'),
-            ('fltdt', 'Forklift Drivers Test'),#admin
-            ('wpsafety', 'Workplace Safety'),
-
-
-            ('bacteria', 'Bacteria Review'),
-            ('foodborne', 'Foodborne Illness Review', ),
-            ('personalhygiene', 'Personal Hygiene Review' ),
-            ('haccp', 'HACCP Review'),
-            ('sanitation', 'Sanitation Review'),
-            ('time', 'Time and Temperature Controls Review'),
-            ('foreign', 'Foreign Material Detection Review'),
-            ('cross', 'Cross Contamination Review'),
-            ('allergens', 'Allergens Review'),
-            ('pest', 'Pest Control Review'),
-            ('security', 'Security Review')
-
-        )
-
         test_type = models.CharField(choices=TEST_TYPES, max_length=30, default="")
-        tester = models.ForeignKey(User, blank=True, null=True,on_delete=models.CASCADE)
+        tester = models.ForeignKey(User, blank=True, null=True)
         completion_date = models.DateField(blank=True, null=True, default=date.today)
         complete = models.BooleanField(default=False, blank=False, null=False)
         passed = models.BooleanField(default=False, blank=False, null=False)
-
+        spanish_version = models.BooleanField(default=False, blank=False, null=False)
+        # score = models.DecimalField(default=Decimal(0), decimal_places=2, max_digits=4, blank=True, null=True)
         # source_materials = ArrayField(
         #     models.CharField(max_length=100, blank=True),
         #     default = []
@@ -6001,7 +6067,51 @@ class Training(models.Model):
         # )
         @property
         def questions(self):
-            return Question.objects.filter(training=self)
+            return Question.objects.filter(test_type=self.test_type, spanish_version=self.spanish_version)
+
+
+        @property
+        def proper_name(self):
+            for t in TEST_TYPES:
+                if self.test_type == t[0]:
+                    return t[1]
+
+        @property
+        def score(self):
+            count = 0
+            questions = self.questions
+            for q in questions:
+                    temp = Answer.objects.get(question=q, tester=self.tester)
+                    if q.correct_answer.lower() == temp.answer.lower():
+                        count+=1
+
+            return round(Decimal(count)/Decimal(questions.count()) * 100, 2)
+            #
+            # def check_submitted_answers(request, questions, section):
+            #     # delete all answers from previous test taken
+            #
+            #     Answer.objects.filter(tester=request.user, question__test_type=section).delete()
+            #     point_count = 0
+            #     # special case for signature
+            #     if section in signature_test:
+            #         if request.POST.get('username') == request.user.username and request.user.check_password(request.POST.get('pw')):
+            #             return True
+            #         else:
+            #             return False
+            #
+            #     # compare question and posted answer to correct answers
+            #     for q in questions:
+            #         temp = request.POST.get(str(q.id))
+            #         if q.correct_answer.lower() == temp.lower():
+            #             point_count+=1
+            #         a = Answer(tester=request.user, question = q, answer = temp)
+            #         a.save()
+            #
+            #     # return true if scored above 70%
+            #     if (Decimal(point_count)/Decimal(questions.count())) >= .7 or section=='survey':
+            #         return True
+            #
+            #     return False
 
         @property
         def test_renewal(self):
@@ -6010,31 +6120,52 @@ class Training(models.Model):
             # three = ['ccp']
             # five = ['sensory']
 
-            if not self.test_type in one + two + three + five:
+            if not self.test_type in once + two + three + five:
                 return False
             elif self.test_type in two:
                 return (date.today() - date(self.completion_date.year+2, self.completion_date.month, self.completion_date.day)).days
             elif self.test_type in one:
                 return (date.today() - date(self.completion_date.year+1, self.completion_date.month, self.completion_date.day)).days
-            # elif self.test_type in five:
-            #     return (date.today() - date(self.completion_date.year+5, self.completion_date.month, self.completion_date.day)).days
 
-
-            # class Training_Test(models.Model):
-#     test_type = models.CharField(blank=False, null=False)
-#     # questions = models.ForeignKey('Trainging_Question', blank = False, null=False)
-#     complete = models.BooleanField(default=False, blank=False, null=False)
-
-
-# class Training_Question(models.Model):
-#     test = models.ForeignKey('Training', blank = False, null = False)
-#     question = models.CharField(max_length = 300)
-#     answers = models.ArrayField(
-#         models.CharField(blank=True),
-#     )
 class Question(models.Model):
-        question = models.CharField(max_length=500,default="")
-        answer = models.CharField(max_length=2000,default="")
-        training = models.ForeignKey('Training', blank=False, null=False,on_delete=models.CASCADE)
-        # any images or documents that are associated with question
-        # source_material = models.CharField(max_length=100, default = "")
+    test_type = models.CharField(choices=TEST_TYPES, max_length=30, default="")
+    question = models.CharField(max_length=500,default="")
+
+    answer_options = ArrayField(
+        ArrayField(
+            models.CharField(max_length=2000, default="", blank=True),
+            default=[],
+            blank=True,
+            null=True,
+            size=2
+        ),
+        default=[],
+        blank=True,
+        null=True
+    )
+    spanish_version = models.BooleanField(default=False)
+    correct_answer = models.CharField(max_length=2000, default="")
+
+    @property
+    def get_full_answer(self):
+        if self.answer_options:
+            for a in self.answer_options:
+                if self.correct_answer == a[0]:
+                    return a[1]
+        return self.correct_answer
+
+
+class Answer(models.Model):
+    tester = models.ForeignKey(User, blank=True, null=True)
+    question = models.ForeignKey('Question', blank=True, null=True, related_name='related_question')
+    answer = models.CharField(max_length=500, blank=True,  default="")
+
+
+    @property
+    def get_submitted_answer(self):
+        answeropts = self.question.answer_options
+        if answeropts:
+            for a in answeropts:
+                if self.answer == a[0]:
+                    return a[1]
+        return self.answer

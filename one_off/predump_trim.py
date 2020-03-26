@@ -16,7 +16,7 @@ def get_complete_flavors_and_ingredients(save_flavors):
     complete_flavor_numbers = set()
     complete_ingredient_ids = set()
     for f in save_flavors:
-        print(f)
+        print f
         flavor = Flavor.objects.get(number=f)
         complete_flavor_numbers.add(flavor.number)
         
@@ -39,14 +39,14 @@ def get_complete_flavors_and_ingredients(save_flavors):
 
 def delete_other_ingredients(complete_ingredients):
     for i in Ingredient.objects.exclude(id__in=complete_ingredients):
-        print(i)
+        print i
         for formula in i.formula_set.all():
             formula.delete()
         i.delete()
         
 def delete_other_flavors(complete_flavor_numbers):
     for f in Flavor.objects.exclude(number__in=complete_flavor_numbers):
-        print(f)
+        print f
         f.delete()
 
 def find_most_made_flavors():
@@ -64,7 +64,7 @@ def trim_experimental_logs():
     c = ExperimentalLog.objects.all().count()
     
     for e in ExperimentalLog.objects.annotate(Count('digitizedformula')).order_by('digitizedformula__count')[:c-9]:
-        print(e)
+        print e
         e.delete()
         
     for e in ExperimentalLog.objects.all():
@@ -89,12 +89,12 @@ def trim_purchase_orders():
     c = PurchaseOrder.objects.count()
     
     for po in PurchaseOrder.objects.annotate(Count('purchaseorderlineitem')).order_by('purchaseorderlineitem__count')[:c-9]:
-        print(po)
+        print po
         po.delete()
         
 def delete_jilist():
     for j in JIList.objects.all():
-        print(j)
+        print j
         j.delete()
      
 def delete_unified_adapter_models():
@@ -106,7 +106,7 @@ def delete_unified_adapter_models():
 def trim_lots():
     for fl in Flavor.objects.all():
         for lot in fl.lot_set.all()[10:]:
-            print("Deleting lot %s" % lot)
+            print "Deleting lot %s" % lot
             lot.delete()
 
 #only keep 10 digitized formula per experimental log

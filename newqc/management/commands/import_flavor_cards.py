@@ -41,5 +41,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         import_flavor_cards()
         
-        print("Lot count: %s" % Lot.objects.all().count())
-        print("Retain count: %s" % Retain.objects.all().count())
+        print "Lot count: %s" % Lot.objects.all().count()
+        print "Retain count: %s" % Retain.objects.all().count()

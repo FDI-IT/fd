@@ -134,7 +134,7 @@ function totalcalories(){
   var calories = 4 * (protein + totalcarbs) + 9 * totalfat + fusel * 7 + ethyl * 7 + pg * 4 + tc * 3.7 + glycerin * 4 + triacetin * 1.7;
   // console.log(calories);
   document.getElementById("calories").innerHTML = calories.toFixed(2);
-  document.getElementById("id_Calories").value = calories.toFixed(2);
+  // document.getElementById("id_Calories").value = calories.toFixed(2);
 }
 
 function checkTotalWeight(){

@@ -30,7 +30,7 @@ class AverageAccumulator():
                     pass
             
     def __repr__(self):
-        return str(self.get_result())
+        return unicode(self.get_result())
     
     def __float__(self):
         return float(self.get_result())
@@ -49,7 +49,7 @@ class SumAccumulator():
             pass      
           
     def __repr__(self):
-        return str(self.get_result())
+        return unicode(self.get_result())
     
     def __float__(self):
         return float(self.get_result())
@@ -175,7 +175,7 @@ def annotate_experimental_log_object(e):
     
         
 def toggle_exclude_from_reporting(e, new_val):
-    if new_val == "false":
+    if new_val == u"false":
         e.exclude_from_reporting = False
     else:
         e.exclude_from_reporting = True

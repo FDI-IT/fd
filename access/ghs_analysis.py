@@ -20,9 +20,9 @@ def dump_pickle_sds_list():
     for fl in Flavor.objects.all():
         try:
             pickle.dump(fl.get_hazards(), pfile)
-            print(fl)
+            print fl
         except:
-            print("Flavor %s failed to dump" % fl.number)
+            print "Flavor %s failed to dump" % fl.number
     
     pfile.close()
     
@@ -38,7 +38,7 @@ def load_sds_list():
     while True:
         flavor_sds = []
         try:
-            for key, value in pickle.load(pfile).items():
+            for key, value in pickle.load(pfile).iteritems():
                 flavor_sds.append((key, value))
             #sds_list.append(pickle.load(pfile))
         except:
@@ -95,7 +95,7 @@ def get_fdi_only_ingredients(path_to_destination=None):
             
     fdi_only_with_cas = []
     for cas, pin, name in fdi_only:
-        if cas != '':
+        if cas != u'':
             fdi_only_with_cas.append((cas, pin, name))
                 
     if path_to_destination == None:
@@ -111,16 +111,16 @@ def get_fdi_only_ingredients(path_to_destination=None):
 
 def write_ghs_report(csv_writer, ghs_only):
     
-    csv_writer.writerow(['GHS Exclusive Ingredients'])
-    csv_writer.writerow(['CAS Number', 'Ingredient Name'])
+    csv_writer.writerow([u'GHS Exclusive Ingredients'])
+    csv_writer.writerow([u'CAS Number', u'Ingredient Name'])
     
     for cas, name in ghs_only:
         csv_writer.writerow([cas, name])
                 
 def write_fdi_report(csv_writer, fdi_only):
     
-    csv_writer.writerow(['FDI Exclusive Ingredients'])
-    csv_writer.writerow(['CAS Number', 'Ingredient PIN', 'Ingredient Name'])
+    csv_writer.writerow([u'FDI Exclusive Ingredients'])
+    csv_writer.writerow([u'CAS Number', u'Ingredient PIN', u'Ingredient Name'])
 
     for cas, pin, name in fdi_only:
         csv_writer.writerow([cas, pin, name])
@@ -172,13 +172,13 @@ def get_most_hazardous_flavors(amount):
 def show_flavor_hazards(flavor_list = Flavor.objects.filter(valid=True)):
     for fl in flavor_list:
         
-        print("%s\n" % fl.name)
+        print "%s\n" % fl.name
         
-        for key, val in fl.get_hazards().items():
+        for key, val in fl.get_hazards().iteritems():
             if val != 'No':
-                print("%s: %s" % (key, val))
+                print "%s: %s" % (key, val)
     
-        print("\n")
+        print "\n"
         
 
 
@@ -216,7 +216,7 @@ def create_hazardous_flavors(flavornum_list, min_hazards = 4, failed_dict=defaul
             
             fl.save()
             
-            print("Creating %s\n" % fl.name)
+            print "Creating %s\n" % fl.name
         
             total = 0
             used_ingredients = []
@@ -268,21 +268,21 @@ def create_hazardous_flavors(flavornum_list, min_hazards = 4, failed_dict=defaul
             recalculate_guts(fl)
             
             hcount = 0
-            for val in list(fl.get_hazards().values()):
+            for val in fl.get_hazards().values():
                 if val != 'No':
                     hcount = hcount + 1
                 
             hazard_count = hcount
             
             if hazard_count < min_hazards:
-                print("Hazards: %s  Recreating flavor.\n" % hazard_count)
+                print "Hazards: %s  Recreating flavor.\n" % hazard_count
                 failed_dict[hazard_count] += 1
                 
             else:
                 break
                 
         
-        print("Flavor %s complete\n" % fl.name)
+        print "Flavor %s complete\n" % fl.name
         
 test_hazard_list = ['acute_hazard_oral', 'respiratory_hazard']
     
@@ -295,7 +295,7 @@ def create_sds_identifier_dictionary(test_hazard_list = test_hazard_list):
     sds_list = []
     
     #if you replace the two hazards with all hazards, it will create a list of length 105 million and take forever    
-    for i in product(*[list(zip(*GHSIngredient._meta.get_field(h).choices))[0] for h in test_hazard_list]):
+    for i in product(*[zip(*GHSIngredient._meta.get_field(h).choices)[0] for h in test_hazard_list]):
         sds_list.append(i)
 
     

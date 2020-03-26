@@ -6,4 +6,4 @@ def populat():
             hazards = f.get_hazards()
             # print hazards
         except Exception as e:
-            print(f, e)
+            print f, e

@@ -46,14 +46,14 @@ def import_applications(spreadsheet_path="/var/www/django/dump/sample_data/flavo
 FLAVOR_NUMBER = 6
 def parse_row(row):
     flavor_number = row[FLAVOR_NUMBER].value
-    print(flavor_number)
+    print flavor_number
     try:
         f = Flavor.objects.get(number=flavor_number)
     except Flavor.DoesNotExist:
-        print("Does not exist: %s" % row[FLAVOR_NUMBER])
+        print "Does not exist: %s" % row[FLAVOR_NUMBER]
         return
     except ValueError:
-        print("Invalid production number: %s" % row[FLAVOR_NUMBER])
+        print "Invalid production number: %s" % row[FLAVOR_NUMBER]
         return 
     
     for app in app_types:
@@ -69,8 +69,8 @@ def parse_row(row):
             memo = ""
         
         if usage_level != 0 or memo != '':
-            print(app[APP_NAME])
-            print('usage level: "%s" -- memo: "%s"' % (usage_level, memo))
+            print app[APP_NAME]
+            print 'usage level: "%s" -- memo: "%s"' % (usage_level, memo)
             application = Application(flavor=f,
                     application_type=app[APP_OBJ],
                     usage_level=usage_level,

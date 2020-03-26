@@ -1,7 +1,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 
 from django import template
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 
 from access.models import Flavor, FormulaException, FormulaCycleException
 from access.utils import coster_headers

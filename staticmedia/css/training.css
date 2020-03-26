@@ -18,6 +18,47 @@ ol li ul li{
 table, tr, td{
   border: none;
 }
+img{
+  position: absolute;
+  z-index: -1;
+  padding: 0px;
+  margin: 0px;
+}
+.cbtable{
+  /* border-collapse: collapse; */
+  height: 1100px;
+  width: 1100px;
+  float: right;
+  padding-top:30px;
+}
+
+.cbtable td{
+  padding-top:326px;
+  width: 33%;
+}
+.cbtdlast{
+  padding-right: 10px;
+}
+/* .t2 td{
+  padding-top:310px;
+} */
+
+.cbtable{
+  float: right;
+  padding-top:30px;
+}
+
+.cbinput{
+  width: 90px;
+  float: right;
+
+}
+
+.conflicting_answers{
+  color: red;
+}
+
+
 /*
 input{
   display: inline-block;

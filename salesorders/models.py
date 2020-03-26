@@ -24,7 +24,7 @@ class SalesOrderNumber(models.Model):
     number = models.PositiveIntegerField(unique=True)
     create_date = models.DateField(auto_now_add=True)
     #referred_from = models.Fosal    reignKey(null=True, blank=True)
-    customer = models.ForeignKey('access.Customer',blank=True,null=True,on_delete=models.CASCADE)
+    customer = models.ForeignKey('access.Customer',blank=True,null=True)
     open = models.BooleanField(default=True)
     # TODO - remove the above field in production
     #purchase order number
@@ -57,8 +57,8 @@ class SalesOrderNumber(models.Model):
     def get_url(self):
         return "/salesorder/%s/" % self.id
 
-    def __str__(self):
-        return "%s - %s %s" % (self.number,
+    def __unicode__(self):
+        return u"%s - %s %s" % (self.number,
                                self.create_date,
                                self.customer)
 
@@ -88,18 +88,18 @@ class LineItem(models.Model):
     """
     A line item of a sales order.
     """
-    salesordernumber = models.ForeignKey('SalesOrderNumber',on_delete=models.CASCADE)
-    flavor = models.ForeignKey('access.Flavor',on_delete=models.CASCADE)
+    salesordernumber = models.ForeignKey('SalesOrderNumber')
+    flavor = models.ForeignKey('access.Flavor')
     quantity = models.DecimalField(max_digits=9, decimal_places=2) # 12,345.12
     unit_price = models.DecimalField(max_digits=9, decimal_places=3) # $1,234.123 called Sales Price
     quantity_price = models.DecimalField(max_digits=9, decimal_places=3) # $1,234.123 called Amount
     ship_date = models.DateField()
     due_date = models.DateField()
     covered = models.BooleanField(default=False)
-    lot = models.ForeignKey('newqc.Lot',null=True,on_delete=models.CASCADE)
+    lot = models.ForeignKey('newqc.Lot',null=True)
 
-    def __str__(self):
-        return "%s - %s %s lbs $%s" % (self.salesordernumber,
+    def __unicode__(self):
+        return u"%s - %s %s lbs $%s" % (self.salesordernumber,
                                          self.flavor,
                                          self.quantity,
                                          self.unit_price)

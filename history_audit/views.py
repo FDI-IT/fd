@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.template import RequestContext
 from django.contrib.contenttypes.models import ContentType
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 from django.db.models.fields import FieldDoesNotExist
 from django.core.exceptions import ValidationError
 import json
@@ -163,10 +163,10 @@ def revision_info(request, revision_id, pagination_count = 5):
             url = None
         
         try:        
-            cached_version_objects.append((version_object, url, iter(version_object.get_field_dict().items()), 'current'))
+            cached_version_objects.append((version_object, url, version_object.get_field_dict().iteritems(), 'current'))
         except (FieldDoesNotExist, ValidationError):
             data = json.loads(version_object.serialized_data)[0]
-            cached_version_objects.append((version_object, url, iter(data['fields'].items()), 'serialized'))
+            cached_version_objects.append((version_object, url, data['fields'].iteritems(), 'serialized'))
         
 
     return render(
@@ -201,10 +201,10 @@ def version_info(request, version_pk, redirect = False): #displays information a
         url = None
     
     try:        
-        version_info = [iter(version_object.get_field_dict().items()), 'current']
+        version_info = [version_object.get_field_dict().iteritems(), 'current']
     except (FieldDoesNotExist, ValidationError):
         data = json.loads(version_object.serialized_data)[0]
-        version_info = [iter(data['fields'].items()), 'serialized'] 
+        version_info = [data['fields'].iteritems(), 'serialized'] 
     
     
     return render(

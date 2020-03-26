@@ -39,14 +39,14 @@ team_re = re.compile('\/teams\/([a-zA-Z]+?)\/(\d{4})\.htm')
 player_re = re.compile('\/players\/([a-zA-Z]+?)\/(\d+?)\.htm')
 
 def chunker(seq, size):
-    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+    return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
 
 class MyBaseException:
     def __init__(self, value):
         self.parameter = value
     def __str__(self):
         return repr(self.parameter)
-    def __str__(self):
+    def __unicode__(self):
         return repr(self.parameter)
     
 class PlayerException(MyBaseException):
@@ -69,12 +69,12 @@ class PlayerImport:
         """
         
         delete_all_crap()
-        print(Player.objects.all().count())
+        print Player.objects.all().count()
         self.path = path
         self.wb = open_workbook(path)
         nullcount = 0
         for s in self.wb.sheets():
-            print(s.name)
+            print s.name
             position = s.name
             header_cols = {}
             nullheadercount = 0
@@ -96,7 +96,7 @@ class PlayerImport:
                 else:
                     p = Player(lastname=lname, firstname=fname, position=position)
                     p.save()
-                    for c, year in header_cols.items():
+                    for c, year in header_cols.iteritems():
                         score = None
                         try:
                             score = int(s.cell(r,c).value)
@@ -105,8 +105,8 @@ class PlayerImport:
                         if score is not None and score > -1:
                             ys = YearScore(player=p, year=year, score=int(s.cell(r,c).value))
                             ys.save()
-            print(Player.objects.all().count())
-            print(YearScore.objects.all().count())
+            print Player.objects.all().count()
+            print YearScore.objects.all().count()
         normalize_player_scores()
         
 def normalize_player_scores():
@@ -134,7 +134,7 @@ def try_globs():
     file_list = sorted(file_list)
     file_list.reverse()
     for f in file_list:
-        print(try_boxscore(f))
+        print try_boxscore(f)
     
 def try_boxscore(file_path="/var/www/django/fdileague/201112180crd.htm"):
     try:
@@ -212,7 +212,7 @@ def get_team_links(h):
     return (links[0], links[1])
 
 def parse_team_link(link):
-    match = team_re.match(list(link.values())[0])
+    match = team_re.match(link.values()[0])
     if match:
         team_dict = {}
         g = match.groups()
@@ -290,7 +290,7 @@ def parse_prr(h):
         player_cell = cells[0]
         firstname=str(player_cell.text_content())
         try:
-            url=list(csss_a(player_cell)[0].values())[0]
+            url=csss_a(player_cell)[0].values()[0]
             p,c = Player.objects.get_or_create(firstname=firstname, url=url)
         except:
             continue
@@ -372,7 +372,7 @@ def parse_dr(h):
         player_cell = cells[0]
         firstname=str(player_cell.text_content())
         try:
-            url=list(csss_a(player_cell)[0].values())[0]
+            url=csss_a(player_cell)[0].values()[0]
             p,c = Player.objects.get_or_create(firstname=firstname, url=url)
         except:
             continue
@@ -474,7 +474,7 @@ def parse_kp(h):
         player_cell = cells[0]
         firstname=str(player_cell.text_content())
         try:
-            url=list(csss_a(player_cell)[0].values())[0]
+            url=csss_a(player_cell)[0].values()[0]
             p,c = Player.objects.get_or_create(firstname=firstname, url=url)
         except:
             continue

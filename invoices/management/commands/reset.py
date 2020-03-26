@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-import io
+import cStringIO
 
 from subprocess import call
 from optparse import make_option

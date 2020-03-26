@@ -75,7 +75,7 @@ class FlavorFormula(models.Model):
         db_table = u'Flavors - Formulae'
         ordering = ['flavornumber', '-flavoramount',]
         
-    def __str__(self):
+    def __unicode__(self):
         return "%s %s lbs" % (self.productid, self.flavoramount)
 
 class Customer(models.Model):
@@ -158,7 +158,7 @@ class Product(models.Model):
         db_table = u'Products'
         ordering = ['flavorformula']
         
-    def __str__(self):
+    def __unicode__(self):
         return "%s-%s %s %s %s" % (self.productprefix, self.flavorformula, self.flavornatart, self.productname, self.flavortype)
 
     def get_ingredients(self):
@@ -269,7 +269,7 @@ class ExperimentalLog(models.Model):
     retain_number = models.PositiveIntegerField(db_column='RetainNumber',null=True,blank=True)
     retain_present = models.BooleanField(db_column='RetainPresent',default=False)
     
-    def __str__(self):
+    def __unicode__(self):
         return "%s-%s %s %s" % (self.initials, self.experimentalnum,
                                 self.product_name, self.datesent_short)
     
@@ -508,7 +508,7 @@ class RawMaterial(models.Model):
     class Meta:
         db_table = u'Raw Materials'
         
-    def __str__(self):
+    def __unicode__(self):
         return "%s %s" % (self.prefix, self.productname)
 
 class ShipTo(models.Model):

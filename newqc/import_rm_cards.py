@@ -25,7 +25,7 @@ from access.models import Flavor, Ingredient
 import settings
 
 os.chdir("%s/sample_data/qc/Raw Materials/" % settings.DUMP_DIR)
-log_entry = '"%s","%s","%s"\n'
+log_entry = u'"%s","%s","%s"\n'
 LOG_FILENAME = 'import_rm.log'
 logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
 
@@ -36,14 +36,14 @@ SPECIAL_CELLS = (
     )
 
 def chunker(seq, size):
-    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+    return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
 
 class MyBaseException:
     def __init__(self, value):
         self.parameter = value
     def __str__(self):
         return repr(self.parameter)
-    def __str__(self):
+    def __unicode__(self):
         return repr(self.parameter)
     
 class RMCardException(MyBaseException):
@@ -62,9 +62,9 @@ class RetainRecord:
         # simple gets
         self.date = datetime.date(*xldate_as_tuple(row_array[0].value, 0)[0:3])
         self.pin = int(row_array[1].value)
-        self.supplier = str(row_array[2].value).strip()
-        self.name = str(row_array[3].value).strip()
-        self.lot = str(row_array[4].value)
+        self.supplier = unicode(row_array[2].value).strip()
+        self.name = unicode(row_array[3].value).strip()
+        self.lot = unicode(row_array[4].value)
         
         
         
@@ -87,9 +87,9 @@ class RetainRecord:
         if self.r_number == "":
             raise RMCardException( "Unable to scrape r_number: %s" % row_array[5].value )
         
-        self.status = str(row_array[6].value).strip()
+        self.status = unicode(row_array[6].value).strip()
         try:
-            self.notes = str(row_array[8].value).strip()
+            self.notes = unicode(row_array[8].value).strip()
         except:
             self.notes = ""
 
@@ -109,7 +109,7 @@ class RetainRecord:
             self.ir.save()
             transaction.savepoint_commit(sid)
         except Exception as e:
-            print(("Unhandled Exception: %s -- %s" % (self.ir, e)).rstrip())
+            print ("Unhandled Exception: %s -- %s" % (self.ir, e)).rstrip()
             transaction.savepoint_rollback(sid)
             
     
@@ -133,7 +133,7 @@ class RMCard:
         # get values from the special cells and store them in a dict
         for special_cell in chunker(SPECIAL_CELLS, 2):
             cell_name, loc = special_cell
-            scraped_rm_info[cell_name] = '%s' % (sheet.cell(*loc).value)
+            scraped_rm_info[cell_name] = u'%s' % (sheet.cell(*loc).value)
         
         # get the flavor number from special cells
         try:
@@ -158,11 +158,11 @@ class RMCard:
         
         # iterate over remaining rows and 
         self.retains = []
-        for row_index in range(7, sheet.nrows):
+        for row_index in xrange(7, sheet.nrows):
             try:
                 self.retains.append(RetainRecord(sheet.row(row_index), path))
             except Exception as e:
-                print("Bad retain index-%s in %s file: %s" % (row_index, self.pin, e))
+                print "Bad retain index-%s in %s file: %s" % (row_index, self.pin, e)
         
     def __str__(self):
         return "Card for %s" % self.pin
@@ -207,7 +207,7 @@ def test(rm_path="/var/www/django/dump/sample_data/qc/Raw Materials/"):
     os.chdir(rm_path)
     card_dict = {}
     failcount = 0
-    for card_path in glob.glob("*.[Xx][Ll][Ss]"):
+    for card_path in glob.glob(u"*.[Xx][Ll][Ss]"):
         try:
             #print card_path
             card = RMCard(card_path)
@@ -215,7 +215,7 @@ def test(rm_path="/var/www/django/dump/sample_data/qc/Raw Materials/"):
             for r in card.retains:
                 r.create_model_object()
         except RMCardException as e:
-            print("RMCardException %s: %s" % (card_path,e,))
+            print "RMCardException %s: %s" % (card_path,e,)
             failcount += 1
             #log_file.write(log_entry % (card_path, "Bad File", ''))
     create_rm_retain_objects(card_dict)
@@ -309,7 +309,7 @@ def test(rm_path="/var/www/django/dump/sample_data/qc/Raw Materials/"):
 #    return calculated_vals
 
 def create_rm_retain_objects(card_dict):
-    for c in list(card_dict.values()):
+    for c in card_dict.values():
         #print c.rm_info
         for r in c.retains:
             sid = transaction.savepoint()            
@@ -328,6 +328,6 @@ def create_rm_retain_objects(card_dict):
                 r.save()
                 transaction.savepoint_commit(sid)
             except Exception as e:
-                print(("Unhandled Exception: %s -- %s" % (ir, e)).rstrip())
+                print ("Unhandled Exception: %s -- %s" % (ir, e)).rstrip()
                 transaction.savepoint_rollback(sid)
     

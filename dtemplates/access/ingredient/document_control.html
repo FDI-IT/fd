@@ -3,115 +3,106 @@
 {% block content %}
 
 <style>
-
-  table{
-    width:100%;
-  }
-  tr:nth-child(odd){
-    background-color: #f2f2f2;
-  }
-  tr:hover{
-    background-color: #ddd;
-  }
-
-  table, th, td {
-     border: 1px solid black;
-  }
-  th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    background-color: #3c90ce;
-    color: white;
-  }
-  .link{
-    float: right;
-  }
-  .head{
-    font-size: 14px;
-    font-weight: bold;
-  }
-
-  .expiring{
-    background-color: #ffff4d90 !important;
-  }
-  .expired{
-    background-color: #ff4d4d90 !important;
-  }
-  .ok{
-    background-color: #00ff9990;
-  }
-
-  .incomplete{
-    background-color: #ffff4d90;
-  }
-  p{
-    font-size: 15px;
-  }
-  .multiple_docs td, th{
-    border:none;
-  }
-  .multiple_docs{
-    /* background-color: white !important; */
-    border:none;
-    padding: 0px;
-  }
-  .multiple_docs tr:hover{
-    background-color: #ddd;
-  }
-  .multiple_docs tr:nth-child(odd){
-    background-color: #f2f2f2;
-  }
-  .applicabledocs{
-    height: 100%;
-    border: none;
-  }
-  .upload tr{
-    background-color: white;
-  }
-  .rednotification{
-    border: 1px solid red;
-    width: 100%;
-    /* font-weight: bold; */
-    text-align: center;
-  }
-  .greennotification{
-    border: 1px solid #66ff33;
-    width: 100%;
-    /* font-weight: bold; */
-    text-align: center;
-  }
-  h3{
-    float: left;
-    width: 100%;
-  }
-  ul{
-    list-style: none;
-  }
-  iframe{
-    -webkit-transform:scale(1);
-    -moz-transform-scale(1);
-  }
+    table{
+        width:100%;
+      }
+    tr:nth-child(odd){
+        background-color: #f2f2f2;
+      }
+    tr:hover{
+      background-color: #ddd;
+    }
+    table, th, td {
+       border: 1px solid black;
+    }
+    th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: #3c90ce;
+      color: white;
+    }
+    .link{
+      float: right;
+    }
+    .head{
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .expiring{
+      background-color: #ffff4d90 !important;
+    }
+    .expired{
+      background-color: #ff4d4d90 !important;
+    }
+    .ok{
+      background-color: #00ff9990;
+    }
+    .incomplete{
+      background-color: #ffff4d90;
+    }
+    p{
+      font-size: 15px;
+    }
+    .multiple_docs td, th{
+      border:none;
+    }
+    .multiple_docs{
+      /* background-color: white !important; */
+      border:none;
+      padding: 0px;
+    }
+    .multiple_docs tr:hover{
+      background-color: #ddd;
+    }
+    .multiple_docs tr:nth-child(odd){
+      background-color: #f2f2f2;
+    }
+    .applicabledocs{
+      height: 100%;
+      border: none;
+    }
+    .upload tr{
+      background-color: white;
+    }
+    .rednotification{
+      border: 1px solid red;
+      width: 100%;
+      /* font-weight: bold; */
+      text-align: center;
+    }
+    .greennotification{
+      border: 1px solid #66ff33;
+      width: 100%;
+      /* font-weight: bold; */
+      text-align: center;
+    }
+    h3{
+      float: left;
+      width: 100%;
+    }
+    ul{
+      list-style: none;
+    }
+    iframe{
+      -webkit-transform:scale(1);
+      -moz-transform-scale(1);
+    }
 
 </style>
-<!-- <p>{{link|safe}}</p> -->
-<!-- <h1>{{rm.product_name}}</h1> -->
+
 {% if messages %}
-
-
   <div>
   <br>
-    <!-- <h3>Notice</h3> -->
   {% for m in messages %}
     {{m|safe}}
   {% endfor %}
   <br>
   </div>
-
-
 {% endif  %}
+
+
 <p>{{message}}</p>
-<!-- display all rm codes for pin number -->
 {% if ingredients %}
   <table>
     <th colspan="2">All RM Codes for {{product}}</th>
@@ -195,15 +186,12 @@
                 Unverified | {{d.0.dv_count}} Verfication(s)
               </td>
               <td>
-                <!-- <a href ="/access/document_control/{{d.rawmaterial.id}}/{{d.rawmaterial.rawmaterialcode}}/{{d.doctype}}" target="_blank">Upload New</a> | -->
-
                 {% if not request.user.username in d.0.get_verifiers %}
                 <a href ="/access/document_control/{{rm.id}}/{{rm.rawmaterialcode}}/{{d.0.doctype}}">Upload New</a> |
                   <a href ="/access/document_verification/{{d.0.id}}">Verify</a>
                 {% else %}
                   Verify
                 {% endif %}
-
               </td>
               <td>
                   <a href ="{{d.0.uploadfile.url}}" target="_blank">View</a>
@@ -227,12 +215,7 @@
               </td>
               <td colspan="4">
                 <a href ="{{missing_doc}}/{{l}}" >Upload</a>
-                <!-- <a href ="/access/document_control/{{d.rawmaterial.id}}/{{d.rawmaterial.rawmaterialcode}}/{{d.doctype}}" target="_blank">Upload New</a> -->
               </td>
-              <!-- <td></td>
-              <td></td>
-              <td></td> -->
-
 
         {% endif %}
       </tr>
@@ -371,7 +354,20 @@
 
         <tr>
           <td>Select File</td>
-          <td ><input type="file" id='id_{{doctype}}' name='{{doctype}}' required/></td>
+          <td >
+            <input type="file" id='id_{{doctype}}' name='{{doctype}}' required/>
+
+            {% if manufacturers %}
+
+              <select name='manufacturer'>
+                {% for m in manufacturers %}
+                  <option value={{m.id}}>
+                    {{m}}
+                  </option>
+                {% endfor %}
+              </select>
+            {% endif %}
+          </td>
           <td rowspan="1"class="multiple_docs">
 
             <table name="multiple_docs" class='applicabledocs'>

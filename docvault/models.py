@@ -10,23 +10,23 @@ class Doc(models.Model):
     A scanned document.
     """
     date = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User ,on_delete=models.CASCADE)
+    user = models.ForeignKey(User)
     mailbox = models.PositiveSmallIntegerField(blank=True, default=0)
-
+    
     class Meta:
         ordering = ['-date',]
 
-    def __str__(self):
+    def __unicode__(self):
         return str(self.date.year)[2:5] + "-" + str(self.user)
 
     def get_admin_url(self):
         return "/admin/docvault/doc/%s" % self.pk
-
+    
 class Page(models.Model):
-    doc = models.ForeignKey('Doc' ,on_delete=models.CASCADE)
+    doc = models.ForeignKey('Doc')
     image = models.ImageField(upload_to='docvault__page')
     hash = models.CharField(max_length=64)
-
+    
     def save(self, *args, **kwargs):
         sha = hashlib.sha256()
         for chunk in iter(lambda: self.image.read(8192),''):

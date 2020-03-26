@@ -27,5 +27,5 @@ class Command(BaseCommand):
         # clean up the directory where all our exception info is logged
         cd = CycleDetection()
         cd.check_all_flavors()
-        for flavor in list(cd.cycled_flavors.keys()):
+        for flavor in cd.cycled_flavors.keys():
             draw_graph(flavor)

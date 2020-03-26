@@ -1,6 +1,6 @@
 import collections
 
-KEY, PREV, NEXT = list(range(3))
+KEY, PREV, NEXT = range(3)
 
 class FormulaCycleException(Exception):
     def __init__(self, value):

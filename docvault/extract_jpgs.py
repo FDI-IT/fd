@@ -19,10 +19,10 @@ if __name__ == "__main__":
             page = document.read_page(i + 1)
             counter = 0
             resources = document._dereference(page.page_dict["Resources"])
-            if "XObject" not in resources:
+            if not resources.has_key("XObject"):
                 continue
 
-            for xobject in list(resources["XObject"].values()):
+            for xobject in resources["XObject"].values():
 
                 xdict, stream = document._dereference(xobject)
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
                         data = document.file[stream.start:stream.end]
                         file_name ="%s-%i-%i.jpg" % (prefix, i + 1, counter)
-                        print("Writing", file_name)
+                        print "Writing", file_name
                         open(file_name, "w").write(data)
 
                     elif xdict["Filter"].name == "FlateDecode":
@@ -47,7 +47,7 @@ if __name__ == "__main__":
                                 "RGB", (xdict["Width"], xdict["Height"]), data
                                 )
                             file_name ="%s-%i-%i.png" % (prefix, i + 1, counter)
-                            print("Writing", file_name)
+                            print "Writing", file_name
                             image.save(file_name)
 
                     else:

@@ -49,7 +49,7 @@ def main():
     try:
         doc_match = re.findall(doc_re, coutput.contents)[::2]
     except:
-        print(coutput.contents)
+        print coutput.contents
         return
     coutput.contents = ""
     dummy=10

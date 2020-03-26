@@ -18,7 +18,7 @@ def map_rmretains_to_purchaseorders(path_to_file):
     
     for pin, ponum, rnum in parsed_data:
         
-        print(pin, ponum, rnum)
+        print pin, ponum, rnum
         
         try:
             purchase_order = PurchaseOrder.objects.get(number=ponum)

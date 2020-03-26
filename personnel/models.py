@@ -8,12 +8,12 @@ class UserProfile(models.Model):
     """
     Extra information about users.
     """
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    user = models.OneToOneField(User)
     initials = models.CharField(max_length=3)
     sort_user_columns = models.CharField(max_length=256,blank=True)
     user_columns = models.CharField(max_length=256,blank=True)
     force_password_change = models.BooleanField(blank=True, default=False)
     lot_paginate_by = models.IntegerField(blank=True,default=25)
-
-    def __str__(self):
-        return self.user.__str__()
+    
+    def __unicode__(self):
+        return self.user.__unicode__()

@@ -84,9 +84,9 @@ class Command(NoArgsCommand):
             model_field_map = model_munger.field_map()
             
             for csv_row in model_munger:
-                print("%s %s -> %s" % (str(model_class), 
+                print "%s %s -> %s" % (str(model_class), 
                                        str(model_munger.line_num()), 
-                                       csv_row))
+                                       csv_row)
                 model_instance = model_class()
                 for mapped_field in model_field_map:
                     
@@ -169,13 +169,13 @@ def generic_exception_handle(self,
     
     model_exception_writer.writerow(csv_row)
     
-    print("Caught %s" % (emsg, ))
+    print "Caught %s" % (emsg, )
     transaction.rollback()
     
 def process_formula_row(model_instance):
     acc_flavor = model_instance.acc_flavor
     acc_ingredient = model_instance.acc_ingredient
-    print("acc_flavor: %s, acc_ingredient: %s" % (acc_flavor, acc_ingredient))
+    print "acc_flavor: %s, acc_ingredient: %s" % (acc_flavor, acc_ingredient)
     model_instance.flavor = models.Flavor.objects.get(number=acc_flavor)
     
     possible_ingredients = models.Ingredient.objects.filter(
@@ -184,7 +184,7 @@ def process_formula_row(model_instance):
                                             discontinued=True)
     
     if possible_ingredients.count() > 1:
-        print(possible_ingredients)
+        print possible_ingredients
         raise 
     
 def process_no_relation(model_instance):
@@ -227,13 +227,13 @@ class RowMunger():
         self.csv_reader = csv.reader(self.csv_file,
                                      delimiter=',',
                                      quotechar='\"')
-        self.header_row = next(self.csv_reader)
+        self.header_row = self.csv_reader.next()
         
     def __iter__(self):
         return self
         
-    def __next__(self):
-        data_row = next(self.csv_reader)
+    def next(self):
+        data_row = self.csv_reader.next()
         
         if len(data_row) == len(self.header_row):
             return data_row
@@ -280,11 +280,11 @@ class RowLenException(Exception):
     Raised when a source row and header row don't have equal length
     """
     def __init__(self, header_row, data_row):
-        print("Header row:")
-        print(header_row)
-        print("Data row:")
-        print(data_row)
-        print(type(self))
-        print(self.args)
-        print(self)
+        print "Header row:"
+        print header_row
+        print "Data row:"
+        print data_row
+        print type(self)
+        print self.args
+        print self
     

@@ -6,7 +6,7 @@ from django.db.models import Q, F
 from django.db import models, connection
 from django.contrib.contenttypes.models import ContentType
 
-from access.models import Flavor, Ingredient, ExperimentalLog, Customer, LeafWeight, PurchaseOrderLineItem, IngredientInventoryLog, PurchaseOrderLineItem, PurchaseOrder
+from access.models import Flavor, Ingredient, ExperimentalLog, Customer, LeafWeight, PurchaseOrderLineItem, IngredientInventoryLog, PurchaseOrderLineItem, Supplier, Manufacturer
 
 UNITS_CHOICES = (
     ('lbs','lbs'),
@@ -87,7 +87,7 @@ class ProductInfoManager(models.Manager):
     def update_or_create(self, flavor, *args, **kwargs):
         flavor_info, created = ProductInfo.objects.get_or_create(flavor=flavor)
         if created:
-            for flavor_info_k, flavor_info_v in kwargs.items():
+            for flavor_info_k, flavor_info_v in kwargs.iteritems():
                 setattr(flavor_info, flavor_info_k, flavor_info_v)
             flavor_info.save()
             return (flavor_info, created)
@@ -98,7 +98,7 @@ class ProductInfo(models.Model):
     """
     Info scrubbed from QC cards about products
     """
-    flavor = models.OneToOneField(Flavor,on_delete=models.CASCADE)
+    flavor = models.OneToOneField(Flavor)
     appearance = models.CharField(max_length=100, blank=True)
     organoleptic_properties = models.CharField(max_length=100, blank=True)
     testing_procedure = models.TextField(blank=True)
@@ -109,14 +109,14 @@ class ProductInfo(models.Model):
     original_card = models.FileField(upload_to='qc_original_cards',blank=True,null=True)
     objects = ProductInfoManager()
 
-    def __str__(self):
-        return self.flavor.__str__()
+    def __unicode__(self):
+        return self.flavor.__unicode__()
 
     def get_admin_url(self):
         return "/admin/newqc/productinfo/%s" % self.pk
 
 class ScannedSymbol(models.Model):
-    scanned_doc = models.ForeignKey('ScannedDoc',on_delete=models.CASCADE)
+    scanned_doc = models.ForeignKey('ScannedDoc')
     symbol_data = models.TextField()
     symbol_type = models.CharField(max_length=100)
     symbol_quality = models.DecimalField(max_digits=3, decimal_places=2)
@@ -131,12 +131,12 @@ class ScannedSymbol(models.Model):
 
     def parse_zbar_symbol(self, zbar_symbol):
         self.symbol_data = zbar_symbol.data
-        self.symbol_type = str(zbar_symbol.type) # zbar.EnumItem type
+        self.symbol_type = unicode(zbar_symbol.type) # zbar.EnumItem type
         self.symbol_quality = zbar_symbol.quality
-        self.symbol_location = str(zbar_symbol.location) # 4x 2-tuples, represent coords of symbol
+        self.symbol_location = unicode(zbar_symbol.location) # 4x 2-tuples, represent coords of symbol
         self.symbol_count = zbar_symbol.count
 
-    def __str__(self):
+    def __unicode__(self):
         return """DATA: %s | TYPE: %s | QUALITY: %s | LOCATION: %s | COUNT %s""" % (
                 self.symbol_data,
                 self.symbol_type,
@@ -209,7 +209,7 @@ class ScannedDoc(models.Model):
 class TestCard(ScannedDoc):
     related_object_name = 'retain'
 
-    retain = models.ForeignKey('Retain', related_name='testcards', null=True,on_delete=models.CASCADE)
+    retain = models.ForeignKey('Retain', related_name='testcards', null=True)
     status = models.CharField(max_length=25,choices=STATUS_CHOICES,default='Pending QC')
 
     qc_time = models.DateTimeField(null=True, blank=True)
@@ -218,7 +218,7 @@ class TestCard(ScannedDoc):
     def related_object(self):
         return self.retain
 
-    def __str__(self):
+    def __unicode__(self):
         return "%s" % (self.retain)
 
     @staticmethod
@@ -239,14 +239,14 @@ class TestCard(ScannedDoc):
 class RMTestCard(ScannedDoc):
     related_object_name = 'retain'
 
-    retain = models.ForeignKey('RMRetain', null=True,on_delete=models.CASCADE)
+    retain = models.ForeignKey('RMRetain', null=True)
     status = models.CharField(max_length=25,choices=RM_STATUS_CHOICES,default='Pending QC')
 
     @property
     def related_object(self):
         return self.retain
 
-    def __str__(self):
+    def __unicode__(self):
         return "%s" % (self.retain)
 
     @staticmethod
@@ -266,7 +266,7 @@ class RMTestCard(ScannedDoc):
 class BatchSheet(ScannedDoc):
     related_object_name = 'lot'
 
-    lot = models.ForeignKey('Lot', null=True,on_delete=models.CASCADE)
+    lot = models.ForeignKey('Lot', null=True)
     status = models.CharField(max_length=25, default='')
 
     @property
@@ -276,7 +276,7 @@ class BatchSheet(ScannedDoc):
     class Meta:
         ordering = ['-id']
 
-    def __str__(self):
+    def __unicode__(self):
         if self.lot is None:
             return "Invalid"
         return "%s" % (self.lot.number)
@@ -325,7 +325,7 @@ class Lot(models.Model):
     sub_lot = models.PositiveSmallIntegerField(blank=True,null=True)
     status = models.CharField(max_length=25, choices=STATUS_CHOICES, default="Created")
     amount = models.DecimalField(max_digits=6, decimal_places=1, blank=True, null=True)
-    flavor = models.ForeignKey(Flavor,on_delete=models.CASCADE)
+    flavor = models.ForeignKey(Flavor)
     inventory_updated = models.BooleanField(default=False)
 
     @staticmethod
@@ -364,8 +364,8 @@ class Lot(models.Model):
 
         return string_kwargs
 
-    def __str__(self):
-        return str(self.number)
+    def __unicode__(self):
+        return unicode(self.number)
 
     @staticmethod
     def fix_header(header):
@@ -451,22 +451,22 @@ class LotWeightAdjustment(Lot):
 
 
 class LotSOLIStamp(models.Model):
-    lot = models.ForeignKey('Lot',on_delete=models.CASCADE)
+    lot = models.ForeignKey('Lot')
     salesordernumber = models.PositiveIntegerField()
     quantity = models.DecimalField(max_digits=9,decimal_places=2)
 
 
 class COA(models.Model):
-    lss = models.ForeignKey('LotSOLIStamp',on_delete=models.CASCADE)
+    lss = models.ForeignKey('LotSOLIStamp')
 
 class TestResult(models.Model):
-    lot = models.ForeignKey('Lot',on_delete=models.CASCADE)
+    lot = models.ForeignKey('Lot')
     #spec = models.ForeignKey('access.FlavorSpecification')
     name = models.CharField(max_length=48)
     specification = models.CharField(max_length=48)
     result = models.CharField(max_length=48, blank=True, null=True)
     replaces = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
-    customer = models.ForeignKey(Customer, blank=True, null=True,on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, blank=True, null=True)
 
 class Retain(models.Model):
     """
@@ -476,19 +476,19 @@ class Retain(models.Model):
 #     date = models.DateField("Date on which product was QCed")
     #since we have qc time on testcard objects, we should just have a create timestamp on retain
     date = models.DateTimeField(auto_now_add=True, blank=True)
-    lot = models.ForeignKey(Lot, related_name='retains',on_delete=models.CASCADE)
+    lot = models.ForeignKey(Lot, related_name='retains')
     status = models.CharField(max_length=25,
                               choices=STATUS_CHOICES)
 #     concatenate_notes = models.BooleanField(default=True) #new field, determine whether or not to just concatenate testcard notes
     notes = models.CharField(max_length=500,
                              blank=True,
                              default='')
-    ir = models.ForeignKey('ImportRetain', blank=True, null=True, default=None, editable=False,on_delete=models.CASCADE)
+    ir = models.ForeignKey('ImportRetain', blank=True, null=True, default=None, editable=False)
     browse_url = '/qc/retains/'
     class Meta:
         ordering = ['-date', '-retain']
 
-    def __str__(self):
+    def __unicode__(self):
         return str(self.date.year)[2:5] + "-" + str(self.retain).zfill(4)
 
     def testcards_present(self):
@@ -554,16 +554,16 @@ class RMImportRetain(models.Model):
     status = models.CharField(max_length=20,blank=True,null=True)
     notes = models.CharField(max_length=200,blank=True,null=True)
 
-    def __str__(self):
-        return " - ".join((
-                    str(self.date),
-                    str(self.pin),
-                    str(self.supplier),
-                    str(self.name),
-                    str(self.lot),
-                    str(self.r_number),
-                    str(self.status),
-                    str(self.notes)
+    def __unicode__(self):
+        return u" - ".join((
+                    unicode(self.date),
+                    unicode(self.pin),
+                    unicode(self.supplier),
+                    unicode(self.name),
+                    unicode(self.lot),
+                    unicode(self.r_number),
+                    unicode(self.status),
+                    unicode(self.notes)
                 ))
 
 class RMInfo(models.Model):
@@ -577,8 +577,8 @@ class RMInfo(models.Model):
     original_card = models.FileField(upload_to='rm_original_cards',blank=True,null=True)
     #objects = ProductInfoManager()
 
-    def __str__(self):
-        return str(self.pin)
+    def __unicode__(self):
+        return unicode(self.pin)
 
     def get_admin_url(self):
         return "/admin/newqc/rm_info/%s" % self.pk
@@ -596,8 +596,8 @@ class RMRetain(models.Model):
     status = models.CharField(max_length=25,
                               choices=RM_STATUS_CHOICES)
     notes = notes = models.CharField(max_length=200,blank=True,default="")
-    ir = models.ForeignKey('RMImportRetain', blank=True, null=True, default=None, editable=False,on_delete=models.CASCADE)
-    coa_document = models.ForeignKey('access.Documents', blank =True, null=True,on_delete=models.CASCADE)
+    ir = models.ForeignKey('RMImportRetain', blank=True, null=True, default=None, editable=False)
+    coa_document = models.ForeignKey('access.Documents', blank =True, null=True)
     salmonella_negative_check = models.NullBooleanField(default=False)
 
 
@@ -632,8 +632,8 @@ class RMRetain(models.Model):
     class Meta:
         ordering = ['-date', '-r_number']
 
-    def __str__(self):
-        return "PIN: " + str(self.pin) + " " + str(self.date.year)[2:5] + "-R" + str(self.r_number).zfill(3)
+    def __unicode__(self):
+        return u"PIN: " + str(self.pin) + " " + str(self.date.year)[2:5] + "-R" + str(self.r_number).zfill(3)
 
     def short_repr(self):
         return str(self.date.year)[2:5] + "-R" + str(self.r_number).zfill(3)
@@ -673,8 +673,8 @@ class ReceivingLogManager(models.Manager):
 #         return 1
 
 class ReceivingLog(models.Model):
-    poli = models.ForeignKey(PurchaseOrderLineItem,on_delete=models.CASCADE)
-    rm_retain = models.ForeignKey('RMRetain',on_delete=models.CASCADE)
+    poli = models.ForeignKey(PurchaseOrderLineItem)
+    rm_retain = models.ForeignKey('RMRetain')
     date_received = models.DateTimeField()
     amount_received = models.DecimalField(max_digits=12, decimal_places=4)
     supplier = models.CharField(max_length=40)
@@ -683,27 +683,58 @@ class ReceivingLog(models.Model):
     manufacturer = models.CharField(max_length=40)
     cp3_received = models.BooleanField(blank=True, default=None)
 
-    def save(self, *a, **kw): #this checks for foreign keys and saves their ids before attempting to save
-        for field in self._meta.fields:
-            if isinstance(field, models.ForeignKey): #this line is important, change it to whatever the field type is
-                id_attname = field.attname
-                instance_attname = id_attname.rpartition("_id")[0]
-                instance = getattr(self, instance_attname)
-                instance_id = instance.pk
-                setattr(self, id_attname, instance_id)
+    supplier_fk = models.ForeignKey(Supplier, null=True)
+    manufacturer_fk = models.ForeignKey(Manufacturer, null=True)
 
-        '''
-        If the receiving log was just created, it will NOT have a pk yet.
-        In that case, save it (by invoking super()) and then create an inventory log pointing to self.
-        Otherwise, just find the inventory log that points to it and overwrite its data.
-        '''
-        if not self.pk:
-            super(ReceivingLog, self).save(*a, **kw)
-            self.update_rm_inventory(new_inventory_log=True)
+    def __unicode__(self):
+        return '%s - %s' % (self.poli, self.amount_received)
 
-        else:
-            super(ReceivingLog, self).save(*a, **kw)
-            self.update_rm_inventory(new_inventory_log=False)
+    #TEMP_FUNCTION
+    def set_supplier_fk(self):
+        if self.supplier_fk == None:
+            try:
+                self.supplier_fk = Supplier.objects.get(name=self.supplier)
+                print self.supplier_fk
+                self.save()
+            except:
+                print 'Could not find supplier with suppliername %s' % self.supplier
+
+    #TEMP_FUNCTION
+    def get_potential_manufacturers(self):
+        # based on supplier,
+        pass
+
+    #TEMP FUNCTION
+    def set_manufacturer_fk(self):
+        if self.manufacturer_fk == None:
+            try:
+                self.manufacturer_fk = Manufacturer.objects.get(name=self.manufacturer)
+            except:
+                print 'Could not find manufacturer with name %s' % self.manufacturer
+
+
+    # Not sure what this was for
+    # def save(self, *a, **kw): #this checks for foreign keys and saves their ids before attempting to save
+    #     for field in self._meta.fields:
+    #         if isinstance(field, models.ForeignKey): #this line is important, change it to whatever the field type is
+    #             id_attname = field.attname
+    #             instance_attname = id_attname.rpartition("_id")[0]
+    #             instance = getattr(self, instance_attname)
+    #             instance_id = instance.pk
+    #             setattr(self, id_attname, instance_id)
+    #
+    #     '''
+    #     If the receiving log was just created, it will NOT have a pk yet.
+    #     In that case, save it (by invoking super()) and then create an inventory log pointing to self.
+    #     Otherwise, just find the inventory log that points to it and overwrite its data.
+    #     '''
+    #     if not self.pk:
+    #         super(ReceivingLog, self).save(*a, **kw)
+    #         self.update_rm_inventory(new_inventory_log=True)
+    #
+    #     else:
+    #         super(ReceivingLog, self).save(*a, **kw)
+    #         self.update_rm_inventory(new_inventory_log=False)
 
 
     def update_rm_inventory(self, new_inventory_log):
@@ -795,13 +826,13 @@ class ExperimentalRetain(models.Model):
     """
     retain = models.PositiveSmallIntegerField(default=next_experimental_retain_number)
     date = models.DateField()
-    experimental_log = models.ForeignKey(ExperimentalLog,on_delete=models.CASCADE)
+    experimental_log = models.ForeignKey(ExperimentalLog)
     comments = models.TextField()
 
     class Meta:
         ordering = ['-date', '-retain']
 
-    def __str__(self):
+    def __unicode__(self):
         return str(self.date.year)[2:5] + "-" + str(self.retain).zfill(4)
 
     def get_admin_url(self):
@@ -809,6 +840,6 @@ class ExperimentalRetain(models.Model):
 
 
 class RecoveredImage(models.Model):
-    scanned_doc = models.ForeignKey('ScannedDoc', null=True,on_delete=models.CASCADE)
+    scanned_doc = models.ForeignKey('ScannedDoc', null=True)
     recovery_path = models.CharField(max_length=255)
     image_hash = models.CharField(max_length=255)

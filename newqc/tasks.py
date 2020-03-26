@@ -44,4 +44,4 @@ def file_walker(walk_paths):
 
 
 def logger_test():
-    print(logger)
+    print logger

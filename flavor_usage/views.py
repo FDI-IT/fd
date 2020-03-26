@@ -30,7 +30,7 @@ def new_usage(request, flavor):
 
 def test(request):
     import os
-    x = list(os.environ.keys())
+    x = os.environ.keys()
     import getpass
     u = getpass.getuser()
-    print(x)
+    print x

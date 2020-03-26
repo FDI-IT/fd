@@ -1,10 +1,5 @@
 from django.conf.urls import url, include
-from django.urls import path
 from access import views
-from rest_framework import routers
-
-router = routers.DefaultRouter()
-router.register('flavorAPI', views.FlavorView)
 
 urlpatterns = (
     # Example:
@@ -13,8 +8,7 @@ urlpatterns = (
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
     # to INSTALLED_APPS to enable admin documentation:
     #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    path('fdAPI/', include(router.urls)),
-    path('testapi/', views.test_api_view),
+
     # Uncomment the next line to enable the admin:
     url(r'^(?P<flavor_number>\d+)/$', views.ft_review, name='flavor_review'),
     url(r'(?P<flavor_number>\d+)/spec_sheet/$', views.spec_sheet),
@@ -114,25 +108,25 @@ urlpatterns = (
     url(r'^mass_upload/$', views.mass_upload),
     url(r'^flavor_copier/$', views.flavor_copier),
     url(r'^training/$', views.training),
-    url(r'^gbpp/$', views.glass_and_brittle),
-    url(r'^osha/$', views.osha_lockout),
-    url(r'^wiki/$', views.wiki_review),
+    # url(r'^gbpp/$', views.glass_and_brittle),
+    # url(r'^osha/$', views.osha_lockout),
+    # url(r'^wiki/$', views.wiki_review),
     url(r'^admin_certification/$', views.admin_certification),
     url(r'^admin_individual_training/$', views.admin_individual_training),
-    url(r'^colorblind/$', views.color_blind),
-    url(r'^fooddefense/$', views.food_defense),
-    url(r'^ccp/$', views.ccp_allergen),
-    url(r'^handbook/$', views.employee_handbook),
-    url(r'^food_safety/$', views.food_safety, {'section':''}),
-    url(r'^food_safety/(?P<section>\w+)/$', views.food_safety),
-    url(r'^fltv/$', views.fork_lift_video),
-    url(r'^wpsafety/$', views.workplace_safety),
-    url(r'^hazcom/$', views.hazcom),
+    # url(r'^colorblind/$', views.color_blind),
+    # url(r'^fooddefense/$', views.food_defense),
+    # url(r'^ccp/$', views.ccp_allergen),
+    # url(r'^handbook/$', views.employee_handbook),
+    # url(r'^food_safety/$', views.food_safety, {'section':''}),
+    # url(r'^food_safety/(?P<section>\w+)/$', views.food_safety),
+    # url(r'^fltv/$', views.fork_lift_video),
+    # url(r'^wpsafety/$', views.workplace_safety),
+    # url(r'^hazcom/$', views.hazcom),
     url(r'^training_overview/$', views.training_overview, {'username':None}),
     url(r'^training_overview/(?P<username>\w+)/$', views.training_overview),
     url(r'^json_test_response/(?P<flavor_number>\d+)/$', views.json_test_response),
     url(r'^docreview_comparison/(?P<document_id>\d+)/$', views.docreview_comparison),
-
+    url(r'^training_test/(?P<test_type>\w+)/$', views.training_test),
     # url(r'^document_verification/(?P<doc_id>\d+)/$', views.document_verification),
 
 

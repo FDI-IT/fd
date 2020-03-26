@@ -1,4 +1,4 @@
-import io
+import StringIO
 import re
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -41,7 +41,7 @@ def experimental_labels(request):
         if experimental.flavor == None or experimental.flavor.formula_set.all().count() == 0:
             return redirect('%s?status_message=Unable to print label because a formula must be entered.' % experimental.get_absolute_url())
         if 'inventory_slot' in request.GET and request.GET['inventory_slot'] != "":
-            if experimental.location_code == "" or experimental.location_code == "" or experimental.location_code is None:
+            if experimental.location_code == u"" or experimental.location_code == "" or experimental.location_code is None:
                 loc_code = LocationCode.get_next_location_code(request.GET['inventory_slot'])
                 lc = LocationCode(
                             location_code = loc_code,
@@ -72,7 +72,7 @@ def finished_product_labels(request):
         flavor = Flavor.objects.get(number=request.GET['production_number'])
         
         if 'inventory_slot' in request.GET and request.GET['inventory_slot'] != "":
-            if flavor.location_code == "" or flavor.location_code == "" or flavor.location_code is None:
+            if flavor.location_code == u"" or flavor.location_code == "" or flavor.location_code is None:
                 loc_code = LocationCode.get_next_location_code(request.GET['inventory_slot'])
                 lc = LocationCode(
                             location_code=loc_code,

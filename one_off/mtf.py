@@ -119,7 +119,7 @@ def search_mtfs_for_specs(mtf_list, spec_search_list): #make first argument list
     #                         if (sheet, point, range) not in possible_spec_values:
     #                             possible_spec_values.append((sheet, point, range))
                     except TypeError:
-                        print("TYPE ERROR IDK WHAT TO DO HERE")
+                        print "TYPE ERROR IDK WHAT TO DO HERE"
                  
          
     return spec_value_dict

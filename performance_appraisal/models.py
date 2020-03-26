@@ -4,8 +4,8 @@ from django.db import models
 
 class Department(models.Model):
     name = models.CharField(max_length=40)
-
-    def __str__(self):
+    
+    def __unicode__(self):
         return self.name
 
 class PerformanceAppraisal(models.Model):
@@ -17,21 +17,21 @@ class PerformanceAppraisal(models.Model):
         (5, 'Very Good'),
         (6, 'Excellent'),
     )
-
+    
     REASON_CHOICES = (
         ('Annual', 'Annual'),
         ('Promotion', 'Promotion'),
         ('Unsatisfactory performance', 'Unsatisfactory performance'),
-        ('Other', 'Other'),
+        ('Other', 'Other'),                 
     )
-
+    
     employee_name = models.CharField(max_length=40)
-    department = models.ForeignKey('Department',on_delete=models.CASCADE)
+    department = models.ForeignKey('Department')
     title = models.CharField(max_length=40)
     reason_for_review = models.CharField(max_length=40, choices=REASON_CHOICES)
     period_start = models.DateField()
     period_end = models.DateField()
-
+    
     quality_rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES)
     quality_comments = models.TextField(help_text="Accuracy, thoroughness, neatness. Observes prescribed breaks and good overall attendance.", blank=True)
     productivity_rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES)
@@ -52,9 +52,9 @@ class PerformanceAppraisal(models.Model):
     interpersonal_relationships_comments = models.TextField(help_text="Ability to cooperate, work and communicate with coworkers, supervisors, and subordinates, as well as outside contractors, etc.", blank=True)
     judgement_rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES)
     judgement_comments = models.TextField(help_text="Proper judgement and decision making skills.", blank=True)
-
+    
     additional_comments = models.TextField(blank=True)
-
+    
     def get_score(self):
         return (self.quality_rating +
                  self.productivity_rating +
@@ -67,7 +67,7 @@ class PerformanceAppraisal(models.Model):
                  self.interpersonal_relationships_rating +
                  self.judgement_rating
                  )
-
+        
     def get_grade(self, score=None):
         if not score:
             score = self.get_score()
@@ -84,8 +84,8 @@ class PerformanceAppraisal(models.Model):
         else:
             grade = "Excellent"
         return grade
-
-    def __str__(self):
+    
+    def __unicode__(self):
         score = self.get_score()
         grade = self.get_grade(score)
         return "%s - %s to %s - Score: %s - %s" % (self.employee_name, self.period_start, self.period_end, score, grade)

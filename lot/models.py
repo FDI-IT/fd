@@ -10,11 +10,11 @@ def get_next_lot_number():
     base_lot_number = base_lot_prefix*1000
     lot_number_ceil = base_lot_number+999
     #base_overflow_number = base_lot_number*10
-
+    
     current_lots = Lot.objects.filter(number__gte=base_lot_number).filter(number__lte=lot_number_ceil).order_by('-number')
     if current_lots.count() == 0:
         return base_lot_number
-
+    
     next_number = current_lots[0].number + 1
     if next_number > lot_number_ceil:
         overflow_number = base_lot_number*10
@@ -28,14 +28,14 @@ class Lot(models.Model):
     number = models.PositiveIntegerField(default=get_next_lot_number)
     sub_lot = models.PositiveSmallIntegerField(blank=True,default="")
     status = models.CharField(max_length=25, default="Pending")
-    amount = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
-    flavor = models.ForeignKey(Flavor, related_name="plot",on_delete=models.CASCADE)
-
-    def __str__(self):
-        return str(self.number)
+    amount = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True) 
+    flavor = models.ForeignKey(Flavor, related_name="plot")
+    
+    def __unicode__(self):
+        return unicode(self.number)
 
     class Meta:
         ordering = ['number']
-
+        
     def get_admin_url(self):
         return "/admin/lot/lot/%s" % self.pk

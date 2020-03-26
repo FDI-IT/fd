@@ -8,9 +8,9 @@ class Invoice(models.Model):
     number = models.PositiveIntegerField(unique=True)
     create_date = models.DateField(auto_now_add=True)
     qb_date = models.DateField()
-    customer = models.ForeignKey('access.Customer',blank=True,null=True,on_delete=models.CASCADE)
+    customer = models.ForeignKey('access.Customer',blank=True,null=True)
     open = models.BooleanField(default=True)
-
+    
     headers = (
                     ('number','Number', 'width="80px"'),
                     ('qb_date','Date', 'width="120px"'),
@@ -19,22 +19,22 @@ class Invoice(models.Model):
                 )
     class Meta:
         ordering = ["-number"]
-
+    
     def get_url(self):
         return "/invoice/%s/" % self.id
-
-    def __str__(self):
-        return "%s - %s %s" % (self.number,
-                               self.create_date,
+        
+    def __unicode__(self):
+        return u"%s - %s %s" % (self.number, 
+                               self.create_date, 
                                self.customer)
-
-    @staticmethod
+       
+    @staticmethod 
     def text_search(search_string):
         return Invoice.objects.filter(
             Q(customer__companyname__icontains=search_string) |
             Q(number=search_string)
         )
-
+        
     @staticmethod
     def build_kwargs(qdict, default, get_filter_kwargs):
         string_kwargs = {}
@@ -47,21 +47,21 @@ class Invoice(models.Model):
                         arg_list.append(False)
                     elif my_arg == 'True':
                         arg_list.append(True)
-                string_kwargs[keyword] = arg_list
-        return string_kwargs
-
+                string_kwargs[keyword] = arg_list   
+        return string_kwargs 
+    
 class LineItem(models.Model):
     """
     A line item of a sales order.
     """
-    invoice = models.ForeignKey('Invoice',on_delete=models.CASCADE)
-    flavor = models.ForeignKey('access.Flavor', related_name="invoice_lineitem",on_delete=models.CASCADE)
+    invoice = models.ForeignKey('Invoice')
+    flavor = models.ForeignKey('access.Flavor', related_name="invoice_lineitem")
     quantity = models.DecimalField(max_digits=9, decimal_places=2) # 12,345.12
-    rawmaterialcost = models.DecimalField(max_digits=9, decimal_places=3) # $1,234.123 called Sales Price
+    rawmaterialcost = models.DecimalField(max_digits=9, decimal_places=3) # $1,234.123 called Sales Price 
     quantity_cost = models.DecimalField(max_digits=9, decimal_places=3) # $1,234.123 called Amount
-
-    def __str__(self):
-        return "%s - %s %s lbs $%s" % (self.invoice,
-                                         self.flavor,
+    
+    def __unicode__(self):
+        return u"%s - %s %s lbs $%s" % (self.invoice,
+                                         self.flavor, 
                                          self.quantity,
                                          self.rawmaterialcost)

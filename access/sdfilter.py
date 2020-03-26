@@ -17,5 +17,5 @@ for formula in Formula.objects.filter(ingredient__in=arabic_ingredients):
         fname_lower = flavor.name.lower()
         ftype_lower = flavor.type.lower()
         if "emulsion" not in fname_lower and "emulsion" not in ftype_lower:
-            print('"%s","%s"' % (flavor.number, flavor.name))
+            print '"%s","%s"' % (flavor.number, flavor.name)
 

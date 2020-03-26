@@ -11,7 +11,7 @@ def main():
     write_sheet = write_wb.get_sheet(0)
     for r in range(4, read_sheet.nrows):
         flavornum = int(read_sheet.cell(r,0).value)
-        print(flavornum)
+        print flavornum
         try:
             f = Flavor.objects.get(number=flavornum)
         except Flavor.DoesNotExist:

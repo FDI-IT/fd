@@ -45,11 +45,11 @@ class FlavorAdmin(VersionAdmin):
 admin.site.register(models.Flavor, FlavorAdmin)
 
 class PurchaseOrderAdmin(VersionAdmin):
-    search_fields = ['supplier__suppliername', 'supplier__suppliercode', 'number', 'purchaseorderlineitem__raw_material__product_name', 'purchaseorderlineitem__raw_material__rawmaterialcode', 'purchaseorderlineitem__raw_material__id']
+    search_fields = ['supplier__name', 'supplier__suppliercode', 'number', 'purchaseorderlineitem__raw_material__product_name', 'purchaseorderlineitem__raw_material__rawmaterialcode', 'purchaseorderlineitem__raw_material__id']
 admin.site.register(models.PurchaseOrder, PurchaseOrderAdmin)
 
 class PurchaseOrderLineItemAdmin(VersionAdmin):
-    search_fields = ['po__number', 'po__supplier__suppliername', 'raw_material__id', 'raw_material__rawmaterialcode', 'raw_material__id', 'raw_material__product_name']
+    search_fields = ['po__number', 'po__supplier__name', 'raw_material__id', 'raw_material__rawmaterialcode', 'raw_material__id', 'raw_material__product_name']
     ordering = ['po__number']
 admin.site.register(models.PurchaseOrderLineItem, PurchaseOrderLineItemAdmin)
 

@@ -210,7 +210,7 @@ lot_list_attn =  {
 def build_filter_kwargs(qdict, default):
     string_kwargs = {}
     
-    for key in list(qdict.keys()):
+    for key in qdict.keys():
         if key == 'page':
             pass
         elif key == 'search_string':
@@ -931,7 +931,7 @@ def edit_test_results(request, lot_pk):
             for form in formset.forms:
 
                 if 'DELETE' in form.cleaned_data:
-                    if form.cleaned_data['DELETE']==True:
+                    if form.cleaned_data[u'DELETE']==True:
                         try: 
                             testresult = TestResult.objects.get(pk=form.cleaned_data['pk'])
                             testresult.result = ''
@@ -968,7 +968,7 @@ def edit_test_results(request, lot_pk):
                     'lot': lot,
                     'window_title': page_title,
                     'page_title': page_title,
-                    'result_rows': list(zip(formset.forms,)),
+                    'result_rows': zip(formset.forms,),
                     'management_form': formset.management_form,
                 },
             )
@@ -1001,7 +1001,7 @@ def edit_test_results(request, lot_pk):
 #     for result in lot.testresult_set.all():
 #         result_list.append(result)
             
-    result_rows = list(zip(formset.forms))
+    result_rows = zip(formset.forms)
     return render(
         request,
         'newqc/testresult_list.html',
@@ -1031,7 +1031,7 @@ def old_lot_detail(request, lot_pk):
         if changed:
             product_info.save()
             
-        keys = list(post_data.keys())
+        keys = post_data.keys()
         keys.remove('product_info_form')
         for k in keys:
             testcard_info_data = post_data[k]
@@ -1278,7 +1278,7 @@ def passed_finder(request):
 
 def last_chance_retains(request):
     lcr_dict = get_lcrs()
-    lcr_list = list(lcr_dict.values())
+    lcr_list = lcr_dict.values()
     lcr_list = sorted(lcr_list, key=lambda retain: retain.date)
     return render(
         request,
@@ -1290,7 +1290,7 @@ def last_chance_retains(request):
     
 def last_chance_rms(request):
     lcr_dict = get_rm_lcrs()
-    lcr_list = list(lcr_dict.values())
+    lcr_list = lcr_dict.values()
     lcr_list = sorted(lcr_list, key=lambda retain: retain.date)
     return render(
         request,

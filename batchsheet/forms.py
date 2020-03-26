@@ -20,7 +20,7 @@ class BatchSheetForm(forms.Form):
 
 def validate_flavor_number(num):
     if Flavor.objects.filter(number = num).exists() == False:
-        raise ValidationError("Please input a valid flavor number.")
+        raise ValidationError(u"Please input a valid flavor number.")
 
 def validate_lot_number(num):
 #     if Lot.objects.filter(number = num).exists() == False:
@@ -114,7 +114,7 @@ def build_confirmation_rows(formset):
                 update_lot = Lot.objects.get(number = cd['lot_number'])
                 #update_lot = Ingredient.get_formula_ingredient(form.cleaned_data['ingredient_number'])
             except KeyError:
-                print("KEYERROR BUILDIN OLD INFO ROWS")
+                print "KEYERROR BUILDIN OLD INFO ROWS"
             
             info_row['lot_number'] = cd['lot_number']
             info_row['flavor_number'] = cd['flavor_number']
@@ -135,7 +135,7 @@ def build_confirmation_rows(formset):
             confirmation_rows.append(info_row)
                 
         else:
-            print("THERE ARE ERRORS IN THE FORM, BUILD_OLD_INFO_ROWS")
+            print "THERE ARE ERRORS IN THE FORM, BUILD_OLD_INFO_ROWS"
         
 
     return confirmation_rows

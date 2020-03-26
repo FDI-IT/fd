@@ -87,16 +87,16 @@ class Command(BaseCommand):
         
         
         name_indexed_model_dict = {}
-        print(model_list)
+        print model_list
         for model in model_list:
             name_indexed_model_dict[model.__name__] = model
-        print(name_indexed_model_dict) 
+        print name_indexed_model_dict 
         for model in model_list:
-            print("Deleting %s records..." % model)
+            print "Deleting %s records..." % model
             model.objects.all().delete()
         
         for model in model_list:
-            print("Importing %s records..." % model)
+            print "Importing %s records..." % model
             self.import_model_data(model)
             """
             Models need a "access_table_name" field to indicate which table
@@ -117,8 +117,8 @@ class Command(BaseCommand):
         
         if(self.test_model_dict['Ingredient'] in model_list):
             anonymizer.anonymize_ingredients()
-            import queue
-            q = queue.Queue()
+            import Queue
+            q = Queue.Queue()
             supplier_codes = ("abt", 'cna','kerry','vigon','FDI')
             for word in supplier_codes:
                 q.put(word)               
@@ -130,7 +130,7 @@ class Command(BaseCommand):
     
     @transaction.atomic
     def import_model_data(self, model):
-        print(str(model))
+        print str(model)
         
         # find certain model classes that need real relationships added
         if str(model) == str(models.Formula):
@@ -160,7 +160,7 @@ class Command(BaseCommand):
             try:
                 #for each field in the row, set the model attribute
                 for (csv_index, model_field) in model_field_map:
-                    csv_field = str.strip(csv_row[csv_index])             
+                    csv_field = unicode.strip(csv_row[csv_index])             
                     parsed_csv_field = \
                         parse_csv_field(model_field.db_type(), csv_field)
                     setattr(model_instance,
@@ -171,9 +171,9 @@ class Command(BaseCommand):
                 model_instance.save()
             except IntegrityError as e:
                 transaction.savepoint_rollback(sid)
-                print("%s %s -> %s" % (str(model), 
+                print "%s %s -> %s" % (str(model), 
                                    str(model_munger.line_num()), 
-                                   csv_row))
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row, 
                                      model_exception_writer, 
@@ -183,9 +183,9 @@ class Command(BaseCommand):
                 raise e
             except Exception as e:
                 transaction.savepoint_rollback(sid)
-                print("%s %s -> %s" % (str(model), 
+                print "%s %s -> %s" % (str(model), 
                                    str(model_munger.line_num()), 
-                                   csv_row))
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row, 
                                      model_exception_writer, 

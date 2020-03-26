@@ -28,11 +28,11 @@ class Command(BaseCommand):
         for solution in Solution.objects.all():
             matches = sf.get_related_ingredients(solution.ingredient)
             sorted_matches = []
-            for key in sorted(iter(matches.keys()), reverse=True):
+            for key in sorted(matches.iterkeys(), reverse=True):
                 for m in matches[key]:
                     my_append_dict = {}
                     my_append_dict['id'] = my_append_dict['value'] = m.rawmaterialcode
-                    my_append_dict['label'] = m.__str__()
+                    my_append_dict['label'] = m.__unicode__()
                     sorted_matches.append(my_append_dict)
                     if (len(sorted_matches) > 9):
                         break

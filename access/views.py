@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import date, datetime
@@ -12,7 +12,7 @@ import ast
 import os
 import sys
 
-from decimal import ROUND_HALF_UP
+from decimal import Decimal, ROUND_HALF_UP
 
 from django import template
 from django.shortcuts import render, get_object_or_404, redirect
@@ -30,7 +30,7 @@ from django.contrib.auth.models import Group, User
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import Count, Sum, Avg
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 from django.core.files.uploadedfile import UploadedFile
 from django.core.files import File
 from django import forms
@@ -67,9 +67,6 @@ from newqc.models import RMRetain, ReceivingLog, Lot, Retain
 from newqc.forms import ReceivingLogStaticForm, ReceivingLogDynamicForm, RMInventoryForm
 
 from salesorders.models import SalesOrderNumber, LineItem
-from rest_framework import viewsets
-from access.serializers import *
-
 
 ones = Decimal('1')
 tenths = Decimal('0.0')
@@ -98,7 +95,7 @@ class BatchSheetException(Exception):
 
 def get_filter_kwargs(qdict):
     filter_kwargs = []
-    for key in list(qdict.keys()):
+    for key in qdict.keys():
         if key == 'page':
             pass
         elif key == 'search_string':
@@ -261,7 +258,7 @@ def experimental_review(request, experimental):
 
                         'status_message':status_message,
                         'digitized_table':digitized_table,
-                        'window_title': experimental.__str__(),
+                        'window_title': experimental.__unicode__(),
                         'experimental': experimental,
                         # 'labuser':labuser,
                         'field_details': field_details,
@@ -296,7 +293,7 @@ def digitized_review(request, experimental):
 
     context_dict = {
                     'digitized_table':digitized_table,
-                    'window_title': experimental.__str__(),
+                    'window_title': experimental.__unicode__(),
                     'experimental': experimental,
                     'page_title': page_title,
                     'green_book_link':green_book_link,
@@ -321,7 +318,7 @@ def flavor_review(request, flavor):
 
     context_dict = {
                     # 'labuser':labuser,
-                    'window_title': flavor.__str__(),
+                    'window_title': flavor.__unicode__(),
                     'flavor': flavor,
                     'help_link': help_link,
                     'page_title': page_title,
@@ -336,7 +333,7 @@ def tsr_review(request, tsr_number):
     page_title = "TSR Review"
     help_link = "/wiki/index.php/Purchase_Order_Review"
     context_dict = {
-                    'window_title': tsr.__str__(),
+                    'window_title': tsr.__unicode__(),
                    'tsr': tsr,
                    'help_link': help_link,
                    'page_title': page_title,
@@ -350,7 +347,7 @@ def po_review(request, po):
     page_title = "Purchase Order Review"
     help_link = "/wiki/index.php/Purchase_Order_Review"
     context_dict = {
-                    'window_title': po.__str__(),
+                    'window_title': po.__unicode__(),
                    'po': po,
                    'help_link': help_link,
                    'page_title': page_title,
@@ -508,7 +505,7 @@ def ft_review(request, flavor):
     context_dict = {
                     # 'labuser':labuser,
                     'status_message':status_message,
-                    'window_title': flavor.__str__(),
+                    'window_title': flavor.__unicode__(),
                     'flavor': flavor,
                     'page_title': page_title,
                     'weight_factor': weight_factor,
@@ -526,7 +523,7 @@ def ft_review(request, flavor):
 def recalculate_flavor_view(request,flavor):
     results = recalculate_flavor(flavor)
     context_dict = {
-                   'window_title': flavor.__str__(),
+                   'window_title': flavor.__unicode__(),
                    'page_title': "Recalculate Flavor Properties",
                    'flavor': flavor,
                    'weight_factor':1000,
@@ -545,7 +542,7 @@ def recalculate_experimental(request,experimental):
     results = recalculate_flavor(flavor)
     context_dict = {
                     'experimental':experimental,
-                   'window_title': flavor.__str__(),
+                   'window_title': flavor.__unicode__(),
                    'page_title': "Recalculate Flavor Properties",
                    'flavor': flavor,
                    'weight_factor':1000,
@@ -563,7 +560,7 @@ def print_review(request,flavor):
         ingredient_statement = None
 
     context_dict = {
-                   'window_title': flavor.__str__(),
+                   'window_title': flavor.__unicode__(),
                    'info_form':info_form,
                    'flavor': flavor,
                    'ingredient_statement': ingredient_statement,
@@ -624,7 +621,7 @@ def experimental_print_review(request, experimental):
     context_dict = {
                     'info_form':info_form,
                     'flavor':experimental.flavor,
-                   'window_title': experimental.__str__(),
+                   'window_title': experimental.__unicode__(),
                    'experimental': experimental,
                    'digitized_table':digitized_table,
                    }
@@ -634,7 +631,7 @@ def experimental_print_review(request, experimental):
 def gzl(request, flavor):
     page_title = "Product Gazinta List (GZL)"
     context_dict = {
-                   'window_title': flavor.__str__(),
+                   'window_title': flavor.__unicode__(),
                    'product': flavor,
                    'page_title': page_title,
                    }
@@ -647,14 +644,14 @@ def ingredient_gzl_review(request, ingredients):
     ingredient = Ingredient.get_obj_from_softkey(ingredients[0].id)
     if ingredient.sub_flavor == None:
         context_dict = {
-                       'window_title': ingredient.__str__(),
+                       'window_title': ingredient.__unicode__(),
                        'product': ingredient,
                        'leafweights': LeafWeight.objects.filter(ingredient__in=ingredients).order_by('-weight'),
                        'page_title': page_title,
                        }
     else:
         context_dict = {
-                       'window_title': ingredient.__str__(),
+                       'window_title': ingredient.__unicode__(),
                        'product': ingredient,
                        'leafweights': FormulaTree.objects.filter(node_ingredient__in=ingredients).order_by('-weight'),
                        'page_title': page_title,
@@ -825,7 +822,7 @@ def ingredient_pin_review(request, ingredients):
             updated_flavors = highlighted_ingredient.update_price(icu.cleaned_data['new_cost'])
 
         if updated_flavors != True:
-            for f, prices in updated_flavors.items():
+            for f, prices in updated_flavors.iteritems():
                 try:
                     delta = prices[1] - prices[0]
                     if delta > price_attention_threshold:
@@ -842,7 +839,7 @@ def ingredient_pin_review(request, ingredients):
         updated_flavors = {}
 
     context_dict = {
-                    'window_title': highlighted_ingredient.__str__(),
+                    'window_title': highlighted_ingredient.__unicode__(),
                     'highlighted_ingredient': highlighted_ingredient,
                     'ingredients': ingredients,
                     'page_title': page_title,
@@ -864,7 +861,7 @@ def ingredient_review(request, ingredient):
                               field.value_from_object(ingredient)))
 
     context_dict = {
-                    'window_title': ingredient.__str__(),
+                    'window_title': ingredient.__unicode__(),
                    'ingredient': ingredient,
                    'field_details': field_details,
                    'page_title': page_title,
@@ -983,7 +980,7 @@ def ingredient_autocomplete(request):
     for ingredient in ingredients.order_by('discontinued','-ing_obj'):
         ingredient_json = {}
         ingredient_json["id"] = ingredient.id
-        ingredient_json["label"] = ingredient.__str__()
+        ingredient_json["label"] = ingredient.__unicode__()
         ingredient_json["value"] = ingredient_json["id"]
         ret_array.append(ingredient_json)
     return HttpResponse(json.dumps(ret_array), content_type='application/json; charset=utf-8')
@@ -1029,7 +1026,7 @@ def process_tsrli_update(request):
     if type == 'ex_log':
         try:
             ex_log = ExperimentalLog.objects.get(experimentalnum = number)
-            response_dict['name'] = ex_log.__str__()
+            response_dict['name'] = ex_log.__unicode__()
         except:
             if number == '':
                 response_dict['name'] = 'Please enter an experimental number.'
@@ -1106,7 +1103,7 @@ def formula_entry(request, flavor, status_message=None):
             reversion.set_comment("Old formula: %s" % ", ".join(previous_formula_text_summary))
             flavor.ingredients.clear()
 
-            for ing, amount in ingredient_list.items():
+            for ing, amount in ingredient_list.iteritems():
                 formula_row = Formula(flavor=flavor,
                                     ingredient=ing,
                                     amount=amount,
@@ -1122,8 +1119,8 @@ def formula_entry(request, flavor, status_message=None):
             filterselect = FormulaEntryFilterSelectForm(request.GET.copy())
             filterexclude = FormulaEntryExcludeSelectForm(request.GET.copy())
             label_rows = forms.build_formularow_formset_label_rows(formset)
-            formula_rows = list(zip(formset.forms,
-                       label_rows ))
+            formula_rows = zip(formset.forms,
+                       label_rows )
             return render(
                 request,
                 'access/flavor/formula_entry.html',
@@ -1152,8 +1149,8 @@ def formula_entry(request, flavor, status_message=None):
     filterselect = FormulaEntryFilterSelectForm(request.GET.copy())
 
     formset = FormulaFormSet(initial=initial_data)
-    formula_rows = list(zip(formset.forms,
-                       label_rows ))
+    formula_rows = zip(formset.forms,
+                       label_rows )
 
 
     return render(
@@ -1206,7 +1203,7 @@ def experimental_formula_entry(request, experimental, status_message=None):
             flavor.ingredients.clear()
             rawmaterialcost = 0
 
-            for ing, amount in ingredient_list.items():
+            for ing, amount in ingredient_list.iteritems():
                 rawmaterialcost = rawmaterialcost + amount * ing.unitprice
                 formula_row = Formula(flavor=flavor,
                                     ingredient=ing,
@@ -1224,8 +1221,8 @@ def experimental_formula_entry(request, experimental, status_message=None):
             return HttpResponseRedirect(redirect_path)
         else:
             label_rows = forms.build_formularow_formset_label_rows(formset)
-            formula_rows = list(zip(formset.forms,
-                       label_rows ))
+            formula_rows = zip(formset.forms,
+                       label_rows )
             digitized_table = []
             digitized_test_re = re.compile('\w')
             for digitizedformula in experimental.digitizedformula_set.all().order_by('pk'):
@@ -1254,8 +1251,8 @@ def experimental_formula_entry(request, experimental, status_message=None):
     else:
         FormulaFormSet = formset_factory(forms.FormulaRow, extra=0)
     formset = FormulaFormSet(initial=initial_data)
-    formula_rows = list(zip(formset.forms,
-                       label_rows))
+    formula_rows = zip(formset.forms,
+                       label_rows)
     digitized_table = []
     digitized_test_re = re.compile('\w')
     for digitizedformula in experimental.digitizedformula_set.all().order_by('pk'):
@@ -1319,7 +1316,7 @@ def tsr_entry(request, tsr_number):
                     'status_message': status_message,
                     'window_title': page_title,
                     'page_title': page_title,
-                    'tsr_rows': list(zip(formset.forms,)),
+                    'tsr_rows': zip(formset.forms,),
                     'management_form': formset.management_form,
                 },
             )
@@ -1331,9 +1328,9 @@ def tsr_entry(request, tsr_number):
 #    else:
 #        POLIFormSet = formset_factory(forms.POLIForm, extra=0)
 #    formset = POLIFormSet(initial=initial_data)
-    tsrli_rows = list(zip(formset.forms,
+    tsrli_rows = zip(formset.forms,
                    #    label_rows)
-                   ))
+                   )
     return render(
         request,
         'access/tsr/tsr_entry.html',
@@ -1429,7 +1426,7 @@ def ajax_dispatch(request):
 
 #    ingredient_json = {}
 #        ingredient_json["id"] = ingredient.id
-#        ingredient_json["label"] = ingredient.__str__()
+#        ingredient_json["label"] = ingredient.__unicode__()
 #        ingredient_json["value"] = ingredient_json["id"]
 #        ret_array.append(ingredient_json)
 #    return HttpResponse(json.dumps(ret_array), content_type='application/json; charset=utf-8')
@@ -1445,7 +1442,7 @@ def table_to_csv(request):
 def get_ingredient_option_list(request):
     option_list = []
     for ing in Ingredient.objects.all():
-        option_list.append({ing.rawmaterialcode: ing.__str__()})
+        option_list.append({ing.rawmaterialcode: ing.__unicode__()})
     return HttpResponse(json.dumps(option_list), content_type='application/json; charset=utf-8')
 
 
@@ -1796,28 +1793,28 @@ def new_rm_wizard_rm(request, ingredient_pk):
     return NewRMFormWizard.as_view([forms.NewRMForm1, forms.NewRMForm2, forms.NewRMForm3, forms.NewRMForm4, forms.NewRMForm5], initial_dict=initial)(request)
 
 
-@flavor_info_wrapper
-def formula_visualization(request, flavor):
-    formatted_ft = formulatree_to_jsinfovis(FormulaTree.objects.filter(root_flavor=flavor))
-
-    st_layout_parameters = {}
-    if request.method == 'GET' and 'levels_to_show' in request.GET:
-        st_layout_form = forms.STLayoutForm(request.GET)
-        if st_layout_form.is_valid():
-            for k,v in st_layout_form.cleaned_data.items():
-                st_layout_parameters[k] = v
-    else:
-        st_layout_form = forms.STLayoutForm()
-        for k,v in st_layout_form.fields.items():
-            st_layout_parameters[k] = v.initial
-
-    context_dict = {
-         'flavor':flavor,
-         'st_layout_form':st_layout_form,
-         'st_layout_parameters':  json.dumps(st_layout_parameters),
-        }
-    context_dict.update(formatted_ft)
-    return render(request, 'access/flavor/formula_visualization.html', context_dict)
+# @flavor_info_wrapper
+# def formula_visualization(request, flavor):
+#     formatted_ft = formulatree_to_jsinfovis(FormulaTree.objects.filter(root_flavor=flavor))
+#
+#     st_layout_parameters = {}
+#     if request.method == 'GET' and 'levels_to_show' in request.GET:
+#         st_layout_form = forms.STLayoutForm(request.GET)
+#         if st_layout_form.is_valid():
+#             for k,v in st_layout_form.cleaned_data.iteritems():
+#                 st_layout_parameters[k] = v
+#     else:
+#         st_layout_form = forms.STLayoutForm()
+#         for k,v in st_layout_form.fields.iteritems():
+#             st_layout_parameters[k] = v.initial
+#
+#     context_dict = {
+#          'flavor':flavor,
+#          'st_layout_form':st_layout_form,
+#          'st_layout_parameters':  json.dumps(st_layout_parameters),
+#         }
+#     context_dict.update(formatted_ft)
+#     return render(request, 'access/flavor/formula_visualization.html', context_dict)
 
 @flavor_info_wrapper
 def spec_sheet(request, flavor):
@@ -1944,7 +1941,7 @@ def spec_list(request, flavor):
             for form in formset.forms:
                 try: #need this try/except in case they click 'delete' on an empty row and save
                     if 'DELETE' in form.cleaned_data:
-                        if form.cleaned_data['DELETE']==True:
+                        if form.cleaned_data[u'DELETE']==True:
                             try:
                                 flavorspec = FlavorSpecification.objects.get(pk=form.cleaned_data['pk'])
                                 flavorspec.delete()
@@ -1979,7 +1976,7 @@ def spec_list(request, flavor):
                     'flavor': flavor,
                     'window_title': page_title,
                     'page_title': page_title,
-                    'spec_rows': list(zip(formset.forms,)),
+                    'spec_rows': zip(formset.forms,),
                     'flavor_edit_link': '#',
                     'management_form': formset.management_form,
                 },
@@ -2014,7 +2011,7 @@ def spec_list(request, flavor):
 
     formset = SpecFormSet(initial=initial_data)
 
-    spec_rows = list(zip(formset.forms))
+    spec_rows = zip(formset.forms)
     return render(
         request,
         'access/flavor/spec_list.html',
@@ -2032,7 +2029,7 @@ def spec_list(request, flavor):
 
 class DecimalEncoder(json.JSONEncoder):
     def _iterencode(self, o, markers=None):
-        if isinstance(o, decimal.Decimal):
+        if isinstance(o, Decimal):
             # wanted a simple yield str(o) in the next line,
             # but that would mean a yield on the line with super(...),
             # which wouldn't work (see my comment below), so...
@@ -2069,7 +2066,7 @@ def reconcile_specs(request, flavor):
                 redirect_path = reverse('access.views.specification_list', args=[flavor.number])
                 return HttpResponseRedirect(redirect_path)
             else:
-                print("The user somehow posted to this page without going through the reconcile specs view...")
+                print "The user somehow posted to this page without going through the reconcile specs view..."
 
 
     #get any flavors with the same formula and scrape from those files as well!
@@ -2116,7 +2113,7 @@ def reconcile_specs(request, flavor):
 
     #turn any decimals to strings because json cannot serialize decimals
     for name, mtf, db in scraped_data:
-        for key in list(db.keys()):
+        for key in db.keys():
             if isinstance(db[key], Decimal):
                 db[key] = str(db[key])
 
@@ -2354,7 +2351,7 @@ def flavor_hazard_report(request):
     # can't iterate over defaultdicts
     hazardous_flavors.default_factory = None
 
-    hazardous_flavor_list = list(hazardous_flavors.items())
+    hazardous_flavor_list = hazardous_flavors.items()
 
     #if the user is filtering by statement, recreate the list to only include flavors that have filter_statement in its hcode
     if filter_statement:
@@ -3084,7 +3081,7 @@ def receiving_log_edit(request, po_number, poli_pk):
             static_initial = {'supplier':poli.po.supplier, 'manufacturer':poli.po.supplier,}
             dynamic_initial = [{'already_created': False}]
 
-        staticform = ReceivingLogStaticForm(initial=static_initial)
+        staticform = ReceivingLogStaticForm(initial=static_initial, supplier=poli.po.supplier)
         formset = ReceivingLogDynamicFormSet(initial=dynamic_initial)
 
     return render(
@@ -3148,7 +3145,7 @@ def rm_inventory_data_entry(request):
                 except KeyError:
                     continue
 
-            for i, total in inventory_dict.items():
+            for i, total in inventory_dict.iteritems():
                 #Create an IngredientInventoryLog for each item updated
                 inventory_log = IngredientInventoryLog(
                     ingredient = i,
@@ -3564,21 +3561,6 @@ def flavor_nutri_facts(request, flavor_number=None): #nutri labeling tool
 
 
 def allergen_declaration(request, flavor_number):
-    # allergens = ['Wheat* (includes Triticum species & Triticale)', 'Eggs and Egg Products', 'Fish', 'Milk and Milk Products', 'Peanut Products (oil, nut, etc)',
-    #         'Crustacean Shellfish', 'Soy (flour, oil, proteins, etc)', 'Sulfur Dioxide and Sulfites', 'Tree Nuts', 'Celery (root, stalk, leaves, not seeds)',
-    #         'Lupines and Products thereof', 'Mollusks (oysters, clams, etc)','Mustard and Products thereof', 'Sesame and products thereof','Yellow #5'
-    #     ]
-    # search = searchForm()
-    # if request.method == 'GET':
-    #     form = searchForm(request.GET)
-    #     if form.is_valid():
-    #         flavor = Flavor.objects.get(number = form.cleaned_data['rm_search'])
-    #         # stuff = [
-    #         #             flavor.wheat, flavor.eggs, flavor.fish, flavor.milk, flavor.peanuts, flavor.crustacean, flavor.soybeans, flavor.sulfites,
-    #         #             flavor.treenuts, flavor.celery, flavor.lupines, flavor.mollusks, flavor.mustard, flavor.sesame, flavor.yellow_5
-    #         #         ]
-    #         # zipped = zip(allergens, stuff)
-    # else:
     flavor = Flavor.objects.get(number=flavor_number)
 
     return render(
@@ -3625,8 +3607,8 @@ def gmo_statement(request, flavor_number):
         return render(
             request,
             'access/flavor/gmo_statement.html',
-            {
-                'flavor':fl,
+                                            {
+                                                'flavor':fl,
                 'letter_content':letter_content,
                 'form':search,
             },
@@ -3709,7 +3691,7 @@ def product_spec_sheet(request, flavor_number):
 
     if(len(spec) >= 1): #return list of multiple spec sheets
         warning = ""
-        multiple += "<h1>%s: Spec Sheets </h1>" % spec[0].flavor.__str__()
+        multiple += "<h1>%s: Spec Sheets </h1>" % spec[0].flavor.__unicode__()
         standard = False
         multiple += '<table>'
         for i in spec:
@@ -3756,7 +3738,7 @@ def product_spec_sheet(request, flavor_number):
             'ingredient_statement':ingredient_statement,
             'flavor':fl,
             'flavor':flavor_number,
-            'ing':flavor__number,
+            'ing':flavor_number,
             'extrapowdermessage':extrapowdermessage,
         },
     )
@@ -4443,7 +4425,7 @@ def coa(request, lot_number):
             li += i
         updated_data.update({'origin_lot':origin_lot_entry})
         coaform = coa_form(data=updated_data)
-        zipped = list(zip(coaform, li))
+        zipped = zip(coaform, li)
 
 
         return render(
@@ -4552,7 +4534,7 @@ def coa(request, lot_number):
             else:
                 coaform = coa_form(instance=coa)
             specform = spec_sheet_form(instance=coa.sp)
-            zipped = list(zip(coaform, li))
+            zipped = zip(coaform, li)
 
             return render(
                         request,
@@ -4576,7 +4558,7 @@ def coa(request, lot_number):
         else:
             multipleLines+='coa doesnt exist for this'
             coaform = coa_form(initial={'flavor':sp.flavor, 'one_off_customer':customer, 'line':spec_line, 'lot':lot, 'sp':sp, 'date': date.today(),})
-            zipped = list(zip(coaform, li))
+            zipped = zip(coaform, li)
             return render(
                         request,
                         'access/flavor/coa.html',
@@ -4695,7 +4677,7 @@ def query_list(request):
     query_dict['invalid_rm_nutri_total'] = {
             'proper_name': "Invalid Nutri Totals",
             'headers': ['Raw Material', 'Nutri Total', 'Edit Nutri'],
-            'items': [[x.ingredient, x.total, '<a href="/access/rm_nutri_edit?rm=%s" target="_blank">Edit Nutri</a>' % x.ingredient.id] for x in invalid_rm_nutri_total_list],
+            'items': map(lambda x: [x.ingredient, x.total, '<a href="/access/rm_nutri_edit?rm=%s" target="_blank">Edit Nutri</a>' % x.ingredient.id], invalid_rm_nutri_total_list),
             'url': '/access/query_list?category=invalid_rm_nutri_total',
         }
     query_dict['outdated_raw_materials'] = {
@@ -4707,76 +4689,86 @@ def query_list(request):
     query_dict['natural_on_file_without_natural_doc'] = {
             'proper_name': "RMs bought in the last 3 years with Natural on File checked but no NATURAL documentation",
             'headers': ['Ingredient'],
-            'items': [['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()),] for x in natural_on_file_without_natural_doc],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()),], natural_on_file_without_natural_doc),
             'url': '/access/query_list?category=natural_on_file_without_natural_doc'
         }
     query_dict['nutri_field_checked_but_no_nutri_info'] = {
             'proper_name': "RMs with Nutri field checked but no nutri info",
             'headers': ['Ingredient', 'Add Nutri Info'],
-            'items': [['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), '<a href="/access/rm_nutri_edit/?rm=%s" target="_blank">Add Nutri Info</a>' % x.id] for x in nutri_field_checked_but_no_nutri_info],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), '<a href="/access/rm_nutri_edit/?rm=%s" target="_blank">Add Nutri Info</a>' % x.id],
+                         nutri_field_checked_but_no_nutri_info),
             'url': '/access/query_list?category=nutri_field_checked_but_no_nutri_info'
         }
     query_dict['raw_materials_with_no_sds_on_file'] = {
             'proper_name': "RMs bought in the last 3 years with no SDS on file",
             'headers': ['Ingredient'],
-            'items': [['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), ] for x in raw_materials_with_no_sds_on_file],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), ], raw_materials_with_no_sds_on_file),
             'url': '/access/query_list?category=raw_materials_with_no_sds_on_file'
         }
     query_dict['docs_contain_alldocs_or_paperwork_keywords'] = {
             'proper_name': "RMs with 'All Docs' or 'Paperwork' in documentation names",
             'headers': ['Ingredient'],
-            'items': [['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), ] for x in docs_contain_alldocs_or_paperwork_keywords],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), ],
+                         docs_contain_alldocs_or_paperwork_keywords),
             'url': '/access/query_list?category=docs_contain_alldocs_or_paperwork_keywords'
         }
     query_dict['suppliers_since_2019'] = {
             'proper_name': "All suppliers bought from since January 1, 2019",
             'headers': ['Supplier'],
-            'items': sorted([['%s' % x, PurchaseOrder.objects.filter(supplier=x,date_ordered__year__gte=2019).count()] for x in supplier_set],key=lambda x: -x[1]),
+            'items': sorted(map(lambda x: ['%s' % x, PurchaseOrder.objects.filter(supplier=x,date_ordered__year__gte=2019).count()],
+                         supplier_set),key=lambda x: -x[1]),
             'url': '/access/query_list?category=suppliers_since_2019'
         }
     query_dict['rms_with_missing_gmo_data'] = {
             'proper_name': "RMs with missing GMO data",
             'headers': ['Ingredient'],
-            'items': [['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), ] for x in rms_with_missing_gmo_data],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), ],
+                         rms_with_missing_gmo_data),
             'url': '/access/query_list?category=rms_with_missing_gmo_data'
         }
     query_dict['flavors_with_undetermined_phase'] = {
             'proper_name': "Sold flavors with undetermined Phase",
             'headers': ['Flavor'],
-            'items': [['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), ] for x in flavors_with_undetermined_phase],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), ],
+                         flavors_with_undetermined_phase),
             'url': '/access/query_list?category=flavors_with_undetermined_phase'
         }
     query_dict['microsensitive_rms'] = {
             'proper_name': "Microsensitive Raw Materials",
             'headers': ['Raw Material'],
-            'items': [['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), ] for x in microsensitive_rms],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), ],
+                         microsensitive_rms),
             'url': '/access/query_list?category=microsensitive_rms'
         }
     query_dict['experimentals_with_approved_products_and_duplication_info'] = {
 
             'proper_name': "Experimentals with Approved Products and Duplication Info",
             'headers': ['Experimental','Approved Product','Duplication','Dup. Name', 'Dup. Company', 'Dup. ID'],
-            'items': [['<a href="%s" target="_blank">%s</a>' % (x.get_absolute_url(), x.__str__()),
-                                    '<a href="%s" target="_blank">%s</a>' % (x.flavor.url, x.flavor.__str__()),
-                                    x.duplication, x.duplication_name, x.duplication_company, x.duplication_id] for x in approved_experimentals_with_duplication_info],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.get_absolute_url(), x.__unicode__()),
+                                    '<a href="%s" target="_blank">%s</a>' % (x.flavor.url, x.flavor.__unicode__()),
+                                    x.duplication, x.duplication_name, x.duplication_company, x.duplication_id],
+                         approved_experimentals_with_duplication_info),
             'url': '/access/query_list?category=experimentals_with_approved_products_and_duplication_info'
         }
     query_dict['pm_under_3'] = {
             'proper_name': "Products with Profit Margin under 3.0",
             'headers': ['Raw Material','Profit Margin'],
-            'items': [['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), round(x.unitprice/x.rawmaterialcost, 3)] for x in pm_under_3],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), round(x.unitprice/x.rawmaterialcost, 3)],
+                         pm_under_3),
             'url': '/access/query_list?category=pm_under_3'
         }
     query_dict['top_selling_products_with_pm_under_3_5'] = {
             'proper_name': "Top Selling Products with Profit Margin under 3.5",
             'headers': ['Flavor','# of Lots in Last Year', 'Total Amount in Last Year (lbs)', 'Avg. Lot Size in Last Year (lbs)','Profit Margin'],
-            'items': [['<a href="%s" target="_blank">%s</a>' % (x[0].url, x[0].__str__()), x[1], round(x[2], 3), round(x[3], 3), round(x[4], 3)] for x in top_selling_products_with_pm_under_3_5],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x[0].url, x[0].__unicode__()), x[1], round(x[2], 3), round(x[3], 3), round(x[4], 3)],
+                         top_selling_products_with_pm_under_3_5),
             'url': '/access/query_list?category=top_selling_products_with_pm_under_3_5'
         }
     query_dict['lowest_selling_products_with_pm_under_4'] = {
             'proper_name': "Lowest Selling Products with Profit Margin under 4.0",
             'headers': ['Flavor','# of Lots in Last Year', 'Total Amount in Last Year (lbs)', 'Avg. Lot Size in Last Year (lbs)','Profit Margin'],
-            'items': [['<a href="%s" target="_blank">%s</a>' % (x[0].url, x[0].__str__()), x[1], round(x[2], 3), round(x[3], 3), round(x[4], 3)] for x in lowest_selling_products_with_pm_under_4],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x[0].url, x[0].__unicode__()), x[1], round(x[2], 3), round(x[3], 3), round(x[4], 3)],
+                         lowest_selling_products_with_pm_under_4),
             'url': '/access/query_list?category=lowest_selling_products_with_pm_under_4'
         }
 
@@ -4797,7 +4789,7 @@ def query_list(request):
         )
 
     #create category rows from query_dict
-    query_dict_category_rows = [[x['proper_name'], x['items'], x['url']] for x in list(query_dict.values())]
+    query_dict_category_rows = map(lambda x: [x['proper_name'], x['items'], x['url']], query_dict.values())
 
     return render(
         request,
@@ -4940,7 +4932,7 @@ doctypes = [
             ]
 def latest_docs(rm):
         latest = {}
-
+        # supplier_specific = ['COI', 'form40', 'form20', 'form20ar', 'form20c']
         doctypes = [
                         'specsheet',
                         'sds',
@@ -4973,13 +4965,6 @@ def latest_docs(rm):
             # doctypes.remove('vegan')
             doctypes.remove('natural')
 
-        # else:
-        #     if not rm.vegan:
-        #         doctypes.remove('vegan')
-        #     if not rm.organic_compliant:
-        #         doctypes.remove('organic')
-
-        # check if qualifed for GPVC
         if not rm.new_gmo == 'GMO Free':
             doctypes.remove('GPVC')
 
@@ -4989,12 +4974,11 @@ def latest_docs(rm):
             latest[i] = [None, doctype_label]
             docs = Documents.objects.filter(rawmaterial = rm, doctype = i)
             #
-
             # searches for latest document across all documents if supplier specific
             if i in supplier_specific and Documents.objects.filter(rawmaterial__supplier = rm.supplier, doctype = i).exists():
                 latest[i] = [Documents.objects.filter(rawmaterial__supplier= rm.supplier, doctype = i).order_by('-expiration')[0], doctype_label]
 
-            if i == 'LOG':
+            elif i == 'LOG':
                 product_specific_query = Documents.objects.filter(doctype=i, log_rms__contains=[str(rm.rawmaterialcode)]).order_by('-expiration')
                 supplier_specific_query = Documents.objects.filter(rawmaterial__supplier = rm.supplier, doctype = i, log_rms=[]).order_by('-expiration')
 
@@ -5028,6 +5012,32 @@ def latest_docs(rm):
 
         return collections.OrderedDict(latest)
 
+
+manufacturer_docs = [
+    'mform20',
+    'mform20ar',
+    'mform20c',
+    'mLOG',
+    'mform40',
+]
+
+def get_rm_manufacturers(rm):
+    manufacturers = []
+    for r in ReceivingLog.objects.filter(poli__raw_material=rm).order_by('manufacturer_fk').distinct('manufacturer_fk'):
+        manufacturers.append(r.manufacturer_fk)
+
+    return manufacturers
+
+def latest_manufacturer_docs(rm):
+
+    manufacturer_docs = []
+    manufacturers = get_rm_manufacturers(rm)
+    for m in manufacturers:
+        manufacturer_docs.append(Documents.objects.filter(doctype__in=manufacturer_docs, manufacturer=m))
+
+
+
+    return manufacturer_docs
 
 def autoverify(request, doc):
     if IngredientTemp.objects.filter(user_id = request.user.id).filter(temp_rmcode = doc.rawmaterial.rawmaterialcode).exists():
@@ -5069,6 +5079,7 @@ def document_control(request, pin_number, rm_code, doctype):
 
     elif doctype == None:
         # list document objects for RM
+        f20 = ['form20', 'form20c', 'form20ar']
         rm = Ingredient.objects.get(rawmaterialcode=rm_code)
         missing_doc = '/access/document_control/'+str(rm.id)+'/'+str(rm.rawmaterialcode)
         d = Documents.objects.filter(rawmaterial = rm).order_by('doctype')
@@ -5085,12 +5096,14 @@ def document_control(request, pin_number, rm_code, doctype):
             else:
                 docpending[x] = None
 
-        admin = False
+        # admin = False
+        # if request.user.is_superuser:
+        #     admin = True
 
-        if request.user.is_superuser:
-            admin = True
+        coa = Documents.objects.filter(rawmaterial = rm, doctype='COA').order_by('-expiration')[:10]
 
-        coa = Documents.objects.filter(rawmaterial = rm, doctype='COA').order_by('-expiration')
+        # manufacturer docs
+
         return render(
             request,
             'access/ingredient/document_control.html',
@@ -5101,7 +5114,7 @@ def document_control(request, pin_number, rm_code, doctype):
                 'coa':coa,
                 'latest':latest,
                 'page_title':pagetitle,
-                'admin':admin,
+                'admin':request.user.is_superuser,
                 # 'ss':supplier_specific,
             }
         )
@@ -5109,9 +5122,23 @@ def document_control(request, pin_number, rm_code, doctype):
     else:
         # Handle uploads and post
         # form40
-        auto = ['GPVC','COI', 'form40', 'form20', 'form20ar', 'form20c', 'ingbreak']
+        auto = [
+                'GPVC',
+                'COI',
+                'form40',
+                'form20',
+                'form20ar',
+                'form20c',
+                'ingbreak',
+                'mform20',
+                'mform20ar',
+                'mform20c',
+                'mLOG',
+                'mform40',
+            ]
         rm = Ingredient.objects.get(rawmaterialcode = rm_code)
         link = ""
+        doctype_choices = Documents._meta.get_field('doctype').choices
         applicabletypes = [
                         'specsheet',
                         'sds',
@@ -5134,6 +5161,11 @@ def document_control(request, pin_number, rm_code, doctype):
                         'form20c',
                         'form40',
                         'ingbreak',
+                        'mform20',
+                        'mform20ar',
+                        'mform20c',
+                        'mLOG',
+                        'mform40',
                     ]
 
         if not rm.art_nati == 'Nat' and not rm.art_nati == 'NFI-N':
@@ -5178,8 +5210,6 @@ def document_control(request, pin_number, rm_code, doctype):
                         }
                     )
 
-
-
         if request.method == 'POST':
             # USER IS UPLOADING DOCUMENT
             if 'confirm' in request.POST:
@@ -5201,17 +5231,6 @@ def document_control(request, pin_number, rm_code, doctype):
                 # else:
                 for s in savedocs:
                     s.save()
-                    # if not os.path.splitext(s.uploadfile.path)[1] == "pdf":
-                    #     new_path_to_pdf = convert_to_pdf(s.uploadfile.path)
-                    #     f = File(file(new_path_to_pdf))
-                    #     f.name = os.path.basename(new_path_to_pdf)
-                    #     setattr(s, 'uploadfile', f)
-                    #     s.save()
-                    #     f.close()
-                    #     # hacky way to remove the duplicate :
-                    #     os.remove(os.path.splitext(new_path_to_pdf)[0] + '.pdf')
-                    #     # f.name = os.path.basename(new_path_to_pdf)
-                    #     # s.uploadfile = f
 
                     getlink += str(s.id)+"."
                     # if s.doctype in auto: #or (n == 'COA' and rm.microsensitive == 'False'):
@@ -5287,6 +5306,9 @@ def document_control(request, pin_number, rm_code, doctype):
             )
 
         if doctype in applicabletypes:
+            rm_manufacturers = []
+            if doctype in manufacturer_docs:
+                rm_manufacturers = get_rm_manufacturers(rm)
             return render(
                 request,
                 'access/ingredient/document_control.html',
@@ -5296,6 +5318,7 @@ def document_control(request, pin_number, rm_code, doctype):
                     'rm':rm,
                     'link':link,
                     'doctypes':applicabletypes,
+                    'manufacturers':rm_manufacturers,
                     # 'previous':d.id,
                     'page_title':pagetitle,
                 }
@@ -5501,7 +5524,6 @@ def nutritemp_form_validation(request, temp, type):
 
 
 
-
 def compare_temp(dv1, dv2):
     auto = ['GPVC','COI','form40', 'form20', 'form20ar', 'form20c', 'ingbreak']
     i1 = dv1.temp_ingredient
@@ -5509,11 +5531,13 @@ def compare_temp(dv1, dv2):
     delta1 = dv1.expiration - date.today()
     delta2 = dv2.expiration - date.today()
     # mismatching expirations
-    if not dv1.days_until_expiration == dv2.days_until_expiration:
+    if not abs(dv1.days_until_expiration-dv2.days_until_expiration) <= 30:
         return False
     # auto verify auto docs
-    elif dv1.document.doctype == dv2.document.doctype and dv1.document.doctype in auto and delta1.days == delta2.days:
-        return True
+    elif dv1.document.doctype == dv2.document.doctype and dv1.document.doctype in auto:
+        if abs(dv1.days_until_expiration-dv2.days_until_expiration) <= 30:
+            return True
+        return False
 
     # date mismatch
     elif not dv1.is_documentdate == dv2.is_documentdate:
@@ -5522,7 +5546,7 @@ def compare_temp(dv1, dv2):
     elif dv1.document.doctype == 'nutri':
         n1 = dv1.temp_nutri
         n2 = dv2.temp_nutri
-        fields = [x.name for x in NutriInfoTemp._meta.fields]
+        fields = map(lambda x: x.name, NutriInfoTemp._meta.fields)
         exclude = ['id', 'user']
         for f in fields:
             if not f in exclude and not getattr(n1, f) == getattr(n2, f):
@@ -5602,7 +5626,7 @@ def save_to_main(dv):
         retain = dv.rm_retain
         setattr(retain, 'salmonella_negative_check', dv.temp_ingredient.salmonella)
         setattr(retain, 'coa_document', dv.document)
-        setattr(i, 'salmonella_tested_for_negative', )
+
         # retain.coa_document = dv.document
         # retain.save()
         # retain.salmonella_negative_check = dv.temp_ingredient.salmonella
@@ -5617,7 +5641,7 @@ def save_to_main(dv):
         i.save()
 
     elif dv.document.doctype == 'nutri':
-        nutrifields = [x.name for x in NutriInfo._meta.fields]
+        nutrifields = map(lambda x: x.name, NutriInfo._meta.fields)
         exclude = ['id', 'ingredient']
         for f in nutrifields:
             if not f in exclude:
@@ -5675,7 +5699,7 @@ def sds_validation(request, temp, type):
 
 
 def coa_validation(request, temp, type):
-    if 'salmonella' in request.POST and request.POST.get('salmonella') == 'NA':
+    if 'salmonella' in request.POST and request.POST.get('salmonella') == 'No':
         setattr(temp, 'salmonella', False)
     else:
         setattr(temp, 'salmonella', True)
@@ -5799,9 +5823,7 @@ def nutriformformat(nutriform):
                                             <td>"""+str(row)+""" mg</td>
                                           </tr>
                                         """
-    return formatdict+"""  <div class = "totalweight" ><span id = "total"></span> g</div>"""
-
-
+    return formatdict+"""<div class = "totalweight" ><span id = "total"></span> g</div>"""
 
 
 def list_rnumbers(rm):
@@ -5876,7 +5898,7 @@ def dv_autocomplete(request):
 
 def json_test_response(request, flavor_number):
     from django.forms.models import model_to_dict
-    f = list(Flavor.objects.filter(number = flavor_number).values())
+    f = Flavor.objects.filter(number = flavor_number).values()
     f = list(f)
     return JsonResponse(f, safe=False)
     # return Jsonf2dict
@@ -6068,25 +6090,25 @@ def document_verification(request, doc_id):
         admin = True
 
 
-
-# Ingredient.objects.filter(doctype=b, rawmaterialcode = i).latest('-expiration')
-#
-#
     if request.GET:
         # display by doctype
-        three_years_ago = date.today() - relativedelta(years=3)
+        two_years_ago = date.today() - relativedelta(years=2)
         # rawmaterials bought in last three years that are not discontinued
-        rms = PurchaseOrderLineItem.objects.filter(raw_material__discontinued=False, due_date__range=[three_years_ago, date.today()]).order_by().values_list('raw_material', flat=True).distinct()
+        rms = PurchaseOrderLineItem.objects.filter(raw_material__discontinued=False, due_date__range=[two_years_ago, date.today()]).order_by().values_list('raw_material', flat=True).distinct()
         d = []
+
+        curr_user_verified = Documents.objects.filter(verifications__verifier=request.user)
+        # # document ids that are verified
+        doc_ids = Documents.objects.filter(verifications__final=True).values_list('id', flat=True).distinct()
+
         for b in docbytype:
+            distinct_docs = Documents.objects.filter(rawmaterial__rawmaterialcode__in=rms, doctype=b).order_by('rawmaterial_id', '-expiration').distinct('rawmaterial')
             # LIST UNVERIFIED DOCUMENTS BY DOCTYPE
             if b in request.GET:
                 # d = [obj for obj in Documents.objects.filter(doctype = b).exclude(rawmaterial__discontinued=True) if obj.verified == False and obj.dv_count < 2 and not request.user.username in obj.get_verifiers]
-                for r in rms:
-                    doc = Ingredient.objects.get(rawmaterialcode=r).get_latest_document(b)
-                    if doc:
-                        if doc.dv_count < 2 and request.user.username not in doc.get_verifiers:
-                            d.append(doc)
+
+                d = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__lte=1, doctype=b,rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=curr_user_verified)
+
                 if d:
                     message = ""
                 else:
@@ -6104,14 +6126,8 @@ def document_verification(request, doc_id):
 
             # LIST ALL DOCUMENTS FOR DOCREVIEW BY DOCTYPE
             elif "review_"+b in request.GET:
-                # d = [obj for obj in Documents.objects.filter(doctype = b).exclude(rawmaterial__discontinued=True) if obj.verified == False and obj.dv_count==2 and not request.user.username in obj.get_verifiers]
-                for r in rms:
-                    doc = Ingredient.objects.get(rawmaterialcode=r).get_latest_document(b)
 
-                    if doc:
-                        if doc.dv_count == 2 and not doc.verified and request.user.username not in doc.get_verifiers:
-                            d.append(doc)
-
+                d = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__gte=2, doctype=b, rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=doc_ids).exclude(id__in=curr_user_verified)
                 if d:
                     message = ""
                 else:
@@ -6132,18 +6148,11 @@ def document_verification(request, doc_id):
                 rms = []
                 # three_years_ago = date.today() - relativedelta(years=3)
 
-                rawmaterialcodes = PurchaseOrderLineItem.objects.filter(due_date__range=[three_years_ago, date.today()]).values_list('raw_material',flat=True).distinct()
+                rawmaterialcodes = PurchaseOrderLineItem.objects.filter(due_date__range=[two_years_ago, date.today()]).values_list('raw_material',flat=True).distinct()
                 rm_queryset = Ingredient.objects.filter(rawmaterialcode__in=rawmaterialcodes, discontinued = False).exclude(documents__doctype=b).exclude(supplier__suppliercode='FDI')
-
-
-                # if b == 'natural':
-                #     rm_queryset = rm_queryset.filter(art_nati="Nat")
 
                 if b == 'vegan':
                     rm_queryset = rm_queryset.exclude(milk=True).exclude(eggs=True).exclude(id=266)
-
-                # elif b == 'organic':
-                #     rm_queryset = rm_queryset.filter(organic_compliant=True)
 
                 auto = ['COI', 'form40', 'form20', 'form20ar', 'form20c']
                 f20 = ['form20', 'form20ar', 'form20c']
@@ -6179,11 +6188,8 @@ def document_verification(request, doc_id):
                     }
                 )
 
-
-
     message = ""
     prev = ""
-    # d = [obj for obj in Documents.objects.exclude(rawmaterial=None).exclude(rawmaterial__discontinued=True) if obj.verified == False and not request.user.username in obj.get_verifiers]
 
     if doc_id:
         doc = Documents.objects.get(id= doc_id)
@@ -6192,14 +6198,14 @@ def document_verification(request, doc_id):
                                 """+additionalhtml+"""
                                 <tr>
                                     <td>
-                                        Has this been tested negative for salmonella?
+                                        Does document state that it has been tested negative for salmonella?
                                     </td>
                                     <td>
                                         <select name='salmonella' id ="salmonella" required>
                                                     <option disabled selected value> -- select an option -- </option>
                                                     <option value='Yes'>Yes</option>
                                                     <option value='NA'>Not applicable</option>
-                                                </select>
+                                        </select>
                                     </td>
                                 </tr>
                                 <tr>
@@ -6362,7 +6368,6 @@ def document_verification(request, doc_id):
                 'organic_cert':organic_compliant_validation,
             }
 
-            # log_verification(request, temp, 'LOG')
 
             if doc.doctype == 'nutri':
                 case_switch[doc.doctype](request, ntemp, 'nutri')
@@ -6417,9 +6422,6 @@ def document_verification(request, doc_id):
                 else:
                     submitmessage = "<div class='rednotification'><h2>There exists a newer document for this document type and rawmaterial. Changes to database will not be made.</h2></div>"
 
-
-            # d = [obj for obj in Documents.objects.all() if obj.verified == False and not DocumentVerification.objects.filter(document=obj, verifier=request.user).exists()]
-
             # redirect back to previous page (DV or DC) to continue workflow
             if 'next' in request.GET and not request.GET.get('next') == "" and not request.GET.get('next') == None:
                 # redirect to previous
@@ -6439,12 +6441,9 @@ def document_verification(request, doc_id):
                 }
             )
 
-
-
         else:
             # DOCREVIEW VIEW
             #
-
             # USER NOT AUTHORIZED TO DOCREVIEW
             #
             if not request.user.is_superuser:
@@ -6453,9 +6452,7 @@ def document_verification(request, doc_id):
                         'access/ingredient/document_verification.html',
                         {
                             'message':'Not authorized to do final review on documents',
-
                         }
-
                     )
 
             # CREATE APPROPRIATE DOCREVIEW BY DOCTYPE
@@ -6468,11 +6465,8 @@ def document_verification(request, doc_id):
                                     <input type='date' id='expiration' name='expiration' required/></td>
                                     </tr>"""
             review = DocumentVerification.objects.filter(document = doc)
-            # additionalhtml = """
-            #                     <tr>
-            #                         <td>Document Date</td><td><input type='date' id='expiration' name='expiration' required/></td>
-            #                     </tr>"""
-            reviewhtml = """<div class='review'>
+
+            reviewhtml = """<div class='review' oninput = 'checkTotalWeight()'>
                                             <table id='reviewtable'>
                                                 <tr>
                                                     <td>Verifier</td>
@@ -6489,8 +6483,6 @@ def document_verification(request, doc_id):
                                                     <td>Document Expiration Date</td>
                                                     <td>"""+str(review[0].expiration)+"""</td>
                                                     <td>"""+str(review[1].expiration)+"""</td>
-
-
 
                         """
             if not doc.doctype in auto:
@@ -6541,16 +6533,68 @@ def document_verification(request, doc_id):
                     n2 = review[1].temp_nutri
                     meta = []
                     nutriform = nutriFormTemp()
-                    meta = [x.name for x in NutriInfoTemp._meta.fields]
-                    reviewhtml +=""" <td>Please appropriate date type:
-                        <ul>
-                            <li><input type = 'radio' name = 'doc_date' value = 'document_date' required/> Document Date</li>
-                            <li><input type = 'radio' name = 'doc_date' value = 'expiration_date'/> Expiration Date</li>
-                        </ul>
-                        <input type='date' id='expiration' name='expiration' required/></td>
-                                            </tr>"""
+                    meta = map(lambda x: x.name, NutriInfoTemp._meta.fields)
+                    reviewhtml +="""    <td>Please appropriate date type:
+                                            <ul>
+                                                <li><input type = 'radio' name = 'doc_date' value = 'document_date' required/> Document Date</li>
+                                                <li><input type = 'radio' name = 'doc_date' value = 'expiration_date'/> Expiration Date</li>
+                                            </ul>
+                                            <input type='date' id='expiration' name='expiration' required/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Weight</td>
+                                        <td>"""+ str(calculate_nutri_weight(n1, 'total')) +"""</td>
+                                        <td>"""+ str(calculate_nutri_weight(n2, 'total')) +"""</td>
+                                        <td><span id = 'totalw'> </span> g </td>
+                                    </tr>"""
                     for row in nutriform:
-                        if not row.label == "Calories":
+                        if row.label == 'Other Fat':
+                            reviewhtml += """
+                                                        <tr>
+                                                            <td>Total Fats</td>
+                                                            <td>"""+str(calculate_nutri_weight(n1, 'fat'))+"""</td>
+                                                            <td>"""+str(calculate_nutri_weight(n2, 'fat'))+"""</td>
+                                                            <td><p id = "total fat"></p></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>"""+str(row.label)+"""</td>
+                                                            <td>"""+str(getattr(n1, row.name))+"""</td>
+                                                            <td>"""+str(getattr(n2, row.name))+"""</td>
+                                                            <td>"""+str(row)+"""</td>
+                                                        </tr>"""
+                        elif row.label == 'Carbohydrates':
+                            reviewhtml += """
+                                                        <tr>
+                                                            <td>Total Carbohydrates</td>
+                                                            <td>"""+str(calculate_nutri_weight(n1, 'carbs'))+"""</td>
+                                                            <td>"""+str(calculate_nutri_weight(n2, 'carbs'))+"""</td>
+                                                            <td><p id = "totalcarbs"></p></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>"""+str(row.label)+"""</td>
+                                                            <td>"""+str(getattr(n1, row.name))+"""</td>
+                                                            <td>"""+str(getattr(n2, row.name))+"""</td>
+                                                            <td>"""+str(row)+"""</td>
+                                                        </tr>
+                                                        """
+                        elif row.label == "Alcohol Content":
+                            reviewhtml +="""
+                                                    <tr>
+                                                        <td>"""+str(row.label)+"""</td>
+                                                        <td>"""+str(getattr(n1, row.name))+"""</td>
+                                                        <td>"""+str(getattr(n2, row.name))+"""</td>
+                                                        <td><span id = "totalalcohol"></span> g</td>
+                                                    </tr>"""
+                        elif row.label == "Calories":
+                            reviewhtml +="""
+                                                    <tr>
+                                                        <td>"""+str(row.label)+"""</td>
+                                                        <td>"""+str(getattr(n1, row.name))+"""</td>
+                                                        <td>"""+str(getattr(n2, row.name))+"""</td>
+                                                        <td><p id='calories'></p></td>
+                                                    </tr>"""
+                        else:
                             reviewhtml +="""
                                                     <tr>
                                                         <td>"""+str(row.label)+"""</td>
@@ -6568,7 +6612,7 @@ def document_verification(request, doc_id):
                 elif doc.doctype == 'COA':
                     reviewhtml += """<td rowspan="3" class= "coa_subrow">"""+docv_dict[doc.doctype]+"""</td></tr>
                                     <tr>
-                                        <td>Salmonella Tested for Negative Result</td>
+                                        <td>Salmonella Postive</td>
                                         <td>"""+str(getattr(review[0].temp_ingredient, ing_doctype_dict[doc.doctype]))+"""</td>
                                         <td>"""+str(getattr(review[1].temp_ingredient, ing_doctype_dict[doc.doctype]))+"""</td>
 
@@ -6697,73 +6741,48 @@ def document_verification(request, doc_id):
 
     else:
         # list all RMs without docs bought in last three years
-        supplier_specific = ['COI','form40', 'form20', 'form20ar', 'form20c']
+        # supplier_specific = ['COI','form40', 'form20', 'form20ar', 'form20c']
         f20 = ['form20', 'form20ar', 'form20c']
-        # unverifieddocs = {}
         three_years_ago = date.today() - relativedelta(years=3)
         # rawmaterials bought in last three years that are not discontinued
         rms = PurchaseOrderLineItem.objects.filter(raw_material__discontinued=False, due_date__range=[three_years_ago, date.today()]).order_by().values_list('raw_material', flat=True).distinct()
-        # d = [obj for obj in Documents.objects.exclude(rawmaterial=None).exclude(rawmaterial__discontinued=True) if obj.verified == False and not request.user.username in obj.get_verifiers]
 
-        # count RMS without docs, exlude certain docs based on art_nati
-
-        # dict, doctype points to array of number of [unverified, docs need for review, no documents] count
-        # unverifieddocs[dt] = [unverified_count, review_count, no_docs.count(), doctype_label]
         unverifieddocs = OrderedDict([
-            ('specsheet'        ,  [ 0, 0, 0  , 'Specsheet']),
-            ('sds'              ,  [ 0, 0, 0  , 'SDS']),
             ('allergen'         ,  [ 0, 0, 0  , 'Allergen']),
-            ('nutri'            ,  [ 0, 0, 0  , 'Nutri']),
-            ('GMO'              ,  [ 0, 0, 0  , 'GMO']),
-            ('GPVC'             ,  [ 0, 0, 0  , 'GMO Project Verified Certificate']),
-            ('LOG'              ,  [ 0, 0, 0  , 'Letter Of Guarantee']),
-            ('natural'          ,  [ 0, 0, 0  , 'Natural']),
-            ('origin'           ,  [ 0, 0, 0  , 'Origin']),
-            ('vegan'            ,  [ 0, 0, 0  , 'Vegan']),
-            ('organic'          ,  [ 0, 0, 0  , 'Organic Compliance']),
-            ('organic_cert'     ,  [ 0, 0, 0  , 'Organic Certified']),
-            ('kosher'           ,  [ 0, 0, 0  , 'Kosher']),
-            ('halal'            ,  [ 0, 0, 0  , 'Halal']),
             ('COA'              ,  [ 0, 0, 0  , 'Certificate of Analysis']),
             ('COI'              ,  [ 0, 0, 0  , 'Certificate of Insurance']),
-            ('ingbreak'         ,  [ 0, 0, 0  , 'Ingredient Breakdown']),
             ('form20'           ,  [ 0, 0, 0  , 'Form #020']),
+            ('mform20'          ,  [ 0, 0, 0  , 'Form #020 - Manufacturer']),
             ('form20ar'         ,  [ 0, 0, 0  , 'Form #020 Audit Report']),
+            ('mform20ar'        ,  [ 0, 0, 0  , 'Form #020 Audit Report - Manufacturer']),
             ('form20c'          ,  [ 0, 0, 0  , 'Form #020 Certification']),
+            ('mform20c'         ,  [ 0, 0, 0  , 'Form #020 Certification - Manufacturer']),
             ('form40'           ,  [ 0, 0, 0  , 'Form #040']),
+            ('mform40'          ,  [ 0, 0, 0  , 'Form#40 - Manufacturer']),
+            ('GMO'              ,  [ 0, 0, 0  , 'GMO']),
+            ('GPVC'             ,  [ 0, 0, 0  , 'GMO Project Verified Certificate']),
+            ('halal'            ,  [ 0, 0, 0  , 'Halal']),
+            ('ingbreak'         ,  [ 0, 0, 0  , 'Ingredient Breakdown']),
+            ('kosher'           ,  [ 0, 0, 0  , 'Kosher']),
+            ('LOG'              ,  [ 0, 0, 0  , 'Letter Of Guarantee']),
+            ('mLOG'             ,  [ 0, 0, 0  , 'Letter Of Guarantee - Manufacturer']),
+            ('natural'          ,  [ 0, 0, 0  , 'Natural']),
+            ('nutri'            ,  [ 0, 0, 0  , 'Nutri']),
+            ('organic'          ,  [ 0, 0, 0  , 'Organic Compliance']),
+            ('organic_cert'     ,  [ 0, 0, 0  , 'Organic Certified']),
+            ('origin'           ,  [ 0, 0, 0  , 'Origin']),
+            ('sds'              ,  [ 0, 0, 0  , 'SDS']),
+            ('specsheet'        ,  [ 0, 0, 0  , 'Specsheet']),
+            ('vegan'            ,  [ 0, 0, 0  , 'Vegan']),
         ])
 
-
-        # for r in rms:
-        #     ing = Ingredient.objects.get(rawmaterialcode=r)
-        #     for dt in docbytype:
-        #         if not Documents.objects.filter(rawmaterial=ing, doctype=dt).exists():
-        #              unverifieddocs[dt][2] += 1
-        #         else:
-        #             latest = Documents.objects.filter(rawmaterial=ing, doctype=dt).latest('expiration')
-        #             if latest.dv_count < 2 and request.user.username not in latest.get_verifiers:
-        #                 unverifieddocs[dt][0] += 1
-        #             elif latest.dv_count == 2 and not latest.verified and request.user.username not in latest.get_verifiers:
-        #                 unverifieddocs[dt][1] += 1
-        # # for r in rms:
-        # #     ing = Ingredient.objects.get(rawmaterialcode=r)
-        #
-        #
         curr_user_verified = Documents.objects.filter(verifications__verifier=request.user)
         # document ids that are verified
         doc_ids = Documents.objects.filter(verifications__final=True).values_list('id', flat=True).distinct()
         for dt in docbytype:
-            # doc ids of documents that are not verified, latest of each doc by rawmaterial
-            # docs = Documents.objects.filter(doctype=dt, rawmaterial__rawmaterialcode__in=rms).exclude(id__in =doc_ids).exclude(id__in=curr_user_verified).order_by('rawmaterial_id', '-expiration').distinct('rawmaterial')
-            # COAs work a little differently. list ALL coa, not just latest
-            if dt == "COA":
-                uv = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__lte=1, doctype=dt,rawmaterial__rawmaterialcode__in=rms).exclude(id__in=curr_user_verified)
-                review = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__gte=2, doctype=dt, rawmaterial__rawmaterialcode__in=rms).exclude(id__in=doc_ids).exclude(id__in=curr_user_verified)
-            else:
-                # documents distinct by rawmaterial, latest by expiration
-                distinct_docs = Documents.objects.filter(rawmaterial__rawmaterialcode__in=rms, doctype=dt).order_by('rawmaterial_id', '-expiration').distinct('rawmaterial')
-                uv = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__lte=1, doctype=dt,rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=curr_user_verified)
-                review = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__gte=2, doctype=dt, rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=doc_ids).exclude(id__in=curr_user_verified)
+            distinct_docs = Documents.objects.filter(rawmaterial__rawmaterialcode__in=rms, doctype=dt).order_by('rawmaterial_id', '-expiration').distinct('rawmaterial')
+            uv = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__lte=1, doctype=dt,rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=curr_user_verified)
+            review = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__gte=2, doctype=dt, rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=doc_ids).exclude(id__in=curr_user_verified)
                 # rawmaterials that have been verified for this document type
 
             rms_w_docs = Documents.objects.filter(doctype=dt, rawmaterial__rawmaterialcode__in=rms).distinct('rawmaterial')
@@ -6781,7 +6800,6 @@ def document_verification(request, doc_id):
             'access/ingredient/document_verification.html',
             {
                 'message':'',
-                # 'documents':d,
                 'unverified':unverifieddocs,
                 'page_title':pagetitle,
                 'ingredients':ingredients,
@@ -6789,6 +6807,15 @@ def document_verification(request, doc_id):
                 'admin':admin,
             }
         )
+
+def calculate_nutri_weight(nutri, weight):
+    if weight == 'total':
+        return nutri.FA_Poly + nutri.FA_Mono + nutri.FA_Sat + nutri.TotalFat + nutri.Water + nutri.Protein + nutri.FlavorContent + nutri.ethyl + nutri.fusel + nutri.pg + nutri.tri_citrate + nutri.glycerin + nutri.triacetin + nutri.Carbohydrt + nutri.Sugars + nutri.Fiber_TD + nutri.Ash
+    elif weight == 'fat':
+        return nutri.FA_Poly + nutri.FA_Mono + nutri.FA_Sat + nutri.TotalFat
+    elif weight == 'carbs':
+        return nutri.Carbohydrt + nutri.Sugars + nutri.Fiber_TD
+
 
 def RMS_PurchasedLastThreeYears():
     three_years_ago = date.today() - relativedelta(years=3)
@@ -6846,26 +6873,6 @@ def mass_upload(request):
             'ingbreak',
         ]
 
-        # Country of Origin       = coo
-        # specsheet               = spec
-        # GMO                     = GMO
-        # GMO Certification       = GMOCERT
-        # Letter of Guarantee     = LOG
-        # SDS                     = SDS
-        # Kosher                  = kosher
-        # Form20                  = form20
-        # Form20-Audit Report     = form20ar
-        # Form20 Certificate      = form20c
-        # Halal                   = Halal
-        # Allergen                = Allergen
-        # Nutri                   = Nutri
-        # Cerificate of Insurance = COI
-        # Organic Compliance      = oc
-        # Vegan                   = vegan
-        # Natural                 = nat
-        # Form40                  = form40
-        # Cerificate of Analysis  = COA
-        # Ingredient Breakdown    = ingbreak
         dtod = {
             'coo':'origin',
             'spec':'specsheet',
@@ -6895,18 +6902,15 @@ def mass_upload(request):
         if 'massupload' in request.POST:
 
             for f in request.FILES.getlist('doc'):
-                # filename = open(f.path)
                 docinfo = f.name[0:-4].split('_')
 
                 if(rep_int(docinfo[0]) and Ingredient.objects.filter(id=int(docinfo[0])).exists()):
-                    # doctype = docinfo[1].lower()
                     i = Ingredient.objects.filter(id=int(docinfo[0]))
                     # if document of that name already exists
                     if Documents.objects.filter(uploadfile__icontains="/"+f.name).exclude(uploadfile__icontains="/Temp").exists():
                         name_err.append(f.name)
                     elif(len(i) > 1):
                         multiples.append(f.name)
-                        # multiplesupps[f] = i
                         t = Documents(uploader=request.user, uploadfile=f)
                         t.save()
                         multiplesupps[t] = i
@@ -6915,10 +6919,8 @@ def mass_upload(request):
                         tempf = File(f)
                         validtag = False
                         for dt in docinfo[1:]:
-                            if dt.lower() in list(dtod.keys()):
+                            if dt.lower() in dtod.keys():
                                 d = Documents(rawmaterial=i[0], doctype=dtod[dt.lower()], uploader=request.user, uploadfile=tempf)
-                                # d.save()
-                                # instead of saving, attach to temps array and save location_entry
                                 temps.append(d)
                                 validtag = True
 
@@ -6929,8 +6931,6 @@ def mass_upload(request):
 
                     else:
                         d = Documents(rawmaterial=i[0], doctype=dtod[docinfo[1].lower()], uploader=request.user, uploadfile=f)
-                        # d.save()
-                        # instead of saving, attach to temps array and save location_entry
                         temps.append(d)
                         success.append(f.name)
 
@@ -6947,9 +6947,6 @@ def mass_upload(request):
                     request,
                     'access/ingredient/mass_upload.html',
                     {
-                        # 'files':request.FILES.getlist("doc"),
-                        # 'file_list':files,
-                        # 'pending':pendingdocs,
                         'success':success,
                         'multiples':multiples,
                         'multiplesupps':multiplesupps,
@@ -6958,10 +6955,8 @@ def mass_upload(request):
                     }
                 )
 
-# how to get doctype???
         elif 'choosesupplier' in request.POST or 'pending' in request.POST:
-            # dt = request.POST.get('doctype')
-            # blankdocs = Documents.objects.filter(uploader=request.user, rawmaterial=None)
+
             for c in request.POST.getlist('supplist'):
                 if c == 'idk':
                     continue
@@ -6980,8 +6975,7 @@ def mass_upload(request):
                     dtypes.pop(0)
                     for dt in dtypes:
                         try:
-                            # blankdoc = Documents.objects.filter(uploadfile__icontains=filename, rawmaterial=None, uploader=request.user).filter(uploadfile__icontains='Temp')
-                            # blankdoc.update(rawmaterial = i, doctype=dtod[dt], uploadfile= assignfile)
+
                             d = Documents(rawmaterial = i, doctype=dtod[dt.lower()], uploadfile= assignfile, uploader=request.user)
                             d.save()
                             blankdoc.delete()
@@ -6994,12 +6988,6 @@ def mass_upload(request):
                         'access/ingredient/mass_upload.html',
                         {
                             'message':"no ingredient",
-                            # 'files':request.POST.getlist('supplist'),
-                            # # 'file_list':files,
-                        #     'success':request.POST.getlist('supplist'),
-                        #     'multiples':blankdocs,
-                        #     # 'multiplesupps':multiplesupps,
-                        #     'misnamed':dt,
                         }
                     )
 
@@ -7007,13 +6995,7 @@ def mass_upload(request):
                 request,
                 'access/ingredient/mass_upload.html',
                 {
-                    # 'files':request.POST.getlist('supplist'),
-                    # # 'file_list':files,
                     'success':request.POST.getlist('supplist'),
-                    # 'pending':pendingdocs,
-                    # 'multiples':blankdocs,
-                    # 'multiplesupps':multiplesupps,
-                    # 'misnamed':dt,
                 }
             )
 
@@ -7092,7 +7074,7 @@ def flavor_copier(request):
                 'nflavor':nflavor,
                 'olist':oflavor_list,
                 'nlist':nflavor_list,
-                'flist':list(zip(alist, oflavor_list, nflavor_list)),
+                'flist':zip(alist, oflavor_list, nflavor_list),
                 'page_title':page_title,
 
             }
@@ -7144,13 +7126,6 @@ def training(request):
 
     # filter tests based on user group
     t=unfinished_training_log(request.user, request.user.groups.all()[0].name)
-    # for test in test_types:
-    #     to = Training.objects.filter(tester=request.user, passed=True, test_type = test[0])
-    #     # if test[0] in group[u.groups.all()[0].name]:
-    #     #     continue
-    #     if (not to.exists() or to[0].test_renewal > 0) and not test[0] in group[request.user.groups.all()[0].name]:
-    #         t.append(test)
-    # test_types = filter(lambda x: not x[0] in group[request.user.groups.all()[0].name] (not to.exists() or to[0].test_renewal > 0) , test_types)
 
     return render(
         request,
@@ -7184,11 +7159,13 @@ def unfinished_training_log(user, g):
         ]
     group = {
             'Production':(['sensory',],['colorblind','handbook', 'fltdt'],['facemask','ccp','osha'],['gbpp','wiki','hazcom','fooddefense', 'firedrill', 'fltv', 'wpsafety',]+fs,[]),
-            'Lab':(['sensory','facemask','osha', 'fltv', 'fltdt',],['colorblind','handbook', 'sensory', ],['ccp',],['gbpp', 'wiki', 'hazcom', 'fooddefense', 'firedrill', 'wpsafey',]+fs,[]),
+            'Lab':(['sensory','facemask','osha', 'fltv', 'fltdt',],['colorblind','handbook', 'sensory', ],['ccp',],['gbpp', 'wiki', 'hazcom', 'fooddefense', 'firedrill', 'wpsafety',]+fs,[]),
             'Customer Service':(['sensory', 'facemask', 'osha', 'fltv', 'fltdt'],['wiki', 'hazcom', 'colorblind','handbook', 'ccp',]+fs,[],['fooddefense', 'firedrill','wpsafety'],['gbpp']),
             'Sales':(['sensory', 'facemask', 'osha', 'firedrill', 'fltv', 'fltdt'],['gbpp', 'wiki', 'hazcom', 'colorblind', 'handbook', 'fooddefense','ccp', 'wpsafety',]+fs,[],[],[]),
     }
+
     exp = group[g]
+
     never = exp[0]
     once = exp[1]
     annual = exp[2]
@@ -7197,7 +7174,7 @@ def unfinished_training_log(user, g):
 
     for t in test_types:
         if not t[0] in never:
-            training = Training.objects.filter(tester=user, test_type=t[0])
+            training = Training.objects.filter(tester=user, test_type=t[0]).order_by('-completion_date')
             if not training.exists():
                 unfinished.append(t)
 
@@ -7223,21 +7200,31 @@ def training_overview(request, username):
     }
 
     employees = []
-    # if username:
+    admin = ['facemask' ,'sensory', 'firedrill', 'fltdt']
+    signature = ['gbpp', 'handbook', 'osha', 'hazcom']
+    if username:
+        questions = {}
+        usertests = Training.objects.filter(tester__username=username, passed=True)
+        usertests = list(filter(lambda t: t.test_type not in admin+signature, usertests))
+        for u in usertests:
+                questions[u.proper_name] = (Answer.objects.filter(tester__username =username, question__test_type=u.test_type), u.score)
+
+        return render(
+            request,
+            'access/training/training_overview.html',
+            {
+                'page_title':page_title,
+                'types':test_types,
+                'questions':questions
+
+            }
+        )
+
+
 
     users = User.objects.filter(is_active=True).exclude(username='test').exclude(username='TEST').exclude(username='labtest').order_by('username')
     for u in users:
-        # t = Training.objects.filter(tester=u, passed=True)
-        # t = [ x for x in test_types if Training.objects.filter(tester=u, passed=True, test_type=x).exists() and Training.objects.get(tester=u, passed=True, test_type=x).test_renewal < 0]
         t = unfinished_training_log(u, u.groups.all()[0].name)
-        # for test in test_types:
-        #     to = Training.objects.filter(tester=u, passed=True, test_type = test[0])
-        #     # if test[0] in group[u.groups.all()[0].name]:
-        #     #     continue
-        #     if (not to.exists() or to[0].test_renewal > 0) and not test[0] in group[u.groups.all()[0].name]:
-        #         t.append(test)
-        #     # else:
-        #     #     t.append()
         e = (u, t, u.groups.all()[0])
         employees.append(e)
 
@@ -7325,78 +7312,14 @@ def admin_certification(request):
     )
 
 
-def glass_and_brittle(request):
-    page_title='Glass Policy Agreement #050 ver2016'
-    # might be useless
-    if request.POST.get('username') == request.user.username and request.user.check_password(request.POST.get('pw')):
-    # save training object
-        if Training.objects.filter(test_type='gbpp', tester=request.user, passed=True).exists():
-            t = Training.objects.get(test_type='gbpp', tester=request.user, passed=True)
-            t.completion_date = date.today()
-            t.save()
-        else:
-            t = Training(test_type='gbpp', completion_date=date.today(), tester=request.user, passed=True)
-            t.save()
-        return redirect('/access/training/')
-    if not request.POST.get('signature'):
-
-        return render(
-            request,
-            'access/training/glass_and_brittle.html',
-            {
-                'error':'Not signed',
-                'page_title':page_title,
-            }
-        )
-
-    return render(
-        request,
-        'access/training/glass_and_brittle.html',
-        {
-            'page_title':page_title,
-        }
-
-    )
-# basically the same as glass/brittle
-def osha_lockout(request):
-    page_title = 'Lockout Tagout OSHA Policy #059 ver2016'
-    if request.POST.get('username') == request.user.username and request.user.check_password(request.POST.get('pw')):
-    # save training object
-        if Training.objects.filter(test_type='osha', tester=request.user, passed=True).exists():
-            t = Training.objects.get(test_type='osha', tester=request.user, passed=True)
-            t.completion_date = date.today()
-            t.save()
-        else:
-            t = Training(test_type='osha', completion_date=date.today(), tester=request.user, passed=True)
-            t.save()
-        return redirect('/access/training/')
-    if not request.POST.get('signature'):
-
-        return render(
-            request,
-            'access/training/osha.html',
-            {
-                'error':'Not signed',
-                'page_title':page_title,
-            }
-        )
-    return render(
-        request,
-        'access/training/osha.html',
-        {
-            'page_title':page_title,
-        }
-
-    )
-
 def check_answers(test, answers):
     check = {
         'wiki_review':['manager', 'police', 'manager', 'true', 'true', 'true', 'true'],
         'colorblind':['29','73', '45', '7', '26', '15', '16', '8', '5'],
         'wpsafety':['b','d','c','true','b','c','d','b','a','c','b','a','b','true', 'b', 'c', 'c', 'd', 'b', 'd', 'c'],
         'fooddefense':['d', 'c', 'b', 'true', 'true'],
-        'hazcom':[],
-        'ccp':[],
+         'hazcom':[],
+        'ccp':['true', 'peanut', 'b', 'true', 'true', 'd', 'false', 'a', 'b', 'false', 'd', 'd', 'b', 'false', 'true'],
         'fltv':['false', 'true', 'true', 'true', 'false', 'false','false','false','false','false', 'true', 'true', 'false','false','true','false','true','true','false'],
 
         # foodsafety answers
@@ -7422,7 +7345,7 @@ def check_answers(test, answers):
     for a, b in zip(answers, check[test]):
         # if not a.lower() == b:
             # return False
-        if a.lower() == b:
+        if a.lower() == b.lower():
             count += 1
 
     if (Decimal(count)/Decimal(total)) >= .7:
@@ -7430,25 +7353,7 @@ def check_answers(test, answers):
 
     return False
 
-# var_to_trainingq = {
-#         # 'gbpp':gbpp,
-#
-#
-#         # food_safety
-#         'bacteria':bacteria,
-#         'foodborne':foodborne,
-#         'personalhygiene':personalhygiene,
-#         'haccp':haccp,
-#         'sanitation':sanitation,
-#         'time':time,
-#         'foreign':foreign,
-#         'cross':cross,
-#         'allergens':allergens,
-#         'pest':pest,
-#         'security':security,
-#
-#
-# }
+
 section_dict = {
     'wiki':wiki,
     # 'colorblind':colorblind,
@@ -7456,7 +7361,8 @@ section_dict = {
     # 'fooddefense':fooddefense,
     # 'ccp':ccp,
     # 'fltv':fltv,
-
+    'wps':wps,
+    'wps2':wps2,
     'bacteria':bacteria,
     'foodborne':foodborne,
     'personalhygiene':personalhygiene,
@@ -7478,21 +7384,20 @@ section_dict = {
     'cross_sp':cross_sp,
     'allergens_sp':allergens_sp,
     'pest_sp':pest_sp,
-    'security_sp':security_sp
+    'security_sp':security_sp,
+    'ccp':ccp,
+    'fltv':fltv,
 
 }
 
-def get_training_answers(request, section):
-    answers = []
-    questions = section_dict[section]
-    for key in range(len(questions)):
-        answers.append(request.POST.get(section+str(key)))
-
-    return answers
-
 
 def save_question_response(training_obj, answers):
-    questions = section_dict[training_obj.test_type]
+    if training_obj.test_type=='wpsafety':
+        questions = wps + wps2
+
+    else:
+        questions = section_dict[training_obj.test_type]
+
     if Question.objects.filter(training__tester=training_obj.tester, training__test_type = training_obj.test_type).exists():
         Question.objects.filter(training__tester=training_obj.tester, training__test_type = training_obj.test_type).delete()
     for a, b in zip(answers, questions):
@@ -7506,408 +7411,12 @@ def save_question_response(training_obj, answers):
     # save question and response
     # how am i gonna do this for the foodsafety?!?!?
 
-def wiki_review(request):
-    page_title = 'Wiki Review'
-
-    questions = section_dict['wiki']
-    if request.method == 'POST':
-    # submit Questions
-
-        answers = get_training_answers(request, 'wiki')
-        if check_answers('wiki_review', answers):
-            # return redirect('/access/')
-
-            if Training.objects.filter(test_type='wiki', tester=request.user, passed=True).exists():
-                t = Training.objects.get(test_type='wiki', tester=request.user, passed=True)
-                t.completion_date = date.today()
-                t.save()
-            else:
-                t = Training(test_type='wiki', completion_date=date.today(), tester=request.user, passed=True)
-                t.save()
-
-            save_question_response(t, answers)
-            return redirect('/access/training/')
-
-        # correct submission
-        # if Training.objects.filter(test_type='wiki', tester=request.user, passed=True).exists():
-        #     t = Training.objects.get(test_type='wiki', tester=request.user, passed=True)
-        #     t.completion_date = date.today()
-        #     t.save()
-        # else:
-        #     t = Training(test_type='wiki', completion_date=date.today(), tester=request.user, passed=True)
-        #     t.save()
-        #
-
-
-        else:
-            return render(
-                request,
-                'access/training/wikireview.html',
-                {
-                    'page_title':page_title,
-                    'questions':questions,
-                    'section':'wiki',
-                    'alert':'Did not answer enough correctly. Try again.',
-                }
-            )
-        # if wiki1.lower() == 'manager':
-
-    return render(
-        request,
-        'access/training/wikireview.html',
-        {
-            'page_title':page_title,
-            'questions':questions,
-            'section':'wiki'
-        }
-    )
-
-
-
-def food_safety(request, section):
-
-    page_title = 'Employee Food Safety Handbook 3rd Edition Quiz'
-    fs = [
-            ('Bacteria Review', 'bacteria'),
-            ('Foodborne Illness Review', 'foodborne'),
-            ('Personal Hygiene Review', 'personalhygiene'),
-            ('HACCP Review', 'haccp'),
-            ('Sanitation Review', 'sanitation'),
-            ('Time and Temperature Controls Review', 'time'),
-            ('Foreign Material Detection Review', 'foreign'),
-            ('Cross Contamination Review', 'cross'),
-            ('Allergens Review', 'allergens'),
-            ('Pest Control Review', 'pest'),
-            ('Security Review', 'security')
-        ]
-
-    # section_dict = {
-    #     'bacteria':bacteria,
-    #     'foodborne':foodborne,
-    #     'personalhygiene':personalhygiene,
-    #     'haccp':haccp,
-    #     'sanitation':sanitation,
-    #     'time':time,
-    #     'foreign':foreign,
-    #     'cross':cross,
-    #     'allergens':allergens,
-    #     'pest':pest,
-    #     'security':security,
-    #     'bacteria_sp':bacteria_sp,
-    #     'foodborne_sp':foodborne_sp,
-    #     'personalhygiene_sp':personalhygiene_sp,
-    #     'haccp_sp':haccp_sp,
-    #     'sanitation_sp':sanitation_sp,
-    #     'time_sp':time_sp,
-    #     'foreign_sp':foreign_sp,
-    #     'cross_sp':cross_sp,
-    #     'allergens_sp':allergens_sp,
-    #     'pest_sp':pest_sp,
-    #     'security_sp':security_sp
-    #
-    # }
-    # arr = []
-    # for key in request.POST:
-    #     arr.insert(0,request.POST[key])
-    section_pdf = {
-        'bacteria':'<iframe src="https://drive.google.com/file/d/10-fWm9VsKMhNlaY81_epTHsImF8EnF1y/preview" width="1099.5" height="749"></iframe>',
-        'foodborne':'<iframe src="https://drive.google.com/file/d/1X7z8IirWvtJQ7emcpuYGdkA-JvfsNF2y/preview" width="1099.5" height="749"></iframe>',
-        'personalhygiene':'<iframe src="https://drive.google.com/file/d/1tRlXPD52Dn2QHVYp22FGByT2Q_kgzE4J/preview" width="1099.5" height="749"></iframe>',
-        'haccp':'<iframe src="https://drive.google.com/file/d/1ZByJNdWASqnOya2viuACsvOZeko1sSrt/preview" width="1099.5" height="749"></iframe>',
-        'sanitation':'<iframe src="https://drive.google.com/file/d/1nit_JUUprod7DFuMVQD20gmDQR_UHJyu/preview" width="1099.5" height="749"></iframe>',
-        'time':'<iframe src="https://drive.google.com/file/d/1rbtcfoTWzdUBt3q5k97oETSf9ooL2fJB/preview" width="1099.5" height="749"></iframe>',
-        'foreign':'<iframe src="https://drive.google.com/file/d/1k7y9L7XGofUHKGSIjmXPP8US3tRFhVhq/preview" width="1099.5" height="749"></iframe>',
-        'cross':'<iframe src="https://drive.google.com/file/d/1x6G4P-ZTqVkvF8_JSdc1qcqfSDXVp7bg/preview" width="1099.5" height="749"></iframe>',
-        'allergens':'<iframe src="https://drive.google.com/file/d/11QTVHybfvVFreAWfx0V30o0bwtVV45di/preview" width="1099.5" height="749"></iframe>',
-        'pest':'<iframe src="https://drive.google.com/file/d/11yTyf9CHj9xsS6N2ssIou18hR6IKKXZz/preview" width="1099.5" height="749"></iframe>',
-        'security':'<iframe src="https://drive.google.com/file/d/11XnI_AzyaB07gu4eWhgJiQ64Ylhkl0sx/preview" width="1099.5" height="749"></iframe>',
-        'bacteria_sp':'<iframe src="https://drive.google.com/file/d/1aDJ6l5GIKTSI-89p2JW41BYhvnDMtYEk/preview" width="1099.5" height="749"></iframe>',
-        'foodborne_sp':'<iframe src="https://drive.google.com/file/d/1h2MUmJsWWn5-LOdDzpXrUhd3OBMnwchk/preview" width="1099.5" height="749"></iframe>',
-        'personalhygiene_sp':'<iframe src="https://drive.google.com/file/d/1gouApSKF2DU7MzntWZSqk44Rkzk1Zajd/preview" width="1099.5" height="749"></iframe>',
-        'haccp_sp':'<iframe src="https://drive.google.com/file/d/1NmtUsJEF-YiRUPnhUHHKjzvHimZU6s26/preview" width="1099.5" height="749"></iframe>',
-        'sanitation_sp':'<iframe src="https://drive.google.com/file/d/17rJXtRo12ai1MDm-iozwaZPkTykKQNp-/preview" width="1099.5" height="749"></iframe>',
-        'time_sp':'<iframe src="https://drive.google.com/file/d/1H3zX0ZI8PpvX6FdwH1bJly1MKLOgq15i/preview" width="1099.5" height="749"></iframe>',
-        'foreign_sp':'<iframe src="https://drive.google.com/file/d/1eRBCsFVv7LxOgoOZ8vzB7S6VD0lNVhGP/preview" width="1099.5" height="749"></iframe>',
-        'cross_sp':'<iframe src="https://drive.google.com/file/d/1vBRf7C1JZyAALvMJuCWIRwDpCoScnGWi/preview" width="1099.5" height="749"></iframe>',
-        'allergens_sp':'<iframe src="https://drive.google.com/file/d/17sa9_akzuIwtUjteuoEIxQR5nD_Z1PXd/preview" width="1099.5" height="749"></iframe>',
-        'pest_sp':'<iframe src="https://drive.google.com/file/d/1MS0YCd-NZipWVsq-iw181d7z_6c_YxC-/preview" width="1099.5" height="749"></iframe>',
-        'security_sp':'<iframe src="https://drive.google.com/file/d/1ZSCJCk_4hjNps8EXCknjwvBdv3Q5G83Z/preview" width="1099.5" height="749"></iframe>'
-    }
-    if section:
-        questions = section_dict[section]
-        if request.method == 'POST':
-            # answers = request.POST.getlist(section)
-            answers = []
-            for key in range(len(questions)):
-                answers.append(request.POST.get(section+str(key)))
-            if check_answers(section, answers):
-                if Training.objects.filter(test_type=section, tester=request.user, passed=True).exists():
-                    t = Training.objects.get(test_type=section, tester=request.user, passed=True)
-                    t.completion_date = date.today()
-                    t.save()
-                else:
-                    t = Training(test_type=section, tester=request.user,  passed=True)
-                    t.save()
-
-                save_question_response(t , answers)
-                return redirect('/access/training/')
-            else:
-                # return redirect('/access/food_safety/'+section)
-                return render(
-                    request,
-                    'access/training/food_safety.html',
-                    {
-                        'pdf':section_pdf[section],
-                        'section':section,
-                        'alert':'Did not answer enough correctly. Try again.',
-                        'questions':questions,
-                        'page_title':page_title,
-                    }
-                )
-
-
-        return render(
-            request,
-            'access/training/food_safety.html',
-            {
-                'pdf':section_pdf[section],
-                'section':section,
-                'questions':questions,
-                'page_title':page_title,
-            }
-        )
-
-    return render(
-        request,
-        'access/training/food_safety.html',
-        {
-            # 'current':section,
-            'sections':fs,
-            'page_title':page_title,
-        }
-    )
-
-
-
-def hazcom(request):
-    page_title='Hazcom 2012'
-    if request.method == 'POST':
-        if Training.objects.filter(test_type='hazcom', tester=request.user, passed=True).exists():
-            t = Training.objects.get(test_type='hazcom', tester=request.user, passed=True)
-            t.completion_date = date.today()
-            t.save()
-        else:
-            t = Training(test_type='hazcom', tester=request.user, passed=True)
-            t.save()
-        return redirect('/access/training/')
-    return render(
-        request,
-        'access/training/hazcom.html',
-        {
-            'page_title':page_title,
-        }
-    )
-
-
-
-def employee_handbook(request):
-    page_title='Employee Handbook Confimation'
-    # might be useless
-    if request.POST.get('username') == request.user.username and request.user.check_password(request.POST.get('pw')):
-    # save training object
-        if Training.objects.filter(test_type='handbook', tester=request.user, passed=True).exists():
-            t = Training.objects.get(test_type='handbook', tester=request.user, passed=True)
-            t.completion_date = date.today()
-            t.save()
-        else:
-            t = Training(test_type='handbook', completion_date=date.today(), tester=request.user, passed=True)
-            t.save()
-        return redirect('/access/training/')
-    if not request.POST.get('signature'):
-
-        return render(
-            request,
-            'access/training/employee_handbook.html',
-            {
-                'error':'Not signed',
-                'page_title':page_title,
-            }
-        )
-
-
-    return render(
-        request,
-        'access/training/employee_handbook.html',
-        {
-            'page_title':page_title,
-        }
-
-    )
-def color_blind(request):
-    page_title = 'Color Blind Test #024 ver2015'
-    arr = ''
-    if request.method =='POST':
-
-        # answers = request.POST.getlist('cb_answer')
-        # # for a in answers:
-        # #     arr.append(a)
-        if check_answers('colorblind', request.POST.getlist('cb_answer')):
-            if Training.objects.filter(test_type='colorblind', tester=request.user, passed=True).exists():
-                t = Training.objects.get(test_type='colorblind', tester=request.user, passed=True)
-                t.completion_date = date.today()
-                t.save()
-            else:
-                t = Training(test_type='colorblind', tester=request.user, passed=True)
-                t.save()
-            return redirect('/access/training/')
-        else:
-            arr = 'Incorrect answers. Try again.'
-        # return render(
-        #     request,
-        #     'access/training/colorblindtest.html',
-        #     {
-        #         # 'answers':arr,
-        #         'page_title':page_title,
-        #     }
-        # )
-
-    return render(
-        request,
-        'access/training/colorblindtest.html',
-        {
-            'answers':arr,
-            'page_title':page_title,
-        }
-    )
-def food_defense(request):
-    page_title = 'Food Defense Plan Training #061 ver2016'
-    arr = []
-    if request.method == "POST":
-        responses = request.POST.getlist('fd_response')
-        questions = [
-                        'What types of suspicious activity should be reported to your supervisor?',
-                        'What steps would we use to approve a new supplier?',
-                        'Where can a trucker go?',
-                        'Where can a contractor go?',
-                        'What types of suspicious activity should be reported to your supervisor?What steps would we use to approve a new supplier? Where can a trucker go? Where can a contractor go? What would you do it you have an unfinished batch and it is time to go for the day?',
-                    ]
-        if Training.objects.filter(test_type='fooddefense', tester=request.user, passed=True).exists():
-            t = Training.objects.get(test_type='fooddefense', tester=request.user, passed=True)
-            t.completion_date = date.today()
-            t.save()
-        else:
-            t = Training(test_type='fooddefense', tester=request.user, passed=True)
-            t.save()
-        return redirect('/access/training/')
-        # for q, r in zip(questions,responses):
-        #     qo = Question(question=q, answer=r,training=t)
-        #     qo.save()
-        #     arr.append(q)
-        #     arr.append(r)
-    return render(
-        request,
-        'access/training/fooddefense.html',
-        {
-            'answers':arr,
-            'page_title':page_title,
-        }
-    )
-
-
-################################## NEED ANSWER CHECK (user dict to coordinate answers) #############################################
-def ccp_allergen(request):
-    page_title = "CCP and Allergen HACCP Questionnaire #060 ver2016"
-    if request.method == 'POST':
-        if Training.objects.filter(test_type='ccp', tester=request.user, passed=True).exists():
-            t = Training.objects.get(test_type='ccp', tester=request.user, passed=True)
-            t.completion_date = date.today()
-            t.save()
-        else:
-            t = Training(test_type='ccp', tester=request.user, passed=True)
-            t.save()
-        return redirect('/access/training/')
-        arr = []
-        for key in request.POST:
-            arr.insert(0,request.POST[key])
-        return render(
-            request,
-            'access/training/ccp_allergen.html',
-            {
-                'answers':arr,
-                'page_title':page_title,
-            }
-        )
-    return render(
-        request,
-        'access/training/ccp_allergen.html',
-        {
-            'page_title':page_title,
-        }
-    )
-
-
-# def fork_lift(request):
-def fork_lift_video(request):
-    page_title = 'Fork Lift Quiz'
-
-
-    if request.method == 'POST':
-        if Training.objects.filter(test_type='fltv', tester=request.user, passed=True).exists():
-            t = Training.objects.get(test_type='fltv', tester=request.user, passed=True)
-            t.completion_date = date.today()
-            t.save()
-        else:
-             t = Training(test_type='fltv', tester=request.user, passed=True)
-             t.save()
-        return redirect('/access/training/')
-
-    if request.GET.get('spanish'):
-            return render(
-                request,
-                'access/training/fltcert.html',
-                {
-                    'questions':fltc_sp,
-                    'page_title':page_title,
-                }
-            )
-
-    return render(
-        request,
-        'access/training/fltcert.html',
-        {
-            'questions':fltc,
-            'page_title':page_title,
-        }
-    )
-def workplace_safety(request):
-    page_title="Workplace Safety Quiz"
-
-    if request.method == 'POST':
-
-            if Training.objects.filter(test_type='wpsafety', tester=request.user, passed=True).exists():
-                t = Training.objects.get(test_type='wpsafety', tester=request.user, passed=True)
-                t.completion_date = date.today()
-                t.save()
-            else:
-                 t = Training(test_type='wpsafety', tester=request.user, passed=True)
-                 t.save()
-            return redirect('/access/training/')
-
-    return render(
-        request,
-        'access/training/workplace_safety.html',
-        {
-            'questions':wps,
-            'questions2':wps2,
-            'page_title':page_title,
-        }
-    )
 
 def docreview_comparison(request, document_id):
     doc = Documents.objects.get(id=document_id)
     dv  = DocumentVerification.objects.filter(document=doc)
-    temp_ing_dict = list(dv[0].temp_ingredient.__dict__.keys())
-    temp_nutri_dict = list(dv[0].temp_nutri.__dict__.keys())
+    temp_ing_dict = dv[0].temp_ingredient.__dict__.keys()
+    temp_nutri_dict = dv[0].temp_nutri.__dict__.keys()
 
 
     temp_ing_dict.remove('_state')
@@ -7958,29 +7467,363 @@ def docreview_comparison(request, document_id):
     )
 
 
-# ss = SpecSheetInfo.objects.filter(one_off_customer=None, flavor__phase="Liquid")
-#
-# for s in ss:
-#     setattr(s, 'aerobic_plate_count', '<10,000 gm')
-#     setattr(s, 'escherichia_coli', '<10/gm')
-#     setattr(s, 'salmonella', 'Negative/375gm')
-#     setattr(s, 'yeast', '<100/gm')
-#     setattr(s, 'mold', '<100/gm')
-#     setattr(s, 'coliforms', '<100/gm')
-#     setattr(s, 'listeria', 'Negative/25g')
-#     s.save()
+signature_test = ['osha', 'gbpp', 'handbook',]
+def check_submitted_answers(request, questions, section):
+    # delete all answers from previous test taken
 
+    Answer.objects.filter(tester=request.user, question__test_type=section).delete()
+    point_count = 0
+    # special case for signature
+    if section in signature_test:
+        if request.POST.get('username') == request.user.username and request.user.check_password(request.POST.get('pw')):
+            return True
+        else:
+            return False
 
-def test_api_view(request):
+    # compare question and posted answer to correct answers
+    for q in questions:
+        temp = request.POST.get(str(q.id))
+        if q.correct_answer.lower() == temp.lower():
+            point_count+=1
+        a = Answer(tester=request.user, question = q, answer = temp)
+        a.save()
+
+    # return true if scored above 70%
+    if (Decimal(point_count)/Decimal(questions.count())) >= .7 or section=='survey':
+        return True
+
+    return False
+
+def training_test(request, test_type):
+
+    test_resources = {
+        'ccp':['CCP and Allergen HACCP Questionnaire #060 ver2020','<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRmsuCLsEqZpaMZQpiqddlWASV85EOJTXrsTzfl-SSHxiHxkcU0Qb7iM12iuaqBH2ahqK_SJD4RHlEW/embed?start=false&loop=false&delayms=3000" frameborder="0" width="1100" height="647" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>'],
+        'gbpp':['Glass Policy Agreement #050 ver2016','''<p>
+                  It is the intent of the company to eliminate or at least minimize the usage of glass and brittle plastics in the plant.
+                  <ol>
+                    <li>Exception - within the Free Area Zone (located between the Plant Men's Locker room, Loading dock area and Front Office Access Door by the large
+                      Cold Storage Room), sample bottles (112 oz. Can be taken and sent in the QC lab for Raw Material Approval.</li>
+                    <li>If samples are taken of raw materials that have been approved, for R&D used; try to avoid the use of glass.
+                      If glass must be used, the person carrying the glass should keep it with them at all times, and then bring the bottle immediately to the Laboratory.
+                    </li>
+                    <li>Glass can be used in the Small Production Lab. 1-2 Pound bottles are used here for inventory, storage and sale.</li>
+                    <li>If glass is seen in production it is to be immediately removed.</li>
+                    <li>Shoes should be inspected before reentering the production area.  If glass is present shoes must be left outside and a new pair will be provided.</li>
+                    <li>Contaminated clothing should be placed in a plastic bag and put in the uniform cleaning service bin labeled glass contamination.</li>
+                    <li>If there is a breakage of glass; it is not to be cleaned up. A supervisor must be called and the plume of damage must be assessed. If any open containers, or potential contamination of raw materials or finished products could have occurred, an immediate assessment of the situation must be made. It will be reported in the emergency condition log, and signed by the supervisor. Product so contaminated will be thrown away. If equipment is involved, and the glass is not readily accessible, it shall be dismantled. In the case of inability to dismantle the equipment it shall either be disposed of or professionally repaired.</li>
+                    <li>The person involved will go outside and brush him or herself off. A special glass emergency broom will be used, with dustpan, and these will all be thrown out after use and replaced.</li>
+                    <li>Everyone is to sign an acknowledgement of this policy. Periodic interview by management will occur and results be placed in the personnel file to assure the information is retained. This will start randomly 2 months after the signing of the acknowledgement, and will continue to occur until the employee demonstrates a retained knowledge of the procedure.</li>
+                  </ol>
+
+                </p>
+                <p>
+                  By checking the box and signing below, I understand and agree to comply with what I have read.
+                </p>'''],#sign
+        'wiki':['Wiki Review','''<div>
+                Directions:
+                <ol>
+                  <li><a href="http://fdiwiki.flavordynamics.lan/wiki/index.php/Security" target="_blank"> Click here</a> to open the wiki.</li>
+                  <li>Read through it</li>
+                  <li>Find outside inspectors and the name of the file to read as published by FEMA</li>
+                </ol>
+                <br>
+            </div>'''],
+        'hazcom':['',''],
+        'handbook':['Employee Handbook Confimation',''' <head>
+                          <link rel="stylesheet" type="text/css" href='/static/css/training.css'/>
+                        </head>
+                        <p><a href="http://fdiwiki.flavordynamics.lan/wiki/index.php/Category:EMPLOYEE_HANDBOOK" target="_blank">Click here</a> to view the FDI employee handbook.</p>
+
+                        <p> By completing the form below, you acknowledge that you have read and will abide by the policies noted in the handbook.</p>
+                        '''],#sign
+        'colorblind':['Color Blind Test #024 ver2015','<img src="../../../static/images/colorblindtest.jpg" height="1100px" width="1100px">'],
+        'fooddefense':['Food Defense Plan Training #061 ver2016','''
+                    <div>
+                      <p>  We have done a careful analysis of the Food Defense System in place at Flavor Dynamics, Inc.   This, in accordance with criteria set forth by the Food and Drug Administration and the cooperation of the employees will assure the safety of our products.
+                        The Food and Drug Administration defines 4 parts to the Food Defense Program, namely;
+                      </p>
+                      <ol>
+                        <li>Actionable Process Steps – This is similar to the Risk Analysis we had to do for our HACCP Plan.</li>
+                        <li>Focused Mitigation Strategy – This is similar to identifying our CCP’s and Good Manufacturing Practices.</li>
+                        <li>Procedures for Monitoring Corrective Actions and Verification – All Similar to our HACCP Plan.</li>
+                        <li>Documentation – The main system of HACCP control.</li>
+                      </ol>
+                      <h3>IDENTIFICATION OF VULNERABILITIES</h3>
+                      <p> The first step in Identifying Vulnerabilities is to define them into three categories </p>
+                      <ol>
+                        <li>Entry from doors by unauthorized individuals.</li>
+                        <li>Addition of contaminants to batches.</li>
+                        <li>Adulteration of raw materials or packaging before receipt.</li>
+                      </ol>
+                      <h3>ACTIONABLE PROCESS</h3>
+                      <ol>
+                        <li>Door Entry Monitoring – Cameras are employed at all doors, codes are used for entrance in secondary door, and employee cards enable access into entryways.  Visitors are known.  They sign secrecy agreements and sign in at the front entrance.  Only deliveries and shipments are made at the side entrances.  Unless there is need for ground level entrance, only employees use the rear door.</li>
+                        <li>Constant Oversight of Process and Prevention of Contamination to Batch – Employees have individual carts that they monitor.  They keep track of all batches.  The will report any suspicious activity of outside contractors; they will safely store items overnight so no contamination can occur.</li>
+                        <li>Supplier Documentation – Supplier of raw materials and packaging are monitored annually and the form #20 Supplier Questionnaire ver 2015 and Form #40 Lot Traceability Questionnaire ver 2015.   These suppliers are well known in the industry and we have been dealing with them for many years.</li>
+                      </ol>
+                    </div>
+                '''],
+        'facemask':['',''],#admin
+        'sensory':['',''],#admin
+        'osha':['Lockout Tagout OSHA Policy #059 ver2016','''
+                    <p>
+                      What must employers do to protect employees?
+                      <ol>
+                        <li>
+                          The standards establish requirements that employers must follow when employees are exposed to hazardous energy while servicing and maintaining equipment and machinery. Some of the most critical requirements from these standards are outlined below:
+                          <ol type='a'>
+                            <li>Develop, implement, and enforce an energy control program.</li>
+                            <li>Use lockout devices for equipment that can be locked out. Tagout devices may be used in lieu of lockout devices only if the tagout program provides employee protection equivalent to that provided through a lockout program.</li>
+                            <li>Ensure that new or overhauled equipment is capable of being locked out.</li>
+                            <li>Develop, implement, and enforce an effective tagout program if machines or equipment are not capable of being locked out.</li>
+                            <li>Develop, document, implement, and enforce energy control procedures. [See the note to 29 CFR 1910.147(c)(4)(i) for an exception to the documentation requirements.]</li>
+                            <li>Use only lockout/tagout devices authorized for the particular equipment or machinery and ensure that they are durable, standardized, and substantial.</li>
+                            <li>Ensure that lockout/tagout devices identify the individual users.</li>
+                            <li>Establish a policy that permits only the employee who applied a lockout/tagout device to remove it. [See 29 CFR 1910.147(e)(3) for exception.]</li>
+                            <li>Inspect energy control procedures at least annually.</li>
+                            <li>Provide effective training as mandated for all employees covered by the standard.</li>
+                            <li>Comply with the additional energy control provisions in OSHA standards when machines or equipment must be tested or repositioned, when outside contractors work at the site, in group lockout situations,</li>
+                          </ol>
+                        </li>
+                        <li>
+                          The facility uses a lever switch to turn on the dry blenders in the powder room.
+                          <ol type='a'>
+                            <li>Lock out systems using locks and keys are used to assure the switch is in the off or circuit open (no electricity running) position.</li>
+                            <li>There is no new or overhauled equipment.</li>
+                            <li>The equipment can be effectively locked out.</li>
+                            <li>The procedure for lockout/tagout is documented in the Portal of the Company.  Employees are trained on how to review this information.</li>
+                            <li>The locks used are suitable for the switches.</li>
+                            <li>There are only two individuals who use the powder rooms.</li>
+                            <li>Same as f.</li>
+                            <li>Inspected during the monthly walkthrough.</li>
+                            <li>Annual training is documented.</li>
+                            <li>Outside contractors are carefully monitored when in the powder room.</li>
+                          </ol>
+                        </li>
+                      </ol>
+
+                      <p>I have carefully read the above and am in compliance with the policies and procedures of the company.</p>
+                    </p>
+                '''],#sign
+        'firedrill':['',''],#admin
+        'fltv':['Fork Lift Training Video Quiz','<iframe width="1099.5" height="630" src="https://www.youtube.com/embed/toFKdtV_ZO4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'],
+        'fltv_sp':['Fork Lift Training Video Quiz','<iframe width="1099.5" height="630" src="https://www.youtube.com/embed/toFKdtV_ZO4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'],
+        'fltdt':['',''],#admin
+        'wpsafety':['Workplace Safety Quiz','<iframe width="1099.5" height="630" src="https://www.youtube.com/embed/uA97kEnK3kw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'],
+        'survey':['Food Safety Survey','''
+                    <p> Please rate your opinion on each statement as accurately and honestly as possible. </p>
+                '''],
+        'bacteria':['Bacteria Review','<iframe src="https://drive.google.com/file/d/10-fWm9VsKMhNlaY81_epTHsImF8EnF1y/preview" width="1099.5" height="749"></iframe>'],
+        'foodborne':['Foodborne Illness Review','<iframe src="https://drive.google.com/file/d/1X7z8IirWvtJQ7emcpuYGdkA-JvfsNF2y/preview" width="1099.5" height="749"></iframe>'],
+        'personalhygiene':['Personal Hygiene Review','<iframe src="https://drive.google.com/file/d/1tRlXPD52Dn2QHVYp22FGByT2Q_kgzE4J/preview" width="1099.5" height="749"></iframe>'],
+        'haccp':['HACCP Review','<iframe src="https://drive.google.com/file/d/1ZByJNdWASqnOya2viuACsvOZeko1sSrt/preview" width="1099.5" height="749"></iframe>'],
+        'sanitation':['Sanitation Review','<iframe src="https://drive.google.com/file/d/1nit_JUUprod7DFuMVQD20gmDQR_UHJyu/preview" width="1099.5" height="749"></iframe>'],
+        'time':['Time and Temperature Controls Review','<iframe src="https://drive.google.com/file/d/1rbtcfoTWzdUBt3q5k97oETSf9ooL2fJB/preview" width="1099.5" height="749"></iframe>'],
+        'foreign':['Foreign Material Detection Review','<iframe src="https://drive.google.com/file/d/1k7y9L7XGofUHKGSIjmXPP8US3tRFhVhq/preview" width="1099.5" height="749"></iframe>'],
+        'cross':['Cross Contamination Review','<iframe src="https://drive.google.com/file/d/1x6G4P-ZTqVkvF8_JSdc1qcqfSDXVp7bg/preview" width="1099.5" height="749"></iframe>'],
+        'allergens':['Allergens Review','<iframe src="https://drive.google.com/file/d/11QTVHybfvVFreAWfx0V30o0bwtVV45di/preview" width="1099.5" height="749"></iframe>'],
+        'pest':['Pest Control Review','<iframe src="https://drive.google.com/file/d/11yTyf9CHj9xsS6N2ssIou18hR6IKKXZz/preview" width="1099.5" height="749"></iframe>'],
+        'security':['Security Review','<iframe src="https://drive.google.com/file/d/11XnI_AzyaB07gu4eWhgJiQ64Ylhkl0sx/preview" width="1099.5" height="749"></iframe>'],
+        'bacteria_sp':['Bacteria Review','<iframe src="https://drive.google.com/file/d/1aDJ6l5GIKTSI-89p2JW41BYhvnDMtYEk/preview" width="1099.5" height="749"></iframe>'],
+        'foodborne_sp':['Foodborne Illness Review','<iframe src="https://drive.google.com/file/d/1h2MUmJsWWn5-LOdDzpXrUhd3OBMnwchk/preview" width="1099.5" height="749"></iframe>'],
+        'personalhygiene_sp':['Personal Hygiene Review','<iframe src="https://drive.google.com/file/d/1gouApSKF2DU7MzntWZSqk44Rkzk1Zajd/preview" width="1099.5" height="749"></iframe>'],
+        'haccp_sp':['HACCP Review','<iframe src="https://drive.google.com/file/d/1NmtUsJEF-YiRUPnhUHHKjzvHimZU6s26/preview" width="1099.5" height="749"></iframe>'],
+        'sanitation_sp':['Sanitation Review','<iframe src="https://drive.google.com/file/d/17rJXtRo12ai1MDm-iozwaZPkTykKQNp-/preview" width="1099.5" height="749"></iframe>'],
+        'time_sp':['Time and Temperature Controls Review','<iframe src="https://drive.google.com/file/d/1H3zX0ZI8PpvX6FdwH1bJly1MKLOgq15i/preview" width="1099.5" height="749"></iframe>'],
+        'foreign_sp':['Foreign Material Detection Review','<iframe src="https://drive.google.com/file/d/1eRBCsFVv7LxOgoOZ8vzB7S6VD0lNVhGP/preview" width="1099.5" height="749"></iframe>'],
+        'cross_sp':['Cross Contamination Review','<iframe src="https://drive.google.com/file/d/1vBRf7C1JZyAALvMJuCWIRwDpCoScnGWi/preview" width="1099.5" height="749"></iframe>'],
+        'allergens_sp':['Allergens Review','<iframe src="https://drive.google.com/file/d/17sa9_akzuIwtUjteuoEIxQR5nD_Z1PXd/preview" width="1099.5" height="749"></iframe>'],
+        'pest_sp':['Pest Control Review','<iframe src="https://drive.google.com/file/d/1MS0YCd-NZipWVsq-iw181d7z_6c_YxC-/preview" width="1099.5" height="749"></iframe>'],
+        'security_sp':['Security Review','<iframe src="https://drive.google.com/file/d/1ZSCJCk_4hjNps8EXCknjwvBdv3Q5G83Z/preview" width="1099.5" height="749"></iframe>'],
+    }
+
+    spanish = False
+    test_material = test_resources[test_type][1]
+    section = test_type
+    if '_sp' in test_type:
+        section = test_type[:-3]
+        spanish = True
+
+    q = Question.objects.filter(test_type = section, spanish_version=spanish)
+
+    spanish_versions = [
+                        'bacteria',
+                        'foodborne',
+                        'personalhygiene',
+                        'haccp',
+                        'sanitation',
+                        'time',
+                        'foreign',
+                        'cross',
+                        'allergens',
+                        'pest',
+                        'security',
+                        'fltv',
+                        ]
+    if request.method == 'POST':
+        Training.objects.filter(tester=request.user, test_type=section).delete()
+        if check_submitted_answers(request, q, section):
+            t = Training(test_type=section, tester=request.user, complete=True, passed=True, spanish_version=spanish)
+            t.save()
+            messages.add_message(request, messages.SUCCESS, 'Passed')
+
+            return redirect('../../../access/training/')
+        else:
+            t = Training(test_type=section, tester=request.user, complete=True, passed=False, spanish_version=spanish)
+            t.save()
+            return render(
+                request,
+                'access/training/training_test.html',
+                {
+                    'page_title':test_resources[test_type][0],
+                    'test_type':test_type,
+                    'questions':q,
+                    'test_material':test_material,
+                    'signature_test':signature_test,
+                    'spanish_version':spanish_versions,
+                    'message':'Did not pass. Please try again.',
+                    'section':section,
+                }
+            )
+
+        # review and/or save answers
+
     return render(
         request,
-        'access/flavor/test.html',
+        'access/training/training_test.html',
         {
+            'page_title':test_resources[test_type][0],
+            'test_type':test_type,
+            'questions':q,
+            'test_material':test_material,
+            'signature_test':signature_test,
+            'spanish_version':spanish_versions,
+            'section':section,
 
         }
     )
 
-# @FlavorView(['GET', 'POST', 'PUT'])
-class FlavorView(viewsets.ModelViewSet):
-    queryset = Flavor.objects.all()
-    serializer_class = FlavorSerializer
+
+def convert_trainingpy_to_objects():
+    fd = {
+        'bacteria':bacteria,
+        'foodborne':foodborne,
+        'personalhygiene':personalhygiene,
+        'haccp':haccp,
+        'sanitation':sanitation,
+        'time':time,
+        'foreign':foreign,
+        'cross':cross,
+        'allergens':allergens,
+        'pest':pest,
+        'security':security,
+        'fltv':fltv,
+    }
+    fdsp = {
+        'bacteria':bacteria_sp,
+        'foodborne':foodborne_sp,
+        'personalhygiene':personalhygiene_sp,
+        'haccp':haccp_sp,
+        'sanitation':sanitation_sp,
+        'time':time_sp,
+        'foreign':foreign_sp,
+        'cross':cross_sp,
+        'allergens':allergens_sp,
+        'pest':pest_sp,
+        'security':security_sp,
+        'fltv':fltv_sp
+    }
+
+    # wiki
+    for w in wiki:
+        q = Question(test_type="wiki", question=w[0], correct_answer=w[3])
+        answeropts = []
+        if len(w[1])> 1:
+            for key, val in w[1].iteritems():
+                print key, val
+                answeropts.append([key, val])
+        q.answer_options = answeropts
+        q.save()
+
+
+    # food_safety handbooks
+    for key, val in fd.iteritems():
+        for v in val:
+            q = Question(test_type=key, question=v[0], correct_answer=v[3])
+            answeropts = []
+            if len(v[1]) > 1:
+                for akey, aval in v[1].iteritems():
+                    print akey, aval
+                    answeropts.append([akey, aval])
+            q.answer_options = answeropts
+            q.save()
+
+    for key, val in fdsp.iteritems():
+        for v in val:
+            q = Question(test_type=key, question=v[0], correct_answer=v[3], spanish_version=True)
+            answeropts = []
+            if len(v[1]) > 1:
+                for akey, aval in v[1].iteritems():
+                    print akey, aval
+                    answeropts.append([akey, aval])
+            q.answer_options = answeropts
+            q.save()
+
+    # food Defense
+    for fd in fooddefense:
+        q = Question(test_type="fooddefense", question=fd[0], correct_answer=fd[3])
+        answeropts = []
+        if len(fd[1])> 1:
+            for key, val in fd[1].iteritems():
+                print key, val
+                answeropts.append([key, val])
+        q.answer_options = answeropts
+        q.save()
+
+    # ccp/haccp
+    for c in ccp:
+        q = Question(test_type="ccp", question=c[0], correct_answer=c[3])
+        answeropts = []
+        if len(c[1])> 1:
+            for key, val in c[1].iteritems():
+                print key, val
+                answeropts.append([key, val])
+        q.answer_options = answeropts
+        q.save()
+
+    # forklift
+    for f in fltv:
+        q = Question(test_type="fltv", question=f[0], correct_answer=f[3])
+        answeropts = []
+        if len(f[1])> 1:
+            for key, val in f[1].iteritems():
+                print key, val
+                answeropts.append([key, val])
+        q.answer_options = answeropts
+        q.save()
+
+    # wpsafety
+    for wp in wps + wps2:
+        q = Question(test_type="wpsafety", question=wp[0], correct_answer=wp[3])
+        answeropts = []
+        if len(wp[1])> 1:
+            for key, val in wp[1].iteritems():
+                print key, val
+                answeropts.append([key, val])
+        q.answer_options = answeropts
+        q.save()
+
+    # Survey
+    for s in survey:
+        q = Question(test_type="survey", question=s[0])
+        answeropts = []
+        if len(s[1])> 1:
+            for key, val in s[1].iteritems():
+                print key, val
+                answeropts.append([key, val])
+        q.answer_options = answeropts
+        q.save()
+
+    for c in colorblind:
+        q = Question(test_type='colorblind', question='', correct_answer=c[3])
+        q.save()

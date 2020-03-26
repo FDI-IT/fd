@@ -133,7 +133,7 @@ def instantiate_integrated_product_objects():
             for field in psi_fields_to_migrate:
                 setattr(ip, field, getattr(psi, field))
         except ProductSpecialInformation.DoesNotExist:
-            print(f)
+            print f
         ip.save()
         
 def instantiate_formula_objects():
@@ -258,7 +258,7 @@ def dictify_flavors_by_number():
     flavor_qs = Flavor.objects.all()
     flavor_dict = {}
     for fn in flavor_numbers:
-        print(fn)
+        print fn
         f = flavor_qs.get(number=fn)
         flavor_dict[fn] = dictify_my_flavor(f)
     return flavor_dict
@@ -285,7 +285,7 @@ def jaccard_index(a,b):
 def test_ji_batch(flavor_dict, batch_size=100000,threshold=0.9, ji_func=jaccard_index):
     count=0    
     for x in range(0,len(flavor_numbers)):
-        print(x)
+        print x
         for y in range(x+1,len(flavor_numbers)):
             if count > batch_size:
                 return
@@ -293,18 +293,18 @@ def test_ji_batch(flavor_dict, batch_size=100000,threshold=0.9, ji_func=jaccard_
                 count+=1
             ji = ji_func(flavor_dict[flavor_numbers[x]],flavor_dict[flavor_numbers[y]])
             if ji > threshold:
-                print("%s, %s" % (flavor_numbers[x],flavor_numbers[y]))
+                print "%s, %s" % (flavor_numbers[x],flavor_numbers[y])
 
 
 def test_ji_all(flavor_dict,threshold=0.9):
     ji_results = []
     for x in range(0,len(flavor_numbers)):
-        print(x)
+        print x
         for y in range(x+1,len(flavor_numbers)):
             ji = jaccard_index(flavor_dict[flavor_numbers[x]],flavor_dict[flavor_numbers[y]])
             if ji > threshold:
                 ji_results.append((x,y,ji))
-                print("%s, %s" % (flavor_numbers[x],flavor_numbers[y]))
+                print "%s, %s" % (flavor_numbers[x],flavor_numbers[y])
 
     return ji_results
 

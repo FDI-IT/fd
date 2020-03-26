@@ -2,7 +2,7 @@ from datetime import date
 from django import forms
 from django.forms.formsets import BaseFormSet
 from django.forms import widgets
-from django.forms.widgets import SelectDateWidget
+from django.forms.extras.widgets import SelectDateWidget
 from django.db import connection
 from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
@@ -10,7 +10,7 @@ from cgi import escape
 
 import re
 
-from access.models import Flavor, Ingredient
+from access.models import Flavor, Ingredient, Supplier, Manufacturer
 
 from newqc.models import Retain, RMRetain, TestCard, Lot, ReceivingLog, ProductInfo, STATUS_CHOICES, UNITS_CHOICES, COA, TestResult, KOSHER_GROUP_CHOICES
 from newqc import controller
@@ -20,7 +20,7 @@ class AddObjectsBatch(forms.Form):
 
 def validate_flavor_number(num):
     if Flavor.objects.filter(number = num).exists() == False:
-        raise ValidationError("Please input a valid flavor number.")
+        raise ValidationError(u"Please input a valid flavor number.")
 
 def validate_lot_number(num):
 #     if Lot.objects.filter(number = num).exists() == False:
@@ -130,13 +130,13 @@ def validate_rnumber(rnum):
     m = checkRNum.match(rnum)
 
     if m is None:
-        raise ValidationError("Please input a valid R Number.")
+        raise ValidationError(u"Please input a valid R Number.")
 
 
 
 class RNumberField(forms.CharField):
     default_error_messages = {
-        'invalid': ('Enter a valid R Number.'),
+        'invalid': (u'Enter a valid R Number.'),
     }
     default_validators = [validate_rnumber]
 
@@ -283,6 +283,7 @@ class RawMaterialQCForm(forms.Form):
     trucker_name = forms.CharField(max_length=50)
 
 class ReceivingLogStaticForm(forms.Form):
+
     #this is the form for the receivinglog fields which are the same for all the receivinglogs of in the same POLI
     trucking_company = forms.CharField(label="Trucking Company", max_length=60)
     trucking_company.widget.attrs['class'] = 'form-control'
@@ -290,9 +291,16 @@ class ReceivingLogStaticForm(forms.Form):
     supplier = forms.CharField(label="Supplier", max_length=60)
     supplier.widget.attrs['class'] = 'form-control'
 
-    manufacturer = forms.CharField(label="Manufacturer")
+    #initialize the manufacturers with no queryset - to be updated when the form is created
+    manufacturer = forms.ModelChoiceField(queryset=None)
     manufacturer.widget.attrs['class'] = 'form-control'
-    #kosher_approved = forms.BooleanField(label="Kosher Approved")
+
+    # get the supplier which was passed into the form to update the possible manufacturers
+    def __init__(self, *args, **kwargs):
+        s = kwargs.pop('supplier')
+        super(ReceivingLogStaticForm, self).__init__(*args, **kwargs)
+        self.fields['manufacturer'].queryset = s.manufacturer_set.all()
+
 
 class ReceivingLogDynamicForm(forms.Form):
 #     edit_existing_receiving_log = forms.BooleanField(label="Edit Existing Receiving Log", required=False)

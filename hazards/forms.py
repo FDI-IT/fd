@@ -5,7 +5,7 @@ from hazards.models import GHSIngredient
 
 def validate_cas_number(cas):
     if GHSIngredient.objects.filter(cas=cas).count() == 0:
-        raise ValidationError('Invalid CAS Number')
+        raise ValidationError(u'Invalid CAS Number')
 
 class CasNumberField(forms.CharField):
     default_validators = [validate_cas_number]

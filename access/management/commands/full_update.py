@@ -43,7 +43,7 @@ class Command(BaseCommand):
     
     
     def handle(self, *args, **options):
-        print("HANDLING!")
+        print "HANDLING!"
         get_csvs_from_mdb(args[0])
         id = ImportData()
         id.import_data(self.import_model_list)

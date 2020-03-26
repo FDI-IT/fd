@@ -9,37 +9,35 @@ apt-get update
 
 apt-get -fy upgrade
 
-apt-get -y install python3 build-essential tmux vim apache2 apache2-bin \
-    apache2-data libapache2-mod-wsgi-py3 rsync python3-pip \
-    python3-dev glabels glabels-dev glabels-data openssh-server memcached \
+apt-get -y install build-essential tmux vim apache2 apache2-bin \
+    apache2-data libapache2-mod-wsgi rsync python-pip \
+    python-dev glabels glabels-dev glabels-data openssh-server memcached \
     libboost-python-dev python-pythonmagick libzbar-dev libcurl4-gnutls-dev \
     libpq-dev man postgresql-client-9.3 gettext zlib1g-dev libjpeg-dev \
-    redis-server default-jre cifs-utils 2to3 python3-numpy python3-scipy  \
-    libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
-
-pip3 install virtualenv virtualenvwrapper
+    redis-server default-jre cifs-utils
+    
+pip install virtualenv virtualenvwrapper
 EOF
 
 echo "export WORKON_HOME=/var/www/.virtualenvs" >> ~/.bashrc
 echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
 source ~/.bashrc
 
-alias python=python3
-mkvirtualenv fd2.2
-workon fd2.2
+mkvirtualenv fd1.11
+workon fd1.11
 
 sudo chmod -R 777 /var/www
 
-pip3 install -r /var/www/django/fd/requirements.txt
+pip install -r /var/www/django/fd/requirements.txt
 
 # Monkey patching this line in Django to get admin to work with our super long model names
-sed -i.BAK "s/name = models.CharField(_('name'), max_length=50)/name = models.CharField(_('name'), max_length=255) # MONKEYPATCHED! MONKEY PATCHED!/" /var/www/.virtualenvs/fd2.2/lib/python3.6/site-packages/django/contrib/auth/models.py
+sed -i.BAK "s/name = models.CharField(_('name'), max_length=50)/name = models.CharField(_('name'), max_length=255) # MONKEYPATCHED! MONKEY PATCHED!/" /var/www/.virtualenvs/fd1.11/local/lib/python2.7/site-packages/django/contrib/auth/models.py
 
-# Monkey patching installed app 'formsetfield', Django 1.7: forms.util -> forms.utils
-sed -i '50s/util/utils/' /var/www/.virtualenvs/fd2.2/lib/python3.6/site-packages/formfieldset/forms.py
+# Monkey patching installed app 'formsetfield', Django 1.7: forms.util -> forms.utils 
+sed -i '50s/util/utils/' /var/www/.virtualenvs/fd1.11/local/lib/python2.7/site-packages/formfieldset/forms.py
 
 #Monkey patching reversion; Django 1.7: Opts.module_name -> Opts.model_name
-sed -i '136s/module_name/model_name/' /var/www/.virtualenvs/fd2.2/lib/python3.6/site-packages/reversion/admin.py
+sed -i '136s/module_name/model_name/' /var/www/.virtualenvs/fd1.11/local/lib/python2.7/site-packages/reversion/admin.py
 
 cd /var/www/django/fd
 
@@ -50,7 +48,7 @@ ln -s /etc/apache2/sites-enabled/django_apache_wsgi.conf /etc/apache2/sites-avai
 mkdir /var/www/djangomedia
 
 mkdir /var/www/static_root
-ln -s /var/www/.virtualenvs/fd2.2/lib/python3.6/site-packages/django/contrib/admin/static/admin /var/www/static_root/admin
+ln -s /var/www/.virtualenvs/fd1.11/local/lib/python2.7/site-packages/django/contrib/admin/static/admin /var/www/static_root/admin
 ln -s /var/www/django/fd/staticmedia/css /var/www/static_root/css
 ln -s /var/www/django/fd/staticmedia/js /var/www/static_root/js
 ln -s /var/www/django/fd/staticmedia/images /var/www/static_root/images
@@ -74,3 +72,5 @@ service apache2 reload
 
 service apache2 restart
 EOF
+
+

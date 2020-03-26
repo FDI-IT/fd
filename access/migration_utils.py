@@ -135,7 +135,7 @@ def instantiate_integrated_product_objects():
             for field in psi_fields_to_migrate:
                 setattr(ip, field, getattr(psi, field))
         except ProductSpecialInformation.DoesNotExist:
-            print(f)
+            print f
         ip.save()
         
 def instantiate_formula_objects():
@@ -144,7 +144,7 @@ def instantiate_formula_objects():
         int_for = IntegratedFormula()
         int_for.flavor = IntegratedProduct.objects.get(number=f['flavor__number'])
         del(f['flavor__number'])
-        for field in list(f.keys()):
+        for field in f.keys():
             setattr(int_for, field, f[field])
         int_for.save()
 
@@ -285,13 +285,13 @@ def jaccard_index(a,b):
     for k in b:
         if k not in a:
             union_cardinality += b[k]
-    print(intersection_cardinality)
+    print intersection_cardinality
     return intersection_cardinality/union_cardinality
 
 def test_ji_batch(flavor_dict, batch_size=100000,threshold=0.9, ji_func=jaccard_index):
     count=0    
     for x in range(0,len(flavor_numbers)):
-        print(x)
+        print x
         for y in range(x+1,len(flavor_numbers)):
             if count > batch_size:
                 return
@@ -299,21 +299,21 @@ def test_ji_batch(flavor_dict, batch_size=100000,threshold=0.9, ji_func=jaccard_
                 count+=1
             ji = ji_func(flavor_dict[flavor_numbers[x]],flavor_dict[flavor_numbers[y]])
             if ji > threshold:
-                print("%s, %s" % (flavor_numbers[x],flavor_numbers[y]))
+                print "%s, %s" % (flavor_numbers[x],flavor_numbers[y])
 
 
 def test_ji_all(flavor_dict,threshold=Decimal('0.9')):
     JIList.objects.all().delete()
     for x in range(0,len(flavor_numbers)):
         for y in range(x+1,len(flavor_numbers)):
-            print("ji = jaccard_index(flavor_dict[flavor_numbers[x]],flavor_dict[flavor_numbers[y]])")
-            print(flavor_dict[flavor_numbers[x]])
-            print(flavor_numbers[y])
-            print(flavor_dict[flavor_numbers[y]])
-            print()
+            print "ji = jaccard_index(flavor_dict[flavor_numbers[x]],flavor_dict[flavor_numbers[y]])"
+            print flavor_dict[flavor_numbers[x]]
+            print flavor_numbers[y]
+            print flavor_dict[flavor_numbers[y]]
+            print
             ji = jaccard_index(flavor_dict[flavor_numbers[x]],flavor_dict[flavor_numbers[y]])
             if ji > threshold:
-                print("%s, %s" % (flavor_numbers[x],flavor_numbers[y]))
+                print "%s, %s" % (flavor_numbers[x],flavor_numbers[y])
                 jil = JIList(a=flavor_numbers[x],
                              b=flavor_numbers[y],
                              score=ji)
@@ -369,7 +369,7 @@ def jil_setify():
             jild[a] = frozenset([a,b])
             jild[b] = jild[a]
     
-    for k,v in jild.items():
+    for k,v in jild.iteritems():
         c = len(v);biggest_set=v
         for x in v:
             if c < len(jild[x]):
@@ -396,7 +396,7 @@ def analyze_jild(jils=jil_setify()):
 
 def populate_renumbers(jils=jil_setify()):
     Renumber.objects.all().delete()
-    for k,v in jils.items():
+    for k,v in jils.iteritems():
         a = Flavor.objects.get(number=k)
         for num in v:
             if v == k:
@@ -420,12 +420,12 @@ def sold_gazintas(lotted_flavors):
 @transaction.atomic
 def unapprove_unsell_flavors():
     for f in Flavor.objects.filter(approved=True):
-        print(f)
+        print f
         f.approved = False
         f.sold = False
         f.save()
     for f in Flavor.objects.filter(sold=True):
-        print(f)
+        print f
         f.approved=False
         f.sold=False
         f.save()
@@ -455,10 +455,10 @@ def reset_approved_flavors():
 @transaction.atomic
 def fix_microsensitive():
     sensitive_set = set([
-         'Senstive',
-         'Sensitive',
-         'True',
-         'Yes',])
+         u'Senstive',
+         u'Sensitive',
+         u'True',
+         u'Yes',])
     for i in Ingredient.objects.all():
         if i.microsensitive in sensitive_set:
             i.microsensitive = "MICROSENSITIVE"
@@ -470,7 +470,7 @@ def fix_microsensitive():
 @transaction.atomic
 def set_rag_pending():
     for f in Flavor.objects.all():
-        print(f)
+        print f
         f.risk_assessment_group = 7
         f.risk_assessment_memo = "Reset for audit"
         f.save()
@@ -480,43 +480,43 @@ def set_antimicrobial():
     #vanilla
     for lw in LeafWeight.objects.filter(ingredient__id__in=[852,853]).filter(weight__gte=357).select_related():
         f = lw.root_flavor
-        print(f)
+        print f
         f.risk_assessment_group=0
         f.risk_assessment_memo = "Contains 35.7% Vanilla Extract (12.5% ETOH)"
         f.save()
     
-    print('pg')
+    print 'pg'
     # PG
     for lw in LeafWeight.objects.filter(ingredient__id=703).filter(weight__gte=200).select_related():
         f = lw.root_flavor
-        print(f)
+        print f
         f.risk_assessment_group=0
         f.risk_assessment_memo = "Contains 20% PG"
         f.save()
         
-    print('ethyl')
+    print 'ethyl'
     #ethyl
     for lw in LeafWeight.objects.filter(ingredient__id=321).filter(weight__gte=125).select_related():
         f = lw.root_flavor
-        print(f)
+        print f
         f.risk_assessment_group=0
         f.risk_assessment_memo = "Contains 12.5% ETOH"
         f.save()
         
-    print('denatured')
+    print 'denatured'
     #denatured
     for lw in LeafWeight.objects.filter(ingredient__id=5121).filter(weight__gte='131.25').select_related():
         f = lw.root_flavor
-        print(f)
+        print f
         f.risk_assessment_group=0
         f.risk_assessment_memo = "Contains 12.5% ETOH"
         f.save()
     
-    print('triacetin')
+    print 'triacetin'
     #triacetin
     for lw in LeafWeight.objects.filter(ingredient__id=829).filter(weight__gte=750).select_related():
         f = lw.root_flavor
-        print(f)
+        print f
         f.risk_assessment_group=0
         f.risk_assessment_memo = "Contains 75% Triacetin"
         f.save()
@@ -526,7 +526,7 @@ def set_antimicrobial():
 def set_coa_monitored():
     for lw in LeafWeight.objects.filter(ingredient__microsensitive='MICROSENSITIVE').select_related():
         f = lw.root_flavor
-        print(f)
+        print f
         f.risk_assessment_group = 5
         f.risk_assessment_memo = "Contains microsensitive ingredients."
         f.save()
@@ -536,21 +536,21 @@ def set_bacteriostatic():
     
     for lw in LeafWeight.objects.filter(ingredient__id=750).filter(weight__gte=1).select_related():
         f= lw.root_flavor
-        print(f)
+        print f
         f.risk_assessment_group = 2
         f.risk_assessment_memo = "Contains 0.1% Sodium Benzoate."
         f.save()
         
     for lw in LeafWeight.objects.filter(ingredient__id=898).filter(weight__gte=4).select_related():
         f= lw.root_flavor
-        print(f)
+        print f
         f.risk_assessment_group = 2
         f.risk_assessment_memo = "Contains 0.1% Sodium Benzoate."
         f.save()
         
     for lw in LeafWeight.objects.filter(ingredient__id=1003).filter(weight__gte=10).select_related():
         f= lw.root_flavor
-        print(f)
+        print f
         f.risk_assessment_group = 2
         f.risk_assessment_memo = "Contains 0.1% Sodium Benzoate."
         f.save()
@@ -561,7 +561,7 @@ def set_bacteriostatic():
     ]    
     for lw in LeafWeight.objects.filter(ingredient__id__in=low_water_activity_list).filter(weight__gte=160).select_related():
         f = lw.root_flavor
-        print(f)
+        print f
         f.risk_assessment_group = 2
         f.risk_assessment_memo = "Contains Oil Soluble chemicals--low water activity."
         f.save()
@@ -571,7 +571,7 @@ def set_bacteriostatic():
     ]
     for lw in LeafWeight.objects.filter(ingredient__id__in=sugar_list).filter(weight__gte=667).select_related():
         f = lw.root_flavor
-        print(f)
+        print f
         f.risk_assessment_group = 2
         f.risk_assessment_memo = "Contains concentrated dissolved solids--low water activity."
         f.save()
@@ -579,7 +579,7 @@ def set_bacteriostatic():
 @transaction.atomic
 def set_hot_packed():
     for f in Flavor.objects.filter(number__in=[111232,]):
-        print(f)
+        print f
         f.risk_assessment_group = 3
         f.risk_assessment_memo = "Heated to 212F for extended period."
         f.save()
@@ -587,7 +587,7 @@ def set_hot_packed():
 @transaction.atomic
 def set_spraydried():
     for f in Flavor.objects.filter(spraydried=True):
-        print(f)
+        print f
         f.risk_assessment_group = 6
         f.risk_assessment_memo = "Spray dried."
         f.save()
@@ -596,7 +596,7 @@ def set_spraydried():
 @transaction.atomic
 def set_regularly_monitored_list():
     for f in Flavor.objects.filter(number__in=[2739,80983,7574,90273,1732,7650,2826,170606,60749]):
-        print(f)
+        print f
         f.risk_assessment_group = 1
         f.risk_assessment_memo = "On the list of regularly monitored flavors, per customer request."
         f.save()

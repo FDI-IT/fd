@@ -47,11 +47,11 @@ def build_cache():
 class ImportData:
     def import_data(self, model_list):
         for model in model_list:
-            print("Deleting %s records..." % model)
+            print "Deleting %s records..." % model
             model.objects.all().delete()
         
         for model in model_list:
-            print("Importing %s records..." % model)
+            print "Importing %s records..." % model
             self.import_model_data(model)
             """
             Models need a "access_table_name" field to indicate which table
@@ -87,7 +87,7 @@ class ImportData:
             try:
                 #for each field in the row, set the model attribute
                 for (csv_index, model_field) in model_field_map:
-                    csv_field = str.strip(csv_row[csv_index])             
+                    csv_field = unicode.strip(csv_row[csv_index])             
                     parsed_csv_field = \
                         parse_csv_field(model_field.db_type(), csv_field)
                     setattr(model_instance,
@@ -98,9 +98,9 @@ class ImportData:
                 model_instance.save()
             except IntegrityError as e:
                 transaction.savepoint_rollback(sid)
-                print("%s %s -> %s" % (str(model), 
+                print "%s %s -> %s" % (str(model), 
                                    str(model_munger.line_num()), 
-                                   csv_row))
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row, 
                                      model_exception_writer, 
@@ -110,9 +110,9 @@ class ImportData:
                 raise e
             except Exception as e:
                 transaction.savepoint_rollback(sid)
-                print("%s %s -> %s" % (str(model), 
+                print "%s %s -> %s" % (str(model), 
                                    str(model_munger.line_num()), 
-                                   csv_row))
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row, 
                                      model_exception_writer, 
@@ -128,7 +128,7 @@ class ImportData:
 class UpdateData:
     def update_data(self, model_list):
         for model in model_list:
-            print("Updating %s..." % model)
+            print "Updating %s..." % model
             self.update_model(model)
     
     
@@ -163,27 +163,27 @@ class UpdateData:
             except ValidationError as e:
                 self.exception_count += 1
                 transaction.savepoint_rollback(sid)
-                print("%s %s -> %s" % (str(self.model), 
+                print "%s %s -> %s" % (str(self.model), 
                                    str(self.model_munger.line_num()), 
-                                   csv_row))
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row,
                                      model_exception_writer, 
                                      Flavor)
             except FormulaException as e:
-                print("Formula Exception: %s" % e)
+                print "Formula Exception: %s" % e
                 transaction.savepoint_rollback(sid)
-                print("%s: %s -> %s" % (str(model), str(self.model_munger.line_num()), 
-                                   csv_row))
+                print "%s: %s -> %s" % (str(model), str(self.model_munger.line_num()), 
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row, 
                                      model_exception_writer, 
                                      Ingredient)
             except InvalidOperation as e:
-                print("Invalid Operation: %s" % e)
+                print "Invalid Operation: %s" % e
                 transaction.savepoint_rollback(sid)
-                print("%s: %s -> %s" % (str(model), str(self.model_munger.line_num()), 
-                                   csv_row))
+                print "%s: %s -> %s" % (str(model), str(self.model_munger.line_num()), 
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row, 
                                      model_exception_writer, 
@@ -194,8 +194,8 @@ class UpdateData:
             except Exception as e:
                 self.exception_count+=1
                 transaction.savepoint_rollback(sid)
-                print("%s: %s -> %s" % (str(model), str(self.model_munger.line_num()), 
-                                   csv_row))
+                print "%s: %s -> %s" % (str(model), str(self.model_munger.line_num()), 
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row, 
                                      model_exception_writer, 
@@ -213,17 +213,17 @@ class UpdateData:
 
         model_exception_writer.close()
         
-        print("Resembles: %s" % self.resemble_count)
-        print("Different: %s" % len(self.different_count))
-        print("Exceptions: %s" % self.exception_count)
-        print("New: %s" % self.new_count)
+        print "Resembles: %s" % self.resemble_count
+        print "Different: %s" % len(self.different_count)
+        print "Exceptions: %s" % self.exception_count
+        print "New: %s" % self.new_count
     
     
     def process_row(self, csv_row): 
         new_model_instance = self.model()
         #for each field in the row, set the model attribute
         for (csv_index, model_field) in self.model_field_map:
-            csv_field = str.strip(csv_row[csv_index])        
+            csv_field = unicode.strip(csv_row[csv_index])        
             parsed_csv_field = parse_csv_field(model_field.db_type(), csv_field)
             setattr(new_model_instance,
                 model_field.attname,
@@ -252,10 +252,10 @@ class UpdateData:
             new_model_instance.pk = old_model_instance.pk
             new_model_instance.save()
             self.different_count.append(difference_field)
-            print("Difference in %s - old: %s | new: %s" % (
+            print u"Difference in %s - old: %s | new: %s" % (
                                             old_model_instance,
                                             getattr(old_model_instance, difference_field),
-                                            getattr(new_model_instance, difference_field)))
+                                            getattr(new_model_instance, difference_field))
             
             if self.model == Ingredient:
                 solutions_to_flag = Solution.objects.filter(Q(ingredient=old_model_instance) | 
@@ -429,11 +429,11 @@ class IntegrityCheck:
                     break
             self.iter_count += 1
             if self.debug:
-                print("pass count: %s | iterations: %s | remaining this pass: %s | queue length: %s" % (
+                print "pass count: %s | iterations: %s | remaining this pass: %s | queue length: %s" % (
                     self.pass_count,
                     self.iter_count,
                     len(self.flavors_to_validate), 
-                    len(self.enqueued_flavors)))
+                    len(self.enqueued_flavors))
             self.validate(f)
                 
     
@@ -445,7 +445,7 @@ class IntegrityCheck:
         #import pdb; pdb.set_trace()
         self.pass_count += 1
         # flush self.queue_extension_lists
-        for key in sorted(self.queue_extension_lists.keys()):
+        for key in sorted(self.queue_extension_lists.iterkeys()):
             extender = self.queue_extension_lists[key]
             self.flavors_to_validate.extend(extender)
         self.queue_extension_lists = {}
@@ -483,7 +483,7 @@ class SolventUpdater():
             try:
                 self.update_flavor_solvent(flavor)
             except FormulaException as e:
-                print("Invalid flavor %s: %s" % (flavor, e))
+                print "Invalid flavor %s: %s" % (flavor, e)
     
     
     def update_flavor_solvent(self, flavor):
@@ -496,7 +496,7 @@ class SolventUpdater():
         ones = Decimal('1')
         sorted_solvent_string_list = []
         
-        sorted_by_weight = sorted(iter(my_solvents.items()), key=operator.itemgetter(1))
+        sorted_by_weight = sorted(my_solvents.iteritems(), key=operator.itemgetter(1))
         sorted_by_weight.reverse()
         
         for solvent_number, solvent_amount in sorted_by_weight:
@@ -521,7 +521,7 @@ class OCUpdate():
     def update_oc(self, flavor):
         name = flavor.name
         if re.search(r"\b[Oo]\.*[Cc]\.*\b", name):
-            print(name)    
+            print name    
             
             
 class MemoAnalyzer():

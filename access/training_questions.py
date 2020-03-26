@@ -2318,7 +2318,7 @@ security_sp =[
 
             ]
 
-fltc = [
+fltv = [
         (
             'Forklift inspections are only required once per year.',
             [
@@ -2481,7 +2481,7 @@ fltc = [
         )
     ]
 
-fltc_sp = [
+fltv_sp = [
         (
             'El montacargas requiere inspección sólo una vez al año.',
             [

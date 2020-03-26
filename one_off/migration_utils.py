@@ -133,7 +133,7 @@ def instantiate_integrated_product_objects():
             for field in psi_fields_to_migrate:
                 setattr(ip, field, getattr(psi, field))
         except ProductSpecialInformation.DoesNotExist:
-            print(f)
+            print f
         ip.save()
         
 def instantiate_formula_objects():
@@ -142,7 +142,7 @@ def instantiate_formula_objects():
         int_for = IntegratedFormula()
         int_for.flavor = IntegratedProduct.objects.get(number=f['flavor__number'])
         del(f['flavor__number'])
-        for field in list(f.keys()):
+        for field in f.keys():
             setattr(int_for, field, f[field])
         int_for.save()
 
@@ -252,7 +252,7 @@ formula_numbers = list(set(Formula.objects.all().values_list('flavor__number',fl
 
 def dictify_my_formula(f):
     d = {}
-    for element in list(f.formula_set.all().values()):
+    for element in f.formula_set.all().values():
         d[element['id']] = element
     return d
 
@@ -315,7 +315,7 @@ def jaccard_index(a,b):
 def test_ji_batch(flavor_dict, batch_size=100000,threshold=0.9, ji_func=jaccard_index):
     count=0    
     for x in range(0,len(flavor_numbers)):
-        print(x)
+        print x
         for y in range(x+1,len(flavor_numbers)):
             if count > batch_size:
                 return
@@ -323,16 +323,16 @@ def test_ji_batch(flavor_dict, batch_size=100000,threshold=0.9, ji_func=jaccard_
                 count+=1
             ji = ji_func(flavor_dict[flavor_numbers[x]],flavor_dict[flavor_numbers[y]])
             if ji > threshold:
-                print("%s, %s" % (flavor_numbers[x],flavor_numbers[y]))
+                print "%s, %s" % (flavor_numbers[x],flavor_numbers[y])
 
 
 def test_ji_all(flavor_dict,threshold=0.9):
     for x in range(0,len(flavor_numbers)):
-        print(x)
+        print x
         for y in range(x+1,len(flavor_numbers)):
             ji = jaccard_index(flavor_dict[flavor_numbers[x]],flavor_dict[flavor_numbers[y]])
             if ji > threshold:
-                print("%s, %s" % (flavor_numbers[x],flavor_numbers[y]))
+                print "%s, %s" % (flavor_numbers[x],flavor_numbers[y])
                 jil = JIList(a=flavor_numbers[x],
                              b=flavor_numbers[y],
                              score=ji)

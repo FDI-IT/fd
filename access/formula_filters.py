@@ -1,7 +1,6 @@
 from django.db.models import Q
 
 from access.models import Ingredient
-from functools import reduce
 
 class ArtNatiFilter():
     error_label = "Natural/Artificial"

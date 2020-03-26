@@ -95,7 +95,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 #     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
 # )
-DEFAULT_CHARSET='utf-8'
 
 TEMPLATES = [
     {
@@ -121,7 +120,7 @@ TEMPLATES = [
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
-                # 'django.template.loaders.eggs.Loader',
+                'django.template.loaders.eggs.Loader',
             ]
         },
     },

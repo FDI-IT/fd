@@ -36,7 +36,7 @@ def get_card_file(search_path):
         return glob.glob('%s*.jbg' % search_path)[0]
     except IndexError:
         return False 
-        print(png_name)
+        print png_name
 
 def process_jbg(jbg_path):
     # get the name for later
@@ -88,14 +88,14 @@ def input_batch(input_path):
     os.chdir(input_path)
     user = User.objects.get(username='stachurski')
     for pdf_path in glob.glob('*.pdf'):
-        print(pdf_path)
+        print pdf_path
         convert_pdf(pdf_path)
 
         
 def process_pdf(pdf_path):
     pypdf = PdfFileReader(file(pdf_path, 'rb'))    
     num_pages = pypdf.getNumPages()
-    print(num_pages)
+    print num_pages
     
     
 def barcode_scan(img_path):

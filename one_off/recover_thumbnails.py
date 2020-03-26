@@ -10,10 +10,10 @@ def regenerate_thumbnails():
     for scanned_doc in ScannedDoc.objects.all():
         if not os.path.isfile(scanned_doc.thumbnail.path):
             generate_thumbnail(scanned_doc)
-            print(counter)
+            print counter
             counter += 1
             
-    print(counter)
+    print counter
     
 def generate_thumbnail(scanned_doc):
     
@@ -37,7 +37,7 @@ def generate_thumbnail(scanned_doc):
         scanned_doc.save()
 
     except Exception as e:
-        print("Unable to Image.open('%s') -- %s" % (image_path, repr(e)))
+        print "Unable to Image.open('%s') -- %s" % (image_path, repr(e))
         return    
     
 def find_scanned_docs_without_images(output_file):
@@ -48,8 +48,8 @@ def find_scanned_docs_without_images(output_file):
         
         if not os.path.isfile(scanned_doc.large.path):
             f.write('%s\n' % scanned_doc.pk)
-            print('Scanned Doc with pk %s has no large image' % scanned_doc.pk)
+            print 'Scanned Doc with pk %s has no large image' % scanned_doc.pk
             count += 1            
 
-    print('Total: %s' % count)
+    print 'Total: %s' % count
     f.close()

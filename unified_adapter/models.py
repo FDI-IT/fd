@@ -22,7 +22,7 @@ class ProductInfo(models.Model):
     allergens = models.CharField(max_length=50,blank=True,default="")
     approved_promote = models.CharField(max_length=20,blank=True,default="")
     concentrate = models.BooleanField(default=False)
-    customer = models.CharField(max_length=60,blank=True,default="")
+    customer = models.CharField(max_length=60,blank=True,default="")    
     description = models.CharField(max_length=60,blank=True,default="")
     dry = models.BooleanField(default=False)
     duplication = models.BooleanField(default=False)
@@ -67,7 +67,7 @@ class ProductInfo(models.Model):
                 ('experimental_number','ExNum', 'width="90px" class="{sorter: \'link-digit\'}"'),
                 ('location_code','Location Code', 'width="90px" class="{sorter: \'link-digit\'}"')
             )
-
+    
     @property
     def main_number(self):
         if self.production_number is not None:
@@ -83,7 +83,7 @@ class ProductInfo(models.Model):
                 appl_list.append( "%s %s %s" % (appl.application_type, appl.usage_level, appl.memo))
             else:
                 appl_list.append( "%s %s" % (appl.application_type, appl.usage_level))
-
+            
         return ", ".join(appl_list)
 
     @staticmethod
@@ -92,7 +92,7 @@ class ProductInfo(models.Model):
 
     class Meta:
         ordering = ("production_number","experimental_number","name")
-
+        
     @staticmethod
     def build_kwargs(qdict, default, get_filter_kwargs):
         string_kwargs = {}
@@ -101,13 +101,13 @@ class ProductInfo(models.Model):
             for my_arg in qdict.getlist(key):
                 arg_list.append(my_arg)
             string_kwargs[key] = arg_list
-
+        
         def parse_bool_kwarg(key):
             arg_list = []
             for my_arg in qdict.getlist(key):
                 arg_list.append(bool(my_arg))
             return arg_list
-
+        
         def parse_other_kwarg(key):
             for my_arg in qdict.getlist(key):
                 #if my_arg == 'retains__notes':
@@ -115,7 +115,7 @@ class ProductInfo(models.Model):
                 #if my_arg == 'no_pg':
                 #    string_kwargs['no_pg__in'] = [True]
                 string_kwargs['%s__in' % my_arg] = [True,]
-
+        
         key_parse_func_map = {
             'allergens__in': parse_kwarg,
             'approved_promote__in': parse_kwarg,
@@ -123,25 +123,25 @@ class ProductInfo(models.Model):
             'other': parse_other_kwarg,
             'kosher__in': parse_kwarg,
             'application__application_type__id__in': parse_kwarg,
-            'initials__in': parse_kwarg,
+            'initials__in': parse_kwarg,      
         }
-
+        
         for key in get_filter_kwargs(qdict):
-
+            
             if key in key_parse_func_map:
                 key_parse_func_map[key](key)
             else:
                 parse_bool_kwarg(key)
 
         return string_kwargs
-
+    
     @staticmethod
     def get_absolute_url(self):
         if self.production_number:
             return '/access/%s/' % self.production_number
         elif self.experimental_number:
             return '/access/experimental/%s/' % self.experimental_number
-
+    
     @staticmethod
     def get_absolute_url_from_softkey(softkey):
         try:
@@ -154,9 +154,9 @@ class ProductInfo(models.Model):
             return finished_products[0].get_absolute_url()
         elif finished_products.count() == 0 and experimentals.count() == 1:
             return experimentals[0].get_absolute_url()
-
+        
         return None
-
+    
     @staticmethod
     def get_object_from_softkey(softkey):
         try:
@@ -174,17 +174,17 @@ class ProductInfo(models.Model):
             return finished_products[0]
         elif experimentals.count() > 0:
             return experimentals[0]
-
-
-
+        
+        
+        
         return None
-
+        
     @staticmethod
     def text_search(search_string):
         try:
             search_int = int(search_string)
-
-            return ProductInfo.objects.filter(
+            
+            return ProductInfo.objects.filter( 
                 Q(name__icontains=search_string) |
                 Q(keyword_1__icontains=search_string) |
                 Q(keyword_2__icontains=search_string) |
@@ -193,7 +193,7 @@ class ProductInfo(models.Model):
                 Q(experimental_number=search_int)
             )
         except:
-            return ProductInfo.objects.filter(
+            return ProductInfo.objects.filter( 
                 Q(name__icontains=search_string) |
                 Q(keyword_1__icontains=search_string) |
                 Q(keyword_2__icontains=search_string) |
@@ -207,30 +207,30 @@ class UABooleanField(models.Field):
 
 # Create your models here.
 class ApplicationType(models.Model):
-    name = models.CharField(max_length=40)
-    def __str__(self):
+    name = models.CharField(max_length=40)   
+    def __unicode__(self):
         return self.name
-
+    
 class Application(models.Model):
     # add a foreign key to productinfo from unified adpater
-    product_info = models.ForeignKey('ProductInfo',on_delete=models.CASCADE)
-    application_type = models.ForeignKey('ApplicationType',on_delete=models.CASCADE)
+    product_info = models.ForeignKey('ProductInfo')
+    application_type = models.ForeignKey('ApplicationType')
     usage_level = models.DecimalField('Usage level (percentage)', decimal_places=3,
                                       max_digits=5)
     memo = models.TextField(blank=True)
-
+    
     def get_admin_url(self):
         return "/admin/unified_adapter/application/%s/" % self.pk
-
-    def __str__(self):
+    
+    def __unicode__(self):
         if self.memo is not "":
             return "%s: %s %s %s" % (self.product_info, self.application_type, self.usage_level, self.memo)
         else:
             return "%s: %s %s" % (self.product_info, self.application_type, self.usage_level)
 
-
-
-
+    
+    
+    
 """Static info from Norma's sheet
 """
 APP_NAME = 0
@@ -265,10 +265,10 @@ def import_applications(spreadsheet_path="/var/www/django/dump/sample_data/flavo
     re_init()
     wb = open_workbook(spreadsheet_path)
     sheet = wb.sheets()[0]
-
+    
     for x in range(1, sheet.nrows):
         parse_row(sheet.row(x))
-
+        
 #def import_allergens():
 #    for psi in ProductSpecialInformation.objects.all():
 #        for pi in ProductInfo.objects.filter(production_number=psi.flavornumber):
@@ -278,22 +278,22 @@ def import_applications(spreadsheet_path="/var/www/django/dump/sample_data/flavo
 FLAVOR_NUMBER = 7
 def parse_row(row):
     flavor_number = row[FLAVOR_NUMBER].value
-    print(flavor_number)
+    print flavor_number
     try:
         f = ProductInfo.objects.get(production_number=flavor_number)
         single = True
     except ProductInfo.DoesNotExist:
-        print("Does not exist: %s" % row[FLAVOR_NUMBER])
+        print "Does not exist: %s" % row[FLAVOR_NUMBER]
         return
     except ProductInfo.MultipleObjectsReturned:
         f_multiple = ProductInfo.objects.filter(production_number=flavor_number)
         single = False
     except ValueError:
-        print("Invalid production number: %s" % row[FLAVOR_NUMBER])
-        return
-
+        print "Invalid production number: %s" % row[FLAVOR_NUMBER]
+        return 
+    
     for app in app_types:
-
+        
         try:
             usage_level = row[app[APP_LEVEL]].value
             usage_level = Decimal(str(usage_level))
@@ -303,10 +303,10 @@ def parse_row(row):
             memo = row[app[APP_MEMO]].value
         except:
             memo = ""
-
+        
         if usage_level != 0 or memo != '':
-            print(app[APP_NAME])
-            print('usage level: "%s" -- memo: "%s"' % (usage_level, memo))
+            print app[APP_NAME]
+            print 'usage level: "%s" -- memo: "%s"' % (usage_level, memo)
             if single:
                 application = Application(product_info=f,
                         application_type=app[APP_OBJ],
@@ -322,8 +322,8 @@ def parse_row(row):
                         memo=memo
                     )
                     application.save()
-
-
+    
+    
 def re_init():
     Application.objects.all().delete()
     ApplicationType.objects.all().delete()

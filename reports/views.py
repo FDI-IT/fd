@@ -109,7 +109,7 @@ def report_parse(report_path='/srv/samba/tank/Share folders by role/Quality Cont
     sales_report_file = open(report_path,'rb')
     csvreader = csv.reader(sales_report_file)
     
-    header = next(csvreader)
+    header = csvreader.next()
     
     lines = []
 
@@ -131,7 +131,7 @@ def report_parse(report_path='/srv/samba/tank/Share folders by role/Quality Cont
             flavor_number_dict[my_match] = [l,]
             
     summarized_flavor_dict = {}
-    for flavor_number, flavor_lines in flavor_number_dict.items():
+    for flavor_number, flavor_lines in flavor_number_dict.iteritems():
         total=0
         for l in flavor_lines:
             total+= int(float(l[2]))
@@ -155,7 +155,7 @@ def sales_by_person(request,):
     
     complete_credit_sets = {}
     credit_reverse_map = {}
-    for initials, range_string in credit_ranges.items():
+    for initials, range_string in credit_ranges.iteritems():
         my_flavors = set()
         my_experimentals = ExperimentalLog.objects.filter(initials=initials).exclude(flavor=None)
         for my_e in my_experimentals:
@@ -174,7 +174,7 @@ def sales_by_person(request,):
             credit_reverse_map[formula_line.flavor] = my_initials
                     
     partial_credit_sets = {}
-    for initials, flavors in complete_credit_sets.items():
+    for initials, flavors in complete_credit_sets.iteritems():
         partial_flavors = set()
         for f in flavors:
             for ft in FormulaTree.objects.filter(node_flavor=f).exclude(root_flavor=f):
@@ -183,7 +183,7 @@ def sales_by_person(request,):
   
     summarized_flavor_dict = report_parse()
     sales_per_flavor = {} 
-    for flavor_number, total in summarized_flavor_dict.items():
+    for flavor_number, total in summarized_flavor_dict.iteritems():
         try:
             flavor = Flavor.objects.get(number=flavor_number)
             sales_per_flavor[flavor_number] = (total, credit_reverse_map[flavor])
@@ -191,7 +191,7 @@ def sales_by_person(request,):
             sales_per_flavor[flavor_number] = (total, "UNK")
 
     partial_sales_per_person = {}
-    for initials, partial_flavors in partial_credit_sets.items():
+    for initials, partial_flavors in partial_credit_sets.iteritems():
         my_partial_sales = {}
         for f in partial_flavors:
             k = str(f.number)
@@ -201,14 +201,14 @@ def sales_by_person(request,):
         partial_sales_per_person[initials] = my_partial_sales
         
     partial_totals = {}
-    for initials, partial_sales in partial_sales_per_person.items():
+    for initials, partial_sales in partial_sales_per_person.iteritems():
         total = 0
-        for ps in list(partial_sales.values()):
+        for ps in partial_sales.values():
             total += ps
         partial_totals[initials] = total
             
     sales_per_person = {}
-    for flavor_number, details in sales_per_flavor.items():
+    for flavor_number, details in sales_per_flavor.iteritems():
         total, initials = details
         if initials in sales_per_person:
             sales_per_person[initials] += total
@@ -216,7 +216,7 @@ def sales_by_person(request,):
             sales_per_person[initials] = total
             
     sales_per_person_with_partials = {}
-    for initials, partial_sales in partial_sales_per_person.items():
+    for initials, partial_sales in partial_sales_per_person.iteritems():
         sales_per_person_with_partials[initials] = sales_per_person[initials] + partial_totals[initials]
 
     return render(
@@ -331,7 +331,7 @@ def formula_component_summary():
             lft=0).exclude(node_flavor=None).values_list('node_flavor__number',flat=True
                                                          )
     for flavor_summary in queryset:
-        print(flavor_summary)
+        print flavor_summary
         for ft in formula_trees.filter(root_flavor__number=flavor_summary['number']):
             if ft in component_summary:
                 component_summary[ft] += flavor_summary['lot_count']

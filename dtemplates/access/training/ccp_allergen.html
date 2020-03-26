@@ -17,9 +17,8 @@
 {% for a in answers %}
   {{a}}
 {% endfor %}
-<img src="../../static/images/batchsheet.jpg" height="750" width="750">
-<p>
-  You have a copy of an example Formula HA-2 HACCP Example.  Although this is a fictitious flavor, it is an example of CCP’s and how we handle allergens.
+<!-- <img src="../../static/images/batchsheet.jpg" height="750" width="750"> -->
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRmsuCLsEqZpaMZQpiqddlWASV85EOJTXrsTzfl-SSHxiHxkcU0Qb7iM12iuaqBH2ahqK_SJD4RHlEW/embed?start=false&loop=false&delayms=3000" frameborder="0" width="1100" height="647" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
 Please answer the following questions:
 </p>
 <form method='POST'>
@@ -29,14 +28,14 @@ Please answer the following questions:
     <li>
       If there is a microsensitive raw material used in the flavor, the lot number of the ingredient is written by hand on the formula
       <ul>
-        <li><input type="radio" name='ccp_1' value='True' required/> True </li>
-        <li><input type="radio" name='ccp_1' value='True'/> False</li>
+        <li><input type="radio" name='ccp_1' value='true' required/> True </li>
+        <li><input type="radio" name='ccp_1' value='false'/> False</li>
       </ul>
     </li>
 
 
     <li>
-      The Peanut Extract is an allergen and is located where?
+      What allergen is found in this product?
       <ul>
         <li><input type='text' name='ccp_2' required/></li>
       </ul>
@@ -44,100 +43,80 @@ Please answer the following questions:
 
 
     <li>
-      The pre-op statement is signed by the compounder and dated
+      Where is the above allergen located?
       <ul>
-        <li><input type='radio' name='ccp_3' value='a' required/> At the end of the day </li>
-        <li><input type='radio' name='ccp_3' value='b'/> At the end of the batch </li>
-        <li><input type='radio' name='ccp_3' value='c'/> At the beginning of the batch</li>
-        <li><input type='radio' name='ccp_3' value='d'/> At the beginning of the day in the general area in which the batch will be made</li>
+        <li><input type='radio' name='ccp_3' value='a' required/> With the other allergen powders</li>
+        <li><input type='radio' name='ccp_3' value='b'/> Production Lab and Production Isolation areas</li>
+        <li><input type='radio' name='ccp_3' value='c'/> In the Stench Fridge</li>
       </ul>
     </li>
 
     <li>
-      If the Micro Test says yes, what do you have to do?
-      <ul>
-        <li><input type='text' name='ccp_4' required/></li>
-      </ul>
+      The pre-op statement is signed by the compounder and dated after every batch.
+
+        <ul>
+          <li><input type="radio" name='ccp_4' value='true' required/> True </li>
+          <li><input type="radio" name='ccp_4' value='false'/> False</li>
+        </ul>
+
     </li>
 
 
     <li>
-      The Sieve CCP 1 is on every batch sheet this means:
+      The Sieve CCP 1 is on every batch sheet this means:   All batches must pass through a screen, sieve, paper filter or something else to prevent foreign matter from getting into the final product.
       <ul>
-        <li><input type='radio' name='ccp_5' value='a' required/> All batches must pass through a screen, sieve, paper filter or something else to prevent foreign matter from getting into the final product.</li>
-        <li><input type='radio' name='ccp_5' value='b'/> For very viscous liquid substances that cannot go through a sieve careful visual inspection can be made.</li>
-        <li><input type='radio' name='ccp_5' value='c'/> For repacks, these have already been screened so visual inspection is only necessary.</li>
-        <li><input type='radio' name='ccp_5' value='d'/> All of the above.</li>
-        <li><input type='radio' name='ccp_5' value='e'/> Clickable pens, no buttons on clothing, glass and brittle plastic policies and careful observation of palettes, knives, scoops etc. assure that no foreign matter is introduced into the batch.</li>
+        <li><input type="radio" name='ccp_5' value='true' required/> True </li>
+        <li><input type="radio" name='ccp_5' value='false'/> False</li>
       </ul>
     </li>
 
     <li>
       If the sieve is seen to be broken,
       <ul>
-        <li><input type='radio' name='ccp_6' value='a' required/> This is a non-conformity and the supervisor should be immediately called and the batch should be stopped.</li>
-        <li><input type='radio' name='ccp_6' value='b'/> If the compounder sees there is no problem the batch can continue.</li>
-        <li><input type='radio' name='ccp_6' value='c'/> The batch should immediately be thrown out.</li>
+        <li><input type='radio' name='ccp_6' value='a' required/> Report it to Supervisor</li>
+        <li><input type='radio' name='ccp_6' value='b'/> Replace the Sieve</li>
+        <li><input type='radio' name='ccp_6' value='c'/> Re-sieve the batch</li>
         <li><input type='radio' name='ccp_6' value='d'/> All of the above.</li>
       </ul>
     </li>
 
 
     <li>
-      After the batch form is completed the supervisor checks over each batch sheet and signs and dates the paperwork in the white space in the formula sheet.
+      CCP2 Allergen Cleaning  involves Visual Inspection
       <ul>
-        <li><input type='radio' name='ccp_7' value='True' required/> True</li>
-        <li><input type='radio' name='ccp_7' value='False'/> False</li>
+        <li><input type='radio' name='ccp_7' value='true' required/> True</li>
+        <li><input type='radio' name='ccp_7' value='false'/> False</li>
       </ul>
     </li>
-
-    <li>
-      Allergen Cleaning CCP 2 means a visual inspection of all containers is made after the batch.  For liquids it means the mixing vessels, for powders it means the sieve in all corners and spots even with the aid of a flashlight
-      <ul>
-        <li><input type='radio' name='ccp_8' value='True' required/> True</li>
-        <li><input type='radio' name='ccp_8' value='False'/> False</li>
-      </ul>
-    </li>
-
 
     <li>
       Label application CCP 4 shows up when there is an allergen.
       <ul>
-        <li><input type='radio' name='ccp_9' value='a' required/> Labels are counted and the allergen statement is compared with the ingredients within the formula.  If there is a discrepancy, the supervisor should be called immediately. </li>
-        <li><input type='radio' name='ccp_9' value='b'/> All labels are counted even if it is not an allergen according to the pre-op sheet.  Also the Flavor Number, name and all other information is compared to the batch sheet number, information and name as well.</li>
-        <li><input type='radio' name='ccp_9' value='c'/> If there is no allergen shown on the label this is a non-conformity and the supervisor should be called immediately.</li>
-        <li><input type='radio' name='ccp_9' value='d'/> All of the above.</li>
+        <li><input type='radio' name='ccp_8' value='a' required/>  Labels are counted and the allergen statement is compared with the allergen statement on the batch sheet. If there is a discrepancy, the supervisor should be called immediately.</li>
+        <li><input type='radio' name='ccp_8' value='b'/>  All labels are counted even if it is not an allergen according to the pre-op sheet. Also the Flavor Number, name and all other information is compared to the batch sheet number, information and name as well.</li>
+        <li><input type='radio' name='ccp_8' value='c'/> If there is no allergen shown on the label this is a non-conformity and the supervisor should be called immediately.</li>
+        <li><input type='radio' name='ccp_8' value='d'/> All of the above.</li>
       </ul>
     </li>
 
 
     <li>
-      Thermal Kill Step CCP 6 - This is a special form which has to be filled out using a calibrated thermometer.  There are only a few people who typically do this.  The form is located in the Portal (wiki) under S:\HACCP\Forms\045 CCP 6 – Thermal Kill Step ver2014
-      <ol type='a'>
-        <li>
-          The calibrated thermometers are kept in the Production Managers office
-          <ul>
-            <li><input type='radio' name='ccp_10' value='True' required/> True</li>
-            <li><input type='radio' name='ccp_10' value='False'/> False</li>
-          </ul>
-        </li>
-        <li>
-          The Form is scanned and added to the archives
-          <ul>
-            <li><input type='radio' name='ccp_11' value='True' required/> True</li>
-            <li><input type='radio' name='ccp_11' value='False'/> False</li>
-          </ul>
-        </li>
-        <li>
-          There are currently two product types that fall into this category
-          <ul>
-            <li><input type='radio' name='ccp_12' value='True' required/> True</li>
-            <li><input type='radio' name='ccp_12' value='False'/> False</li>
-          </ul>
-        </li>
+      Thermal Kill Step CCP 6 - Is designed to destroy most pathogenic microorganisms. How is this achieved?
+      <ul>
+        <li><input type='radio' name='ccp_9' value='a' required/> Product is heated for 10 minutes at 160 degrees</li>
+        <li><input type='radio' name='ccp_9' value='b'/> Product is heated for 15 minutes at 160 degrees</li>
+        <li><input type='radio' name='ccp_9' value='c'/> Product is heated for 15 minutes at 150 degrees</li>
+        <li><input type='radio' name='ccp_9' value='d'/> Product is heated for 10 minutes at 150 degrees</li>
+      </ul>
+    </li>
 
-      </ol>
 
+    <li>
+      The filled out CCP 6 Thermal Kill Step ver2014 is reviewed and recycled in the shred box
+      <ul>
+        <li><input type='radio' name='ccp_10' value='true' required/> True</li>
+        <li><input type='radio' name='ccp_10' value='false'/> False</li>
+      </ul>
     </li>
   </ol>
 
@@ -149,42 +128,42 @@ Please answer the following questions:
     <li>
       When receiving a raw material how do you know if it is an allergen?
       <ul>
-        <li>
-          <input type='text' name='ccp_13' required/>
-        </li>
+        <li><input type='radio' name='ccp_11' value='a' required/> Spec Sheet</li>
+        <li><input type='radio' name='ccp_11' value='b'/> Allergen Declaration</li>
+        <li><input type='radio' name='ccp_11' value='c'/> Product Label</li>
+        <li><input type='radio' name='ccp_11' value='d'/> All of the above</li>
       </ul>
     </li>
     <li>
-      What steps best describes what do you take to make sure there is no cross contamination of that allergen?
+      What are the 8 big allergens?
       <ul>
-        <li><input type='radio' name='ccp_14' value='a' required/> A sample is taken of the raw material and is sent up to QC </li>
-        <li><input type='radio' name='ccp_14' value='b'/> The individual item or palette is then clearly marked and the receiving sticker is attached.  It is then placed into an area in the plant marked with a magnet sign or signs indicating the allergen types.  If there is more than one allergen contained in the product it is either separated into a different spot or put lower than any of the allergens contained. </li>
-        <li><input type='radio' name='ccp_14' value='c'/> All of the above </li>
-        <li><input type='radio' name='ccp_14' value='d'/> The raw material is not used in a batch until the price is confirmed. </li>
+        <li><input type='radio' name='ccp_12' value='a' required/>  Peanuts, Shellfish, Melons, Wheat, Soy, Tree nuts, Dairy and Sulfites. </li>
+        <li><input type='radio' name='ccp_12' value='b'/>  Diary, Peanuts, Soy, Sulfites, Wheat, Vegetable Proteins, Fish and Corn.</li>
+        <li><input type='radio' name='ccp_12' value='c'/>  Corn, Wheat, Soy, Soy Sauce, Vegetable Proteins, Sulfites, Fish and Milk</li>
+        <li><input type='radio' name='ccp_12' value='d'/>  Tree Nuts, Peanuts, Soy, Dairy, Wheat, Fish, Shellfish and Eggs.</li>
       </ul>
     </li>
     <li>
-      What best describes the procedure for inventory?
+      Sulfites need to be labeled if there is more than
       <ul>
-        <li><input type='radio' name='ccp_15' value='a' required/> If an allergen example soy is next to a wheat allergen they must be at least 20 feet away from each other.</li>
-        <li><input type='radio' name='ccp_15' value='b'/> If there must be storage above, it must be the same allergen or contain at least one of multiple allergens below. </li>
-        <li><input type='radio' name='ccp_15' value='c'/> Fish allergens must be kept near shellfish allergens.</li>
-        <li><input type='radio' name='ccp_15' value='d'/> The magnetic signs have to appear on the top shelf only. </li>
+        <li><input type='radio' name='ccp_13' value='a' required/> 10 ppm</li>
+        <li><input type='radio' name='ccp_13' value='b'/> 20 ppm</li>
+        <li><input type='radio' name='ccp_13' value='c'/> 15 ppm</li>
+        <li><input type='radio' name='ccp_13' value='d'/> 25 ppm</li>
       </ul>
     </li>
     <li>
-      If a palette is shrink wrapped and the tag placed on the plastic is then removed as the products are used, what is the best way to relabel the product as an allergen?
+      Liquid Allergens are allowed to be with other Liquid Raw Materials as long as they are labeled clearly.
       <ul>
-        <li><input type='text' name ='ccp_16' required/></li>
+        <li><input type='radio' name='ccp_14' value='true' required/> True</li>
+        <li><input type='radio' name='ccp_14' value='false'/> False</li>
       </ul>
     </li>
     <li>
-      What are the allergens?
+    Soy Powder (Soy Allergen) can only be stored above a Soy Allergen Product.
       <ul>
-        <li><input type='radio' name='ccp_17' value='a' required/> Peanuts, Shellfish, Melons, Wheat, Soy, Tree nuts, Dairy Fish and Sulfites.</li>
-        <li><input type='radio' name='ccp_17' value='b'/> Diary, Peanuts, Soy, Sulfites, Wheat, Vegetable Proteins, Fish and Corn.</li>
-        <li><input type='radio' name='ccp_17' value='c'/> Corn, Wheat, Soy, Soy Sauce, Vegetable Proteins, Sulfites, Fish, Tree Nuts.</li>
-        <li><input type='radio' name='ccp_17' value='d'/> Tree Nuts, Peanuts, Soy, Dairy, Wheat, Fish, Shellfish, Eggs and Sulfites.</li>
+        <li><input type='radio' name='ccp_15' value='true' required/> True</li>
+        <li><input type='radio' name='ccp_15' value='false'/> False</li>
       </ul>
     </li>
 

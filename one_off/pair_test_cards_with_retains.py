@@ -1,5 +1,5 @@
 import os
-import io
+import StringIO
 from PIL import Image, ImageOps
 from newqc import models
 from django.core.files import File

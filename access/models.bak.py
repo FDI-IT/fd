@@ -39,7 +39,7 @@ class ExperimentalFormula(models.Model):
     machinebatch = models.IntegerField(db_column='MachineBatch')
     rawmaterialcode = models.IntegerField(db_column='RawMaterialCode') #not sure what the purpose of this field is in here...to specify an ingredient from a certain supplier?
     class Meta:
-        db_table = 'Experimental Formulas'
+        db_table = u'Experimental Formulas'
               
 class FlavorFormula(models.Model):
     """
@@ -72,10 +72,10 @@ class FlavorFormula(models.Model):
     #product = models.ForeignKey('Product', related_name='ingredients')
     
     class Meta:
-        db_table = 'Flavors - Formulae'
+        db_table = u'Flavors - Formulae'
         ordering = ['flavornumber', '-flavoramount',]
         
-    def __str__(self):
+    def __unicode__(self):
         return "%s %s lbs" % (self.productid, self.flavoramount)
 
 class Customer(models.Model):
@@ -124,7 +124,7 @@ class Customer(models.Model):
     email = models.CharField(max_length=50, db_column='EMail')
     customertype = models.CharField(max_length=10, db_column='CustomerType')
     class Meta:
-        db_table = 'Customers'
+        db_table = u'Customers'
 
 class Product(models.Model):
     """
@@ -155,10 +155,10 @@ class Product(models.Model):
     lastspdate = models.DateTimeField(db_column='LastSPDate')
     
     class Meta:
-        db_table = 'Products'
+        db_table = u'Products'
         ordering = ['flavorformula']
         
-    def __str__(self):
+    def __unicode__(self):
         return "%s-%s %s %s %s" % (self.productprefix, self.flavorformula, self.flavornatart, self.productname, self.flavortype)
 
     def get_ingredients(self):
@@ -195,7 +195,7 @@ class ExperimentalProduct(models.Model):
     experimental = models.CharField(max_length=50, db_column='Experimental')
     lastspdate = models.DateTimeField(db_column='LastSPDate')
     class Meta:
-        db_table = 'Experimental Products'
+        db_table = u'Experimental Products'
 class ExperimentalLog(models.Model):
     """
     Records of completed ExperimentalProducts.
@@ -269,7 +269,7 @@ class ExperimentalLog(models.Model):
     retain_number = models.PositiveIntegerField(db_column='RetainNumber',null=True,blank=True)
     retain_present = models.BooleanField(db_column='RetainPresent',default=False)
     
-    def __str__(self):
+    def __unicode__(self):
         return "%s-%s %s %s" % (self.initials, self.experimentalnum,
                                 self.product_name, self.datesent_short)
     
@@ -280,7 +280,7 @@ class ExperimentalLog(models.Model):
             lorem_two = q.get()
             lorem_three = q.get()
             lorem_four = q.get()
-            print(e)
+            print e
             e.product_name = "%s %s" % (lorem_one, lorem_two)
             e.customer = lorem_three
             e.memo = "%s %s %s %s" % (lorem_one, lorem_two, lorem_three, lorem_four)
@@ -338,7 +338,7 @@ class ExperimentalLog(models.Model):
     import_order = 3
     
     class Meta:
-        db_table = 'ExperimentalLog'
+        db_table = u'ExperimentalLog'
         ordering = ['experimentalnum']
     headers = (
                     ('experimentalnum','Number', 'width="80px"'),
@@ -376,7 +376,7 @@ class Incoming(models.Model):
     incid = models.CharField(max_length=50, db_column='IncID')
     incmemo = models.TextField(db_column='IncMemo')
     class Meta:
-        db_table = 'Incoming'
+        db_table = u'Incoming'
 
 class ProductSpecialInformation(models.Model):
     """
@@ -422,7 +422,7 @@ class ProductSpecialInformation(models.Model):
     diacetyl = models.BooleanField(db_column='Diacetyl')
     entered = models.DateTimeField(db_column='Entered')
     class Meta:
-        db_table = 'Products - Special Information'
+        db_table = u'Products - Special Information'
 
 #
 # PURCHASES SECTION - DATA FROM KRISTY'S DATABASE
@@ -456,7 +456,7 @@ class Purchase(models.Model):
     pomemo2 = models.TextField(db_column='POMEMO2')
     
     class Meta:
-        db_table = 'Purchases'
+        db_table = u'Purchases'
 
 class RawMaterial(models.Model):
     """
@@ -506,9 +506,9 @@ class RawMaterial(models.Model):
     transfat = models.BooleanField(db_column='TransFat')
     
     class Meta:
-        db_table = 'access_ingredient'
+        db_table = u'access_ingredient'
         
-    def __str__(self):
+    def __unicode__(self):
         return "%s %s" % (self.prefix, self.productname)
 
 class ShipTo(models.Model):
@@ -527,7 +527,7 @@ class ShipTo(models.Model):
     shiptocontacttitle = models.CharField(max_length=50, db_column='ShipToContactTitle')
     shiptoname = models.CharField(max_length=50, db_column='ShipToName')
     class Meta:
-        db_table = 'ShipTo'
+        db_table = u'ShipTo'
 
 class Shipper(models.Model):
     """
@@ -537,7 +537,7 @@ class Shipper(models.Model):
     shipper_name = models.CharField(max_length=40, db_column='Shipper Name') # Field renamed to remove spaces.lc
     phone = models.CharField(max_length=24, db_column='Phone')
     class Meta:
-        db_table = 'Shippers'
+        db_table = u'Shippers'
 
 class Supplier(models.Model):
     """
@@ -560,5 +560,5 @@ class Supplier(models.Model):
     homepage = models.CharField(max_length=255, db_column='HomePage')
     email = models.CharField(max_length=255, db_column='EMail')
     class Meta:
-        db_table = 'Suppliers'
+        db_table = u'Suppliers'
 

@@ -74,9 +74,9 @@ class Command(BaseCommand):
                 raise e
             except ValidationError as e:
                 self.exception_count += 1
-                print("%s %s -> %s" % (str(Flavor), 
+                print "%s %s -> %s" % (str(Flavor), 
                                    str(self.model_munger.line_num()), 
-                                   csv_row))
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row,
                                      model_exception_writer, 
@@ -85,9 +85,9 @@ class Command(BaseCommand):
 #                raise e
             except Exception as e:
                 self.exception_count += 1
-                print("%s %s -> %s" % (str(Formula), 
+                print "%s %s -> %s" % (str(Formula), 
                                    str(self.model_munger.line_num()), 
-                                   csv_row))
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row,
                                      model_exception_writer, 
@@ -95,10 +95,10 @@ class Command(BaseCommand):
                 
         model_exception_writer.close()
         
-        print("Resembles: %s" % self.resemble_count)
-        print("Different: %s" % len(self.different_count))
-        print("Exceptions: %s" % self.exception_count)
-        print("New: %s" % self.new_count)
+        print "Resembles: %s" % self.resemble_count
+        print "Different: %s" % len(self.different_count)
+        print "Exceptions: %s" % self.exception_count
+        print "New: %s" % self.new_count
         
         
     def process_row(self, csv_row):
@@ -106,7 +106,7 @@ class Command(BaseCommand):
         new_model_instance = Formula()
         #for each field in the row, set the model attribute
         for (csv_index, model_field) in self.model_field_map:
-            csv_field = str.strip(csv_row[csv_index])         
+            csv_field = unicode.strip(csv_row[csv_index])         
             parsed_csv_field = \
                 parse_csv_field(model_field.db_type(), csv_field)
             setattr(new_model_instance,
@@ -115,5 +115,5 @@ class Command(BaseCommand):
         self.relation_processor.build_relation(new_model_instance)
                              
         new_model_instance.save()
-        print(new_model_instance.flavor) 
+        print new_model_instance.flavor 
         

@@ -33,14 +33,14 @@ def quickbooks_flavor_fix(flavor_cell):
     try:
         if match:
             flavor = match.group(1)
-            print(match.groups())
+            print match.groups()
         else:
             flavor = flavor_cell
     except:
         return False
         #raise InvoiceException("Invalid Flavor number: %s" % flavor_cell)
     
-    print(flavor_cell)
+    print flavor_cell
     return flavor
 
 class InvoiceGenerator():
@@ -62,8 +62,8 @@ class InvoiceGenerator():
         self.report_reader = csv.reader(report_file,
                                         delimiter=',',
                                         quotechar='"')
-        self.header_row = next(self.report_reader)
-        self.header_row_b = next(self.report_reader)
+        self.header_row = self.report_reader.next()
+        self.header_row_b = self.report_reader.next()
         self.cell_keys = {}
         for index, col_header in enumerate(self.header_row):
             if col_header in self.required_headers:
@@ -80,7 +80,7 @@ class InvoiceGenerator():
         of the required headers found. If all of them are found, the value 
         should be an empty list.
         """
-        my_headers = list(self.required_headers.keys())
+        my_headers = self.required_headers.keys()
         for header in self.required_headers:
             if header in self.cell_keys:
                 my_headers.remove(header)
@@ -89,9 +89,9 @@ class InvoiceGenerator():
     def __iter__(self):
         return self
     
-    def __next__(self):
+    def next(self):
         while(True):
-            n = next(self.report_reader)
+            n = self.report_reader.next()
             try:
                 x = self.try_line_item(n)
             except InvalidOperation:
@@ -112,7 +112,7 @@ class InvoiceGenerator():
             self.flavor = new_flavor
 
         li = {}
-        for k, v in self.cell_keys.items():
+        for k, v in self.cell_keys.iteritems():
             h = self.required_headers[k]
             li[k] = h(row[v])
         li['flavor'] = self.flavor
@@ -129,8 +129,8 @@ class TotalInvoiceReportParser():
         self.report_reader = csv.reader(report_file,
                                         delimiter=',',
                                         quotechar='"')
-        self.header_row_a = next(self.report_reader)
-        self.header_row_b = next(self.report_reader)
+        self.header_row_a = self.report_reader.next()
+        self.header_row_b = self.report_reader.next()
         self.cell_keys = {}
         for index, col_header in enumerate(self.header_row_a):
             if col_header in self.required_headers:
@@ -139,9 +139,9 @@ class TotalInvoiceReportParser():
     def __iter__(self):
         return self
     
-    def __next__(self):
+    def next(self):
         while(True):
-            n = next(self.report_reader)
+            n = self.report_reader.next()
             
             try:
                 x = self.try_line_item(n)
@@ -163,7 +163,7 @@ class TotalInvoiceReportParser():
             self.flavor = new_flavor
 
         li = {}
-        for k, v in self.cell_keys.items():
+        for k, v in self.cell_keys.iteritems():
             h = self.required_headers[k]
             li[k] = h(row[v])
         li['flavor'] = self.flavor
@@ -179,9 +179,9 @@ class InvoiceLineGenerator():
         self.report_reader = csv.reader(report_file,
                                         delimiter=',',
                                         quotechar='"')
-        self.date_row = next(self.report_reader)
-        self.header_row_a = next(self.report_reader)
-        self.header_row_b = next(self.report_reader)
+        self.date_row = self.report_reader.next()
+        self.header_row_a = self.report_reader.next()
+        self.header_row_b = self.report_reader.next()
         self.cell_keys = {
             'flavor_number': 0,
             'weight': 1,
@@ -190,12 +190,12 @@ class InvoiceLineGenerator():
     def __iter__(self):
         return self
     
-    def __next__(self):
+    def next(self):
         """
         TODO this isn't good, the examination of the row and saving 
         corresponding model objects are coupled here.
         """
-        return next(self.report_reader)
+        return self.report_reader.next()
     
     def try_line_item(self, row):
         #import pdb; pdb.set_trace()

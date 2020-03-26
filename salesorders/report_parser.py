@@ -33,8 +33,8 @@ class SalesOrderGenerator():
         self.report_reader = csv.reader(report_file,
                                         delimiter=',',
                                         quotechar='"')
-        self.header_row = next(self.report_reader)
-        self.header_row_b = next(self.report_reader)
+        self.header_row = self.report_reader.next()
+        self.header_row_b = self.report_reader.next()
         self.cell_keys = {}
         for index, col_header in enumerate(self.header_row):
             self.cell_keys[col_header] = index
@@ -50,7 +50,7 @@ class SalesOrderGenerator():
         of the required headers found. If all of them are found, the value 
         should be an empty list.
         """
-        my_headers = list(self.required_headers.keys())
+        my_headers = self.required_headers.keys()
         for header in self.required_headers:
             if header in self.cell_keys:
                 my_headers.remove(header)
@@ -59,19 +59,19 @@ class SalesOrderGenerator():
     def __iter__(self):
         return self
     
-    def __next__(self):
+    def next(self):
         """
         TODO this isn't good, the examination of the row and saving 
         corresponding model objects are coupled here.
         """
-        return next(self.report_reader)
+        return self.report_reader.next()
     
     def try_line_item(self, row):
         # probably want to test for row validity here
         #
         # get or create Customer from qb field Name
         li = {}
-        for k, v in self.cell_keys.items():
+        for k, v in self.cell_keys.iteritems():
             h = self.required_headers[k]
             li[k] = h(row[v])
         return li

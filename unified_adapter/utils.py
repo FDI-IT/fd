@@ -25,7 +25,7 @@ def parse_boolean_field(field_value):
     
 def parse_string_field(field_value):
     try:
-        return str(field_value.strip())
+        return unicode(field_value.strip())
     except:
         return ""
     
@@ -102,7 +102,7 @@ def scan_objects(spreadsheet_path="/var/www/django/dump/sample_data/flavors.xls"
     sheet = wb.sheets()[0]
     
     for x in range(2, sheet.nrows):
-        print(x)
+        print x
         r = sheet.row(x)
         production_number = r[7].value
         if production_number != "":
@@ -137,7 +137,7 @@ def import_objects(spreadsheet_path="/var/www/django/dump/sample_data/flavors.xl
         r = sheet.row(x)
         
         pi = ProductInfo()
-        for k,v in key_index.items():
+        for k,v in key_index.iteritems():
             try:
                 if v[0] != -1:
                     field_value = r[v[0]].value
@@ -146,8 +146,8 @@ def import_objects(spreadsheet_path="/var/www/django/dump/sample_data/flavors.xl
                     else:
                         pi.__setattr__(k,v[1](field_value))
             except:
-                print(k)
-                print(v)
+                print k
+                print v
         pi.save()
     for pi in ProductInfo.objects.all():
         pi.initials = pi.initials.upper()

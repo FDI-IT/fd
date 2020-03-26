@@ -177,7 +177,7 @@ no_changes_list = [
 ]
 
 def update_hazard_differences():
-    for rm_id, hazard_differences in hazard_difference_dict.items():
+    for rm_id, hazard_differences in hazard_difference_dict.iteritems():
         i = Ingredient.objects.get(id=rm_id, discontinued=False)
         if i.hazards_approved == True:
             pass
@@ -186,7 +186,7 @@ def update_hazard_differences():
             for hcode_number in hazard_differences:
                 hcode_list.append('H' + str(hcode_number))
             
-            print(i)
+            print i
             i.add_hazards_by_hcode(hcode_list)
             
     for rm_id in no_changes_list:

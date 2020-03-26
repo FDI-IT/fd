@@ -22,7 +22,7 @@ def dictify_formulae():
     a list of their formulae items.
     """
     d = {}
-    for k, g in groupby(list(Formula.objects.filter(flavor__valid=True).values()), xfunc):
+    for k, g in groupby(Formula.objects.filter(flavor__valid=True).values(), xfunc):
         d[k]=list(g)
     return d
 
@@ -48,13 +48,13 @@ def validate_everything():
     # using the values found in the first pass, key those ids to a list of
     # their formulae
     d = {}
-    for k,g in groupby(list(Formula.objects.filter(flavor__id__in=valid_flavors).values()), xfunc):
+    for k,g in groupby(Formula.objects.filter(flavor__id__in=valid_flavors).values(), xfunc):
         d[k]=list(g)
     
     g = dictify_gaz()
        
     # second pass: checking for cycles using a depth first search
-    flavors_to_cycle = list(d.keys())
+    flavors_to_cycle = d.keys()
     contains_no_cycles = {} # if contains_no_cycle[x] == True, x has none
     
 #    def check_contains_no_cycles(g_id):
@@ -123,7 +123,7 @@ def validate_everything():
             f = flavors_to_cycle.pop()
         except:
             break
-        print(f)
+        print f
         validate(f,[])
                     
     
@@ -145,9 +145,9 @@ def traverse(d, gzs, k, wf, ):
         #print i
         if i['ingredient_id'] in gzs:
             g_id, g_yf = gzs[i['ingredient_id']] # the id and the yield field
-            print(g_yf)
+            print g_yf
             new_wf = wf*(i['amount']/1000)
-            print(new_wf)
+            print new_wf
             formula.extend(traverse(d, gzs, g_id, new_wf))
         else:
             i['amount'] = i['amount'] * wf

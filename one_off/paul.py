@@ -49,8 +49,8 @@ class privilege(object):
     #this looks to be working correctly
     def __call__(self, func):
         self.func = func
-        print(("minclear " + str(self.minclear)))
-        print(("func " + str(self.func)))
+        print("minclear " + str(self.minclear))
+        print("func " + str(self.func))
         return self.func
 
     #stores the clearance level at decoration time

@@ -19,7 +19,7 @@ from solutionfixer import forms
 
 def build_filter_kwargs(qdict, default):
     string_kwargs = {}
-    for key in list(qdict.keys()):
+    for key in qdict.keys():
         if key == 'status':
             keyword = '%s__in' % (key)
             arg_list = []
@@ -77,7 +77,7 @@ def ingredient_autocomplete(request):
     for ingredient in ingredients:
             ingredient_json = {}
             ingredient_json["id"] = ingredient.rawmaterialcode
-            ingredient_json["label"] = ingredient.__str__()
+            ingredient_json["label"] = ingredient.__unicode__()
             ingredient_json["value"] = ingredient_json["id"]
             ret_array.append(ingredient_json)
     return HttpResponse(json.dumps(ret_array), content_type='application/json; charset=utf-8')
@@ -200,7 +200,7 @@ def solution_review(request):
     sf = SolutionFixer()
     matches = sf.get_related_ingredients(solution.ingredient)
     sorted_matches = []
-    for key in sorted(iter(matches.keys()), reverse=True):
+    for key in sorted(matches.iterkeys(), reverse=True):
         sorted_matches.append((key, matches[key]))
 
     return render(
@@ -264,7 +264,7 @@ def flagged_review(request):
     sf = SolutionFixer()
     matches = sf.get_related_ingredients(solution.ingredient)
     sorted_matches = []
-    for key in sorted(iter(matches.keys()), reverse=True):
+    for key in sorted(matches.iterkeys(), reverse=True):
         sorted_matches.append((key, matches[key]))
 
     return render(
@@ -367,11 +367,11 @@ def solution_loader(request):
     # this is provided by the jQuery UI widget
     last_index = int(request.GET['last_index'][5:])
     show_statuses = {}
-    if request.GET['show_unverified'] == 'true':
+    if request.GET['show_unverified'] == u'true':
         show_statuses[1] = True
-    if request.GET['show_flagged'] == 'true':
+    if request.GET['show_flagged'] == u'true':
         show_statuses[2] = True
-    if request.GET['show_verified'] == 'true':
+    if request.GET['show_verified'] == u'true':
         show_statuses[3] = True
     SolutionModelFormFormsetFactory = modelformset_factory(Solution,form=forms.SolutionModelForm, extra=0)
     solution_formset = SolutionModelFormFormsetFactory(queryset=Solution.objects.all())

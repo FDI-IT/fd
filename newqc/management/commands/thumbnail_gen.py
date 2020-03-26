@@ -6,7 +6,7 @@ import re
 import glob
 import datetime
 import logging
-import io
+import StringIO
 from PIL import Image
 
 from optparse import make_option
@@ -40,7 +40,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for tc in TestCard.objects.all():
             try:
-                print("%sx%s" % (tc.thumbnail.height, tc.thumbnail.width))
+                print "%sx%s" % (tc.thumbnail.height, tc.thumbnail.width)
             except ValueError:
                 large = Image.open(tc.large.file.file)
                 tn = large.resize((380,490), Image.ANTIALIAS)

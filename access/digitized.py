@@ -27,7 +27,7 @@ def test(path="/var/www/django/dump/sample_data/digitized_formulas"):
             dwb.check_sheet()
             dwb_list.append(dwb)
         except DigitizedException as err:
-            print("Error in %s: %s" % (digitized_formula, err))
+            print "Error in %s: %s" % (digitized_formula, err)
 #        except:
 #            print "Unexpected error in %s: %s" % (digitized_formula, sys.exc_info()[0])
     return dwb_list
@@ -67,7 +67,7 @@ class DigitizedWB:
         try:
             self.experimental_num = experimental_re.match(self.path).group(0)
             self.experimental_log = ExperimentalLog.objects.get(experimentalnum=self.experimental_num)
-            print(self.experimental_num)
+            print self.experimental_num
         except:
             return
         for row in range(self.sheet.nrows):
@@ -76,7 +76,7 @@ class DigitizedWB:
                 v = self.sheet.cell(row,col).value
                 raw_row.append(v)
                 self.check_cell(row,col,v)
-            row_string = '|||'.join(str(item) for item in raw_row)
+            row_string = u'|||'.join(unicode(item) for item in raw_row)
             df = DigitizedFormula(experimental_log=self.experimental_log, raw_row=row_string)
             df.save()
                     

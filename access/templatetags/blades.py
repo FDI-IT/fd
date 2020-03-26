@@ -200,7 +200,7 @@ class FlavorBlades(ObjectBlades):
     def customer_list(self):
         customer_list = []
         for experimental in self.flavor.experimental_log.all():
-            customer_list.append('<a href="%s">%s</a><br>' % (experimental.get_absolute_url(), experimental.customer))
+            customer_list.append(u'<a href="%s">%s</a><br>' % (experimental.get_absolute_url(), experimental.customer))
         if len(customer_list) > 0:
             joined_cusomters = ''.join(customer_list)
             return ("Customers", joined_cusomters)
@@ -310,7 +310,7 @@ class FlavorBlades(ObjectBlades):
     def experimental_link(self):
         ex_list = []
         for experimental in self.flavor.experimental_log.all():
-            ex_list.append('<a href="%s">%s-%s</a><br>' % (experimental.get_absolute_url(), experimental.initials, experimental.experimentalnum))
+            ex_list.append(u'<a href="%s">%s-%s</a><br>' % (experimental.get_absolute_url(), experimental.initials, experimental.experimentalnum))
         if len(ex_list) > 0:
             joined_exs = ''.join(ex_list)
             return ("Experimentals", joined_exs)
@@ -324,11 +324,11 @@ class FlavorBlades(ObjectBlades):
         appl_list = []
         for appl in self.flavor.applications.all():
             if appl.top_usage_level:
-                appl_list.append('<a href="%s" title="%s">%s: %s-%s%% %s</a><br>' %
+                appl_list.append(u'<a href="%s" title="%s">%s: %s-%s%% %s</a><br>' %
                           (appl.get_admin_url(), appl.memo, appl.application_type.name, appl.usage_level,appl.top_usage_level, appl.short_memo, )
                         )
             else:
-                appl_list.append('<a href="%s" title="%s">%s: %s%% %s</a><br>' %
+                appl_list.append(u'<a href="%s" title="%s">%s: %s%% %s</a><br>' %
                           (appl.get_admin_url(), appl.memo, appl.application_type.name, appl.usage_level, appl.short_memo, )
                         )
 
@@ -423,7 +423,7 @@ class IngredientBlades(ObjectBlades):
     @property
     def sub_flavor(self):
         if self.ingredient.sub_flavor != None:
-            return ("FD Formula", '<a href="%s">%s</a>' % (self.ingredient.sub_flavor.get_absolute_url(), self.ingredient.sub_flavor))
+            return ("FD Formula", u'<a href="%s">%s</a>' % (self.ingredient.sub_flavor.get_absolute_url(), self.ingredient.sub_flavor))
 
     @property
     def comments(self):

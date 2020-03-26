@@ -50,9 +50,9 @@ def traverse(d, gzs, k, wf, ):
         #print i
         if i['ingredient_id'] in gzs:
             g_id, g_yf = gzs[i['ingredient_id']] # the id and the yield field
-            print(g_yf)
+            print g_yf
             new_wf = wf*(i['amount']/1000)
-            print(new_wf)
+            print new_wf
             formula.extend(traverse(d, gzs, g_id, new_wf))
         else:
             i['amount'] = i['amount'] * wf
@@ -302,7 +302,7 @@ def build_all_trees():
     FormulaTree.objects.all().delete()
     for flavor_info in Flavor.objects.filter(valid=True).values_list('id'):
         root_flavor_id = flavor_info[0]
-        print(root_flavor_id)
+        print root_flavor_id
         
         
         formula_root = FormulaTree(root_flavor_id=root_flavor_id,

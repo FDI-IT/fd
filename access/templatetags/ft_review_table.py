@@ -4,7 +4,7 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django import template
 from django.db.models import Sum, Q
 from django.template import RequestContext
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 
 from access.models import Flavor, FormulaTree, Ingredient, FormulaException, FormulaCycleException, FlavorSpecification, JIList, flavor_field_to_doctype_dict, LeafWeight, DOC_TYPES
 from access.utils import coster_headers
@@ -35,7 +35,7 @@ def documentation(flavor):
 
     header_labels = dict(DOC_TYPES)
 
-    relevant_document_types = set(flavor_field_to_doctype_dict.values())
+    relevant_document_types = set(flavor_field_to_doctype_dict.itervalues())
 
     headers = "<th>Ingredient</th>"
     for doctype in relevant_document_types:
@@ -234,7 +234,7 @@ def spec_sheet(flavor):
             customer_specsheet_urls.append(reverse('salesorders.views.customer_spec_sheet', args=[customer.pk, flavor.number]))
 
     customer_table = []
-    customer_table = list(zip(customer_list, customer_spec_counts, customer_report_urls, customer_specsheet_urls))
+    customer_table = zip(customer_list, customer_spec_counts, customer_report_urls, customer_specsheet_urls)
 
     #make customer_table None so we dont display anything in the template if there aren't any customers
     if customer_table == []:
@@ -280,7 +280,7 @@ def customer_info(flavor):
             customer_specsheet_urls.append(reverse('salesorders.views.customer_spec_sheet', args=[customer.pk, flavor.number]))
 
     customer_table = []
-    customer_table = list(zip(customer_list, customer_spec_counts, customer_report_urls, customer_specsheet_urls))
+    customer_table = zip(customer_list, customer_spec_counts, customer_report_urls, customer_specsheet_urls)
 
     #make customer_table None so we dont display anything in the template if there aren't any customers
     if customer_table == []:

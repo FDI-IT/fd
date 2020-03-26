@@ -18,21 +18,25 @@ wiki = [
         {
             'text':''
         },
-        'text'
+        'text',
+        'manager'
     ),
     (
         'If you see any suspicious criminal activity, alert the manager who will alert',
         {
             'text':''
         },
-        'text'
+        'text',
+        'police',
     ),
     (
         'Outside contractors in unauthorized areas or if you receive unexpected mail or packages alert',
         {
             'text':''
         },
-        'text'
+        'text',
+        'manager',
+
     ),
     (
         'Truckers are the only people other than employees and routine outside contractors (Once signed in) that can enter the side doors',
@@ -41,28 +45,107 @@ wiki = [
         #     'True' :'True',
         #     'False':'False'
         # },
-        'radio'
+        'radio',
+        'True'
     ),
     (
-        'Truckers can use the men’s locker room lavatories?',
+        'Truckers can use the men\’s locker room lavatories?',
         OrderedDict([('True' ,'True',),('False','False')]),
-        'radio'
+        'radio',
+        'True',
     ),
     (
         'Any government inspector can review a record as long as they show a badge',
         OrderedDict([('True' ,'True',),('False','False')]),
-        'radio'
+        'radio',
+        'True',
     ),
     (
         'Any non-personal visitor coming into the building must sign a secrecy agreement for the first time.',
         OrderedDict([('True' ,'True',),('False','False')]),
-        'radio'
+        'radio',
+        'True'
     ),
 
 ]
 
 # colorblind
 #
+
+colorblind = [
+    (
+        '',
+        {
+            'text':''
+        },
+        'text',
+        '29',
+    ),
+    (
+        '',
+        {
+            'text':''
+        },
+        'text',
+        '73',
+    ),
+    (
+        '',
+        {
+            'text':''
+        },
+        'text',
+        '45',
+    ),
+    (
+        '',
+        {
+            'text':''
+        },
+        'text',
+        '7',
+    ),
+    (
+        '',
+        {
+            'text':''
+        },
+        'text',
+        '26',
+    ),
+    (
+        '',
+        {
+            'text':''
+        },
+        'text',
+        '15',
+    ),
+    (
+        '',
+        {
+            'text':''
+        },
+        'text',
+        '16',
+    ),
+    (
+        '',
+        {
+            'text':''
+        },
+        'text',
+        '8',
+    ),
+    (
+        '',
+        {
+            'text':''
+        },
+        'text',
+        '5',
+    ),
+]
 hazcom = [
     # links to appropriate labels/sds
     (
@@ -85,7 +168,10 @@ fooddefense = [
             'b':'Addition of contaminants',
             'c':'Adulteration of raw materials or packaging before receipt',
             'd':'All of the above'
-        }
+        },
+        'radio',
+        'd'
+
     ),
     (
         'What steps would we use to approve a new supplier?',
@@ -94,7 +180,9 @@ fooddefense = [
             'b':'Word of mouth from other flavor companies',
             'c':'Completing our provided questonnaires',
             'd':'Taking our online survey',
-        }
+        },
+        'radio',
+        'c'
     ),
     (
         'Where can a trucker go?',
@@ -103,15 +191,21 @@ fooddefense = [
             'b':'Restroom and warehouse behind the white line',
             'c':'Loading area and front office',
             'd':'Non-production areas',
-        }
+        },
+        'radio',
+        'b'
     ),
     (
         'Contractors may enter the building after signing in, wearing a badge and being escorted to the thing they are working on.',
         OrderedDict([('True' ,'True',),('False','False')]),
+        'radio',
+        'True'
     ),
     (
         'Unfinished batches may be left until the next day as long as they are stored correctly',
         OrderedDict([('True' ,'True',),('False','False')]),
+        'radio',
+        'True'
     )
 
 ]
@@ -132,6 +226,8 @@ bacteria = [
             'c':'Organisms that are made of "micros"',
             'd':'None of the above'
         },
+        'radio',
+        'a'
     ),
     (
         'Bacteria are found in:',
@@ -141,6 +237,8 @@ bacteria = [
             'c':'Intestines of people and animals',
             'd':'All of the above'
         },
+        'radio',
+        'd'
 
     ),
     (
@@ -151,6 +249,8 @@ bacteria = [
             'c':'Summer sausage',
             'd':'All of the above'
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -161,6 +261,8 @@ bacteria = [
             'c':'Zoology',
             'd':'Salmonella'
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -171,6 +273,8 @@ bacteria = [
             'c':'Food contamination',
             'd':'food infection'
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -181,6 +285,8 @@ bacteria = [
             'c':'Sleepiness',
             'd':'None of the above'
         },
+        'radio',
+        'a',
 
     ),
     (
@@ -191,6 +297,8 @@ bacteria = [
             'c':'Cooking',
             'd':'All of the above'
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -201,6 +309,8 @@ bacteria = [
                 'c':'Bathing daily',
                 'd':'None of the above'
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -211,6 +321,8 @@ bacteria = [
             'c':'Smelly',
             'd':'All of the above'
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -221,6 +333,8 @@ bacteria = [
             'c':'Moisture control',
             'd':'All of the above'
         },
+        'radio',
+        'd',
 
     )
 ]
@@ -234,6 +348,8 @@ foodborne = [
             'c':'76,000,000',
             'd':'None of the above'
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -244,6 +360,8 @@ foodborne = [
             'c':'50,000',
             'd':'None of the above'
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -254,6 +372,8 @@ foodborne = [
             'c':'Disinfection of water supplies',
             'd':'All of the above'
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -264,6 +384,8 @@ foodborne = [
             'c':'Food production practices and consumption habits change',
             'd':'All of the above'
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -274,6 +396,8 @@ foodborne = [
             'c':'Invade deep body tissues',
             'd':'All of the above'
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -284,6 +408,8 @@ foodborne = [
             'c':'Nausea',
             'd':'All of the above'
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -294,6 +420,8 @@ foodborne = [
             'c':'The elderly',
             'd':'All of the above'
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -304,6 +432,8 @@ foodborne = [
             'c':'Drink lots of fluids',
             'd':'None of the above'
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -314,6 +444,8 @@ foodborne = [
             'c':'Neither a nor b',
             'd':'Both a and b'
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -324,6 +456,8 @@ foodborne = [
             'c':'Following time and temperature controls',
             'd':'All of the above'
         },
+        'radio',
+        'd',
 
     )
 ]
@@ -337,6 +471,8 @@ personalhygiene = [
             'c':'Coming to work on time',
             'd':'None ofthe above'
         },
+        'radio',
+        'a',
 
     ),
     (
@@ -347,6 +483,8 @@ personalhygiene = [
             'c':'Wearing clean jewelry',
             'd':'Handwashing',
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -357,6 +495,8 @@ personalhygiene = [
             'c':'Trimming, cleaning, and filing fingernails frequently',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -367,6 +507,8 @@ personalhygiene = [
             'c':'Lunches',
             'd':'Candy',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -377,6 +519,8 @@ personalhygiene = [
             'c':'Smocks',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -387,6 +531,8 @@ personalhygiene = [
             'c':'Keep it on until the end of your shift, even if it is contaminated',
             'd':'None of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -397,6 +543,8 @@ personalhygiene = [
             'c':'One',
             'd':'Two',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -407,6 +555,8 @@ personalhygiene = [
             'c':'Eating, drinking, or smoking',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -417,6 +567,8 @@ personalhygiene = [
             'c':'Using the germicidal/anti-bacterial soap or sanitizer provided',
             'd':'Drying your hands on your uniform',
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -427,6 +579,8 @@ personalhygiene = [
             'c':'In clothing storage or changing room areas',
             'd':'All of the above',
         },
+        'radio',
+        'b',
 
     )
 ]
@@ -440,6 +594,8 @@ haccp = [
             'c':'Having any Affects Causes Control Policies',
             'd':'None of the above',
         },
+        'radio',
+        'a',
 
     ),
     (
@@ -450,6 +606,8 @@ haccp = [
             'c':'Clean equipmen t properly',
             'd':'None of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -460,6 +618,8 @@ haccp = [
             'c':'Physical',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -470,6 +630,8 @@ haccp = [
             'c':'Both (a ) and (b)',
             'd':'Neither (a ) nor (b',
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -480,6 +642,8 @@ haccp = [
             'c':'Seven',
             'd':'Eight',
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -490,6 +654,8 @@ haccp = [
             'c':'Monitoring',
             'd':'Recordkeeping',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -500,6 +666,8 @@ haccp = [
             'c':'Bacteria',
             'd':'None of the above',
         },
+        'radio',
+        'a',
 
     ),
     (
@@ -510,6 +678,8 @@ haccp = [
             'c':'Chemical',
             'd':'None of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -520,6 +690,8 @@ haccp = [
             'c':'Product sampling and testing',
             'd':'All of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -530,6 +702,8 @@ haccp = [
             'c':'Dated',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     )
 ]
@@ -543,6 +717,8 @@ sanitation = [
             'c':'All of the practices and procedures used to keep the facility clean and the food produced uncontaminated',
             'd':'Cleaning and sanitizing of non-food work areas',
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -553,16 +729,20 @@ sanitation = [
             'c':'Pest control',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
         'Which does not require strict sanitation procedures be followed:',
         {
-            'a':"Food production equipment",
-            'b':"Employees' automobiles",
-            'c':"Food production work areas",
+            'a':'Food production equipment',
+            "b":'Employees\' automobiles',
+            'c':'Food production work areas',
             'd':"Employees' personal hygiene",
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -573,6 +753,8 @@ sanitation = [
             'c':'Ok, it does not need to be cleaned off',
             'd':'All of the above',
         },
+        'radio',
+        'a',
 
     ),
     (
@@ -583,6 +765,8 @@ sanitation = [
             'c':'Three',
             'd':'Four',
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -593,6 +777,8 @@ sanitation = [
             'c':'Sanitizing',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -603,6 +789,8 @@ sanitation = [
             'c':'Applying as a foam',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -613,6 +801,8 @@ sanitation = [
             'c':'Put away when still wet',
             'd':'None of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -623,6 +813,8 @@ sanitation = [
             'c':'Store the equipment only in its designated storage area',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -633,6 +825,8 @@ sanitation = [
             'c':'Use as much or as little as you want',
             'd':'None of the above',
         },
+        'radio',
+        'a',
 
     )
 ]
@@ -646,6 +840,8 @@ time =[
             'c':'40 and 140 degrees F',
             'd':'50 and 150 degrees F',
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -656,6 +852,8 @@ time =[
             'c':'Store food',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -666,6 +864,8 @@ time =[
             'c':'Pasteurization',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -676,6 +876,8 @@ time =[
             'c':'Create a warm, moist environment',
             'd':'Make food taste good',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -686,6 +888,8 @@ time =[
             'c':'Salmonella',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -696,6 +900,8 @@ time =[
             'c':'Thermal processing',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -706,16 +912,20 @@ time =[
             'c':'Refrigerating',
             'd':'All of the above',
         },
+        'radio',
+        'c',
 
     ),
     (
         'The first rule to follow for time and temperature controls is:',
         {
-            'a':"Being close to target is good enough",
-            'b':"Always follow your company's established procedures and practices for the food you are making",
-            'c':"If you make a small mistake, it won't matter much",
-            'd':"None of the above",
+            'a':'Being close to target is good enough',
+            'b':'Always follow your company\'s established procedures and practices for the food you are making',
+            'c':'If you make a small mistake, it won\'t matter much',
+            'd':'None of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -726,6 +936,8 @@ time =[
             'c':'Use a thermometer to check if a food has reached its correct processing temperature',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -736,6 +948,8 @@ time =[
             'c':'Do not tell anyone',
             'd':'None of the above',
         },
+        'radio',
+        'a',
 
     )
 ]
@@ -749,6 +963,8 @@ foreign =[
             'c':'Sanitizing of equipment and food work areas',
             'd':'None of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -759,6 +975,8 @@ foreign =[
             'c':'It helps detect bacteria',
             'd':'None of the above',
         },
+        'radio',
+        'a',
 
     ),
     (
@@ -769,6 +987,8 @@ foreign =[
             'c':'Employees',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -779,6 +999,8 @@ foreign =[
             'c':'Wood',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -789,6 +1011,8 @@ foreign =[
             'c':'Jewelry',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -799,6 +1023,8 @@ foreign =[
             'c':'After the food has arrived at the store',
             'd':'All of the above',
         },
+        'radio',
+        'a',
 
     ),
     (
@@ -809,6 +1035,8 @@ foreign =[
             'c':'Debris',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -819,6 +1047,8 @@ foreign =[
             'c':'A refrigerator',
             'd':'None of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -829,6 +1059,8 @@ foreign =[
             'c':'Looking for foreign materials with the naked eye',
             'd':'None of the above',
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -839,6 +1071,8 @@ foreign =[
             'c':'Good housekeeping measures',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     )
 ]
@@ -852,6 +1086,8 @@ cross = [
             'c':'Contamination of food with ingredients',
             'd':'None of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -862,6 +1098,8 @@ cross = [
             'c':'Bacteria',
             'd':'Moon beams',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -872,6 +1110,8 @@ cross = [
             'c':'Milk',
             'd':'All of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -882,6 +1122,8 @@ cross = [
             'c':'Put food and packaging materials away or cover them before cleaning or applying pesticides',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -892,6 +1134,8 @@ cross = [
             'c':'Packaging materials',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -902,6 +1146,8 @@ cross = [
             'c':'Separate raw and cooked products',
             'd':'All ofthe a bove',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -912,6 +1158,8 @@ cross = [
             'c':'People',
             'd':'Water',
         },
+        'radio',
+        'a',
 
     ),
     (
@@ -922,6 +1170,8 @@ cross = [
             'c':'Throwing food',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -932,6 +1182,8 @@ cross = [
             'c':'Visual inspection',
             'd':'Screens and sifters',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -942,6 +1194,8 @@ cross = [
             'c':'There is human error or accident',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     )
 ]
@@ -951,10 +1205,12 @@ allergens = [
         'A food allergic reaction is ca used by:',
         {
             'a':'Eating too much food',
-            'b':"The body's response to a foreign protein",
+            'b':'The body\'s response to a foreign protein',
             'c':'A reaction to harmful bacteria in the food',
             'd':'All of th e above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -965,6 +1221,8 @@ allergens = [
             'c':'Difficulty breathing',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -975,6 +1233,8 @@ allergens = [
             'c':'Fish',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -985,6 +1245,8 @@ allergens = [
             'c':'Avoid foods that trigger reactions',
             'd':'None of the above',
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -995,6 +1257,8 @@ allergens = [
             'c':'Clean-up or sanitation of equipment',
             'd':'All ofthe above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1005,6 +1269,8 @@ allergens = [
             'c':'Always check the ingredients before they are added to a batch of food.',
             'd':'All of th e above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1015,6 +1281,8 @@ allergens = [
             'c':'Ad the allergen ingredient near the end of processing',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1025,6 +1293,8 @@ allergens = [
             'c':'Both (a) and (b)',
             'd':'Neither (a) nor (b)',
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -1035,6 +1305,8 @@ allergens = [
             'c':'Visually inspecting equipment after cleaning',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1045,6 +1317,8 @@ allergens = [
             'c':'Avoid your co-workers',
             'd':'All of the above',
         },
+        'radio',
+        'a',
 
     )
 ]
@@ -1058,16 +1332,20 @@ pest = [
             'c':'Rodents',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
-        "Pest control is part of your company's:",
+        'Pest control is part of your company\'s:',
         {
             'a':'Sanitation program',
             'b':'Equipment maintenance',
             'c':'Microbiological testing',
             'd':'None of the above',
         },
+        'radio',
+        'a',
 
     ),
     (
@@ -1078,6 +1356,8 @@ pest = [
             'c':'Garbage',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1088,6 +1368,8 @@ pest = [
             'c':'Detect them once they are in the food product',
             'd':'None of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -1098,6 +1380,8 @@ pest = [
             'c':'Keep doors a nd windows shut',
             'd':'All of th e above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1108,6 +1392,8 @@ pest = [
             'c':'Heat sterilization',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1118,6 +1404,8 @@ pest = [
             'c':'Crack-and-crevice spraying',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1128,6 +1416,8 @@ pest = [
             'c':'Both (a) and (b)',
             'd':'Neither (a) nor (b)',
         },
+        'radio',
+        'c',
 
     ),
     (
@@ -1138,6 +1428,8 @@ pest = [
             'c':'Disposing of, or notifying the proper person to dispose of, any rodent bodies you discover',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1148,6 +1440,8 @@ pest = [
             'c':'Cleaning up garbage',
             'd':'Using pesticides',
         },
+        'radio',
+        'b',
 
     )
 ]
@@ -1161,6 +1455,8 @@ security = [
             'c':'Vandalism',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1171,6 +1467,8 @@ security = [
             'c':'Hidden areas that conceal criminals',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1181,6 +1479,8 @@ security = [
             'c':'Close to the entrance, if possible',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1191,6 +1491,8 @@ security = [
             'c':'heck their ID badge to see if th ey are the card holder, and then let them in',
             'd':'All of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -1201,6 +1503,8 @@ security = [
             'c':'Laboratory',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1211,6 +1515,8 @@ security = [
             'c':'Report missing stock',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1221,6 +1527,8 @@ security = [
             'c':'Be aware of your surroundings at all times',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1231,6 +1539,8 @@ security = [
             'c':'Other employees might take your food',
             'd':'None of the above',
         },
+        'radio',
+        'b',
 
     ),
     (
@@ -1241,6 +1551,8 @@ security = [
             'c':'Threatening people',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     ),
     (
@@ -1251,6 +1563,8 @@ security = [
             'c':'Travel with the employee they have come to see',
             'd':'All of the above',
         },
+        'radio',
+        'd',
 
     )
 ]
@@ -1264,6 +1578,8 @@ bacteria_sp = [
                         'c':'Organismos que están hechos de "micros"',
                         'd':'Ninguna de las respuestas de arriba',
                     },
+                    'radio',
+                    'a',
 
                 ),
 
@@ -1275,6 +1591,8 @@ bacteria_sp = [
                         'c':'Intestinos de personas y animales',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1285,6 +1603,8 @@ bacteria_sp = [
                         'c':'Salchichas de verano',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1295,6 +1615,8 @@ bacteria_sp = [
                         'c':'Zoología',
                         'd':'Salmonela',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -1305,6 +1627,8 @@ bacteria_sp = [
                         'c':'Contaminación de la comida',
                         'd':'Infección de la comida',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1315,6 +1639,8 @@ bacteria_sp = [
                         'c':'Ador mecimiento',
                         'd':'Ninguna de las respuestas de arriba',
                     },
+                    'radio',
+                    'a',
 
                 ),
                 (
@@ -1325,6 +1651,8 @@ bacteria_sp = [
                         'c':'Cocinar',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1335,6 +1663,8 @@ bacteria_sp = [
                         'c':'Bañándose diariamente',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1345,6 +1675,8 @@ bacteria_sp = [
                         'c':'Apestosa',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1355,6 +1687,8 @@ bacteria_sp = [
                         'c':'Control de humedad',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
             ]
@@ -1368,6 +1702,8 @@ foodborne_sp = [
                         'c':'76,000,000',
                         'd':'Ninguna de las respuestas de arriba',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -1378,6 +1714,8 @@ foodborne_sp = [
                         'c':'50,000',
                         'd':'Ninguna de las respuestas de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1388,6 +1726,8 @@ foodborne_sp = [
                         'c':'Desinfección de las fuentes de agua',
                         'd':'Todas las de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1398,6 +1738,8 @@ foodborne_sp = [
                         'c':'Las prácticas de producción y hábitos de consumo cambian',
                         'd':'Todas las de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1408,6 +1750,8 @@ foodborne_sp = [
                         'c':'Invaden tejidos profundos del cuerpo',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1418,6 +1762,8 @@ foodborne_sp = [
                         'c':'Náusea',
                         'd':'Todas las de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1428,6 +1774,8 @@ foodborne_sp = [
                         'c':'Ancianos',
                         'd':'Todas las de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1438,6 +1786,8 @@ foodborne_sp = [
                         'c':'Tome muchos líquidos',
                         'd':'Ninguna de las respuestas de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1448,6 +1798,8 @@ foodborne_sp = [
                         'c':'Ninguna ni a, ni b',
                         'd':'Ambas a, y b',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1458,6 +1810,8 @@ foodborne_sp = [
                         'c':'Siguiendo controles de tiempo y temperatura',
                         'd':'Todas las respuestas de arriba',
                     },
+                    'radio',
+                    'd',
 
                 )
 
@@ -1472,6 +1826,8 @@ personalhygiene_sp = [
                         'c':'Llegar al trabajo a tiempo',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'a',
 
                 ),
                 (
@@ -1482,6 +1838,8 @@ personalhygiene_sp = [
                         'c':'Usar joyería limpia',
                         'd':'Lavarse las manos',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -1492,6 +1850,8 @@ personalhygiene_sp = [
                         'c':'Recortarse, limpiarse, y limarse las uñas frecuentemente',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1502,6 +1862,8 @@ personalhygiene_sp = [
                         'c':'Almuerzos',
                         'd':'Dulces',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1512,6 +1874,8 @@ personalhygiene_sp = [
                         'c':'Guardapolvos',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1522,6 +1886,8 @@ personalhygiene_sp = [
                         'c':'Mantenerlo puesto hasta el fin de la jornada aunque estuviera contaminado',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1532,6 +1898,8 @@ personalhygiene_sp = [
                         'c':'Uno',
                         'd':'Dos',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1542,6 +1910,8 @@ personalhygiene_sp = [
                         'c':'Comer, beber, o fumar',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1552,6 +1922,8 @@ personalhygiene_sp = [
                         'c':'Usando un jabón hermicida/antibacteriano o desinfectante que ha sido suministrado',
                         'd':'Secarse las manos en su uniforme',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -1562,6 +1934,8 @@ personalhygiene_sp = [
                         'c':'En lugares donde se guarda la ropa o se cambia la ropa',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 )
 
@@ -1576,6 +1950,8 @@ haccp_sp = [
                         'c':'Hombres Avanzan Casi Cuando Pueden',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'a',
 
                 ),
                 (
@@ -1586,6 +1962,8 @@ haccp_sp = [
                         'c':'Limpiar el equipo apropiadamente',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1596,6 +1974,8 @@ haccp_sp = [
                         'c':'Físico',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1606,6 +1986,8 @@ haccp_sp = [
                         'c':'Ambos (a ) y (b)',
                         'd':'Ni (a) ni (b )',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -1616,6 +1998,8 @@ haccp_sp = [
                         'c':'Siete',
                         'd':'Ocho',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -1626,6 +2010,8 @@ haccp_sp = [
                         'c':'Monitoreo',
                         'd':'Mantenimiento de archivos',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1636,6 +2022,8 @@ haccp_sp = [
                         'c':'Bacterias',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'a',
 
                 ),
                 (
@@ -1646,6 +2034,8 @@ haccp_sp = [
                         'c':'Químico',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1656,6 +2046,8 @@ haccp_sp = [
                         'c':'Muestras y pruebas del producto',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1666,6 +2058,8 @@ haccp_sp = [
                         'c':'Fechados',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 )
 
@@ -1680,6 +2074,8 @@ sanitation_sp = [
                         'c':'Todas las prácticas de procedimientos que se usan para mantener al lugar limpio y la comida producida sin contaminación',
                         'd':'Limpieza y desinfección de las áreas de trabajo donde no hay alimentos',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -1690,6 +2086,8 @@ sanitation_sp = [
                         'c':'Control de plagas',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1700,6 +2098,8 @@ sanitation_sp = [
                         'c':'Producción de alimentos en las áreas de trabajo',
                         'd':'La higiene personal de los empleados',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1710,6 +2110,8 @@ sanitation_sp = [
                         'c':'No importa, no necesita ser limpiado',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'a',
 
                 ),
                 (
@@ -1720,6 +2122,8 @@ sanitation_sp = [
                         'c':'Tres',
                         'd':'Cuatro',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -1730,6 +2134,8 @@ sanitation_sp = [
                         'c':'Desinfección',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1740,6 +2146,8 @@ sanitation_sp = [
                         'c':'Aplicarlos como una espuma',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1750,6 +2158,8 @@ sanitation_sp = [
                         'c':'Guardarlos cuando todavía esten mojados',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1760,6 +2170,8 @@ sanitation_sp = [
                         'c':'Almacene el equipo sólo en un área de almacenaje designada',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1770,6 +2182,8 @@ sanitation_sp = [
                         'c':'Use tan poco o mucho silo desea',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'a',
 
                 )
 
@@ -1784,6 +2198,8 @@ time_sp = [
                         'c':'40y140 °F',
                         'd':'50 y 150 °F',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -1794,6 +2210,8 @@ time_sp = [
                         'c':'Almacenar comida',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1804,6 +2222,8 @@ time_sp = [
                         'c':'Pasteurizar',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1814,6 +2234,8 @@ time_sp = [
                         'c':'Crear un entorno caliente, húmedo',
                         'd':'Hacer que la comida sepa bien',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1824,6 +2246,8 @@ time_sp = [
                         'c':'Salmonela',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1834,6 +2258,8 @@ time_sp = [
                         'c':'Procesar térmicamente',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1844,6 +2270,8 @@ time_sp = [
                         'c':'Refrigerar',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -1854,6 +2282,8 @@ time_sp = [
                         'c':'Si hace un pequeño error, no importa mayormente',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1864,6 +2294,8 @@ time_sp = [
                         'c':'Use un termómetro para verificar si la comida ha llegado a su temperatura de proceso correcta',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1874,6 +2306,8 @@ time_sp = [
                         'c':'No le diga a nadie',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'a',
 
                 )
 
@@ -1888,6 +2322,8 @@ foreign_sp = [
                         'c':'Desinfectar el equipo y áreas de! trabajo de alimentos',
                         'd':'Ninguno de las de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1898,6 +2334,8 @@ foreign_sp = [
                         'c':'Ayuda a detectar bacterias',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'a',
 
                 ),
                 (
@@ -1908,6 +2346,8 @@ foreign_sp = [
                         'c':'Empleados',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1918,6 +2358,8 @@ foreign_sp = [
                         'c':'Madera',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1928,6 +2370,8 @@ foreign_sp = [
                         'c':'Joyería',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1938,6 +2382,8 @@ foreign_sp = [
                         'c':'Después de que la comida ha llegado a la tienda',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'a',
 
                 ),
                 (
@@ -1948,6 +2394,8 @@ foreign_sp = [
                         'c':'Basura',
                         'd':'Todos los de arriba'
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -1958,6 +2406,8 @@ foreign_sp = [
                         'c':'Un refrigerador',
                         'd':'Ninguno de los arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -1968,6 +2418,8 @@ foreign_sp = [
                         'c':'Buscando materias foráneas a ojo pelado',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -1978,6 +2430,8 @@ foreign_sp = [
                         'c':'Medidas de buen orden en sitio',
                         'd':'Todos los de arriba'
                     },
+                    'radio',
+                    'd',
 
                 )
 
@@ -1992,6 +2446,8 @@ cross_sp = [
                         'c':'Contaminación de comida con ingredientes',
                         'd':'Ninguna de las respuestas de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -2002,6 +2458,8 @@ cross_sp = [
                         'c':'Bacteria',
                         'd':'Rayos de luna',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2012,6 +2470,8 @@ cross_sp = [
                         'c':'Leche',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -2022,6 +2482,8 @@ cross_sp = [
                         'c':'Ponga comida y materiales de empaque lejos o cúbralos antes de limpiar o aplicar pesticidas',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2032,6 +2494,8 @@ cross_sp = [
                         'c':'Materiales de empaque',
                         'd':'Todos los de a rriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2042,6 +2506,8 @@ cross_sp = [
                         'c':'Separe los productos crudos y cocinados',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2052,6 +2518,8 @@ cross_sp = [
                         'c':'Personas',
                         'd':'Agua',
                     },
+                    'radio',
+                    'a',
 
                 ),
                 (
@@ -2062,6 +2530,8 @@ cross_sp = [
                         'c':'Tirar comida',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2072,6 +2542,8 @@ cross_sp = [
                         'c':'Una inspección visual',
                         'd':'Mallas y escudriñadores',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -2082,6 +2554,8 @@ cross_sp = [
                         'c':'Hay un error o accidente humano',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 )
 
@@ -2096,6 +2570,8 @@ allergens_sp = [
                         'c':'Una reacción a bacterias peligrosas en la comida',
                         'd':'Todo lo de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -2106,6 +2582,8 @@ allergens_sp = [
                         'c':'Dificultad en respirar',
                         'd':'Todo lo de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2116,6 +2594,8 @@ allergens_sp = [
                         'c':'Pescado',
                         'd':'Todo lo de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2126,6 +2606,8 @@ allergens_sp = [
                         'c':'Evitar comidas que ca usen la reacción alérgica',
                         'd':'Ninguna de las respuestas de arriba',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -2136,6 +2618,8 @@ allergens_sp = [
                         'c':'limpieza o higiene inapropiada del equipo',
                         'd':'Todo lo de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2146,6 +2630,8 @@ allergens_sp = [
                         'c':'Siempre chequee los ingredientes antes de que se los añada a un lote de alimentos.',
                         'd':'Todo lo de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2156,6 +2642,8 @@ allergens_sp = [
                         'c':'Añadir el ingrediente alérgeno cerca del fin del proceso',
                         'd':'Todo lo de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2166,6 +2654,8 @@ allergens_sp = [
                         'c':'Ambas a. y b.',
                         'd':'Ni a, nib.',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -2176,6 +2666,8 @@ allergens_sp = [
                         'c':'Visualmente inspeccionar el equipo después de limpiarlo',
                         'd':'Todo lo de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2186,6 +2678,8 @@ allergens_sp = [
                         'c':'Evitar contacto con los compañeros',
                         'd':'Todo lo de arriba',
                     },
+                    'radio',
+                    'a',
 
                 )
 
@@ -2200,6 +2694,8 @@ pest_sp = [
                         'c':'Roedores',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2210,6 +2706,8 @@ pest_sp = [
                         'c':'Pruebas microbiológicas',
                         'd':'Ninguno de los e arriba',
                     },
+                    'radio',
+                    'a',
 
                 ),
                 (
@@ -2220,6 +2718,8 @@ pest_sp = [
                         'c':'Basura',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2230,6 +2730,8 @@ pest_sp = [
                         'c':'Detectarlas una vez que estén en el producto comestible',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -2240,6 +2742,8 @@ pest_sp = [
                         'c':'Mantener las puertas y ventanas cerradas',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2250,6 +2754,8 @@ pest_sp = [
                         'c':'Esterilización por medio de calor',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2260,6 +2766,8 @@ pest_sp = [
                         'c':'Rocío de grietas y hendeduras',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2270,6 +2778,8 @@ pest_sp = [
                         'c':'Ambas (a) y (b)',
                         'd':'Ninguno, ni (a) ni (b)',
                     },
+                    'radio',
+                    'c',
 
                 ),
                 (
@@ -2280,6 +2790,8 @@ pest_sp = [
                         'c':'Disponiendo, o notificando a la persona apropiada que deseche cualquier cuerpo de roedor que se encuentre',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2290,6 +2802,8 @@ pest_sp = [
                         'c':'Limpieza de basura',
                         'd':'Usando pesticidas',
                     },
+                    'radio',
+                    'b',
 
                 )
 
@@ -2304,6 +2818,8 @@ security_sp =[
                         'c':'Vandalismo',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2314,6 +2830,8 @@ security_sp =[
                         'c':'Lugares escondidos que pueden encubrir a criminales',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2324,6 +2842,8 @@ security_sp =[
                         'c':'Cerca de la entrada, si es posible',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2334,6 +2854,8 @@ security_sp =[
                         'c':'Verificar sus placas de identificación para ver que sea el dueño de la placa, y luego permitirle entrar',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -2344,6 +2866,8 @@ security_sp =[
                         'c':'Laboratorio',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2354,6 +2878,8 @@ security_sp =[
                         'c':'Reportar cualquier existencia faltante',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2364,6 +2890,8 @@ security_sp =[
                         'c':'Estar consciente de todo a su alrededor todo el tiempo',
                         'd':'Todo lo de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2374,6 +2902,8 @@ security_sp =[
                         'c':'Otros empleados pueden adueñarse de su comida',
                         'd':'Ninguno de los de arriba',
                     },
+                    'radio',
+                    'b',
 
                 ),
                 (
@@ -2384,6 +2914,8 @@ security_sp =[
                         'c':'Actitud amenazante a las personas',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 ),
                 (
@@ -2394,213 +2926,295 @@ security_sp =[
                         'c':'Caminar con el empleado a quien han venido a visitar',
                         'd':'Todos los de arriba',
                     },
+                    'radio',
+                    'd',
 
                 )
 
             ]
 
-fltc = [
+fltv = [
         (
             'Forklift inspections are only required once per year.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
 
         ),
         (
             'A forklift will tip over if the center of gravity is outside the stability triangle.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'True',
 
         ),
         (
             'OSHA requires retraining at least every 3 years.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'True',
 
         ),
         (
             'The safest way to cross a railroad track is at an angle.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'True',
 
         ),
         (
             'If the forklift does not have a seatbelt then it is not required on that particular model.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
 
         ),
         (
             'Forklifts are designed to handle loads of any size and weight.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
 
         ),
         (
             'Driving with an obstructed view is allowed if it is only within 10 yards.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
 
         ),
         (
             'Although forklift injuries are common, no one has ever been killed in a forklift accident.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
 
         ),
         (
             'Maximum safe speed should be equivalent to around 20 miles per hour.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
 
         ),
         (
             'It is okay to give someone in management a ride if the walk is more than 200 yards.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
 
         ),
         (
             'No person is allowed to pass underneath a raised load.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'True',
             '11'
         ),
         (
             'If the load is too heavy or too far from the fulcrum the forklift will tip forward.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'True',
             '12'
         ),
         (
             'The “Load Center” is the sensor on the forklift that warns if the load is too heavy.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
             '13'
         ),
         (
             'Without a load a forklift can never tip over.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
             '14'
         ),
         (
             'If a forklift begins to tip over you should quickly jump away from the forklift and falling items.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
             '15'
         ),
         (
             'Driving across a slope or angle could cause the forklift to tip over.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'True',
             '16'
         ),
         (
             'When transporting a load on a slope, always keep the forks pointed downhill.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
             '17'
         ),
         (
             'Forks should be lowered to the ground when the operator is more than 25 feet away.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'True',
             '18'
         ),
         (
             'Battery charging should only be done in designated areas.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'True',
             '19'
         ),
         (
             'Lifting an employee on the forks is approved only if your supervisor is watching',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'False',
             '20'
         )
     ]
 
-fltc_sp = [
+fltv_sp = [
         (
             'El montacargas requiere inspección sólo una vez al año.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
 
         ),
         (
             'Un montacargas se volcará si el centro de gravedad está fuera del triángulo de estabilidad.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
 
         ),
         (
             'OSHA exige volver a capacitarse al menos cada tres años.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
 
         ),
         (
             'La manera más segura de cruzar rieles ferroviarios es en ángulo.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
 
         ),
         (
             'Si el montacargas no tiene cinturón de seguridad es porque no necesita ese modelo en particular.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
 
         ),
         (
             'Los montacargas están diseñados para maniobrar cargas de cualquier tamaño y peso.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
 
         ),
         (
             'Se permite conducir con obstrucción visual sólo si es una distancia corta.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
 
         ),
         (
             'Aunque las lesiones con montacargas son comunes, nadie ha muerto nunca en un accidente de montacargas.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
 
         ),
         (
             'La velocidad máxima segura equivaldría alrededor de 20 millas por hora.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
 
         ),
         (
             'Está bien llevar a un administrador como pasajero si el recorrido es mayor de 200 yardas.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
 
         ),
         (
             'No se permite a nadie pasar por debajo de una carga levantada.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
             '11'
         ),
         (
             'Si la carga es demasiado pesada o está muy lejos del punto de apoyo el montacargas se inclinará hacia delante.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
             '12'
         ),
         (
             'El “centro de carga” es un detector del montacargas que le advierte si la carga es demasiado pesada.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
             '13'
         ),
         (
             'Sin carga un montacargas nunca puede volcarse.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
             '14'
         ),
         (
             'Si un montacargas empieza a volcarse usted debe rápidamente saltar fuera del montacargas y de los objetos que caen.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
             '15'
         ),
         (
             'Manejar a través de una pendiente o en ángulo puede ocasionar un vuelco del montacargas.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
             '16'
         ),
         (
             'Cuando transporte una carga por una pendiente, mantenga siempre las horquillas apuntando cuesta abajo.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
             '17'
         ),
         (
             'Las horquillas deben bajarse al suelo cuando el operador se aleja a más de 25 pies.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
             '18'
         ),
         (
             'La carga de la batería debe hacerse sólo en áreas designadas.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
             '19'
         ),
         (
             'Levantar a un empleado en el montacargas está aprobado sólo si su supervisor está vigilando.',
             OrderedDict([('True' ,'Verdad',),('False','Falso')]),
+            'radio',
+            '',
             '20'
         )
     ]
@@ -2614,6 +3228,8 @@ wps = [
                 'c':'Bend your back and keep your knees straight',
                 'd':'Twist your back slowly if you need to turn while lifting',
             },
+            'radio',
+            'b',
 
         ),
         (
@@ -2624,6 +3240,8 @@ wps = [
                 'c':'It saves your company money',
                 'd':'Clutter and improperly stored materials are a safety and fire hazard',
             },
+            'radio',
+            'd',
 
         ),
         (
@@ -2634,12 +3252,15 @@ wps = [
                 'c':'The authorized employee',
                 'd':'The machine operator or a supervisor',
             },
+            'radio',
+            'c',
 
         ),
         (
             'Your company must have a safety data sheet (or SDS) for each chemical that poses a physical or health hazard at your workplace.',
             OrderedDict([('True' ,'True',),('False','False')]),
-
+            'radio',
+            'True',
         ),
         (
             'Protecting an extension cord while you work helps prevent damage that can cause electric shock.  This includes:',
@@ -2649,6 +3270,8 @@ wps = [
                 'c':'Running the cord under carpet to protect it from foot traffic',
                 'd':'All of the above',
             },
+            'radio',
+            'b',
 
         ),
         (
@@ -2659,6 +3282,8 @@ wps = [
                 'c':'Know how to prevent fires in the first place',
                 'd':'Know where your headcount area is located',
             },
+            'radio',
+            'c',
 
         ),
         (
@@ -2669,6 +3294,8 @@ wps = [
                 'c':'The forklift, if it’s approaching from the right',
                 'd':'The pedestrian',
             },
+            'radio',
+            'd',
 
         ),
         (
@@ -2679,6 +3306,8 @@ wps = [
                 'c':'Contact the tool manufacturer to see if the guard is really necessary',
                 'd':'Carry the tool by the cord or hose',
             },
+            'radio',
+            'b',
 
         ),
         (
@@ -2689,6 +3318,8 @@ wps = [
                 'c':'Carry any object or load, as long as it doesn’t affect your balance',
                 'd':'All of the above',
             },
+            'radio',
+            'a',
 
         ),
         (
@@ -2699,6 +3330,8 @@ wps = [
                 'c':'An approach to infection control that considers all blood and body fluids to be infectious',
                 'd':'None of the above',
             },
+            'radio',
+            'c',
 
         )
 
@@ -2713,6 +3346,8 @@ wps2 = [
                 'c':'Your co-workers are',
                 'd':'You are',
             },
+            'radio',
+            'b',
             '11'
         ),
         (
@@ -2723,6 +3358,8 @@ wps2 = [
                 'c':'OSHA is',
                 'd':'My co-workers are',
             },
+            'radio',
+            'a',
             '12'
         ),
         (
@@ -2733,11 +3370,15 @@ wps2 = [
                 'c':'Reaching a team consensus',
                 'd':'Calculating workers’ compensation costs',
             },
+            'radio',
+            'b',
             '13'
         ),
         (
             'Simple movements can cause injuries if they are repeated enough.',
             OrderedDict([('True' ,'True',),('False','False')]),
+            'radio',
+            'True',
             '14'
         ),
         (
@@ -2748,6 +3389,8 @@ wps2 = [
                 'c':'You put on proper PPE',
                 'd':'The load meets OSHA requirements',
             },
+            'radio',
+            'b',
             '15'
         ),
         (
@@ -2758,6 +3401,8 @@ wps2 = [
                 'c':'Testing the weight by moving one of the corners',
                 'd':'None of the above',
             },
+            'radio',
+            'c',
             '16'
         ),
         (
@@ -2768,6 +3413,8 @@ wps2 = [
                 'c':'Bend at the knees',
                 'd':'Lift slowly and let your back do the work',
             },
+            'radio',
+            'c',
             '17'
         ),
         (
@@ -2778,6 +3425,8 @@ wps2 = [
                 'c':'Remove ice and snow',
                 'd':'All of the above',
             },
+            'radio',
+            'd',
             '18'
         ),
         (
@@ -2788,6 +3437,8 @@ wps2 = [
                 'c':'Provides exercise by bending over to pick up debris',
                 'd':'Presents a good company image',
             },
+            'radio',
+            'b',
             '19'
         ),
         (
@@ -2798,6 +3449,8 @@ wps2 = [
                 'c':'During modifications and adjustments to powered equipment',
                 'd':'All of the above',
             },
+            'radio',
+            'd',
             '20'
         ),
         (
@@ -2808,6 +3461,299 @@ wps2 = [
                 'c':'Remove a machine guard to clear a jam',
                 'd':'None of the above',
             },
+            'radio',
+            'c',
             '21'
         )
     ]
+
+
+ccp = [
+    (
+        'If there is a microsensitive raw material used in the flavor, the lot number of the ingredient is written by hand on the formula',
+        OrderedDict([('True' ,'True',),('False','False')]),
+        'radio',
+        'True',
+        '',
+    ),
+    (
+        'What allergen is found in this product?',
+        {
+            'peanut':'peanut'
+        },
+        'radio',
+        'peanut',
+        ''
+    ),
+    (
+        'Where is the above mentioned allergen located?',
+        {
+            'a':'With the other allergen powders',
+            'b':'Production Lab and Production Isolation areas',
+            'c':'In the Stench Fridge',
+
+        },
+        'radio',
+        'b',
+        ''
+    ),
+    (
+        'The pre-op statement is signed by the compounder and dated after every batch.',
+        OrderedDict([('True' ,'True',),('False','False')]),
+        'radio',
+        'True',
+        ''
+    ),
+    (
+        'The Sieve CCP 1 is on every batch sheet this means:   All batches must pass through a screen, sieve, paper filter or something else to prevent foreign matter from getting into the final product.',
+        OrderedDict([('True' ,'True',),('False','False')]),
+        'radio',
+        'True',
+        ''
+    ),
+    (
+        'The Sieve is broken, you should….',
+        {
+            'a':'Report it to Supervisor',
+            'b':'Replace the Sieve',
+            'c':'Re-Sieve the Batch',
+            'd':'All of the above.',
+        },
+        'radio',
+        'd',
+        ''
+    ),
+    (
+        'CCP2 Allergen Cleaning  involves Visual Inspection',
+        OrderedDict([('True' ,'True',),('False','False')]),
+        'radio',
+        'False',
+        ''
+    ),
+    (
+        'Label application CCP 4 shows up when there is an allergen.',
+        {
+            'a':'Labels are counted and the allergen statement is compared with the allergen statement on the batch sheet. If there is a discrepancy, the supervisor should be called immediately.',
+            'b':'All labels are counted even if it is not an allergen according to the pre-op sheet. Also the Flavor Number, name and all other information is compared to the batch sheet number, information and name as well.',
+            'c':'If there is no allergen shown on the label this is a non-conformity and the supervisor should be called immediately.',
+            'd':'All of the above.',
+        },
+        'radio',
+        'a',
+        ''
+    ),
+    (
+        'Thermal Kill Step CCP 6 - Is designed to destroy most pathogenic microorganisms. How is this achieved?',
+        {
+            'a':'Product is heated for 10 minutes at 160 degrees',
+            'b':'Product is heated for 15 minutes at 160 degrees',
+            'c':'Product is heated for 15 minutes at 150 degrees',
+            'd':'Product is heated for 10 minutes at 150 degrees',
+        },
+        'radio',
+        'b',
+        ''
+    ),
+    (
+        'The filled out CCP 6 Thermal Kill Step ver2014 is reviewed and recycled in the shred box',
+        OrderedDict([('True' ,'True',),('False','False')]),
+        'radio',
+        'False',
+        ''
+    ),
+    (
+        'When receiving a raw material how do you know if it is an allergen?',
+        {
+            'a':'Spec Sheet',
+            'b':'Allergen Declaration',
+            'c':'Product Label',
+            'd':'All of the above',
+        },
+        'radio',
+        'd',
+        ''
+    ),
+    (
+        'What are the Big 8 Allergens',
+        {
+            'a':'Peanuts, Shellfish, Melons, Wheat, Soy, Tree nuts, Dairy and Sulfites.',
+            'b':'Diary, Peanuts, Soy, Sulfites, Wheat, Vegetable Proteins, Fish and Corn.',
+            'c':'Corn, Wheat, Soy, Soy Sauce, Vegetable Proteins, Sulfites, Fish and Milk',
+            'd':'Tree Nuts, Peanuts, Soy, Dairy, Wheat, Fish, Shellfish and Eggs.',
+        },
+        'radio',
+        'd',
+        ''
+    ),
+    (
+        'Gluten need to be labeled if there is more than ',
+        {
+            'a':'10 ppm',
+            'b':'20 ppm',
+            'c':'15 ppm',
+            'd':'25 ppm',
+        },
+        'radio',
+        'b',
+        ''
+    ),
+    (
+        'Liquid Allergens are allowed to be with other Liquid Raw Materials as long as they are labeled clearly.',
+        OrderedDict([('True' ,'True',),('False','False')]),
+        'radio',
+        'False',
+        ''
+    ),
+    (
+        'Soy Powder (Soy Allergen) can only be stored above a Soy Allergen Product.',
+        OrderedDict([('True' ,'True',),('False','False')]),
+        'radio',
+        'True',
+        ''
+    ),
+]
+
+#
+# colorblind = [
+#     (
+#
+#     )
+# ]
+survey = [
+    (
+        'New employees receive food safety trainig before they are allowed to work',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'I appreciate when a co-worker points out to me if I am doing something that could affect food safety in a bad way',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'I think my supervisor always puts food safety ahead of production.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'I am comfortable stopping the line whenever I see something that might harm the quality and safety of the food we make.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'I understand how food can get contaminated with bacteria or allergens that can make people sick.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'Our decisions, actions, and behaviors do not change when we are audited or when senior leadership is in the building.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'I understand how this plant measures food safety and how we are doing.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'Food safety rules and procedures are reviewed with us regularly.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'If I make a suggetion that will improve food safety, I know it will be taken seriously.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'Everyone on my shift always follows food safety rules and procedures.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'When a food safety incident occurs, we aggressively address its root cause to make sure it does not happen again.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'I think employee safety and food safety are very high priorities for leadership at this plant.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'When I start a shift after the equipment and floors have gone through sanitation, they always look very clean.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'Employees get recognized for their contribution to making sure that we produce safe food.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+    (
+        'I am confident feeding myself or my family the products we make in this location.',
+        {
+            1:'Strongly Disagree',
+            2:'Disagree',
+            3:'Agree',
+            4:'Strongly Agree',
+        },
+    ),
+
+]

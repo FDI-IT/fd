@@ -27,7 +27,7 @@ def parse_report(report_file):
 
         
     total_rmc = 0
-    for flavor, weight in flavor_orders.items():
+    for flavor, weight in flavor_orders.iteritems():
         try:
             rmc = flavor.update_cost()
             relative_rmc = rmc * weight
@@ -52,7 +52,7 @@ def parse_total_reports(report_dir):
                 flavor_orders[row['flavor']] = [(row['Date'], row['Qty'])]
             
     summarized_orders = {}    
-    for k, v in flavor_orders.items():
+    for k, v in flavor_orders.iteritems():
         d_2010 = date(2010,1,1)
         summary = {
             't_2007':0,
@@ -69,7 +69,7 @@ def parse_total_reports(report_dir):
         summarized_orders[k] = summary
     w = writer(open('report.csv','w'))
     w.writerow(['flavor','orders since 2010','quantity since 2010','orders since 2007','quantity since 2007'])
-    for k,v in summarized_orders.items():
+    for k,v in summarized_orders.iteritems():
         w.writerow([k, v['n_2010'], v['t_2010'], v['n_2007'], v['t_2007']])
 
     return summarized_orders
@@ -104,7 +104,7 @@ def parse_report_lw(report_file):
 #            print r
             pass
     total_rmc = Decimal('0')
-    for f, w in flavor_orders.items():
+    for f, w in flavor_orders.iteritems():
         rmc = f.leaf_cost
         rel_rmc = f.leaf_cost * w
         total_rmc += rel_rmc

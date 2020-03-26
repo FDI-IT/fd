@@ -46,7 +46,7 @@ class Command(BaseCommand):
     can_import_settings = True
 
     def handle(self, *args, **options):
-        print(args)
+        print args
         mdb_file = args[0]
         get_csvs_from_mdb(mdb_file)
         if options.get('testdata') == True:
@@ -83,19 +83,19 @@ class Command(BaseCommand):
             try:
                 self.process_row(csv_row)
             except FormulaException as e:
-                print("Formula Exception: %s" % e)
+                print "Formula Exception: %s" % e
                 transaction.savepoint_rollback(sid)
-                print("Ingredient: %s -> %s" % (str(self.model_munger.line_num()), 
-                                   csv_row))
+                print "Ingredient: %s -> %s" % (str(self.model_munger.line_num()), 
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row, 
                                      model_exception_writer, 
                                      Ingredient)
             except InvalidOperation as e:
-                print("Invalid Operation: %s" % e)
+                print "Invalid Operation: %s" % e
                 transaction.savepoint_rollback(sid)
-                print("Ingredient: %s -> %s" % (str(self.model_munger.line_num()), 
-                                   csv_row))
+                print "Ingredient: %s -> %s" % (str(self.model_munger.line_num()), 
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row, 
                                      model_exception_writer, 
@@ -103,8 +103,8 @@ class Command(BaseCommand):
             except Exception as e:
                 self.exception_count+=1
                 transaction.savepoint_rollback(sid)
-                print("Ingredient: %s -> %s" % (str(self.model_munger.line_num()), 
-                                   csv_row))
+                print "Ingredient: %s -> %s" % (str(self.model_munger.line_num()), 
+                                   csv_row)
                 generic_exception_handle(e, 
                                      csv_row, 
                                      model_exception_writer, 
@@ -120,16 +120,16 @@ class Command(BaseCommand):
                     import pdb; pdb.set_trace()
         model_exception_writer.close()
         
-        print("Resembles: %s" % self.resemble_count)
-        print("Different: %s" % len(self.different_count))
-        print("Exceptions: %s" % self.exception_count)
-        print("New: %s" % self.new_count)
+        print "Resembles: %s" % self.resemble_count
+        print "Different: %s" % len(self.different_count)
+        print "Exceptions: %s" % self.exception_count
+        print "New: %s" % self.new_count
         
     def process_row(self, csv_row): 
         new_model_instance = Ingredient()
         #for each field in the row, set the model attribute
         for (csv_index, model_field) in self.model_field_map:
-            csv_field = str.strip(csv_row[csv_index])        
+            csv_field = unicode.strip(csv_row[csv_index])        
             parsed_csv_field = parse_csv_field(model_field.db_type(), csv_field)
             setattr(new_model_instance,
                 model_field.attname,
@@ -162,7 +162,7 @@ class Command(BaseCommand):
             
             
             self.different_count.append(difference_field)
-            print("Difference in %s - old: %s | new: %s" % (
+            print u"Difference in %s - old: %s | new: %s" % (
                                             old_model_instance,
                                             getattr(old_model_instance, difference_field),
-                                            getattr(new_model_instance, difference_field)))
+                                            getattr(new_model_instance, difference_field))

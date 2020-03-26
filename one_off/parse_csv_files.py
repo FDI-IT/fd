@@ -45,7 +45,7 @@ def fix_overwritten_flavors():
                     ssis = SpecSheetInfo.objects.filter(flavor=new_number)
 
                     for exlog in experimentals:
-                        experimentals_moved.append(exlog.__str__())
+                        experimentals_moved.append(exlog.__unicode__())
                         exlog.flavor = original_number
                         exlog.save()
 

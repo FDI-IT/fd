@@ -1,26 +1,94 @@
 {% extends "base.html" %}
 
 {% block content %}
+      <head>
+        <link rel="stylesheet" type="text/css" href='/static/css/training.css'/>
+      </head>
+      <style>
+          .collapsible {
+            background-color: #777;
+            color: white;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+          }
+          .active, .collapsible:hover {
+            background-color: #555;
+          }
+          .collapsible-div{
+            padding: 0 18px;
+            display: none;
+            overflow: hidden;
+            background-color: #f1f1f1;
+          }
+          table, td, tr{
+            border:none;
+          }
+          table.overview tr{
+            border:.5px solid;
+          }
+      </style>
+
+    {% if questions %}
+    <div class='answer_review'>
+      {% for key, val in questions.iteritems %}
+        <button type="button" class="collapsible" onClick='collapse(this)'>{{key}} {{val.1}}</button>
+        <div class="collapsible-div">
+          <table>
+            <th>Question</th>
+            <th>Submitted Answer</th>
+            <th>Correct Answer</th>
+          {% for v in val.0 %}
+            {% if v.get_submitted_answer != v.question.get_full_answer %}
+                <tr class='conflicting_answers'>
+
+            {% else %}
+                <tr>
+            {% endif %}
+
+                <td>
+                  {{v.question.question}}
+                </td>
+                <td>
+                  {{v.get_submitted_answer}}
+                </td>
+                <td>
+                  {{v.question.get_full_answer}}
+                </td>
+              </tr>
+          {% endfor %}
+          </table>
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
 
 
     <!-- {{employees}} -->
-    <table>
-    {% for e in employees %}
-      <tr>
-        <td><a href="./{{e.0.username}}">{{e.0.username}}</a></td>
-        <td>{{e.2.name}}</td>
-        <td>
-          {% if e.1 %}
-            <ul>
-              {% for t in e.1 %}
-                <li>{{t.1}}</li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            Up to date on all necessary training
-          {% endif %}
-        </td>
-      </tr>
-    {% endfor  %}
-    </table>
+
+      <table class='overview'>
+      {% for e in employees %}
+        <tr>
+          <td><a href="./{{e.0.username}}">{{e.0.username}}</a></td>
+          <td>{{e.2.name}}</td>
+          <td>
+            {% if e.1 %}
+              <ul>
+                {% for t in e.1 %}
+                  <li>{{t.1}}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              Up to date on all necessary training
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor  %}
+      </table>
+
+      <script src="/static/js/training.js"></script>
 {% endblock %}

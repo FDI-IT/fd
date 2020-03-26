@@ -24,7 +24,7 @@ class ComplexIngredientValidator():
         for ing in complex_ingredients: 
             try:
                 f = flavors.get(number=ing.flavornum)
-                autoname = f.__str__()[:60]
+                autoname = f.__unicode__()[:60]
                 if ing.product_name != autoname:
                     ing.comments = "%s -- Changed name from '%s'" % (ing.comments, ing.product_name)
                     ing.product_name = autoname
@@ -34,7 +34,7 @@ class ComplexIngredientValidator():
                 ing.comments = "%s -- Flavornum could not be connected: %s" % (ing.comments, ing.flavornum)
                 ing.flavornum = 0
                 ing.save()
-                print("FAILED TO GET FLAVOR #%s" % ing.flavornum)
+                print "FAILED TO GET FLAVOR #%s" % ing.flavornum
 
                 
                 

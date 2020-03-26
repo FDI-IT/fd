@@ -25,7 +25,7 @@ from access.models import Flavor, Ingredient
 import settings
 
 os.chdir("%s/sample_data/qc" % settings.DUMP_DIR)
-log_entry = '"%s","%s","%s"\n'
+log_entry = u'"%s","%s","%s"\n'
 LOG_FILENAME = 'import.log'
 logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
 NEW_CARD_RE = re.compile('QUALITY CONTROL FINISHED PRODUCT TESTING FORM',
@@ -57,7 +57,7 @@ coordinates to the corresponding properties found in an old QC card
 """
 
 def chunker(seq, size):
-    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+    return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
 
 lot_re = re.compile('-')
 
@@ -73,7 +73,7 @@ def get_lot_tuple(lot_num_cell):
         sub_lot_number = int(lot_num_cell[lot_match.end():])
         return (lot_number, sub_lot_number)
     else:
-        print("Error getting lot tuple")
+        print "Error getting lot tuple"
         raise
     
 class MyBaseException:
@@ -81,7 +81,7 @@ class MyBaseException:
         self.parameter = value
     def __str__(self):
         return repr(self.parameter)
-    def __str__(self):
+    def __unicode__(self):
         return repr(self.parameter)
     
 class QCCardException(MyBaseException):
@@ -111,10 +111,10 @@ class RetainRecord:
         # simple gets
         self.retain_number = int(row_array[0].value)
         self.date = datetime.date(*xldate_as_tuple(row_array[1].value, 0)[0:3])
-        self.name = str(row_array[2].value).strip()
-        self.prefix = str(row_array[3].value).strip()
+        self.name = unicode(row_array[2].value).strip()
+        self.prefix = unicode(row_array[3].value).strip()
         self.flavor_number = int(row_array[4].value)
-        self.status = str(row_array[6].value)
+        self.status = unicode(row_array[6].value)
         
         # this block gets lot info
         lot_cell_value = row_array[5].value
@@ -125,7 +125,7 @@ class RetainRecord:
         
         # this block gets amount
         try:
-            self.amount = Decimal(str(row_array[7].value))
+            self.amount = Decimal(unicode(row_array[7].value))
         except:
             pass
         
@@ -197,7 +197,7 @@ class QCCard:
         # get values from the special cells and store them in a dict
         for special_cell in chunker(self.special_cells, 2):
             cell_name, loc = special_cell
-            scraped_flavor_info[cell_name] = '%s' % (sheet.cell(*loc).value)
+            scraped_flavor_info[cell_name] = u'%s' % (sheet.cell(*loc).value)
         
         # get the flavor number from special cells
         try:    
@@ -241,11 +241,11 @@ class QCCard:
         
         # iterate over remaining rows and 
         self.retains = []
-        for row_index in range(self.retain_start_row, sheet.nrows):
+        for row_index in xrange(self.retain_start_row, sheet.nrows):
             try:
                 self.retains.append(RetainRecord(sheet.row(row_index), path))
             except:
-                print("Bad retain index-%s in %s file" % (row_index, self.flavor_number))
+                print "Bad retain index-%s in %s file" % (row_index, self.flavor_number)
         
     def __str__(self):
         return "Card for %s" % self.flavor_number
@@ -267,7 +267,7 @@ def get_retain_row(card, s, retain_row, flavor_info):
     existing_lots = Lot.objects.filter(number=new_lot_num, flavor=flavor, sub_lot=new_sub_lot_num)
     if existing_lots.count() > 0:
         lot = existing_lots[0]
-        print("Dupe lot %s-%s found in flavor %s in %s" % (str(new_lot_num), str(new_sub_lot_num), str(flavor.number), card.path))
+        print "Dupe lot %s-%s found in flavor %s in %s" % (unicode(new_lot_num), unicode(new_sub_lot_num), unicode(flavor.number), card.path)
     else:
         lot = Lot(
             flavor=flavor,                                 
@@ -329,13 +329,13 @@ def get_product_name( product_name_cell ):
     """
     Returns Flavor.name (charfield)
     """
-    return str(product_name_cell).strip()
+    return unicode(product_name_cell).strip()
 
 def get_product_prefix( product_prefix_cell ):
     """
     Returns Flavor.prefix (charfield length=2)
     """
-    return str(product_prefiix_cell).strip()
+    return unicode(product_prefiix_cell).strip()
 
 def get_product_number( product_number_cell ):
     """
@@ -347,14 +347,14 @@ def get_retain_status( retain_status_cell ):
     """
     Returns Retain.status (charfield)
     """
-    return str(retain_status_cell).strip()
+    return unicode(retain_status_cell).strip()
 
 def get_amount( lot_amount_cell ):
     """
     Returns Lot.amount (decimal)
     """
     try:
-        return Decimal( str(lot_amount_cell) )
+        return Decimal( unicode(lot_amount_cell) )
     except Exception as e:
         return None
 
@@ -425,16 +425,16 @@ def import_flavor_cards():
     
     
     os.chdir("/var/www/django/dump/sample_data/qc")
-    card_path_list = glob.glob("*.[Xx][Ll][Ss]")
+    card_path_list = glob.glob(u"*.[Xx][Ll][Ss]")
     card_list = []
     for card_path in card_path_list:
         try:
             card = QCCard(card_path)
         except QCCardException as e:
-            print(e)
+            print e
             continue
         except Exception as e:
-            print(e)
+            print e
             log_file.write(log_entry % (card_path, "Bad File", ''))
             continue
         
@@ -472,16 +472,16 @@ def find_common_lots(multi_lot_files):
                 if common_retains == 1:
                     intersection = intersection.pop()[0]
                     if intersection < 800000:
-                        print("too old...")
+                        print "too old..."
                         continue
                 flavor_list = sorted([int(mlf.split('_')[0]), int(imlf.split('_')[0])])
                 new_pair = Set(flavor_list)
                 if new_pair in pair_list:
-                    print("Skipping %s" % new_pair)
+                    print "Skipping %s" % new_pair
                     continue
                 else:
                     pair_list.append(new_pair)
-                    write_unicode = "%s;%s;%s;%s\n" % (common_retains, flavor_list[0], flavor_list[1], intersection)
+                    write_unicode = u"%s;%s;%s;%s\n" % (common_retains, flavor_list[0], flavor_list[1], intersection)
                     log_file.write(write_unicode)
     log_file.close()
 
@@ -498,22 +498,22 @@ def test(qc_path="/var/www/django/dump/sample_data/qc"):
     os.chdir(qc_path)
     card_dict = {}
     failcount = 0
-    for card_path in glob.glob("*.[Xx][Ll][Ss]"):
+    for card_path in glob.glob(u"*.[Xx][Ll][Ss]"):
         try:
             card = QCCard(card_path)
             card_dict[card_path] = card
             for r in card.retains:
                 r.create_model_object()
         except QCCardException as e:
-            print(e)
+            print e
             failcount += 1
             #log_file.write(log_entry % (card_path, "Bad File", ''))
         except Exception as e:
-            print("Unknown error: %s" % card_path)
+            print "Unknown error: %s" % card_path
             raise e
         
     retaincount = 0
-    for card in list(card_dict.values()):
+    for card in card_dict.values():
         retaincount += len(card.retains)
         
     # here we summarize all the lots by creating a dict
@@ -521,7 +521,7 @@ def test(qc_path="/var/www/django/dump/sample_data/qc"):
     # keys: lot numbers
     # values: a list of retains that have that lot number
     lot_dict = {}
-    for card in list(card_dict.values()):
+    for card in card_dict.values():
         for r in card.retains:
             lot_number = r.lot_number
             previous_list = lot_dict.get(lot_number, [])
@@ -534,7 +534,7 @@ def test(qc_path="/var/www/django/dump/sample_data/qc"):
     # multi_lots: list of lot numbers with more than one retain
     multi_lots = []        
     possible_multi_lots = []
-    for k, v in lot_dict.items():
+    for k, v in lot_dict.iteritems():
         if len(v) > 1:
             possible_multi_lots.append(k)
     for l in possible_multi_lots:
@@ -542,7 +542,7 @@ def test(qc_path="/var/www/django/dump/sample_data/qc"):
         flavor_dict = {}
         for r in r_list:
             flavor_dict[r.path] = 1
-        if len(list(flavor_dict.keys())) > 1:
+        if len(flavor_dict.keys()) > 1:
             multi_lots.append(l)
     
     # here we summarize all the files which contain a multi_lot
@@ -573,11 +573,11 @@ def test(qc_path="/var/www/django/dump/sample_data/qc"):
     
      
     
-    print("Fail Count: %s" % failcount)
-    print("Retain Count: %s" % retaincount)
-    print("Multi Lots: %s" % len(multi_lots))
+    print "Fail Count: %s" % failcount
+    print "Retain Count: %s" % retaincount
+    print "Multi Lots: %s" % len(multi_lots)
 
-    for c in list(card_dict.values()):
+    for c in card_dict.values():
         for r in c.retains:
             retain_object = Retain()
 
@@ -598,8 +598,8 @@ def test(qc_path="/var/www/django/dump/sample_data/qc"):
     return calculated_vals
 
 def create_lot_retain_objects(card_dict):
-    for c in list(card_dict.values()):
-        print(c)
+    for c in card_dict.values():
+        print c
         f = c.flavor_info.flavor
         for r in c.retains:
             ir = r.ir

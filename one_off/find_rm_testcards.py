@@ -8,7 +8,7 @@ from newqc.models import TestCard, RMTestCard
 def test():
     for tc in TestCard.objects.filter(large__isnull=False):
         file_name = tc.large.file.name
-        print(scan_for_barcode(file_name))
+        print scan_for_barcode(file_name)
     
 def scan_for_barcode(path):
     process = subprocess.Popen(

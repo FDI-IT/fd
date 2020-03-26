@@ -27,7 +27,7 @@ def get_csvs_from_mdb(mdb_file='/srv/samba/access/Flavor Dynamics Access.mdb',):
         # move all files that match the pattern
         os.system('ls "{0}"| grep acc | while read -r f; do mv "{0}/${{f}}" "{0}/${{f#acc*_}}"; done'.format(base_path))
     except:
-        print("Failed to process %s" % mdb_file)
+        print "Failed to process %s" % mdb_file
         raise
 
 
@@ -170,7 +170,7 @@ class ProductSpecialInformationBuilder:
         try:
             f = models.Flavor.objects.get(number=psi.flavornumber)
             if psi.productid != f.id:
-                print(psi.flavornumber)
+                print psi.flavornumber
                 psi.flavor=None
             else:
                 psi.flavor=f
@@ -180,7 +180,7 @@ class ProductSpecialInformationBuilder:
             
 class LegacyPurchaseBuilder:
     def build_relation(self,lp):
-        print(lp.poduedate)
+        print lp.poduedate
     
 class NoRelationBuilder:
     def build_relation(self,model_instance):
@@ -204,7 +204,7 @@ class LegacyPurchaseMigrate:
             else:
                 self.lp_dict[lp.ponumber] = [lp,]
         
-        for ponumber, poentries in self.lp_dict.items():
+        for ponumber, poentries in self.lp_dict.iteritems():
             try:
                 poentry=poentries[0]
                 shipper = models.Shipper.objects.get(shipperid=poentry.shipperid)
@@ -258,17 +258,17 @@ class LegacyPurchaseMigrate:
                                 legacy_purchase=poentry,
                             )
                     except models.Ingredient.DoesNotExist as e:
-                        print(e)
-                        print(poentry.rawmaterialcode)
+                        print e
+                        print poentry.rawmaterialcode
             except models.Shipper.DoesNotExist as e:
-                print(e)
-                print(poentry.shipperid)
+                print e
+                print poentry.shipperid
             except models.ShipTo.DoesNotExist as e:
-                print(e)
-                print(poentry.shiptoid)
+                print e
+                print poentry.shiptoid
             except models.Supplier.DoesNotExist as e:
-                print(e)
-                print(poentry.suppliercode)
+                print e
+                print poentry.suppliercode
                     
             
 def generic_exception_handle(e, 
@@ -296,7 +296,7 @@ def generic_exception_handle(e,
     
     model_exception_writer.writerow(csv_row)
     
-    print("Caught %s" % (emsg, ))
+    print "Caught %s" % (emsg, )
 
     
 class ExceptionCSVWriter():
@@ -336,14 +336,14 @@ class RowMunger():
         self.csv_reader = csv.reader(self.csv_file,
                                      delimiter=',',
                                      quotechar='\"')
-        self.header_row = next(self.csv_reader)
+        self.header_row = self.csv_reader.next()
         self.field_map = self.field_map()
         
     def __iter__(self):
         return self
         
-    def __next__(self):
-        data_row = [str(s, 'utf-8') for s in next(self.csv_reader)]
+    def next(self):
+        data_row = [unicode(s, 'utf-8') for s in self.csv_reader.next()]
         
         if len(data_row) == len(self.header_row):
             return data_row
@@ -384,7 +384,7 @@ class RowMunger():
         if len(csv_field_list_check) == 0:
             return map_list
         else:
-            print(csv_field_list_check)
+            print csv_field_list_check
             raise Exception(self.model_class)
         
         #model_field = model_class._meta.fields[mapped_field[1]]
@@ -395,11 +395,11 @@ class RowLenException(Exception):
     
     """
     def __init__(self, header_row, data_row):
-        print("Header row:")
-        print(header_row)
-        print("Data row:")
-        print(data_row)
-        print(type(self))
-        print(self.args)
-        print(self)
+        print "Header row:"
+        print header_row
+        print "Data row:"
+        print data_row
+        print type(self)
+        print self.args
+        print self
     

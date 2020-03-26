@@ -126,8 +126,8 @@ class UsageFinder:
             
         while(formula_queue):
             i += 1
-            print(i)
-            print(len(formula_queue))
+            print i
+            print len(formula_queue)
             fr = formula_queue.popleft()
             my_flavor = fr.flavor
             fn = my_flavor.number
@@ -154,7 +154,7 @@ class UsageFinder:
                 pass
             
             if fn == 180030:
-                print(usage[fn])
+                print usage[fn]
     
         return usage
 

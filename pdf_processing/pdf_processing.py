@@ -6,7 +6,7 @@ from django import http
 from django.template.loader import get_template
 import ho.pisa as pisa
 from sx.pisa3 import pisa_pdf
-import io as StringIO
+import cStringIO as StringIO
 import cgi
 
 def render_sub_pdf(template_src, context_dict):

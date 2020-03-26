@@ -18,7 +18,7 @@ def makeSelectedChanges(listOfFormsets):
                 #get ingredient's old information
                 pk = form.cleaned_data['ing_pk']
                 ing = Ingredient.objects.get(pk=pk) 
-                dicold = {'age':'old', 'ingredient':str(ing.product_name), 'FEMA':str(ing.fema), 'CAS':str(ing.cas)}
+                dicold = {'age':'old', 'ingredient':unicode(ing.product_name), 'FEMA':unicode(ing.fema), 'CAS':unicode(ing.cas)}
                 #find ingredient information in form submission
                 fema = form.cleaned_data['FEMA']
                 cas = form.cleaned_data['CAS']
@@ -86,7 +86,7 @@ class ProductLookup():
             
             #each cas number should have several potential ingredient names
             #if the cas number is in cas_dict, look to append the already existing list of ingredient names
-            if cas in list(self.cas_dict.keys()):
+            if cas in self.cas_dict.keys():
                 ingOptions = self.cas_dict[cas]['ing']
             else:
                 ingOptions=[]
@@ -94,7 +94,7 @@ class ProductLookup():
                 ingOptions.append(ingName)  
             self.cas_dict[cas] = {'ing':ingOptions, 'fema':fema}
             #same as above, each fema number can have several ingredient names
-            if fema in list(self.fema_dict.keys()):
+            if fema in self.fema_dict.keys():
                 ingOptions = self.fema_dict[fema]['ing']
             else:
                 ingOptions = []
@@ -112,7 +112,7 @@ class ProductLookup():
             cas = sht1b.cell_value(rowx=pos, colx=1)
             ingName = sht1b.cell_value(rowx=pos, colx=2)
             fema = str(int(sht1b.cell_value(rowx=pos, colx=0)))
-            if cas not in list(self.cas_dict.keys()):
+            if cas not in self.cas_dict.keys():
                 self.cas_dict[cas] = {'ing': ingName, 'fema': fema}
             if ingName not in self.ing_dict_keys():
                 self.ingredientName_dict[ingName] = {'cas':cas, 'fema': fema}
@@ -121,17 +121,17 @@ class ProductLookup():
         for pos in range(sht2.nrows-1)[2:1603]:             ##the end of my file had inappropraite info so i had manually find cell row to stop at
             cas = sht2.cell_value(rowx=pos, colx=0)
             ingName = sht2.cell_value(rowx=pos, colx=2)
-            if cas not in list(self.cas_dict.keys()):
+            if cas not in self.cas_dict.keys():
                 self.cas_dict[cas] = {'ing': ingName, 'fema': 'unknown'}
-            if ingName not in list(self.ingredientName_dict.keys()):
+            if ingName not in self.ingredientName_dict.keys():
                 self.ingredientName_dict[ingName] = {'cas': cas, 'fema': 'unknown'}
                 
     def cas_dict_keys(self):
-        return list(self.cas_dict.keys())   
+        return self.cas_dict.keys()   
     def fema_dict_keys(self):
-        return list(self.fema_dict.keys())
+        return self.fema_dict.keys()
     def ing_dict_keys(self):
-        return list(self.ingredientName_dict.keys())
+        return self.ingredientName_dict.keys()
     
     def lookup_by_cas(self, cas):
         return self.cas_dict[cas]
@@ -191,14 +191,14 @@ def findFlaws_casDict(ing, lookup, returnDict):
     if ing.fema == '0' or ing.fema == '':
         if dict_oneCas['fema']!='unknown':       #we don't want to change empty fema numbers to 'unknown' (fema can be unknown because one of attached files has no fema info)
             ing.fema = dict_oneCas['fema']
-            print("Fema number for cas number %s, previously blank, changed to %s" %(ing.cas,dict_oneCas['fema']))
+            print "Fema number for cas number %s, previously blank, changed to %s" %(ing.cas,dict_oneCas['fema'])
             returnDict['changed_ings'].append([ing])
         else:
             ## ingredient fema number is empty and its not in the attached files
-            print("Unknown Fema Number for ingredient with cas number %s"%ing.cas)
+            print "Unknown Fema Number for ingredient with cas number %s"%ing.cas
             returnDict['unknownFema'].append(ing)
     elif (ing.fema != dict_oneCas['fema']):
-        print("Disagreement of Fema Numbers for ingredient %s by cas_dict"%ing.product_name)
+        print "Disagreement of Fema Numbers for ingredient %s by cas_dict"%ing.product_name
         error_dict['fema']=dict_oneCas['fema']
         returnDict['disagreements'].append([ing, error_dict])
     if ing.product_name not in dict_oneCas['ing']:
@@ -216,9 +216,9 @@ def findFlaws_femaDict(ing, lookup, returnDict):
     if ing.cas=='0' or ing.cas == '':
         ing.cas = dict_oneFema['cas']
         returnDict['changed_ings'].append([ing])
-        print("Empty cas number can be one of the following %s"%dict_oneFema['cas'])
+        print "Empty cas number can be one of the following %s"%dict_oneFema['cas']
     elif(ing.cas != dict_oneFema['cas']):
-        print("Disagreement of Cas Numbers for ingredient %s by fema_dict"%ing.product_name)
+        print "Disagreement of Cas Numbers for ingredient %s by fema_dict"%ing.product_name
         error_dict['cas'] = dict_oneFema['cas']
         returnDict['disagreements'].append([ing, error_dict])
     if ing.product_name not in dict_oneFema['ing']:
@@ -238,21 +238,21 @@ def findFlaws_nameDict(ing, lookup, returnDict):
         ing.cas = dict_oneName['cas']
         returnDict['changed_ings'].append([ing]) 
     elif ing.cas != dict_oneName['cas']:
-        print("Disagreement of Cas Numbers for ingredient %s"%ing.product_name)
+        print "Disagreement of Cas Numbers for ingredient %s"%ing.product_name
         error_dict['cas']=dict_oneName['cas']
         returnDict['disagreements'].append([ing, error_dict]) 
     if ing.fema=='0' or fema=='':
         if dict_oneName['fema']!='unknown':
             ing.fema = dict_oneName['fema']
-            print("Fema number for ingredient %s, previously blank, changed to %s" %(ing.product_name, dict_oneName['fema']))
+            print "Fema number for ingredient %s, previously blank, changed to %s" %(ing.product_name, dict_oneName['fema'])
             returnDict['changed_ings'].append([ing])
     elif ing.fema != dict_oneName['fema']:
-        print("Disagreement of Fema Numbers for ingredient %s"%ing.product_name)
+        print "Disagreement of Fema Numbers for ingredient %s"%ing.product_name
         error_dict['fema']= dict_oneName['fema']
         returnDict['disagreements'].append([ing, error_dict])
 
     else:
-        print("Unknown Fema Number for ingredient %s"%ing.product_name)
+        print "Unknown Fema Number for ingredient %s"%ing.product_name
         returnDict['unknownFema'].append(ing)                    
     return returnDict
 

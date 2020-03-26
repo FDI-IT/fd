@@ -5,10 +5,8 @@
 
   <link rel="stylesheet" href="/static/css/document.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
   <link href="/static/css/jquery.flexdatalist.min.css" rel="stylesheet" type="text/css">
   <script src="/static/js/jquery.flexdatalist.js"></script>
-
 
 </head>
 <br>
@@ -87,7 +85,7 @@
 
 {% if not form and not review and not unverified and documents or docsby_rm %}
 <h1>Unverified Documents <span name = 'docheader'>{{message}}</span></h1>
-{{documents|length}}
+<!-- {{documents|length}} -->
 <table id = "list">
   {% if documents %}
     <th>Ingredient</th>
@@ -145,6 +143,7 @@
   <form method="post" id="move_doc_form" hidden>
     {% csrf_token %}
     <input name='moving_doc' type='hidden' value='{{doc.id}}'/>
+
     <table>
       <th></th><th>Document Type</th><th>Raw Material</th>
       <tr>
@@ -183,6 +182,15 @@
     </table>
     <input type='submit' name='doc_change'/>
   </form>
+  <fieldset>
+    <legend>Document Date Priority</legend>
+    <ol>
+      <li>Expiration Date</li>
+      <li>Received Date (Red Stamp)</li>
+      <li>Document Date(Latest)</li>
+      <li>Date Uploaded</li>
+    </ol>
+  </fieldset>
 
   {% if doc.doctype == "COA" %}
   <form method="post">
@@ -206,6 +214,15 @@
 {% if review %}
 <a href="{{doc.uploadfile.url}}">Uploaded File</a>
 <h1>Document Review | {{doc.rawmaterial}} | {{doc.get_doctype_display}}</h1>
+<fieldset>
+  <legend>Document Date Priority</legend>
+  <ol>
+    <li>Expiration Date</li>
+    <li>Received Date (Red Stamp)</li>
+    <li>Document Date(Latest)</li>
+    <li>Date Uploaded</li>
+  </ol>
+</fieldset>
   <form method="post" action="./?next={{previous}}">
     {% csrf_token %}
 

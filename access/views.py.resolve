@@ -27,7 +27,7 @@ from django.contrib.auth.models import Group, User
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import Count
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 from django.core.files.uploadedfile import UploadedFile
 from django.core.files import File
 from django import forms
@@ -255,7 +255,7 @@ def experimental_review(request, experimental):
 
                         'status_message':status_message,
                         'digitized_table':digitized_table,
-                        'window_title': experimental.__str__(),
+                        'window_title': experimental.__unicode__(),
                         'experimental': experimental,
                         # 'labuser':labuser,
                         'field_details': field_details,
@@ -290,7 +290,7 @@ def digitized_review(request, experimental):
 
     context_dict = {
                     'digitized_table':digitized_table,
-                    'window_title': experimental.__str__(),
+                    'window_title': experimental.__unicode__(),
                     'experimental': experimental,
                     'page_title': page_title,
                     'green_book_link':green_book_link,
@@ -315,7 +315,7 @@ def flavor_review(request, flavor):
 
     context_dict = {
                     # 'labuser':labuser,
-                    'window_title': flavor.__str__(),
+                    'window_title': flavor.__unicode__(),
                     'flavor': flavor,
                     'help_link': help_link,
                     'page_title': page_title,
@@ -330,7 +330,7 @@ def tsr_review(request, tsr_number):
     page_title = "TSR Review"
     help_link = "/wiki/index.php/Purchase_Order_Review"
     context_dict = {
-                    'window_title': tsr.__str__(),
+                    'window_title': tsr.__unicode__(),
                    'tsr': tsr,
                    'help_link': help_link,
                    'page_title': page_title,
@@ -344,7 +344,7 @@ def po_review(request, po):
     page_title = "Purchase Order Review"
     help_link = "/wiki/index.php/Purchase_Order_Review"
     context_dict = {
-                    'window_title': po.__str__(),
+                    'window_title': po.__unicode__(),
                    'po': po,
                    'help_link': help_link,
                    'page_title': page_title,
@@ -502,7 +502,7 @@ def ft_review(request, flavor):
     context_dict = {
                     # 'labuser':labuser,
                     'status_message':status_message,
-                    'window_title': flavor.__str__(),
+                    'window_title': flavor.__unicode__(),
                     'flavor': flavor,
                     'page_title': page_title,
                     'weight_factor': weight_factor,
@@ -520,7 +520,7 @@ def ft_review(request, flavor):
 def recalculate_flavor_view(request,flavor):
     results = recalculate_flavor(flavor)
     context_dict = {
-                   'window_title': flavor.__str__(),
+                   'window_title': flavor.__unicode__(),
                    'page_title': "Recalculate Flavor Properties",
                    'flavor': flavor,
                    'weight_factor':1000,
@@ -539,7 +539,7 @@ def recalculate_experimental(request,experimental):
     results = recalculate_flavor(flavor)
     context_dict = {
                     'experimental':experimental,
-                   'window_title': flavor.__str__(),
+                   'window_title': flavor.__unicode__(),
                    'page_title': "Recalculate Flavor Properties",
                    'flavor': flavor,
                    'weight_factor':1000,
@@ -557,7 +557,7 @@ def print_review(request,flavor):
         ingredient_statement = None
 
     context_dict = {
-                   'window_title': flavor.__str__(),
+                   'window_title': flavor.__unicode__(),
                    'info_form':info_form,
                    'flavor': flavor,
                    'ingredient_statement': ingredient_statement,
@@ -618,7 +618,7 @@ def experimental_print_review(request, experimental):
     context_dict = {
                     'info_form':info_form,
                     'flavor':experimental.flavor,
-                   'window_title': experimental.__str__(),
+                   'window_title': experimental.__unicode__(),
                    'experimental': experimental,
                    'digitized_table':digitized_table,
                    }
@@ -628,7 +628,7 @@ def experimental_print_review(request, experimental):
 def gzl(request, flavor):
     page_title = "Product Gazinta List (GZL)"
     context_dict = {
-                   'window_title': flavor.__str__(),
+                   'window_title': flavor.__unicode__(),
                    'product': flavor,
                    'page_title': page_title,
                    }
@@ -641,14 +641,14 @@ def ingredient_gzl_review(request, ingredients):
     ingredient = Ingredient.get_obj_from_softkey(ingredients[0].id)
     if ingredient.sub_flavor == None:
         context_dict = {
-                       'window_title': ingredient.__str__(),
+                       'window_title': ingredient.__unicode__(),
                        'product': ingredient,
                        'leafweights': LeafWeight.objects.filter(ingredient__in=ingredients).order_by('-weight'),
                        'page_title': page_title,
                        }
     else:
         context_dict = {
-                       'window_title': ingredient.__str__(),
+                       'window_title': ingredient.__unicode__(),
                        'product': ingredient,
                        'leafweights': FormulaTree.objects.filter(node_ingredient__in=ingredients).order_by('-weight'),
                        'page_title': page_title,
@@ -836,7 +836,7 @@ def ingredient_pin_review(request, ingredients):
         updated_flavors = {}
 
     context_dict = {
-                    'window_title': highlighted_ingredient.__str__(),
+                    'window_title': highlighted_ingredient.__unicode__(),
                     'highlighted_ingredient': highlighted_ingredient,
                     'ingredients': ingredients,
                     'page_title': page_title,
@@ -858,7 +858,7 @@ def ingredient_review(request, ingredient):
                               field.value_from_object(ingredient)))
 
     context_dict = {
-                    'window_title': ingredient.__str__(),
+                    'window_title': ingredient.__unicode__(),
                    'ingredient': ingredient,
                    'field_details': field_details,
                    'page_title': page_title,
@@ -977,7 +977,7 @@ def ingredient_autocomplete(request):
     for ingredient in ingredients.order_by('discontinued','-ing_obj'):
         ingredient_json = {}
         ingredient_json["id"] = ingredient.id
-        ingredient_json["label"] = ingredient.__str__()
+        ingredient_json["label"] = ingredient.__unicode__()
         ingredient_json["value"] = ingredient_json["id"]
         ret_array.append(ingredient_json)
     return HttpResponse(json.dumps(ret_array), content_type='application/json; charset=utf-8')
@@ -1023,7 +1023,7 @@ def process_tsrli_update(request):
     if type == 'ex_log':
         try:
             ex_log = ExperimentalLog.objects.get(experimentalnum = number)
-            response_dict['name'] = ex_log.__str__()
+            response_dict['name'] = ex_log.__unicode__()
         except:
             if number == '':
                 response_dict['name'] = 'Please enter an experimental number.'
@@ -1423,7 +1423,7 @@ def ajax_dispatch(request):
 
 #    ingredient_json = {}
 #        ingredient_json["id"] = ingredient.id
-#        ingredient_json["label"] = ingredient.__str__()
+#        ingredient_json["label"] = ingredient.__unicode__()
 #        ingredient_json["value"] = ingredient_json["id"]
 #        ret_array.append(ingredient_json)
 #    return HttpResponse(json.dumps(ret_array), content_type='application/json; charset=utf-8')
@@ -1439,7 +1439,7 @@ def table_to_csv(request):
 def get_ingredient_option_list(request):
     option_list = []
     for ing in Ingredient.objects.all():
-        option_list.append({ing.rawmaterialcode: ing.__str__()})
+        option_list.append({ing.rawmaterialcode: ing.__unicode__()})
     return HttpResponse(json.dumps(option_list), content_type='application/json; charset=utf-8')
 
 
@@ -3690,7 +3690,7 @@ def product_spec_sheet(request, flavor_number):
 
     if(len(spec) >= 1): #return list of multiple spec sheets
         warning = ""
-        multiple += "<h1>%s: Spec Sheets </h1>" % spec[0].flavor.__str__()
+        multiple += "<h1>%s: Spec Sheets </h1>" % spec[0].flavor.__unicode__()
         standard = False
         multiple += '<table>'
         for i in spec:
@@ -4596,26 +4596,26 @@ def query_list(request):
         'natural_on_file_without_natural_doc': {
             'proper_name': "RMs bought in the last 3 years with Natural on File checked but no NATURAL documentation",
             'headers': ['Ingredient'],
-            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()),], natural_on_file_without_natural_doc),
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()),], natural_on_file_without_natural_doc),
             'url': '/access/query_list?category=natural_on_file_without_natural_doc'
         },
         'nutri_field_checked_but_no_nutri_info': {
             'proper_name': "RMs with Nutri field checked but no nutri info",
             'headers': ['Ingredient', 'Add Nutri Info'],
-            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), '<a href="/access/rm_nutri_edit/?rm=%s" target="_blank">Add Nutri Info</a>' % x.id],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), '<a href="/access/rm_nutri_edit/?rm=%s" target="_blank">Add Nutri Info</a>' % x.id],
                          nutri_field_checked_but_no_nutri_info),
             'url': '/access/query_list?category=nutri_field_checked_but_no_nutri_info'
         },
         'raw_materials_with_no_sds_on_file': {
             'proper_name': "RMs bought in the last 3 years with no SDS on file",
             'headers': ['Ingredient'],
-            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), ], raw_materials_with_no_sds_on_file),
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), ], raw_materials_with_no_sds_on_file),
             'url': '/access/query_list?category=raw_materials_with_no_sds_on_file'
         },
         'docs_contain_alldocs_or_paperwork_keywords': {
             'proper_name': "RMs with 'All Docs' or 'Paperwork' in documentation names",
             'headers': ['Ingredient'],
-            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), ],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), ],
                          docs_contain_alldocs_or_paperwork_keywords),
             'url': '/access/query_list?category=docs_contain_alldocs_or_paperwork_keywords'
         },
@@ -4629,21 +4629,21 @@ def query_list(request):
         'rms_with_missing_gmo_data': {
             'proper_name': "RMs with missing GMO data",
             'headers': ['Ingredient'],
-            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), ],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), ],
                          rms_with_missing_gmo_data),
             'url': '/access/query_list?category=rms_with_missing_gmo_data'
         },
         'flavors_with_undetermined_phase': {
             'proper_name': "Sold flavors with undetermined Phase",
             'headers': ['Flavor'],
-            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), ],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), ],
                          flavors_with_undetermined_phase),
             'url': '/access/query_list?category=flavors_with_undetermined_phase'
         },
         'microsensitive_rms': {
             'proper_name': "Microsensitive Raw Materials",
             'headers': ['Raw Material'],
-            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__str__()), ],
+            'items': map(lambda x: ['<a href="%s" target="_blank">%s</a>' % (x.url, x.__unicode__()), ],
                          microsensitive_rms),
             'url': '/access/query_list?category=microsensitive_rms'
         },
