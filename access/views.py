@@ -49,6 +49,7 @@ from access import forms
 from access.scratch import build_tree, build_leaf_weights, synchronize_price, recalculate_flavor, recalculate_guts
 from access.tasks import ingredient_replacer_guts
 from access.forms import FormulaEntryFilterSelectForm, FormulaEntryExcludeSelectForm, make_flavorspec_form, make_tsr_form, GHSReportForm, CasFemaSpreadsheetsFileForm, searchForm, flavorNumberForm, nutriForm, nutriFormTemp,spec_sheet_form, coa_form
+# from access.forms import *
 from access.formula_filters import ArtNatiFilter, MiscFilter, AllergenExcludeFilter
 
 # Billy's code
@@ -512,8 +513,13 @@ def ft_review(request, flavor):
                     'formula_weight': formula_weight,
                     'print_link':'FLAVOR_REVIEW_PRINT_MENU',
                     'recalculate_link':'/access/%s/recalculate/' % flavor.number,
+                    'renumber_link':'/access/%s/renumber/' % flavor.number,
                     'ingredient_statement': ingredient_statement
                    }
+
+    if flavor.organic_certified_required == True and flavor.organic_certification_number == None:
+        context_dict['certify_link'] = '/access/%s/certify/' % flavor.number
+
     return render(request, 'access/flavor/ft_review.html', context_dict)
 
 
@@ -2636,7 +2642,7 @@ def outdated_raw_material_list(request):
 
     #only get ingredients that are in flavors that were sold in the past two years
 
-    for ing in Ingredient.objects.filter(sub_flavor=None,discontinued=False,purchase_price_update__lt=one_year_ago).exclude(suppliercode='FDI').exclude(supplier=None):
+    for ing in Ingredient.objects.filter(sub_flavor=None,discontinued=False,purchase_price_update__lt=one_year_ago).exclude(supplier__code='FDI').exclude(supplier=None):
 
         rm_retains = RMRetain.objects.filter(pin=ing.id)
         try:
@@ -3551,14 +3557,6 @@ def flavor_nutri_facts(request, flavor_number=None): #nutri labeling tool
             },
         )
 
-    # return render(
-    #     request,
-    #     'access/flavor/flavor_nutri_facts.html',
-    #     {
-    #         'form': form,
-    #     },
-    # )
-
 
 def allergen_declaration(request, flavor_number):
     flavor = Flavor.objects.get(number=flavor_number)
@@ -3589,10 +3587,8 @@ def gmo_statement(request, flavor_number):
                 'form':search,
             },
         )
-    elif fl.gmo_print_review == 'GMO Non-Detect':
-        letter_content = """Many of our suppliers claim that their processing either significantly reduces or eliminates the presence of genetically modified fragments. Furthermore, our processing is such that we believe no GM fragments are transmitted to the final product.
-                            <br><br>
-                            Therefore, it is our belief that there is no detectable Genetically Modified material in the above product(s) if assayed by PCR. However, we cannot confirm this without doing a test on every lot."""
+    elif fl.gmo_print_review == 'GMO Free/Non-Detect':
+        letter_content = "To the best of our knowledge and belief we have determined, through documentation from our suppliers, that the above named product(s) have been produced without the use of GMO materials."
         return render(
             request,
             'access/flavor/gmo_statement.html',
@@ -3603,12 +3599,12 @@ def gmo_statement(request, flavor_number):
             },
         )
     else:
-        letter_content = "To the best of our knowledge and belief we have determined, through documentation from our suppliers, that the above named product(s) have been produced without the use of GMO materials."
+        letter_content = "To the best of our knowledge and belief we have determined, through documentation from our suppliers, that the above named product(s) have all the certifications needed to pass Project Verified."
         return render(
             request,
             'access/flavor/gmo_statement.html',
-                                            {
-                                                'flavor':fl,
+            {
+                'flavor':fl,
                 'letter_content':letter_content,
                 'form':search,
             },
@@ -3684,8 +3680,6 @@ def product_spec_sheet(request, flavor_number):
                 'warning':warning,
                 'multiple':multiple,
 
-                # 'form':search,
-                # 'initial':initial,
             }
         )
 
@@ -3704,14 +3698,6 @@ def product_spec_sheet(request, flavor_number):
             multiple += '</tr>'
 
         multiple += '</table>'
-        # if standard:
-        #     multiple +='<form method ="POST" action="../../one_off_specs/?ing='+flavor_number+'&newOneOff=Create+New+One+Off"><input type = "hidden" id="ing" name="ing" value="'+flavor_number+'"><input type="submit" id="newOneOff" name="newOneOff" value="New One Off"/></form>'
-        # else:
-        #     multiple +='<form method ="POST" action="../../one_off_specs/?ing='+flavor_number+'&newOneOff=Create+New+One+Off"><input type = "hidden" id="ing" name="ing" value="'+flavor_number+'"><input type="submit" id="newOneOff" name="newOneOff" value="New One Off"/><input type="submit" id="newStandard" name="newStandard" value ="Create New Standard"/></form>'
-        # if standard:
-        #     multiple +='<input type = "hidden" id="ing" name="ing" value="'+flavor_number+'"><input type="submit" id="newOneOff" name="newOneOff" value="New One Off"/>'
-        # else:
-        #     multiple +='<input type = "hidden" id="ing" name="ing" value="'+flavor_number+'"><input type="submit" id="newOneOff" name="newOneOff" value="New One Off"/><input type="submit" id="newStandard" name="newStandard" value ="Create New Standard"/>'
 
         return render(
                     request,
@@ -3831,9 +3817,9 @@ def define_spec_params(specform, flavor, update):
     #creating new
     else:
         flav_desc = ""
-        if not (flavor.color == "" or flavor.organoleptics == "" or flavor.color == None or flavor.organoleptics == None):
-                flav_desc = flavor.color + " with the taste and aroma of " + flavor.organoleptics
-                flav_desc = flav_desc.capitalize()
+        # if not (flavor.color == "" or flavor.organoleptics == "" or flavor.color == None or flavor.organoleptics == None):
+        #         flav_desc = flavor.color + " with the taste and aroma of " + flavor.organoleptics
+        #         flav_desc = flav_desc.capitalize()
 
         if flavor.phase == "Liquid":
             specform = spec_sheet_form(initial={'flavor':flavor, 'product_name':flavor.name, 'product_number': flavor.number, 'solubility':flavor.solubility,
@@ -4005,56 +3991,6 @@ def one_off_specs(request, flavor_number):
 
                 return HttpResponseRedirect('/access/product_spec_sheet/%s' % str(sp.flavor.number))
 
-                #
-                # spec = SpecSheetInfo.objects.filter(flavor = fl)
-                # storage = "Store in full, tightly closed containers at a cool temperature. Avoid exposure to excessive heat and sunlight."
-                # shelflife = "9 months to 1 year if stored as recommended."
-                # warning = ""
-                # multiple = ""
-                # emptyFields= []
-                # extrapowdermessage = "The above microbiological guidelines are based on average results for products of this type.  In accordance with our HACCP protocol, products will be micro-tested based on risk analysis."
-                # # micro still to be determined
-                # micro = fl.microsensitive
-                # isPowder = False
-                #
-
-
-
-                # return render(
-                #     request,
-                #     'access/flavor/product_spec_sheet.html',
-                #     {
-                #         'warning':warning,
-                #         'emptyFields':emptyFields,
-                #         'isPowder':isPowder,
-                #         'micro':micro,
-                #         'storage':storage,
-                #         'spec':spec,
-                #         'ingredient_statement':ingredient_statement,
-                #         'flavor':fl,
-                #         'flavor':flavor_number,
-                #         'ing':flavor__number,
-                #         'extrapowdermessage':extrapowdermessage,
-                #     },
-                # )
-
-
-                # return render(
-                #             request,
-                #             'access/flavor/one_off_specs.html',
-                #             {
-                #                 'flavor':sp.flavor,
-                #                 'update':update,
-                #                 'ing':ing,
-                #                 'confirmation':confirmationMessage,
-                #                 'dontTouchThese':dontTouchThese,
-                #                 'readOnly':readOnly,
-                #                 'form':search,
-                #                 'specform':spec,
-                #                 'customer':customer,
-                #             },
-                #     )
-
 
         elif "createNew" in request.POST and specform.is_valid(): # creating new, check if its a one off/standard
             warning = "reached create new"
@@ -4111,24 +4047,7 @@ def one_off_specs(request, flavor_number):
                 # specform.fields['one_off_customer'].required = True
 
             return HttpResponseRedirect('/access/product_spec_sheet/%s' % str(fl.number))
-            # return render(
-            #             request,
-            #             'access/flavor/one_off_specs.html',
-            #             {
-            #                 "flavor": fl,
-            #                 "update":update,
-            #                 'createNew':createNew,
-            #                 'warning':warning,
-            #                 'ing':ing,
-            #                 'confirmation':confirmationMessage,
-            #                 'dontTouchThese':dontTouchThese,
-            #                 'readOnly':readOnly,
-            #                 'form':search,
-            #                 'specform':specform,
-            #                 'standard':standard,
-            #                 'customer':customer,
-            #             },
-            #     )
+
         elif "createNew" in request.POST or "update" in request.POST and not specform.is_valid():
             update = True
             createNew = False
@@ -4270,8 +4189,6 @@ def one_off_specs(request, flavor_number):
             )
         elif "newOneOff" in request.GET: #new one off
             dontTouchThese.extend(('flavor',))
-            # ing = request.GET.get("ing", "")
-            # fl = Flavor.objects.get(number = int(ing))
             spec = SpecSheetInfo.objects.filter(flavor = fl)
             specform = spec_sheet_form(initial={'flavor':fl})
             specform.fields['one_off_customer'].required = True
@@ -4293,21 +4210,8 @@ def one_off_specs(request, flavor_number):
     return render(
                 request,
                 'access/flavor/one_off_specs.html',
-                {
-                    # 'flavor':fl,
-                    # 'update':update,
-                    # 'dontTouchThese':dontTouchThese,
-                    # 'readOnly':readOnly,
-                    # 'ing':ing,
-                    # 'form':search,
-                    # # 'confirmation':sp,
-                    # 'customer':customer,
-                    # 'specform':specform,
-                    # 'standard':standard,
-                },
+                {},
         )
-
-
 
 
 
@@ -4316,7 +4220,6 @@ def coa(request, lot_number):
     hyperlinked = False
     multiple = False
     micro = False
-
 
     # lot doesnt exist
     if not Lot.objects.filter(number = lot_number).exists():
@@ -4329,8 +4232,6 @@ def coa(request, lot_number):
 
                         'multiple': multiple,
                         'multipleLines':multipleLines,
-
-
                     },
             )
     else:
@@ -4580,14 +4481,14 @@ def coa(request, lot_number):
 
 def query_list(request):
 
-    invalid_rm_nutri_total_list = [x for x in NutriInfo.objects.exclude(ingredient__discontinued=True).exclude(ingredient__supplier__suppliercode='FDI') if x.invalid_total]
+    invalid_rm_nutri_total_list = [x for x in NutriInfo.objects.exclude(ingredient__discontinued=True).exclude(ingredient__supplier__code='FDI') if x.invalid_total]
 
     todays_date = date.today()
     one_year_ago = todays_date - relativedelta(years=1)
     three_years_ago = todays_date - relativedelta(years=3)
 
     #Nutri field checked but no NutriInfo object
-    nutri_field_checked_but_no_nutri_info = Ingredient.objects.filter(nutri=True, nutriinfo=None).exclude(suppliercode='FDI')
+    nutri_field_checked_but_no_nutri_info = Ingredient.objects.filter(nutri=True, nutriinfo=None).exclude(supplier__code='FDI')
 
     #All suppliers bought from Jan 1, 2017
     supplier_set = set()
@@ -4600,7 +4501,7 @@ def query_list(request):
     raw_materials_with_no_sds_on_file = []
     docs_contain_alldocs_or_paperwork_keywords = []
 
-    for ing in Ingredient.objects.filter(date_ordered__gte=three_years_ago, discontinued=False).exclude(suppliercode='FDI'):
+    for ing in Ingredient.objects.filter(date_ordered__gte=three_years_ago, discontinued=False).exclude(supplier__code='FDI'):
         documentation_path = '/var/www/static_root/Documentation/%s/' % ing.id
 
         try:
@@ -4624,13 +4525,13 @@ def query_list(request):
             raw_materials_with_no_sds_on_file.append(ing)
 
     #All ingredients with missing gmo data
-    rms_with_missing_gmo_data = Ingredient.objects.filter(date_ordered__gte=three_years_ago, discontinued=False, new_gmo='').exclude(suppliercode='FDI')
+    rms_with_missing_gmo_data = Ingredient.objects.filter(date_ordered__gte=three_years_ago, discontinued=False, new_gmo='').exclude(supplier__code='FDI')
 
     #All products with undetermiend phase
     flavors_with_undetermined_phase = Flavor.objects.filter(sold=True, phase='Undetermined')
 
     #Microsensitive raw materials
-    microsensitive_rms = Ingredient.objects.filter(microsensitive='True', discontinued=False).exclude(suppliercode='FDI')
+    microsensitive_rms = Ingredient.objects.filter(microsensitive='True', discontinued=False).exclude(supplier__code='FDI')
 
     #Approved experimentals with duplication info
     approved_experimentals_with_duplication_info = \
@@ -4683,7 +4584,7 @@ def query_list(request):
     query_dict['outdated_raw_materials'] = {
             'proper_name': "Outdated Raw Materials",
             'headers': [],
-            'items': Ingredient.objects.filter(sub_flavor=None,discontinued=False,purchase_price_update__lt=one_year_ago).exclude(supplier=None).exclude(suppliercode='FDI'),
+            'items': Ingredient.objects.filter(sub_flavor=None,discontinued=False,purchase_price_update__lt=one_year_ago).exclude(supplier=None).exclude(supplier__code='FDI'),
             'url': '/access/outdated_raw_materials',
         }
     query_dict['natural_on_file_without_natural_doc'] = {
@@ -4906,6 +4807,38 @@ def renumber(request, flavor_number):
         }
     )
 
+def certify(request, flavor_number):
+    flavor = Flavor.objects.get(number=flavor_number)
+
+    invalid_message = ''
+    if flavor.organic_certified_required == False:
+        invalid_message = 'This product is not designated to be certified.'
+    if flavor.organic_certification_number == 'CERTIFIED':
+        invalid_message = 'This product has already been certified.'
+
+    if request.method == 'POST':
+        if not invalid_message:
+            # convert the product name
+            flavor.convert_to_organic_name()
+
+            # change certification number field
+            flavor.organic_certification_number = 'CERTIFIED'
+            flavor.save()
+
+            return HttpResponseRedirect('/access/%s' % flavor.number)
+    else:
+        return render(
+            request,
+            'access/flavor/certify.html',
+            {
+                'page_title': 'Organic Certification: %s' % flavor.__unicode__(),
+                'window_title': 'Organic Certification: %s' % flavor.__unicode__(),
+                'flavor': flavor,
+                'invalid_message': invalid_message,
+            }
+        )
+
+
 
 supplier_specific = ['COI', 'form40', 'form20', 'form20ar', 'form20c']
 
@@ -4931,32 +4864,36 @@ doctypes = [
                 'form40',
             ]
 def latest_docs(rm):
-        latest = {}
-        # supplier_specific = ['COI', 'form40', 'form20', 'form20ar', 'form20c']
+        latest = OrderedDict()
+        supplier_specific = ['COI', 'form40', 'form20', 'form20ar', 'form20c']
         doctypes = [
-                        'specsheet',
-                        'sds',
                         'allergen',
-                        'nutri',
-                        'GMO',
-                        'GPVC',
-                        'LOG',
-                        'natural',
-                        'origin',
-                        'vegan',
-                        'organic',
-                        'organic_cert',
-                        'kosher',
-                        'halal',
-                        # 'COA', special case here
                         'COI',
                         'form20',
                         'form20ar',
                         'form20c',
                         'form40',
+                        'GMO',
+                        'GPVC',
+                        'halal',
                         'ingbreak',
+                        'kosher',
+                        'LOG',
+                        'natural',
+                        'nutri',
+                        'organic',
+                        'organic_cert',
+                        'origin',
+                        'sds',
+                        'specsheet',
+                        'vegan',
+                        # 'COA', special case here
+                        'mform20',
+                        'mform20ar',
+                        'mform20c',
+                        'mform40',
+                        'mLOG',
                     ]
-
 
         # CHECK NATURAL STATUS HERE
         #
@@ -4965,6 +4902,7 @@ def latest_docs(rm):
             # doctypes.remove('vegan')
             doctypes.remove('natural')
 
+        # check if qualifed for GPVC
         if not rm.new_gmo == 'GMO Free':
             doctypes.remove('GPVC')
 
@@ -4974,13 +4912,14 @@ def latest_docs(rm):
             latest[i] = [None, doctype_label]
             docs = Documents.objects.filter(rawmaterial = rm, doctype = i)
             #
+
             # searches for latest document across all documents if supplier specific
             if i in supplier_specific and Documents.objects.filter(rawmaterial__supplier = rm.supplier, doctype = i).exists():
-                latest[i] = [Documents.objects.filter(rawmaterial__supplier= rm.supplier, doctype = i).order_by('-expiration')[0], doctype_label]
+                latest[i] = [Documents.objects.filter(rawmaterial__supplier= rm.supplier, doctype = i).order_by('-documententry')[0], doctype_label]
 
             elif i == 'LOG':
-                product_specific_query = Documents.objects.filter(doctype=i, log_rms__contains=[str(rm.rawmaterialcode)]).order_by('-expiration')
-                supplier_specific_query = Documents.objects.filter(rawmaterial__supplier = rm.supplier, doctype = i, log_rms=[]).order_by('-expiration')
+                product_specific_query = Documents.objects.filter(doctype=i, log_rms__contains=[str(rm.rawmaterialcode)]).order_by('-documententry')
+                supplier_specific_query = Documents.objects.filter(rawmaterial__supplier = rm.supplier, doctype = i, log_rms=[]).order_by('-documententry')
 
                 # compare both docs if both queries exists
                 if product_specific_query.exists() and supplier_specific_query.exists():
@@ -4996,7 +4935,7 @@ def latest_docs(rm):
 
 
             elif docs.exists():
-                latest[i] = [docs.order_by('-expiration')[0], doctype_label]
+                latest[i] = [docs.order_by('-documententry')[0], doctype_label]
 
             else:
                 d = [obj for obj in docs if obj.verified == False]
@@ -5010,34 +4949,8 @@ def latest_docs(rm):
             # doctype_label = [y for x, y in Documents.DOC_TYPES if x == dt][0]
             # doctype_label
 
-        return collections.OrderedDict(latest)
+        return latest
 
-
-manufacturer_docs = [
-    'mform20',
-    'mform20ar',
-    'mform20c',
-    'mLOG',
-    'mform40',
-]
-
-def get_rm_manufacturers(rm):
-    manufacturers = []
-    for r in ReceivingLog.objects.filter(poli__raw_material=rm).order_by('manufacturer_fk').distinct('manufacturer_fk'):
-        manufacturers.append(r.manufacturer_fk)
-
-    return manufacturers
-
-def latest_manufacturer_docs(rm):
-
-    manufacturer_docs = []
-    manufacturers = get_rm_manufacturers(rm)
-    for m in manufacturers:
-        manufacturer_docs.append(Documents.objects.filter(doctype__in=manufacturer_docs, manufacturer=m))
-
-
-
-    return manufacturer_docs
 
 def autoverify(request, doc):
     if IngredientTemp.objects.filter(user_id = request.user.id).filter(temp_rmcode = doc.rawmaterial.rawmaterialcode).exists():
@@ -5062,6 +4975,111 @@ def convert_to_pdf(word_doc):
     os.remove(word_doc)
     return os.path.splitext(word_doc)[0] +'.pdf'
 
+manufacturerDocTypes = ['mLOG', 'mform20', 'mform20ar', 'mform20c', 'mform40', 'mCOI' ]
+
+def get_rm_manufacturers(rm):
+    manufacturers = rm.supplier.manufacturer_set.all()
+    return manufacturers
+
+def get_rm_manufacturer_docs(rm):
+    manufacturers = get_rm_manufacturers(rm)
+    manufacturerDocsDict = {}
+    for m in manufacturers:
+        manufacturerDocs = []
+        for d in manufacturerDocTypes:
+            if not Documents.objects.filter(doctype=d, rawmaterial=rm, manufacturer=m).exists():
+                continue
+            manufacturerDocs.append(Documents.objects.filter(doctype=d, rawmaterial=rm, manufacturer=m)[:10])
+        manufacturerDocsDict[m.name] = manufacturerDocs
+    return manufacturerDocsDict
+
+
+def filter_applicable_doctypes(rm):
+    applicabletypes = [
+                    'specsheet',
+                    'sds',
+                    'allergen',
+                    'nutri',
+                    'GMO',
+                    'GPVC',
+                    'LOG',
+                    'natural',
+                    'origin',
+                    'vegan',
+                    'organic',
+                    'organic_cert',
+                    'kosher',
+                    'halal',
+                    'COA',
+                    'COI',
+                    'form20',
+                    'form20ar',
+                    'form20c',
+                    'form40',
+                    'ingbreak',
+                    'mform20',
+                    'mform20ar',
+                    'mform20c',
+                    'mform40',
+                    'mLOG',
+                ]
+
+
+    #
+
+    if not rm.art_nati == 'Nat' and not rm.art_nati == 'NFI-N':
+        applicabletypes.remove('organic')
+        applicabletypes.remove('natural')
+
+    if not rm.new_gmo == 'GMO Free':
+        applicabletypes.remove('GPVC')
+
+    return applicabletypes
+
+def upload_new_documents_and_return_links(request, rm, doctype):
+    getlink = ""
+    savedocs = []
+    link = "/access/document_control/"+str(rm.id)+"/"+str(rm.rawmaterialcode)+"/"
+    manufacturer = None
+    if doctype in manufacturerDocTypes:
+        manufacturer = Manufacturer.objects.get(id = request.POST.get('rmManufacturer'))
+    d = Documents(rawmaterial=rm,doctype=doctype,uploadfile=request.FILES[doctype], uploader = request.user, manufacturer=manufacturer)
+    savedocs.append(d)
+
+    # append other applicable documents to list
+    # CHECK IF OTHER APPLICABLE DOCS HAVE DUPLICATES
+    for n in doctypes:
+        if request.POST.get(n):
+            temp = Documents(rawmaterial=rm,doctype=n,uploadfile=request.FILES[doctype], uploader = request.user, manufacturer=manufacturer)
+            savedocs.append(temp)
+
+    # Save and create the getlink
+    # else:
+    for s in savedocs:
+        s.save()
+        getlink += str(s.id)+"."
+
+    getlink = getlink.rstrip(".")
+    return getlink
+
+
+
+def get_rmdoc_statuses(unverified_docarr):
+    docpending = {}
+
+    for x in unverified_docarr:
+        count = DocumentVerification.objects.filter(document = x)
+        if count.count() >= 2 and not x.verified:
+            docpending[x] = "Review Required. Verified by "+str(count[0].verifier.username) + " and " + str(count[1].verifier.username)
+        elif count.count() == 1:
+            docpending[x] = "1 verification. Verified by "+str(count[0].verifier.username)
+        else:
+            docpending[x] = None
+
+    return docpending
+
+f20 = ['form20', 'form20c', 'form20ar']
+
 def document_control(request, pin_number, rm_code, doctype):
     message = ""
     pagetitle = "Document Control"
@@ -5079,31 +5097,15 @@ def document_control(request, pin_number, rm_code, doctype):
 
     elif doctype == None:
         # list document objects for RM
-        f20 = ['form20', 'form20c', 'form20ar']
         rm = Ingredient.objects.get(rawmaterialcode=rm_code)
         missing_doc = '/access/document_control/'+str(rm.id)+'/'+str(rm.rawmaterialcode)
         d = Documents.objects.filter(rawmaterial = rm).order_by('doctype')
         latest = latest_docs(rm)
+        rmManufacturerDocs = get_rm_manufacturer_docs(rm)
         d = [obj for obj in Documents.objects.filter(rawmaterial = rm).order_by('documententry') if obj.verified == False]
-        docpending = {}
-
-        for x in d:
-            count = DocumentVerification.objects.filter(document = x)
-            if count.count() >= 2 and not x.verified and request.user.is_superuser:
-                docpending[x] = "Review Required. Verified by "+str(count[0].verifier.username) + " and " + str(count[1].verifier.username)
-            elif count.count() == 1:
-                docpending[x] = "1 verification. Verified by "+str(count[0].verifier.username)
-            else:
-                docpending[x] = None
-
-        # admin = False
-        # if request.user.is_superuser:
-        #     admin = True
+        docpending = get_rmdoc_statuses(d)
 
         coa = Documents.objects.filter(rawmaterial = rm, doctype='COA').order_by('-expiration')[:10]
-
-        # manufacturer docs
-
         return render(
             request,
             'access/ingredient/document_control.html',
@@ -5115,6 +5117,7 @@ def document_control(request, pin_number, rm_code, doctype):
                 'latest':latest,
                 'page_title':pagetitle,
                 'admin':request.user.is_superuser,
+                'rmManufacturerDocs':rmManufacturerDocs,
                 # 'ss':supplier_specific,
             }
         )
@@ -5122,64 +5125,11 @@ def document_control(request, pin_number, rm_code, doctype):
     else:
         # Handle uploads and post
         # form40
-        auto = [
-                'GPVC',
-                'COI',
-                'form40',
-                'form20',
-                'form20ar',
-                'form20c',
-                'ingbreak',
-                'mform20',
-                'mform20ar',
-                'mform20c',
-                'mLOG',
-                'mform40',
-            ]
+        auto = ['GPVC','COI', 'form40', 'form20', 'form20ar', 'form20c', 'ingbreak']
         rm = Ingredient.objects.get(rawmaterialcode = rm_code)
+        rmManufacturers = get_rm_manufacturers(rm)
         link = ""
-        doctype_choices = Documents._meta.get_field('doctype').choices
-        applicabletypes = [
-                        'specsheet',
-                        'sds',
-                        'allergen',
-                        'nutri',
-                        'GMO',
-                        'GPVC',
-                        'LOG',
-                        'natural',
-                        'origin',
-                        'vegan',
-                        'organic',
-                        'organic_cert',
-                        'kosher',
-                        'halal',
-                        'COA',
-                        'COI',
-                        'form20',
-                        'form20ar',
-                        'form20c',
-                        'form40',
-                        'ingbreak',
-                        'mform20',
-                        'mform20ar',
-                        'mform20c',
-                        'mLOG',
-                        'mform40',
-                    ]
-
-        if not rm.art_nati == 'Nat' and not rm.art_nati == 'NFI-N':
-            applicabletypes.remove('organic')
-            # applicabletypes.remove('vegan')
-            applicabletypes.remove('natural')
-        # else:
-        #     if not rm.vegan:
-        #         applicabletypes.remove('vegan')
-        #     if not rm.organic_compliant:
-        #         applicabletypes.remove('organic')
-
-        if not rm.new_gmo == 'GMO Free':
-            applicabletypes.remove('GPVC')
+        applicabletypes = filter_applicable_doctypes(rm)
 
         # RENDER UPLOAD CONFIRMATION PAGE
         # Delete after user rejects confirmation
@@ -5209,64 +5159,44 @@ def document_control(request, pin_number, rm_code, doctype):
                             'page_title':pagetitle,
                         }
                     )
+        # if 'next' in request.GET:
+        #     return HttpResponseRedirect('/access/')
 
         if request.method == 'POST':
             # USER IS UPLOADING DOCUMENT
+            ingredient = Ingredient.objects.get(rawmaterialcode = rm_code)
+            link = "/access/document_control/"+str(rm.id)+"/"+str(rm.rawmaterialcode)+"/"
             if 'confirm' in request.POST:
-                getlink = ""
-                savedocs = []
-                link = "/access/document_control/"+str(pin_number)+"/"+str(rm_code)+"/"
-                d = Documents(rawmaterial=rm,doctype=doctype,uploadfile=request.FILES[doctype], uploader = request.user)
-                savedocs.append(d)
-
-                # append other applicable documents to list
-                # CHECK IF OTHER APPLICABLE DOCS HAVE DUPLICATES
-                for n in doctypes:
-                    if request.POST.get(n):
-                        temp = Documents(rawmaterial=rm,doctype=n,uploadfile=request.FILES[doctype], uploader = request.user)
-                        savedocs.append(temp)
-
-
-                # Save and create the getlink
-                # else:
-                for s in savedocs:
-                    s.save()
-
-                    getlink += str(s.id)+"."
-                    # if s.doctype in auto: #or (n == 'COA' and rm.microsensitive == 'False'):
-                    #     autoverify(request, s)
-
-                getlink = getlink.rstrip(".")
+                getlink = upload_new_documents_and_return_links(request, ingredient, doctype)
                 return HttpResponseRedirect('/access/document_control/%s/%s/%s/?next=%s' % (str(pin_number), str(rm_code), doctype, getlink))
+
 
             # REDIRECT TO DOCUMENT CONTROL
             elif 'yes' in request.POST:
-
-                dt = datetime.strptime(request.POST['expiration'], '%Y-%m-%d')
-                year = timedelta(days = 365)
+                # dt = datetime.strptime(request.POST['expiration'], '%Y-%m-%d')
+                # year = timedelta(days = 365)
                 expiration = date.today()
-
-                oneyear = ['LOG', 'COI', 'form40', 'kosher', 'halal', 'specsheet', 'sds', 'form20', 'GPVC', 'organic_cert', 'form20ar', 'organic', 'form20c']
-                # expiration_date = ['form20c', 'kosher', 'halal']
-                threeyears = ['origin', 'GMO', 'vegan', 'allergen', 'nutri', 'natural', 'ingbreak']
-
-
-                if doctype == 'nutri':
-                    expiration = dt.date() + year*5
-                elif doctype in oneyear:
-                    expiration = dt.date() + year
-                else:
-                    expiration = dt.date() + year*3
+                # oneyear = ['LOG', 'COI', 'form40', 'kosher', 'halal', 'specsheet', 'sds', 'form20', 'GPVC', 'organic_cert', 'form20ar', 'organic', 'form20c']
+                # # expiration_date = ['form20c', 'kosher', 'halal']
+                # threeyears = ['origin', 'GMO', 'vegan', 'allergen', 'nutri', 'natural', 'ingbreak']
+                #
+                #
+                # if doctype == 'nutri':
+                #     expiration = dt.date() + year*5
+                # elif doctype in oneyear:
+                #     expiration = dt.date() + year
+                # else:
+                #     expiration = dt.date() + year*3
 
                 duplicatelist = ""
-                duplicate = "<div class='rednotification'><h2>Upload failed. The following document types have an exisiting document with the same expiration date ("+str(expiration)+").<h2><ul>"
+                duplicate = "<div class='rednotification'><h2>Upload failed. The following document types have an exisiting document with the same entry date ("+str(expiration)+").<h2><ul>"
                 # redirect to doc control
 
                 list_docs = request.GET.get('next').split(".")
 
                 for i in list_docs:
                     temp = Documents.objects.get(id=int(i))
-                    if Documents.objects.filter(expiration=expiration, rawmaterial=rm, doctype=temp.doctype).exists():
+                    if Documents.objects.filter(documententry=expiration, rawmaterial=rm, doctype=temp.doctype).exclude(id=temp.id).exists():
                         duplicatelist+= "<li><span name='doctype'>"+ temp.doctype +"</span> - <a href='"+Documents.objects.filter(rawmaterial=rm, expiration=expiration, doctype=temp.doctype)[0].uploadfile.url+"' target='_blank'>View Existing Document</a></li>"
 
                 if duplicatelist and not doctype == 'COA':
@@ -5278,8 +5208,6 @@ def document_control(request, pin_number, rm_code, doctype):
                     messages.info(request, duplicate)
                     return HttpResponseRedirect('/access/document_control/%s/%s' % (str(rm.id), str(rm.rawmaterialcode)))
 
-
-
                 for i in list_docs:
                     s = Documents.objects.get(id = int(i))
                     setattr(s, 'expiration', expiration)
@@ -5289,8 +5217,6 @@ def document_control(request, pin_number, rm_code, doctype):
                 messages.info(request, success)
                 return HttpResponseRedirect('/access/document_control/%s/%s' % (str(pin_number), str(rm_code)))
 
-
-
             return render(
                 request,
                 'access/ingredient/document_control.html',
@@ -5298,6 +5224,8 @@ def document_control(request, pin_number, rm_code, doctype):
                     'message':message,
                     'doctype':doctype,
                     'doctypes':applicabletypes,
+                    'manufacturerDocTypes':manufacturerDocTypes,
+                    'rmManufacturers':rmManufacturers,
                     'rm':rm,
                     'link':link,
                     # 'previous':d.id,
@@ -5306,9 +5234,6 @@ def document_control(request, pin_number, rm_code, doctype):
             )
 
         if doctype in applicabletypes:
-            rm_manufacturers = []
-            if doctype in manufacturer_docs:
-                rm_manufacturers = get_rm_manufacturers(rm)
             return render(
                 request,
                 'access/ingredient/document_control.html',
@@ -5318,7 +5243,8 @@ def document_control(request, pin_number, rm_code, doctype):
                     'rm':rm,
                     'link':link,
                     'doctypes':applicabletypes,
-                    'manufacturers':rm_manufacturers,
+                    'rmManufacturers':rmManufacturers,
+                    'manufacturerDocTypes':manufacturerDocTypes,
                     # 'previous':d.id,
                     'page_title':pagetitle,
                 }
@@ -5488,8 +5414,6 @@ def allergen_form():
                         </td>
                     </tr>"""
 
-    # af += "</table>"
-
     return af
 
 
@@ -5521,7 +5445,6 @@ def nutritemp_form_validation(request, temp, type):
         n.save()
         return True
     return False
-
 
 
 def compare_temp(dv1, dv2):
@@ -5586,12 +5509,6 @@ def compare_temp(dv1, dv2):
             return False
 
     return True
-
-
-# def determine_expiration(request):
-#     expiration = date.today()
-#     year = timedelta(days = 365)
-#     threeyears = ['origin', 'specsheet', 'GMO', 'sds', 'form20', 'allergen', 'nutri', 'natural']
 
 def save_to_main(dv):
     i = dv.document.rawmaterial
@@ -5881,7 +5798,7 @@ def dv_autocomplete(request):
     if ing == "":
         return JsonResponse(r)
     else:
-        pin = Ingredient.objects.exclude(supplier__suppliercode='FDI').exclude(supplier=None).filter(id__startswith = int(ing))
+        pin = Ingredient.objects.exclude(supplier__code='FDI').exclude(supplier=None).filter(id__startswith = int(ing))
 
     if ing.isdigit() and pin.exists():
         for i in pin:
@@ -5913,6 +5830,7 @@ additionalhtml = """
                         </td>
                         <td><input type='date' id='expiration' name='expiration' required/></td>
                     </tr>"""
+
 
 kosheronlyhtml = """
                     <tr>
@@ -6042,33 +5960,44 @@ docv_dict = {
     'form40':"<table>"+additionalhtml+"</table>",
     'ingbreak':"<table>"+additionalhtml+"</table>",
     'GPVC':"<table>"+additionalhtml+"</table>",
+    'mform20':"<table>"+additionalhtml+"</table>",
+    'mform20ar':"<table>"+additionalhtml+"</table>",
+    'mform20c':"<table>"+additionalhtml+"</table>",
+    'mform40':"<table>"+additionalhtml+"</table>",
+    'mLOG':"<table>"+additionalhtml+"</table>",
+    'mCOI':"<table>"+additionalhtml+"</table>",
 }
+
+
+auto = ['natural','GPVC','COI', 'form40', 'form20', 'form20ar', 'form20c', 'ingbreak','mCOI', 'mform40', 'mform20', 'mform20ar', 'mform20c',]
+docbytype = [
+    'origin',
+    'specsheet',
+    'GMO',
+    'GPVC',
+    'LOG',
+    'sds',
+    'kosher',
+    'halal',
+    'allergen',
+    'nutri',
+    'COI',
+    'organic',
+    'organic_cert',
+    'vegan',
+    'natural',
+    'COA',
+    'ingbreak',
+    'form20',
+    'form20ar',
+    'form20c',
+    'form40',
+]
+
 
 def document_verification(request, doc_id):
     pagetitle = "Document Verification"
-    docbytype = [
-        'origin',
-        'specsheet',
-        'GMO',
-        'GPVC',
-        'LOG',
-        'sds',
-        'kosher',
-        'halal',
-        'allergen',
-        'nutri',
-        'COI',
-        'organic',
-        'organic_cert',
-        'vegan',
-        'natural',
-        'COA',
-        'ingbreak',
-        'form20',
-        'form20ar',
-        'form20c',
-        'form40',
-    ]
+
 
     # REFUSE UNAUTHORIZED USERS
     if not request.user.has_perm('access.can_verify'):
@@ -6079,34 +6008,22 @@ def document_verification(request, doc_id):
                     'message':'Not authorized to verify documents',
                 }
             )
-
     # REDIRECT TO DOCUMENT CONTROL VIA PINSEARCH
     if request.method == 'POST' and 'pinsearch' in request.POST:
         return HttpResponseRedirect('/access/document_control/'+str(request.POST.get('pin_search'))+"/")
 
-    admin = False
-
-    if request.user.is_superuser:
-        admin = True
-
 
     if request.GET:
-        # display by doctype
-        two_years_ago = date.today() - relativedelta(years=2)
-        # rawmaterials bought in last three years that are not discontinued
-        rms = PurchaseOrderLineItem.objects.filter(raw_material__discontinued=False, due_date__range=[two_years_ago, date.today()]).order_by().values_list('raw_material', flat=True).distinct()
+        rms = RMsPurchasedLastXYears(2)
         d = []
 
         curr_user_verified = Documents.objects.filter(verifications__verifier=request.user)
-        # # document ids that are verified
         doc_ids = Documents.objects.filter(verifications__final=True).values_list('id', flat=True).distinct()
 
         for b in docbytype:
-            distinct_docs = Documents.objects.filter(rawmaterial__rawmaterialcode__in=rms, doctype=b).order_by('rawmaterial_id', '-expiration').distinct('rawmaterial')
+            distinct_docs = Documents.objects.filter(rawmaterial__rawmaterialcode__in=rms, doctype=b).order_by('rawmaterial_id', '-expiration').distinct('rawmaterial').exclude(rawmaterial__supplier__code='FDI')
             # LIST UNVERIFIED DOCUMENTS BY DOCTYPE
             if b in request.GET:
-                # d = [obj for obj in Documents.objects.filter(doctype = b).exclude(rawmaterial__discontinued=True) if obj.verified == False and obj.dv_count < 2 and not request.user.username in obj.get_verifiers]
-
                 d = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__lte=1, doctype=b,rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=curr_user_verified)
 
                 if d:
@@ -6120,13 +6037,12 @@ def document_verification(request, doc_id):
                     {
                         'message':message,
                         'documents':d,
-                        'admin':admin,
+                        'admin':request.user.is_superuser,
                     }
                 )
 
             # LIST ALL DOCUMENTS FOR DOCREVIEW BY DOCTYPE
             elif "review_"+b in request.GET:
-
                 d = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__gte=2, doctype=b, rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=doc_ids).exclude(id__in=curr_user_verified)
                 if d:
                     message = ""
@@ -6139,37 +6055,15 @@ def document_verification(request, doc_id):
                     {
                         'message':message,
                         'documents':d,
-                        'admin':admin,
+                        'admin':request.user.is_superuser,
                     }
                 )
 
             # list upload links for docs for specific rms
             elif "rm_"+b in request.GET:
-                rms = []
-                # three_years_ago = date.today() - relativedelta(years=3)
-
-                rawmaterialcodes = PurchaseOrderLineItem.objects.filter(due_date__range=[two_years_ago, date.today()]).values_list('raw_material',flat=True).distinct()
-                rm_queryset = Ingredient.objects.filter(rawmaterialcode__in=rawmaterialcodes, discontinued = False).exclude(documents__doctype=b).exclude(supplier__suppliercode='FDI')
-
-                if b == 'vegan':
-                    rm_queryset = rm_queryset.exclude(milk=True).exclude(eggs=True).exclude(id=266)
-
-                auto = ['COI', 'form40', 'form20', 'form20ar', 'form20c']
-                f20 = ['form20', 'form20ar', 'form20c']
-
-                if b in auto:
-                    # queryset of distinct suppliers
-                    if b in f20:
-                        s = Supplier.objects.filter(ingredient__documents__doctype__in=f20)
-                    else:
-                        s = Supplier.objects.filter(ingredient__documents__doctype=b)
-                    rm_queryset = rm_queryset.exclude(supplier__in=s)
-
-
-                for rm in rm_queryset:
-                    # if not rm in rms and not Documents.objects.filter(doctype=b, rawmaterial=rm, rawmaterial__discontinued=False).exists():
-                    if not rm.get_latest_document('b'):
-                        rms.append(rm)
+                rm_queryset = Ingredient.objects.filter(rawmaterialcode__in=rms, discontinued = False).exclude(documents__doctype=b).exclude(supplier__code='FDI')
+                rms_w_docs = Documents.objects.filter(doctype=b, rawmaterial__rawmaterialcode__in=rms).distinct('rawmaterial').values_list('rawmaterial', flat=True)
+                rms_no_docs = Ingredient.objects.filter(rawmaterialcode__in=rms.difference(rms_w_docs))
 
                 if len(rms) > 0:
                     message = ""
@@ -6181,10 +6075,10 @@ def document_verification(request, doc_id):
                     'access/ingredient/document_verification.html',
                     {
                         'message':message,
-                        'docsby_rm':rms,
+                        'docsby_rm':rms_no_docs,
                         'doctype':b,
                         'documents':None,
-                        'admin':admin,
+                        'admin':request.user.is_superuser,
                     }
                 )
 
@@ -6254,11 +6148,8 @@ def document_verification(request, doc_id):
                 'access/ingredient/document_verification.html',
                 {
                     'message':'Already verified this document',
-                    # 'documents':d,
                 }
             )
-
-
         # document not verified by two peeps yet
         elif not request.method == "POST" and DocumentVerification.objects.filter(document = doc).count() < 2:
             f = docv_dict[doc.doctype]
@@ -6270,7 +6161,6 @@ def document_verification(request, doc_id):
 
                             <iframe title='"""+str(doc.filename)+"""' src='"""+str(doc.uploadfile.url)+"""'  style="height: 100vh; width: 100%;"></iframe>
                         """
-
             else:
                 f += """<div class='nutrisubmit'>
                             <input type="submit" value="Submit Verification"/>
@@ -6282,7 +6172,6 @@ def document_verification(request, doc_id):
 
             prev = request.META.get('HTTP_REFERER')
             return render(
-
                 request,
                 'access/ingredient/document_verification.html',
                 {
@@ -6299,18 +6188,10 @@ def document_verification(request, doc_id):
         elif request.method == "POST":
             # HANDLE DOCV SUBMISSION
             #
-
             # move doc to another RM/doctype
             if 'doc_change' in request.POST:
                  # get rawmaterial and DOC_TYPES
-                 new_ingredient = request.POST.get('correct_ing')
-                 new_ingredient = new_ingredient.split(" | ")
-                 new_dt = request.POST.get('correct_type')
-                 doc = Documents.objects.get(id=int(request.POST.get('moving_doc')))
-                 ing = Ingredient.objects.get(id=int(new_ingredient[0]), supplier__suppliercode=new_ingredient[1])
-                 doc.rawmaterial = ing
-                 doc.doctype = new_dt
-                 doc.save()
+                 moveDoc(request)
                  return HttpResponseRedirect('/access/document_verification/'+str(doc.id))
 
             # discard coas that dont need to be verified
@@ -6320,7 +6201,8 @@ def document_verification(request, doc_id):
                 return HttpResponseRedirect('/access/document_verification/?COA')
 
             temp = IngredientTemp(user = request.user, temp_rmcode = doc.rawmaterial.rawmaterialcode, new_gmo="")
-            ntemp= NutriInfoTemp(user = request.user, ingredient = doc.rawmaterial)
+            temp = getUserIngredientTempForDoc(request.user, doc)
+            ntemp= getUserNutriTempForDoc(request.user, doc)
             rmretain = None
             is_documentdate = True
             expiration = request.POST.get('expiration')
@@ -6330,44 +6212,21 @@ def document_verification(request, doc_id):
             if date_type == 'expiration_date':
                 is_documentdate = False
 
-            # CREATE OR GET INGREDIENTTEMP AND NUTRIINFOTEMP
-            if IngredientTemp.objects.filter(user_id = request.user.id).filter(temp_rmcode = doc.rawmaterial.rawmaterialcode).exists():
-                temp = IngredientTemp.objects.get(user_id = request.user.id, temp_rmcode = doc.rawmaterial.rawmaterialcode)
-            # else:
-            #     temp = IngredientTemp(user = request.user, temp_rmcode = doc.rawmaterial.rawmaterialcode, new_gmo="")
-            #     temp.save()
-
-            if NutriInfoTemp.objects.filter(user = request.user).filter(ingredient = doc.rawmaterial).exists():
-                ntemp = NutriInfoTemp.objects.get(user = request.user, ingredient = doc.rawmaterial)
-            # else:
-            #     # ntemp = NutriInfoTemp(user = request.user, ingredient = doc.rawmaterial)
-            #     ntemp.save()
-            auto = ['natural','GPVC','COI', 'form40', 'form20', 'form20ar', 'form20c', 'ingbreak']
             case_switch = {
                 'specsheet':spec_sheet_validation,
                 'sds':sds_validation,
                 'allergen':allergen_form_submission,
                 'nutri':nutritemp_form_validation,
                 'origin':origin_validation,
-                # 'GMO':single_val_validation(temp, doc.doctype , str(request.POST.get(doc.doctype))), #(request, temp)
                 'GMO':single_val_validation,
                 'LOG':log_verification,
-                # 'natural':"",
                 'kosher':kosher_validation,
                 'halal':halal_validation,
                 'vegan':vegan_validation,
                 'COA':coa_validation,
-                # 'COI':"",
-                # 'form20':"",
-                # 'form20ar':"",
-                # 'form20c':"",
-                # 'form40':"",
-                # 'ingbreak':"",
-                # 'GPVC':"",
                 'organic':organic_compliant_validation,
                 'organic_cert':organic_compliant_validation,
             }
-
 
             if doc.doctype == 'nutri':
                 case_switch[doc.doctype](request, ntemp, 'nutri')
@@ -6386,7 +6245,6 @@ def document_verification(request, doc_id):
             # HANDLE DOCREVIEW
             if 'review' in request.POST:
                 docv = DocumentVerification(document = doc, verifier=request.user, temp_ingredient = temp, temp_nutri=ntemp, rm_retain =rmretain, expiration=expiration, final=True, is_documentdate=is_documentdate)
-
                 docv.save()
                 # only save if it is the latest document
                 if Documents.objects.filter(rawmaterial=doc.rawmaterial, doctype = doc.doctype).latest('expiration') == docv.document or doc.doctype=='COA':
@@ -6399,10 +6257,8 @@ def document_verification(request, doc_id):
                 docv = DocumentVerification(document = doc, verifier=request.user, temp_ingredient = temp, temp_nutri=ntemp, rm_retain =rmretain, expiration=expiration, is_documentdate=is_documentdate)
                 docv.save()
 
-
             # CHECK AND COMMIT HERE
             #
-
             dv = DocumentVerification.objects.filter(document = doc)
             # normal DV submission
             if not 'review' in request.POST and dv.count() == 1:
@@ -6421,7 +6277,6 @@ def document_verification(request, doc_id):
                     submitmessage = "<div class='greennotification'><h2>Document verification between two users is identical. Commiting changes to database.<h2></div>"
                 else:
                     submitmessage = "<div class='rednotification'><h2>There exists a newer document for this document type and rawmaterial. Changes to database will not be made.</h2></div>"
-
             # redirect back to previous page (DV or DC) to continue workflow
             if 'next' in request.GET and not request.GET.get('next') == "" and not request.GET.get('next') == None:
                 # redirect to previous
@@ -6437,7 +6292,7 @@ def document_verification(request, doc_id):
                     'doc':doc,
                     'page_title':pagetitle,
                     'previous':prev,
-                    'admin':admin,
+                    'admin':request.user.is_superuser,
                 }
             )
 
@@ -6454,273 +6309,8 @@ def document_verification(request, doc_id):
                             'message':'Not authorized to do final review on documents',
                         }
                     )
-
             # CREATE APPROPRIATE DOCREVIEW BY DOCTYPE
-            auto = ['natural','GPVC','COI', 'form40', 'form20', 'form20ar', 'form20c', 'ingbreak']
-            datetd = """ <td>Please appropriate date type:
-                                    <ul>
-                                        <li><input type = 'radio' name = 'doc_date' value = 'document_date' required/> Document Date</li>
-                                        <li><input type = 'radio' name = 'doc_date' value = 'expiration_date'/> Expiration Date</li>
-                                    </ul>
-                                    <input type='date' id='expiration' name='expiration' required/></td>
-                                    </tr>"""
-            review = DocumentVerification.objects.filter(document = doc)
-
-            reviewhtml = """<div class='review' oninput = 'checkTotalWeight()'>
-                                            <table id='reviewtable'>
-                                                <tr>
-                                                    <td>Verifier</td>
-                                                    <td>"""+review[0].verifier.username+"""</td>
-                                                    <td>"""+review[1].verifier.username+"""</td>
-                                                    <td>"""+request.user.username+"""</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Entered Document Date?</td>
-                                                    <td>"""+str(review[0].is_documentdate)+"""</td>
-                                                    <td colspan='2'>"""+str(review[1].is_documentdate)+"""</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Document Expiration Date</td>
-                                                    <td>"""+str(review[0].expiration)+"""</td>
-                                                    <td>"""+str(review[1].expiration)+"""</td>
-
-                        """
-            if not doc.doctype in auto:
-                # ALLERGEN DOCREVIEW
-                #
-                if isinstance(ing_doctype_dict[doc.doctype], list):
-                    fields = ing_doctype_dict[doc.doctype]
-                    reviewhtml += datetd
-                    for f in fields:
-                        reviewhtml += """
-                                                    <tr>
-                                                        <td>"""+f+"""</td>
-                                                        <td>"""+str(getattr(review[0].temp_ingredient, f))+"""</td>
-                                                        <td>"""+str(getattr(review[1].temp_ingredient, f))+"""</td>"""
-                        if f in boolean_allergens:
-                            reviewhtml += """
-                                                        <td><input type='checkbox' id='"""+f+"""' name='"""+f+"""'/></td>
-                                                    </tr>"""
-                        elif f in text_allergens:
-                            if f == 'sulfites_ppm':
-                                reviewhtml += """
-                                                            <td><input type='number' step='.01' id='"""+f+"""' name='"""+f+"""'/></td>
-                                                        </tr>"""
-                            else:
-                                reviewhtml += """
-                                                            <td><input type='text' id='"""+f+"""' name='"""+f+"""'/></td>
-                                                        </tr>"""
-                        elif f == 'microsensitive':
-                            reviewhtml += """
-                                                        <td>
-                                                            <select name='specsheet' id='specsheet'>
-                                                                <option value='True'>True</option>
-                                                                <option value='False'>False</option>
-                                                            </select>
-                                                        </td>
-                                                    </tr>"""
-
-                        elif f == 'rm_ingredient_statement':
-                            reviewhtml += """
-                                                        <td>
-                                                            <textarea name='ingredient_statement' id = 'ingredient_statment'></textarea>
-                                                        </td>
-                                                    </tr>"""
-
-                    reviewhtml+="""</table>"""
-                elif doc.doctype == 'nutri':
-                    n1 = review[0].temp_nutri
-                    n2 = review[1].temp_nutri
-                    meta = []
-                    nutriform = nutriFormTemp()
-                    meta = map(lambda x: x.name, NutriInfoTemp._meta.fields)
-                    reviewhtml +="""    <td>Please appropriate date type:
-                                            <ul>
-                                                <li><input type = 'radio' name = 'doc_date' value = 'document_date' required/> Document Date</li>
-                                                <li><input type = 'radio' name = 'doc_date' value = 'expiration_date'/> Expiration Date</li>
-                                            </ul>
-                                            <input type='date' id='expiration' name='expiration' required/>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Total Weight</td>
-                                        <td>"""+ str(calculate_nutri_weight(n1, 'total')) +"""</td>
-                                        <td>"""+ str(calculate_nutri_weight(n2, 'total')) +"""</td>
-                                        <td><span id = 'totalw'> </span> g </td>
-                                    </tr>"""
-                    for row in nutriform:
-                        if row.label == 'Other Fat':
-                            reviewhtml += """
-                                                        <tr>
-                                                            <td>Total Fats</td>
-                                                            <td>"""+str(calculate_nutri_weight(n1, 'fat'))+"""</td>
-                                                            <td>"""+str(calculate_nutri_weight(n2, 'fat'))+"""</td>
-                                                            <td><p id = "total fat"></p></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>"""+str(row.label)+"""</td>
-                                                            <td>"""+str(getattr(n1, row.name))+"""</td>
-                                                            <td>"""+str(getattr(n2, row.name))+"""</td>
-                                                            <td>"""+str(row)+"""</td>
-                                                        </tr>"""
-                        elif row.label == 'Carbohydrates':
-                            reviewhtml += """
-                                                        <tr>
-                                                            <td>Total Carbohydrates</td>
-                                                            <td>"""+str(calculate_nutri_weight(n1, 'carbs'))+"""</td>
-                                                            <td>"""+str(calculate_nutri_weight(n2, 'carbs'))+"""</td>
-                                                            <td><p id = "totalcarbs"></p></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>"""+str(row.label)+"""</td>
-                                                            <td>"""+str(getattr(n1, row.name))+"""</td>
-                                                            <td>"""+str(getattr(n2, row.name))+"""</td>
-                                                            <td>"""+str(row)+"""</td>
-                                                        </tr>
-                                                        """
-                        elif row.label == "Alcohol Content":
-                            reviewhtml +="""
-                                                    <tr>
-                                                        <td>"""+str(row.label)+"""</td>
-                                                        <td>"""+str(getattr(n1, row.name))+"""</td>
-                                                        <td>"""+str(getattr(n2, row.name))+"""</td>
-                                                        <td><span id = "totalalcohol"></span> g</td>
-                                                    </tr>"""
-                        elif row.label == "Calories":
-                            reviewhtml +="""
-                                                    <tr>
-                                                        <td>"""+str(row.label)+"""</td>
-                                                        <td>"""+str(getattr(n1, row.name))+"""</td>
-                                                        <td>"""+str(getattr(n2, row.name))+"""</td>
-                                                        <td><p id='calories'></p></td>
-                                                    </tr>"""
-                        else:
-                            reviewhtml +="""
-                                                    <tr>
-                                                        <td>"""+str(row.label)+"""</td>
-                                                        <td>"""+str(getattr(n1, row.name))+"""</td>
-                                                        <td>"""+str(getattr(n2, row.name))+"""</td>
-                                                        <td>"""+str(row)+"""</td>
-                                                    </tr>"""
-                    reviewhtml +="""
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </table>"""
-
-
-                elif doc.doctype == 'COA':
-                    reviewhtml += """<td rowspan="3" class= "coa_subrow">"""+docv_dict[doc.doctype]+"""</td></tr>
-                                    <tr>
-                                        <td>Salmonella Postive</td>
-                                        <td>"""+str(getattr(review[0].temp_ingredient, ing_doctype_dict[doc.doctype]))+"""</td>
-                                        <td>"""+str(getattr(review[1].temp_ingredient, ing_doctype_dict[doc.doctype]))+"""</td>
-
-                                    </tr>
-                                    <tr>
-                                        <td>RM Retain</td>
-                                        <td>"""+str(review[0].rm_retain)+"""</td>
-                                        <td>"""+str(review[1].rm_retain)+"""</td>
-                                    </tr>
-                                    </table>
-                                    """
-
-                elif doc.doctype == 'LOG':
-                    reviewhtml += """<td rowspan="3">"""+docv_dict[doc.doctype]+"""</td></tr>
-                                    <tr>
-                                        <td> List applicable rawmaterials: </td>
-                                        <td><ul>"""+ review[0].temp_ingredient.list_log_rms +"""</ul></td>
-                                        <td><ul>"""+ review[1].temp_ingredient.list_log_rms +"""</ul></td>
-                                    </tr></table>"""
-
-
-                elif doc.doctype == 'sds':
-
-                    if getattr(review[0].temp_ingredient, 'cas2') or getattr(review[1].temp_ingredient, 'cas2'):
-                        reviewhtml += """
-                                            <td rowspan='5' class='coa_subrow'>"""+docv_dict[doc.doctype]+"""</td>
-                                        </tr>
-                                        <tr>
-                                            <td>First CAS Percetage</td>
-                                            <td>
-                                                """+str(Decimal(100.00) - getattr(review[0].temp_ingredient, 'cas2_percentage'))+"""
-                                            </td>
-
-                                            <td>
-                                                """+str(Decimal(100.00) - getattr(review[1].temp_ingredient, 'cas2_percentage'))+"""
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Second CAS Number</td>
-                                            <td>"""+getattr(review[0].temp_ingredient, 'cas2')+"""</td>
-                                            <td>"""+getattr(review[1].temp_ingredient, 'cas2')+"""</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Second CAS Percetage</td>
-                                            <td>
-                                                """+str(getattr(review[0].temp_ingredient, 'cas2_percentage'))+"""
-                                            </td>
-
-                                            <td>
-                                                """+str(getattr(review[1].temp_ingredient, 'cas2_percentage'))+"""
-                                            </td>
-                                        """
-                    else:
-                        reviewhtml +=    "<td rowspan='2' class='coa_subrow'>"+docv_dict[doc.doctype]+"</td>"
-
-                    reviewhtml += """</tr><tr>
-                                        <td>CAS Number</td>
-                                        <td>"""+str(getattr(review[0].temp_ingredient, 'cas'))+"""</td>
-                                        <td>"""+str(getattr(review[1].temp_ingredient, 'cas'))+"""</td>
-
-                                        """
-                    reviewhtml+="</tr></table>"
-
-                elif doc.doctype in auto:
-                    reviewhtml += """<td rowspan="4" class='coa_subrow'>"""+docv_dict[doc.doctype]+"""</td></tr>
-                                                    <tr>
-                                                        <td>"""+ing_doctype_dict[doc.doctype]+"""</td>
-                                                        <td>"""+str(review[0].expiration)+"""</td>
-                                                        <td>"""+str(review[1].expiration)+"""</td>
-
-                                                    </tr>
-                                                </table>"""
-                else:
-                    reviewhtml += """<td rowspan="5" class='coa_subrow'>"""+docv_dict[doc.doctype]+"""</td></tr>
-                                                    <tr>
-                                                        <td>"""+ing_doctype_dict[doc.doctype]+"""</td>
-                                                        <td>"""+str(getattr(review[0].temp_ingredient, ing_doctype_dict[doc.doctype]))+"""</td>
-                                                        <td>"""+str(getattr(review[1].temp_ingredient, ing_doctype_dict[doc.doctype]))+"""</td>
-
-                                                    </tr>
-
-                                                </table>"""
-
-
-            else:
-                # reviewhtml += "</tr></table>"
-                reviewhtml += datetd + "</table>"
-
-            # end of review page based on doctype
-
-            if not doc.doctype =='nutri':
-                reviewhtml+="""<br>
-                                <input type="submit" name='review' id='review' value="Submit Review"/>
-                                <br>
-                                <h3>Document Preview</h3>
-                                                <div class="docpreview" >
-                                                    <iframe src='"""+str(doc.uploadfile.url)+"""'  style="height: 100vh; width: 100%;"></iframe>
-                                                </div>
-                            </div>"""
-            else:
-                reviewhtml += """
-
-                                <iframe src='"""+str(doc.uploadfile.url)+"""'style="height: 100%; width: 45%;" class='nutriiframe' onload="addnutriclass();"></iframe><br>
-                                <div class='nutrisubmit'>
-                                    <input type="submit" type="submit" name='review' id='review' value="Submit Review"/>
-                                </div>"""
-
-
+            reviewhtml = createDocReviewForm(request, doc)
 
             prev = request.META.get('HTTP_REFERER')
 
@@ -6734,79 +6324,353 @@ def document_verification(request, doc_id):
                     'doc':doc,
                     'page_title':pagetitle,
                     'previous':prev,
-                    'admin':admin,
+                    'admin':request.user.is_superuser,
                     'ingredients':Ingredient.objects.all(),
                 }
             )
 
     else:
-        # list all RMs without docs bought in last three years
-        # supplier_specific = ['COI','form40', 'form20', 'form20ar', 'form20c']
-        f20 = ['form20', 'form20ar', 'form20c']
-        three_years_ago = date.today() - relativedelta(years=3)
-        # rawmaterials bought in last three years that are not discontinued
-        rms = PurchaseOrderLineItem.objects.filter(raw_material__discontinued=False, due_date__range=[three_years_ago, date.today()]).order_by().values_list('raw_material', flat=True).distinct()
-
-        unverifieddocs = OrderedDict([
-            ('allergen'         ,  [ 0, 0, 0  , 'Allergen']),
-            ('COA'              ,  [ 0, 0, 0  , 'Certificate of Analysis']),
-            ('COI'              ,  [ 0, 0, 0  , 'Certificate of Insurance']),
-            ('form20'           ,  [ 0, 0, 0  , 'Form #020']),
-            ('mform20'          ,  [ 0, 0, 0  , 'Form #020 - Manufacturer']),
-            ('form20ar'         ,  [ 0, 0, 0  , 'Form #020 Audit Report']),
-            ('mform20ar'        ,  [ 0, 0, 0  , 'Form #020 Audit Report - Manufacturer']),
-            ('form20c'          ,  [ 0, 0, 0  , 'Form #020 Certification']),
-            ('mform20c'         ,  [ 0, 0, 0  , 'Form #020 Certification - Manufacturer']),
-            ('form40'           ,  [ 0, 0, 0  , 'Form #040']),
-            ('mform40'          ,  [ 0, 0, 0  , 'Form#40 - Manufacturer']),
-            ('GMO'              ,  [ 0, 0, 0  , 'GMO']),
-            ('GPVC'             ,  [ 0, 0, 0  , 'GMO Project Verified Certificate']),
-            ('halal'            ,  [ 0, 0, 0  , 'Halal']),
-            ('ingbreak'         ,  [ 0, 0, 0  , 'Ingredient Breakdown']),
-            ('kosher'           ,  [ 0, 0, 0  , 'Kosher']),
-            ('LOG'              ,  [ 0, 0, 0  , 'Letter Of Guarantee']),
-            ('mLOG'             ,  [ 0, 0, 0  , 'Letter Of Guarantee - Manufacturer']),
-            ('natural'          ,  [ 0, 0, 0  , 'Natural']),
-            ('nutri'            ,  [ 0, 0, 0  , 'Nutri']),
-            ('organic'          ,  [ 0, 0, 0  , 'Organic Compliance']),
-            ('organic_cert'     ,  [ 0, 0, 0  , 'Organic Certified']),
-            ('origin'           ,  [ 0, 0, 0  , 'Origin']),
-            ('sds'              ,  [ 0, 0, 0  , 'SDS']),
-            ('specsheet'        ,  [ 0, 0, 0  , 'Specsheet']),
-            ('vegan'            ,  [ 0, 0, 0  , 'Vegan']),
-        ])
-
-        curr_user_verified = Documents.objects.filter(verifications__verifier=request.user)
-        # document ids that are verified
-        doc_ids = Documents.objects.filter(verifications__final=True).values_list('id', flat=True).distinct()
-        for dt in docbytype:
-            distinct_docs = Documents.objects.filter(rawmaterial__rawmaterialcode__in=rms, doctype=dt).order_by('rawmaterial_id', '-expiration').distinct('rawmaterial')
-            uv = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__lte=1, doctype=dt,rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=curr_user_verified)
-            review = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__gte=2, doctype=dt, rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=doc_ids).exclude(id__in=curr_user_verified)
-                # rawmaterials that have been verified for this document type
-
-            rms_w_docs = Documents.objects.filter(doctype=dt, rawmaterial__rawmaterialcode__in=rms).distinct('rawmaterial')
-
-            unverifieddocs[dt][0] = uv.count()
-            unverifieddocs[dt][1] = review.count()
-            unverifieddocs[dt][2] = rms.count() - rms_w_docs.count()
+        # list all RMs without docs bought in last two years
+        unverifieddocs = listRMDocsStatus(request.user)
         #
         #     # idk why i have this
         ingredients = Ingredient.objects.all().distinct("id")
-
 
         return render(
             request,
             'access/ingredient/document_verification.html',
             {
                 'message':'',
+                # 'documents':d,
                 'unverified':unverifieddocs,
                 'page_title':pagetitle,
                 'ingredients':ingredients,
                 'previous':prev,
-                'admin':admin,
+                'admin':request.user.is_superuser,
             }
         )
+
+
+def listRMDocsStatus(user):
+    supplier_specific = ['COI','form40', 'form20', 'form20ar', 'form20c']
+    f20 = ['form20', 'form20ar', 'form20c']
+    # two_years_ago = date.today() - relativedelta(years=2)
+    # rms = PurchaseOrderLineItem.objects.filter(raw_material__discontinued=False, due_date__range=[two_years_ago, date.today()]).order_by().values_list('raw_material', flat=True).distinct()
+    rms = RMsPurchasedLastXYears(2)
+    unverifieddocs = OrderedDict([
+        ('allergen'         ,  [ 0, 0, 0  , 'Allergen']),
+        ('COA'              ,  [ 0, 0, 0  , 'Certificate of Analysis']),
+        ('COI'              ,  [ 0, 0, 0  , 'Certificate of Insurance']),
+        ('form20'           ,  [ 0, 0, 0  , 'Form #020']),
+        ('form20ar'         ,  [ 0, 0, 0  , 'Form #020 Audit Report']),
+        ('form20c'          ,  [ 0, 0, 0  , 'Form #020 Certification']),
+        ('form40'           ,  [ 0, 0, 0  , 'Form #040']),
+        ('GMO'              ,  [ 0, 0, 0  , 'GMO']),
+        ('GPVC'             ,  [ 0, 0, 0  , 'GMO Project Verified Certificate']),
+        ('halal'            ,  [ 0, 0, 0  , 'Halal']),
+        ('ingbreak'         ,  [ 0, 0, 0  , 'Ingredient Breakdown']),
+        ('kosher'           ,  [ 0, 0, 0  , 'Kosher']),
+        ('LOG'              ,  [ 0, 0, 0  , 'Letter Of Guarantee']),
+        ('natural'          ,  [ 0, 0, 0  , 'Natural']),
+        ('nutri'            ,  [ 0, 0, 0  , 'Nutri']),
+        ('organic'          ,  [ 0, 0, 0  , 'Organic Compliance']),
+        ('organic_cert'     ,  [ 0, 0, 0  , 'Organic Certified']),
+        ('origin'           ,  [ 0, 0, 0  , 'Origin']),
+        ('sds'              ,  [ 0, 0, 0  , 'SDS']),
+        ('specsheet'        ,  [ 0, 0, 0  , 'Specsheet']),
+        ('vegan'            ,  [ 0, 0, 0  , 'Vegan']),
+    ])
+
+    curr_user_verified = Documents.objects.filter(verifications__verifier=user)
+    # document ids that are verified
+    doc_ids = Documents.objects.filter(verifications__final=True).exclude(rawmaterial__supplier__code='FDI').values_list('id', flat=True).distinct()
+    for dt in docbytype:
+        distinct_docs = Documents.objects.filter(rawmaterial__rawmaterialcode__in=rms, doctype=dt).exclude(rawmaterial__supplier__code='FDI', verifications__verifier=user).order_by('rawmaterial_id', '-expiration').distinct('rawmaterial')
+        uv = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__lte=1, doctype=dt,rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=curr_user_verified)
+        review = Documents.objects.annotate(num_dv=Count('verifications')).filter(num_dv__gte=2, doctype=dt, rawmaterial__rawmaterialcode__in=rms, id__in=distinct_docs).exclude(id__in=doc_ids).exclude(id__in=curr_user_verified)
+            # rawmaterials that have been verified for this document type
+
+        rms_w_docs = Documents.objects.filter(doctype=dt, rawmaterial__rawmaterialcode__in=rms).distinct('rawmaterial')
+
+        unverifieddocs[dt][0] = uv.count()
+        unverifieddocs[dt][1] = review.count()
+        unverifieddocs[dt][2] = rms.count() - rms_w_docs.count()
+
+    return unverifieddocs
+
+
+
+def createDocReviewForm(request, doc):
+    auto = ['natural','GPVC','COI', 'form40', 'form20', 'form20ar', 'form20c', 'ingbreak']
+    datetd = """ <td>Please appropriate date type:
+                            <ul>
+                                <li><input type = 'radio' name = 'doc_date' value = 'document_date' required/> Document Date</li>
+                                <li><input type = 'radio' name = 'doc_date' value = 'expiration_date'/> Expiration Date</li>
+                            </ul>
+                            <input type='date' id='expiration' name='expiration' required/></td>
+                            </tr>"""
+    review = DocumentVerification.objects.filter(document = doc)
+
+    reviewhtml = """<div class='review' oninput = 'checkTotalWeight()'>
+                                    <table id='reviewtable'>
+                                        <tr>
+                                            <td>Verifier</td>
+                                            <td>"""+review[0].verifier.username+"""</td>
+                                            <td>"""+review[1].verifier.username+"""</td>
+                                            <td>"""+request.user.username+"""</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Entered Document Date?</td>
+                                            <td>"""+str(review[0].is_documentdate)+"""</td>
+                                            <td colspan='2'>"""+str(review[1].is_documentdate)+"""</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Document Expiration Date</td>
+                                            <td>"""+str(review[0].expiration)+"""</td>
+                                            <td>"""+str(review[1].expiration)+"""</td>
+                """
+    if not doc.doctype in auto:
+        # ALLERGEN DOCREVIEW
+        #
+        if isinstance(ing_doctype_dict[doc.doctype], list):
+            fields = ing_doctype_dict[doc.doctype]
+            reviewhtml += datetd
+            for f in fields:
+                reviewhtml += """
+                                            <tr>
+                                                <td>"""+f+"""</td>
+                                                <td>"""+str(getattr(review[0].temp_ingredient, f))+"""</td>
+                                                <td>"""+str(getattr(review[1].temp_ingredient, f))+"""</td>"""
+                if f in boolean_allergens:
+                    reviewhtml += """
+                                                <td><input type='checkbox' id='"""+f+"""' name='"""+f+"""'/></td>
+                                            </tr>"""
+                elif f in text_allergens:
+                    if f == 'sulfites_ppm':
+                        reviewhtml += """
+                                                    <td><input type='number' step='.01' id='"""+f+"""' name='"""+f+"""'/></td>
+                                                </tr>"""
+                    else:
+                        reviewhtml += """
+                                                    <td><input type='text' id='"""+f+"""' name='"""+f+"""'/></td>
+                                                </tr>"""
+                elif f == 'microsensitive':
+                    reviewhtml += """
+                                                <td>
+                                                    <select name='specsheet' id='specsheet'>
+                                                        <option value='True'>True</option>
+                                                        <option value='False'>False</option>
+                                                    </select>
+                                                </td>
+                                            </tr>"""
+
+                elif f == 'rm_ingredient_statement':
+                    reviewhtml += """
+                                                <td>
+                                                    <textarea name='ingredient_statement' id = 'ingredient_statment'></textarea>
+                                                </td>
+                                            </tr>"""
+
+            reviewhtml+="""</table>"""
+        elif doc.doctype == 'nutri':
+            n1 = review[0].temp_nutri
+            n2 = review[1].temp_nutri
+            meta = []
+            nutriform = nutriFormTemp()
+            meta = map(lambda x: x.name, NutriInfoTemp._meta.fields)
+            reviewhtml +="""    <td>Please appropriate date type:
+                                    <ul>
+                                        <li><input type = 'radio' name = 'doc_date' value = 'document_date' required/> Document Date</li>
+                                        <li><input type = 'radio' name = 'doc_date' value = 'expiration_date'/> Expiration Date</li>
+                                    </ul>
+                                    <input type='date' id='expiration' name='expiration' required/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Total Weight</td>
+                                <td>"""+ str(calculate_nutri_weight(n1, 'total')) +"""</td>
+                                <td>"""+ str(calculate_nutri_weight(n2, 'total')) +"""</td>
+                                <td><span id = 'totalw'> </span> g </td>
+                            </tr>"""
+            for row in nutriform:
+                if row.label == 'Other Fat':
+                    reviewhtml += """
+                                                <tr>
+                                                    <td>Total Fats</td>
+                                                    <td>"""+str(calculate_nutri_weight(n1, 'fat'))+"""</td>
+                                                    <td>"""+str(calculate_nutri_weight(n2, 'fat'))+"""</td>
+                                                    <td><p id = "total fat"></p></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>"""+str(row.label)+"""</td>
+                                                    <td>"""+str(getattr(n1, row.name))+"""</td>
+                                                    <td>"""+str(getattr(n2, row.name))+"""</td>
+                                                    <td>"""+str(row)+"""</td>
+                                                </tr>"""
+                elif row.label == 'Carbohydrates':
+                    reviewhtml += """
+                                                <tr>
+                                                    <td>Total Carbohydrates</td>
+                                                    <td>"""+str(calculate_nutri_weight(n1, 'carbs'))+"""</td>
+                                                    <td>"""+str(calculate_nutri_weight(n2, 'carbs'))+"""</td>
+                                                    <td><p id = "totalcarbs"></p></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>"""+str(row.label)+"""</td>
+                                                    <td>"""+str(getattr(n1, row.name))+"""</td>
+                                                    <td>"""+str(getattr(n2, row.name))+"""</td>
+                                                    <td>"""+str(row)+"""</td>
+                                                </tr>
+                                                """
+                elif row.label == "Alcohol Content":
+                    reviewhtml +="""
+                                            <tr>
+                                                <td>"""+str(row.label)+"""</td>
+                                                <td>"""+str(getattr(n1, row.name))+"""</td>
+                                                <td>"""+str(getattr(n2, row.name))+"""</td>
+                                                <td><span id = "totalalcohol"></span> g</td>
+                                            </tr>"""
+                elif row.label == "Calories":
+                    reviewhtml +="""
+                                            <tr>
+                                                <td>"""+str(row.label)+"""</td>
+                                                <td>"""+str(getattr(n1, row.name))+"""</td>
+                                                <td>"""+str(getattr(n2, row.name))+"""</td>
+                                                <td><p id='calories'></p></td>
+                                            </tr>"""
+                else:
+                    reviewhtml +="""
+                                            <tr>
+                                                <td>"""+str(row.label)+"""</td>
+                                                <td>"""+str(getattr(n1, row.name))+"""</td>
+                                                <td>"""+str(getattr(n2, row.name))+"""</td>
+                                                <td>"""+str(row)+"""</td>
+                                            </tr>"""
+            reviewhtml +="""
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>"""
+
+        elif doc.doctype == 'COA':
+            reviewhtml += """<td rowspan="3" class= "coa_subrow">"""+docv_dict[doc.doctype]+"""</td></tr>
+                            <tr>
+                                <td>Salmonella Postive</td>
+                                <td>"""+str(getattr(review[0].temp_ingredient, ing_doctype_dict[doc.doctype]))+"""</td>
+                                <td>"""+str(getattr(review[1].temp_ingredient, ing_doctype_dict[doc.doctype]))+"""</td>
+                            </tr>
+                            <tr>
+                                <td>RM Retain</td>
+                                <td>"""+str(review[0].rm_retain)+"""</td>
+                                <td>"""+str(review[1].rm_retain)+"""</td>
+                            </tr>
+                            </table>
+                            """
+
+        elif doc.doctype == 'LOG':
+            reviewhtml += """<td rowspan="3">"""+docv_dict[doc.doctype]+"""</td></tr>
+                            <tr>
+                                <td> List applicable rawmaterials: </td>
+                                <td><ul>"""+ review[0].temp_ingredient.list_log_rms +"""</ul></td>
+                                <td><ul>"""+ review[1].temp_ingredient.list_log_rms +"""</ul></td>
+                            </tr></table>"""
+
+
+        elif doc.doctype == 'sds':
+
+            if getattr(review[0].temp_ingredient, 'cas2') or getattr(review[1].temp_ingredient, 'cas2'):
+                reviewhtml += """
+                                    <td rowspan='5' class='coa_subrow'>"""+docv_dict[doc.doctype]+"""</td>
+                                </tr>
+                                <tr>
+                                    <td>First CAS Percetage</td>
+                                    <td>
+                                        """+str(Decimal(100.00) - getattr(review[0].temp_ingredient, 'cas2_percentage'))+"""
+                                    </td>
+
+                                    <td>
+                                        """+str(Decimal(100.00) - getattr(review[1].temp_ingredient, 'cas2_percentage'))+"""
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Second CAS Number</td>
+                                    <td>"""+getattr(review[0].temp_ingredient, 'cas2')+"""</td>
+                                    <td>"""+getattr(review[1].temp_ingredient, 'cas2')+"""</td>
+                                </tr>
+                                <tr>
+                                    <td>Second CAS Percetage</td>
+                                    <td>
+                                        """+str(getattr(review[0].temp_ingredient, 'cas2_percentage'))+"""
+                                    </td>
+
+                                    <td>
+                                        """+str(getattr(review[1].temp_ingredient, 'cas2_percentage'))+"""
+                                    </td>
+                                """
+            else:
+                reviewhtml +=    "<td rowspan='2' class='coa_subrow'>"+docv_dict[doc.doctype]+"</td>"
+
+            reviewhtml += """</tr><tr>
+                                <td>CAS Number</td>
+                                <td>"""+str(getattr(review[0].temp_ingredient, 'cas'))+"""</td>
+                                <td>"""+str(getattr(review[1].temp_ingredient, 'cas'))+"""</td>
+
+                                """
+            reviewhtml+="</tr></table>"
+
+        elif doc.doctype in auto:
+            reviewhtml += """<td rowspan="4" class='coa_subrow'>"""+docv_dict[doc.doctype]+"""</td></tr>
+                                            <tr>
+                                                <td>"""+ing_doctype_dict[doc.doctype]+"""</td>
+                                                <td>"""+str(review[0].expiration)+"""</td>
+                                                <td>"""+str(review[1].expiration)+"""</td>
+
+                                            </tr>
+                                        </table>"""
+        else:
+            reviewhtml += """<td rowspan="5" class='coa_subrow'>"""+docv_dict[doc.doctype]+"""</td></tr>
+                                            <tr>
+                                                <td>"""+ing_doctype_dict[doc.doctype]+"""</td>
+                                                <td>"""+str(getattr(review[0].temp_ingredient, ing_doctype_dict[doc.doctype]))+"""</td>
+                                                <td>"""+str(getattr(review[1].temp_ingredient, ing_doctype_dict[doc.doctype]))+"""</td>
+
+                                            </tr>
+                                        </table>"""
+
+    else:
+        reviewhtml += datetd + "</table>"
+
+    # end of review page based on doctype
+
+    if not doc.doctype =='nutri':
+        reviewhtml+="""<br>
+                        <input type="submit" name='review' id='review' value="Submit Review"/>
+                        <br>
+                        <h3>Document Preview</h3>
+                                        <div class="docpreview" >
+                                            <iframe src='"""+str(doc.uploadfile.url)+"""'  style="height: 100vh; width: 100%;"></iframe>
+                                        </div>
+                    </div>"""
+    else:
+        reviewhtml += """
+
+                        <iframe src='"""+str(doc.uploadfile.url)+"""'style="height: 100%; width: 45%;" class='nutriiframe' onload="addnutriclass();"></iframe><br>
+                        <div class='nutrisubmit'>
+                            <input type="submit" type="submit" name='review' id='review' value="Submit Review"/>
+                        </div>"""
+
+    return reviewhtml
+
+
+def moveDoc(request):
+    new_ingredient = request.POST.get('correct_ing')
+    new_ingredient = new_ingredient.split(" | ")
+    new_dt = request.POST.get('correct_type')
+    doc = Documents.objects.get(id=int(request.POST.get('moving_doc')))
+    ing = Ingredient.objects.get(id=int(new_ingredient[0]), supplier__code=new_ingredient[1])
+    doc.rawmaterial = ing
+    doc.doctype = new_dt
+    doc.save()
 
 def calculate_nutri_weight(nutri, weight):
     if weight == 'total':
@@ -6816,11 +6680,10 @@ def calculate_nutri_weight(nutri, weight):
     elif weight == 'carbs':
         return nutri.Carbohydrt + nutri.Sugars + nutri.Fiber_TD
 
-
-def RMS_PurchasedLastThreeYears():
-    three_years_ago = date.today() - relativedelta(years=3)
+def RMsPurchasedLastXYears(years):
+    x_years_ago = date.today() - relativedelta(years=years)
     # rawmaterials bought in last three years that are not discontinued
-    rms = PurchaseOrderLineItem.objects.filter(raw_material__discontinued=False, due_date__range=[three_years_ago, date.today()]).exclude(raw_material__supplier__suppliercode='FDI').order_by().values_list('raw_material', flat=True).distinct()
+    rms = PurchaseOrderLineItem.objects.filter(raw_material__discontinued=False, due_date__range=[x_years_ago, date.today()]).exclude(raw_material__supplier__code='FDI').order_by().values_list('raw_material', flat=True).distinct()
     return rms
 
 def rep_int(s):
@@ -6846,8 +6709,6 @@ def mass_upload(request):
         temp = f.name.split('_')
         i = Ingredient.objects.filter(id=int(temp[0]))
         pendingdocs[p] = i
-
-
 
     if request.method == "POST":
         docbytype = [
@@ -6902,15 +6763,18 @@ def mass_upload(request):
         if 'massupload' in request.POST:
 
             for f in request.FILES.getlist('doc'):
+                # filename = open(f.path)
                 docinfo = f.name[0:-4].split('_')
 
                 if(rep_int(docinfo[0]) and Ingredient.objects.filter(id=int(docinfo[0])).exists()):
+                    # doctype = docinfo[1].lower()
                     i = Ingredient.objects.filter(id=int(docinfo[0]))
                     # if document of that name already exists
                     if Documents.objects.filter(uploadfile__icontains="/"+f.name).exclude(uploadfile__icontains="/Temp").exists():
                         name_err.append(f.name)
                     elif(len(i) > 1):
                         multiples.append(f.name)
+                        # multiplesupps[f] = i
                         t = Documents(uploader=request.user, uploadfile=f)
                         t.save()
                         multiplesupps[t] = i
@@ -6955,8 +6819,8 @@ def mass_upload(request):
                     }
                 )
 
+# how to get doctype???
         elif 'choosesupplier' in request.POST or 'pending' in request.POST:
-
             for c in request.POST.getlist('supplist'):
                 if c == 'idk':
                     continue
@@ -6975,7 +6839,6 @@ def mass_upload(request):
                     dtypes.pop(0)
                     for dt in dtypes:
                         try:
-
                             d = Documents(rawmaterial = i, doctype=dtod[dt.lower()], uploadfile= assignfile, uploader=request.user)
                             d.save()
                             blankdoc.delete()
@@ -6988,6 +6851,12 @@ def mass_upload(request):
                         'access/ingredient/mass_upload.html',
                         {
                             'message':"no ingredient",
+                            # 'files':request.POST.getlist('supplist'),
+                            # # 'file_list':files,
+                        #     'success':request.POST.getlist('supplist'),
+                        #     'multiples':blankdocs,
+                        #     # 'multiplesupps':multiplesupps,
+                        #     'misnamed':dt,
                         }
                     )
 
@@ -6995,7 +6864,13 @@ def mass_upload(request):
                 request,
                 'access/ingredient/mass_upload.html',
                 {
+                    # 'files':request.POST.getlist('supplist'),
+                    # # 'file_list':files,
                     'success':request.POST.getlist('supplist'),
+                    # 'pending':pendingdocs,
+                    # 'multiples':blankdocs,
+                    # 'multiplesupps':multiplesupps,
+                    # 'misnamed':dt,
                 }
             )
 
@@ -7017,7 +6892,7 @@ def mass_upload(request):
 
 
 def flavor_copier(request):
-    page_title = "Mariana's Flavor tool. Don't touch unless you're Mariana!"
+    page_title = "Marianna's Flavor tool. Don't touch unless you're Marianna!"
     alist = ['flashpoint', 'color', 'organoleptics', 'spg']
     if request.method == "POST":
         if 'copy' in request.POST:
@@ -7025,9 +6900,6 @@ def flavor_copier(request):
             ofl = Flavor.objects.get(number = int(request.POST.get('onumber')))
             nfl = Flavor.objects.get(number = int(request.POST.get('nnumber')))
             for a in alist:
-                # check if attribute was checked
-                # if checked, copy attr to new flavor
-                # else use value in textfield
                 if request.POST.get(a):
                     setattr(nfl, a, getattr(ofl, a))
                 elif request.POST.get(a+'text'):
@@ -7040,13 +6912,6 @@ def flavor_copier(request):
                 nfl.save()
                 reversion.set_comment("Flavor attribute copies: %s => %s" % (ofl, nfl))
                 reversion.set_user(User.objects.get(username=request.user))
-
-                # for fl in changed_flavor_list:
-                #     fl.save()
-                #
-                # reversion.set_comment("RM Replacement: %s => %s" % (old_ingredient, new_ingredient))
-                # reversion.set_user(User.objects.get(username='matta'))
-                #         nfl.save()
 
             return render(
                 request,
@@ -7096,8 +6961,6 @@ def training(request):
     page_title = 'Training Log'
     test_types = Training._meta.get_field('test_type').choices
     train = Training.objects.filter(tester= request.user)
-
-
 
     group = {
             'Production':['sensory'],
@@ -7220,14 +7083,11 @@ def training_overview(request, username):
             }
         )
 
-
-
     users = User.objects.filter(is_active=True).exclude(username='test').exclude(username='TEST').exclude(username='labtest').order_by('username')
     for u in users:
         t = unfinished_training_log(u, u.groups.all()[0].name)
         e = (u, t, u.groups.all()[0])
         employees.append(e)
-
 
     return render(
         request,
@@ -7236,9 +7096,9 @@ def training_overview(request, username):
             'page_title':page_title,
             'types':test_types,
             'employees':employees,
-
         }
     )
+
 def admin_individual_training(request):
         page_title = 'Individual Training'
         users = User.objects.filter(is_active=True).exclude(username='test').exclude(username='TEST').exclude(username='labtest').order_by('username')
@@ -7338,7 +7198,6 @@ def check_answers(test, answers):
 
     food_safety_tests = ['bacteria', 'foodborne', 'personalhygiene', 'haccp','sanitation', 'time', 'foreign', 'cross', 'allergens', 'pest', 'security']
 
-
     total = len(check[test])
     count = 0
 
@@ -7387,29 +7246,24 @@ section_dict = {
     'security_sp':security_sp,
     'ccp':ccp,
     'fltv':fltv,
-
 }
-
 
 def save_question_response(training_obj, answers):
     if training_obj.test_type=='wpsafety':
         questions = wps + wps2
-
     else:
         questions = section_dict[training_obj.test_type]
 
     if Question.objects.filter(training__tester=training_obj.tester, training__test_type = training_obj.test_type).exists():
         Question.objects.filter(training__tester=training_obj.tester, training__test_type = training_obj.test_type).delete()
+
     for a, b in zip(answers, questions):
-        # pass
         if len(b[1]) > 1:
             q = Question(question=b[0], answer = b[1][a], training = training_obj)
         else:
             q = Question(question=b[0], answer = a, training = training_obj)
 
         q.save()
-    # save question and response
-    # how am i gonna do this for the foodsafety?!?!?
 
 
 def docreview_comparison(request, document_id):
@@ -7417,7 +7271,6 @@ def docreview_comparison(request, document_id):
     dv  = DocumentVerification.objects.filter(document=doc)
     temp_ing_dict = dv[0].temp_ingredient.__dict__.keys()
     temp_nutri_dict = dv[0].temp_nutri.__dict__.keys()
-
 
     temp_ing_dict.remove('_state')
     temp_ing_dict.remove('id')
@@ -7470,7 +7323,6 @@ def docreview_comparison(request, document_id):
 signature_test = ['osha', 'gbpp', 'handbook',]
 def check_submitted_answers(request, questions, section):
     # delete all answers from previous test taken
-
     Answer.objects.filter(tester=request.user, question__test_type=section).delete()
     point_count = 0
     # special case for signature
@@ -7685,7 +7537,6 @@ def training_test(request, test_type):
                     'section':section,
                 }
             )
-
         # review and/or save answers
 
     return render(
@@ -7744,7 +7595,6 @@ def convert_trainingpy_to_objects():
                 answeropts.append([key, val])
         q.answer_options = answeropts
         q.save()
-
 
     # food_safety handbooks
     for key, val in fd.iteritems():
@@ -7827,3 +7677,95 @@ def convert_trainingpy_to_objects():
     for c in colorblind:
         q = Question(test_type='colorblind', question='', correct_answer=c[3])
         q.save()
+
+
+
+
+@permission_required('access.can_verify')
+def rmChemicalDetermination(request):
+    rms_last_three_years = RMsPurchasedLastXYears(3)
+
+    if request.method == 'POST':
+        saveAndValidateVerifications(request)
+        # checkAndValidateVerifications(request.POST)
+
+    rms_not_verified = list(filter(
+                    lambda rmcode: True if(not checkIfUserVerifiedRM(request.user, rmcode, 'chemical') and not Documents.objects.get(rawmaterial__rawmaterialcode=rmcode, doctype='chemical').verified)
+                    else False,
+                    rms_last_three_years))
+
+    rms_not_verified = Ingredient.objects.filter(rawmaterialcode__in=rms_not_verified, discontinued=False)
+    # rms_not_verified = Ingredient.objects.all()
+
+    return render(
+        request,
+        'access/ingredient/chemical_evaluation.html',
+        {
+            'rms_not_verified':rms_not_verified[:50],
+            'postdata':request.POST,
+        }
+    )
+
+
+def saveAndValidateVerifications(request):
+    postData = request.POST
+    # del postData['csrfmiddlewaretoken']
+    for key, val in postData.iteritems():
+        if key == 'csrfmiddlewaretoken':
+            continue
+        doc = Documents.objects.get(doctype='chemical', rawmaterial__rawmaterialcode = int(key))
+        ing_temp = getUserIngredientTempForDoc(request.user, doc)
+        ing_temp.is_chemical = stringToBoolean(val)
+        ing_temp.save()
+        dv = DocumentVerification(document=doc, verifier=request.user, temp_ingredient = ing_temp)
+        dv.save()
+        if doc.dv_count == 2 and not doc.verified:
+            checkVerificationsAndVerify(doc, 'chemical')
+
+
+
+def getUserIngredientTempForDoc(user, doc):
+    temp = None
+    if IngredientTemp.objects.filter(user_id = user.id).filter(temp_rmcode = doc.rawmaterial.rawmaterialcode).exists():
+        temp = IngredientTemp.objects.get(user_id = user.id, temp_rmcode = doc.rawmaterial.rawmaterialcode)
+    else:
+        temp = IngredientTemp.objects.create(user = user, temp_rmcode = doc.rawmaterial.rawmaterialcode)
+        temp.save()
+
+    return temp
+
+def getUserNutriTempForDoc(user, doc):
+    ntemp = None
+    if NutriInfoTemp.objects.filter(user = user).filter(ingredient = doc.rawmaterial).exists():
+        ntemp = NutriInfoTemp.objects.get(user = user, ingredient = doc.rawmaterial)
+    else:
+        ntemp = NutriInfoTemp.objects.create(user = user, ingredient = doc.rawmaterial)
+        ntemp.save()
+
+    return ntemp
+
+
+def stringToBoolean(str):
+    if str.lower() == 'true':
+        return True
+    else:
+        return False
+
+def checkVerificationsAndVerify(doc, field):
+    dv = DocumentVerification.objects.filter(document=doc)
+    verification1 = getattr(dv[0].temp_ingredient, 'is_chemical')
+    verification2 = getattr(dv[1].temp_ingredient, 'is_chemical')
+
+    if verification1 == verification2:
+        #maybe have a switch statement here to save different doctypes and not just chemicals
+        updateRMChemicalStatus(doc.rawmaterial, verification1)
+        dv.update(final=True)
+
+
+
+def updateRMChemicalStatus(rm, bool):
+    setattr(rm, 'is_chemical', bool)
+    rm.save()
+
+def checkIfUserVerifiedRM(user, rmcode, doctype):
+    return DocumentVerification.objects.filter(document__rawmaterial__rawmaterialcode=rmcode, document__doctype=doctype, verifier=user).exists()

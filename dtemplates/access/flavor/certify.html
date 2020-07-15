@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.container {
+    width: 90%;
+    text-align: center;
+
+    font-family: 'Lato', 'Arial', sans-serif;
+    font-weight: 300;
+    font-size: 14px;
+}
+
+.data-box {
+    display: inline-block;
+    border: 1px solid black;
+    margin: 1%;
+}
+
+.data-box p {
+    padding: 4%;
+    height: 100%;
+}
+
+header{
+    font-size: 24px;
+    font-weight: 400;
+    background: #3c90ce;
+    color: white;
+}
+
+input[type=submit] {
+    display: inline-block;
+    padding: 5px 20px;
+    font-weight: 300;
+    text-decoration: none;
+    border-radius: 200px;
+}
+
+</style>
+
+    {% if invalid_message %}
+        {{ invalid_message }}
+    {% else %}
+        <div class="container">
+
+            <div class="boxes">
+                <div class="data-box">
+                    <header>Current Data</header>
+                    <p><span class="label">Name</span>{{ flavor.long_name }}</p>
+                    <p><span class="label">Certification Status</span> PENDING</p>
+                </div>
+                <ion-icon style="vertical-align: 100%" size="large" name="arrow-forward-sharp"></ion-icon>
+                <div class="data-box">
+                    <header>Organic Certified Data</header>
+                    <p><span class="label">Name</span>{{ flavor.converted_ocert_name }}</p>
+                    <p><span class="label">Certification Status</span> CERTIFIED</p>
+                </div>
+            </div>
+            <form action="" method="POST">
+                {% csrf_token %}
+                <p><input id="submit-button" type="submit" value="Certify Product" /></p>
+            </form>
+        </div>
+
+    {% endif %}
+{% endblock %}

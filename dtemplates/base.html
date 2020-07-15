@@ -68,11 +68,18 @@
 		    	{% if recalculate_link %}
 		    		{% ifnotequal recalculate_link "" %}
 		    			<a href="{{ recalculate_link }}"><img src="/static/images/Icons/16x16/calculator.png"></a>
-              {% if request.user.is_superuser %}
-                <a href="/access/renumber/{{flavor.number}}" target="_blank"><img src="/static/images/Icons/16x16/copy_page.png"></a>
-              {% endif %}
-		    		{% endifnotequal %}
+					{% endifnotequal %}
 		    	{% endif %}
+				{% if renumber_link %}
+					{% if request.user.is_superuser %}
+						<a href="{{ renumber_link }}" target="_blank"><img src="/static/images/Icons/16x16/copy_page.png"></a>
+					{% endif %}
+				{% endif %}
+				{% if certify_link %}
+					{% if request.user.is_superuser %}
+						<a href="{{ certify_link }}" target="_blank"><img src="/static/images/Icons/32x32/otco-32x32.png" width="24" height="24"></a>
+					{% endif %}
+				{% endif %}
 		    	{% if experimental_edit_link %}
 		    		{% ifnotequal edit_link "" %}
 	    			<a id="edit_link" href="{{ experimental_edit_link }}"><img src="/static/images/Icons/16x16/edit.png"></a>

@@ -10,7 +10,7 @@ import csv
 import reversion
 
 from django.db import models, connection
-from django.db.models import Q, F
+from django.db.models import Q, F, Sum
 # from django.db.models.signal import pre_save
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.contrib.contenttypes.models import ContentType
@@ -34,6 +34,9 @@ one_hundred = Decimal('100')
 hundredths = Decimal('0.00')
 zero = Decimal('0')
 one_thousand = Decimal('1000')
+
+current_year = datetime.now().year
+
 
 flavor_api_fields = [
     'prefix',
@@ -547,6 +550,11 @@ class IngredientSuperClass(models.Model):
 
     barley_gluten = models.BooleanField("Barley Gluten", blank=True, default=False)
     sulfites_ppm = models.PositiveSmallIntegerField('Sulfites(PPM)', default=0, blank=True)
+
+    is_chemical = models.NullBooleanField()
+
+
+
     class Meta:
         abstract=True
 
@@ -723,35 +731,6 @@ class Ingredient(IngredientSuperClass):
 
     gluten_ppm = models.PositiveIntegerField(default=0)
 
-    # eggs = models.BooleanField(blank=True, default=False)
-    # milk = models.BooleanField(blank=True, default=False)
-    # soybeans = models.BooleanField(blank=True, default=False)
-    # peanuts = models.BooleanField(blank=True, default=False)
-
-    # fish_bass = models.BooleanField("Fish (bass)",blank=True, default=False)
-    # fish_flounder = models.BooleanField("Fish (flounder)",blank=True, default=False)
-    # fish_cod = models.BooleanField("Fish (cod)",blank=True, default=False)
-    #
-    # treenuts_almond = models.BooleanField("Tree nuts (almond)",blank=True, default=False)
-    # treenuts_pecan = models.BooleanField("Tree nuts (pecan)",blank=True, default=False)
-    # treenuts_walnut = models.BooleanField("Tree nuts (walnut)",blank=True, default=False)
-    #
-    # crustacean_crab = models.BooleanField("Crustacean (crab)",blank=True, default=False)
-    # crustacean_lobster = models.BooleanField("Crustacean (lobster)",blank=True, default=False)
-    # crustacean_shrimp = models.BooleanField("Crustacean (shrimp)",blank=True, default=False)
-
-    # fish = models.CharField("Fish", blank=True, null=True, max_length=100)
-    # treenuts = models.CharField("Treenuts", blank=True, null=True, max_length=100)
-    # crustacean = models.CharField("Crustacean", blank=True, null=True, max_length=100)
-
-    # wheat = models.BooleanField(blank=True, default=False)
-    # sunflower = models.BooleanField(blank=True, default=False)
-    # sesame = models.BooleanField(blank=True, default=False)
-    # mollusks = models.BooleanField(blank=True, default=False)
-    # mustard = models.BooleanField(blank=True, default=False)
-    # celery = models.BooleanField(blank=True, default=False)
-    # lupines = models.BooleanField(blank=True, default=False)
-    # yellow_5 = models.BooleanField(blank=True, default=False)
     has_allergen_text = models.BooleanField(blank=True, default=False)
 
     hazardous = models.BooleanField(blank=True, default=False)
@@ -824,6 +803,30 @@ class Ingredient(IngredientSuperClass):
     # organic_compliant = models.NullBooleanField()
 
     hazards_approved = models.BooleanField(default=False)
+
+    #IFRA MAXIMUM THRESHOLD VALUES
+
+
+    ifra_cat1 = models.DecimalField("IFRA Category 1 Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat2 = models.DecimalField("IFRA Category 2 Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat3 = models.DecimalField("IFRA Category 3 Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat4 = models.DecimalField("IFRA Category 4 Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat5A = models.DecimalField("IFRA Category 5A Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat5B = models.DecimalField("IFRA Category 5B Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat5C = models.DecimalField("IFRA Category 5C Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat5D = models.DecimalField("IFRA Category 5D Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat6 = models.DecimalField("IFRA Category 6 Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat7A = models.DecimalField("IFRA Category 7A Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat7B = models.DecimalField("IFRA Category 7B Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat8 = models.DecimalField("IFRA Category 8 Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat9 = models.DecimalField("IFRA Category 9 Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat10A = models.DecimalField("IFRA Category 10A Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat10B = models.DecimalField("IFRA Category 10B Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat11A = models.DecimalField("IFRA Category 11A Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat11B = models.DecimalField("IFRA Category 11B Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+    ifra_cat12 = models.DecimalField("IFRA Category 12 Maximum Usage", max_digits=7, decimal_places=5, blank=True, null=True)
+
+    ifra_standard_type = models.CharField("IFRA Standard Type", max_length=200, blank=True, null=True)
 
     @staticmethod
     def anonymize():
@@ -1919,6 +1922,9 @@ class Flavor(FormulaInfo):
 
     keep_refrigerated = models.BooleanField("Keep Refrigerated",default=False)
 
+    amount_created_last_year = models.DecimalField(max_digits=10,decimal_places=2)
+    amount_created_this_year = models.DecimalField(max_digits=10, decimal_places=2)
+
     def save(self, *args, **kwargs):
         try:
             self.prefix = self.prefix.upper()
@@ -2822,6 +2828,8 @@ class Flavor(FormulaInfo):
                     ('valid','Valid', 'width=30px'),
                     ('approved','Approved', 'width=30px'),
                     ('sold','Sold', 'width=30px'),
+                    ('amount_created_last_year', '2019 Total (lbs)', ''),
+                    ('amount_created_this_year', '2020 Total (lbs)', ''),
                 )
 
     @staticmethod
@@ -3233,13 +3241,16 @@ class Flavor(FormulaInfo):
         elif 'GMO Non-Detect' in gmo_set:
             non_detect_list = LeafWeight.objects.filter(root_flavor=self, ingredient__new_gmo="GMO Non-Detect")
             ingredient_urls = ", ".join((map(lambda x: '<a href=%s>%s</a>' % (x.ingredient.url, x.ingredient.id), non_detect_list)))
-            return 'GMO Non-Detect because: %s' % ingredient_urls
+            return 'GMO Free/Non-Detect because: %s' % ingredient_urls
         else:
-            return 'GMO Free'
+            return 'GMO Free Certifiable'
 
     @property
     def gmo_print_review(self): #kind of an ugly workaround to get rid of the 'because: ...' for GMO in the flavor printout page
-        return ' '.join(self.new_gmo.split()[:2])
+        if self.new_gmo == 'GMO Free Certifiable':
+            return self.new_gmo
+        else:
+            return ' '.join(self.new_gmo.split()[:2])
 
 
     @property
@@ -3388,6 +3399,41 @@ class Flavor(FormulaInfo):
             allergen_text = "Yes: %s" % ','.join(allergens)
 
         return allergen_text
+
+    @property
+    def converted_ocert_name(self):
+        #remove OCOMP if it exists in the name
+        #remove Organic if it exists
+        #add 'Organic' before Flavor
+        original = self.long_name
+        ocert_name = original.replace('OCOMP','').replace('Organic','').replace('Flavor','Organic Flavor')
+
+        #remove extra spaces
+        ocert_name = " ".join(ocert_name.split())
+
+        return ocert_name
+
+    # use this in the organic certify view when a product is being certified
+    def convert_to_organic_name(self):
+        self.name = self.name.replace('OCOMP', '').replace('Organic', '').replace('Flavor', 'Organic Flavor')
+        self.name = " ".join(self.name.split())
+
+        self.label_type = self.label_type.replace('OCOMP', '').replace('Organic', '').replace('Flavor', 'Organic Flavor')
+        self.label_type = " ".join(self.label_type.split())
+
+        self.save()
+
+
+    def save_amount_created_last_year(self):
+        amount_created_last_year = self.lot_set.filter(date__year=current_year-1).aggregate(Sum('amount'))['amount__sum']
+        self.amount_created_last_year = amount_created_last_year if amount_created_last_year != None else 0
+        self.save()
+
+    def save_amount_created_this_year(self):
+        amount_created_this_year = self.lot_set.filter(date__year=current_year).aggregate(Sum('amount'))['amount__sum']
+        self.amount_created_this_year = amount_created_this_year if amount_created_this_year != None else 0
+        self.save()
+
 
 
 class NoFormulaError(Exception):
@@ -5149,17 +5195,27 @@ class SSI(models.Model):
 
     standard_plate_count = models.CharField('Standard Plate Count', max_length=100, blank=True, null=True)
 
-    description = models.CharField('Description', max_length=1000, blank=True, null=True)
+    # description = models.CharField('Description', max_length=1000, blank=True, null=True)
     ingredient_statement = models.CharField('Ingredient Statement', max_length=1000, blank=True, null=True)
 
     shelf_life = models.CharField('Shelf Life', max_length=1000, blank=True, null=True)
     storage = models.CharField('Storage', max_length=1000, blank=True, null=True)
+
+
+    @property
+    def description(self):
+        flav_desc = flavor.color + " with the taste and aroma of " + flavor.organoleptics
+        flav_desc = flav_desc.capitalize()
+
+        return flav_desc
 
     class Meta:
         abstract = True
 
 class SpecSheetInfo(SSI):
     pass
+
+
 
 # from newqc.models import Lot
 # from salesorders.models import LineItem
@@ -5801,7 +5857,6 @@ DOC_TYPES = (
     ('nutri', 'Nutri'),
     ('GMO', 'GMO'),
     ('GPVC', 'GMO Project Verified Certificate'),
-    ('LOG', 'Letter Of Guarantee'),
     ('natural', 'Natural'),
     ('origin', 'Origin'),
     ('vegan', 'Vegan'),
@@ -5812,27 +5867,29 @@ DOC_TYPES = (
     ('COA', 'Certificate of Analysis'),
     ('COI', 'Certificate of Insurance'),
     ('ingbreak', 'Ingredient Breakdown'),
+    ('LOG', 'Letter Of Guarantee'),
     ('form20', 'Form #020'),
     ('form20ar', 'Form #020 Audit Report'),
     ('form20c', 'Form #020 Certification'),
     ('form40', 'Form #040'),
-    ('mform20','Form #020 - Manufacturer'),
-    ('mform20ar','Form #020 Audit Report - Manufacturer'),
-    ('mform20c','Form #020 Certification - Manufacturer'),
-    ('mLOG','Letter of Guarantee - Manufacturer'),
     ('mLOG', 'Letter Of Guarantee - Manufacturer'),
-    ('mform40', 'Form#40 - Manufacturer'),
+    ('mCOI', 'Certificate of Insurance - Manufacturer'),
+    ('mform20', 'Form #020 - Manufacturer'),
+    ('mform20ar', 'Form #020 Audit Report - Manufacturer'),
+    ('mform20c', 'Form #020 Certification - Manufacturer'),
+    ('mform40', 'Form #040 - Manufacturer'),
+
 )
 
 class Documents(models.Model):
-
     rawmaterial = models.ForeignKey('Ingredient', blank=True, null=True, default=None)
     doctype = models.CharField(choices=DOC_TYPES, max_length=30, default="")
     uploadfile = models.FileField(upload_to=set_file_path, unique=False)
     uploader = models.ForeignKey(User, blank=True, null=True)
     expiration = models.DateField(blank=True, null=True, default=date.today)
     documententry = models.DateField(default=date.today)
-    manufacturer = models.ForeignKey('Manufacturer', blank=True, null=True,default=None)
+    manufacturer = models.ForeignKey('Manufacturer', null=True, default=None, blank=True)
+
 
     log_rms  = ArrayField(
         models.CharField(max_length=25, null=True, blank=True, default=""),
@@ -5840,6 +5897,7 @@ class Documents(models.Model):
         null=True,
         default=[]
     )
+
 
     def save(self, *args, **kwargs):
         if not DocumentVerification.objects.filter(document = self, final=True).exists():
@@ -5884,6 +5942,11 @@ class Documents(models.Model):
     @property
     def filename(self):
         return os.path.basename(self.uploadfile.name)
+
+    @property
+    def get_display_doctype(self):
+        return self.get_doctype_display()
+
 
     # def __init__(self)
 
@@ -5971,34 +6034,12 @@ def fix_suppliers(): # fix supplier codes
     blank = []
     with open('suppliers.csv') as csvfile: #specify csv file name and path here
         reader = csv.DictReader(csvfile)
-
         for row in reader:
-        #     # print row['Delete']
-        #     if row['Delete']:
-        #         print row['Delete']
-        #     else:
-        #         print "none"
-        #     # newcode = 'N/A'
-            # if row['New Code']:
-            #     newcode = row['New Code']
-
-            # elif Ingredient.objects.filter(suppliercode=row['Ingredient Supplier Code']).exists():
-            #     ex = Ingredient.objects.filter(suppliercode=row['Ingredient Supplier Code'])
-                # print row['Ingredient Supplier Code'] +" "+ str(ex[0].id)
 
             i = Ingredient.objects.filter(suppliercode = row['Ingredient Supplier Code'])
-
-            #
-
-                # print row['Ingredient Supplier Code'] +" " + row['New Code'] + " " +row['Delete']
-                # if 1 == 1:
             for ing in i:
                 if row['Delete'] and Ingredient.objects.filter(id=ing.id).count()>1:
 
-                    # print 'D ' + row['Delete']
-                    # print row['Ingredient Supplier Code']
-                    # print Ingredient.objects.filter(id=ing.id)
-                    # ing.delete()
                     delete.append(ing)
                     ing.delete()
                 elif not row['New Code']:
@@ -6010,11 +6051,6 @@ def fix_suppliers(): # fix supplier codes
 
         print delete
         print blank
-        # for d in delete:
-        #     print d
-        #
-        # for b in blank:
-        #     print b
 
 TEST_TYPES = (
     ('gbpp', 'Glass and Brittle Plastic Policy'),#sign
@@ -6032,7 +6068,6 @@ TEST_TYPES = (
     ('fltv', 'Forklift Training Video'),
     ('fltdt', 'Forklift Drivers Test'),#admin
     ('wpsafety', 'Workplace Safety'),
-
 
     ('bacteria', 'Bacteria Review'),
     ('foodborne', 'Foodborne Illness Review', ),
@@ -6056,15 +6091,7 @@ class Training(models.Model):
         complete = models.BooleanField(default=False, blank=False, null=False)
         passed = models.BooleanField(default=False, blank=False, null=False)
         spanish_version = models.BooleanField(default=False, blank=False, null=False)
-        # score = models.DecimalField(default=Decimal(0), decimal_places=2, max_digits=4, blank=True, null=True)
-        # source_materials = ArrayField(
-        #     models.CharField(max_length=100, blank=True),
-        #     default = []
-        # )
 
-        # answers = models.ArrayField(
-        #     models.CharField(blank=True),
-        # )
         @property
         def questions(self):
             return Question.objects.filter(test_type=self.test_type, spanish_version=self.spanish_version)
@@ -6086,32 +6113,6 @@ class Training(models.Model):
                         count+=1
 
             return round(Decimal(count)/Decimal(questions.count()) * 100, 2)
-            #
-            # def check_submitted_answers(request, questions, section):
-            #     # delete all answers from previous test taken
-            #
-            #     Answer.objects.filter(tester=request.user, question__test_type=section).delete()
-            #     point_count = 0
-            #     # special case for signature
-            #     if section in signature_test:
-            #         if request.POST.get('username') == request.user.username and request.user.check_password(request.POST.get('pw')):
-            #             return True
-            #         else:
-            #             return False
-            #
-            #     # compare question and posted answer to correct answers
-            #     for q in questions:
-            #         temp = request.POST.get(str(q.id))
-            #         if q.correct_answer.lower() == temp.lower():
-            #             point_count+=1
-            #         a = Answer(tester=request.user, question = q, answer = temp)
-            #         a.save()
-            #
-            #     # return true if scored above 70%
-            #     if (Decimal(point_count)/Decimal(questions.count())) >= .7 or section=='survey':
-            #         return True
-            #
-            #     return False
 
         @property
         def test_renewal(self):

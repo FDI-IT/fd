@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    table, tr, td{
+      font-size: 20px;
+    }
+</style>
+
+{{postdata}}
+<form method='post'>
+  {% csrf_token %}
+  <table>
+      <th>Raw Material</th><th colspan='2'>Is it a chemical?</th>
+      {% for r in rms_not_verified %}
+      <tr>
+        <td>
+          <span>{{r}}</span>
+        </td>
+        <td>
+          <label for='y{{r.name}}'>Yes</label>
+
+          <input id='y{{r.name}}' type='radio' name='{{r.rawmaterialcode}}' value='true'>
+        </td>
+        <td>
+          <label for='n{{r.name}}'>No</label>
+          <input id='n{{r.name}}' type='radio' name='{{r.rawmaterialcode}}' value='false'>
+        </td>
+      </tr>
+      {% endfor %}
+  </table>
+
+  <input type='submit'/>
+</form>
+
+{% endblock %}

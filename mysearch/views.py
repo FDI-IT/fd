@@ -109,8 +109,14 @@ def search_guts(request, context_dict, paginate_by=None):
             request.session['last_order_by'] = my_order_by   
    
     if my_order_by is not None:
+
+        #django 2.0+ , delete amount_created_2019 / 2020 fields
+        # if my_order_by == 'amount_created_2019':
+        #     resultant_objects = resultant_objects.annotate(sum_2019=Sum('lot__amount',filter=Q(lot__date__year=2019))).order_by('-sum_2019')
+
         resultant_objects = resultant_objects.order_by(my_order_by)
- 
+
+
     if paginate_by is not None:
         paginator = Paginator(resultant_objects, paginate_by)
         page = int(request.GET.get('page', '1'))

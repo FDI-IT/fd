@@ -28,9 +28,9 @@
 			{% autoescape off %}
 			{% for header in headers %}
 				{% if header.0 == get.order_by %}			
-				<th {{header.2}}><a href="?order_by=-{{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></th>
+				<th style="text-align:left" {{header.2}}><a href="?order_by=-{{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></th>
 				{% else %}
-				<th {{header.2}}><a href="?order_by={{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></th>
+				<th style="text-align:left" {{header.2}}><a href="?order_by={{ header.0 }}&{% sparse_qstring %}">{{header.1}}</a></th>
 				{% endif %}
 			{% endfor %}
 			{% endautoescape %}
@@ -41,8 +41,12 @@
 	    	{% for field in fields %}
 			<td>
 				<a href="{{ object.get_absolute_url }}">
-					{% if field %}
-					{% if field|lower == 'true' %}<img src="/static/images/Icons/16x16/accept.png">{% else %}{{field}}{% endif %}
+					{% if field|lower != 'false' %}
+						{% if field|lower == 'true' %}
+							<img src="/static/images/Icons/16x16/accept.png">
+						{% else %}
+							{{field}}
+						{% endif %}
 				</a>{% endif %}
 			</td>
 			{% endfor %}

@@ -14,7 +14,8 @@ from django.forms.extras.widgets import SelectDateWidget
 
 from formfieldset.forms import FieldsetMixin
 
-from access.models import Flavor, FlavorSpecification, Formula, ExperimentalLog, TSR, TSRLineItem, PurchaseOrderLineItem, Solvent, PurchaseOrder, NATART_CHOICES, Ingredient,get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES, ProductCategory,NutriInfo, NutriInfoTemp,SpecSheetInfo, COA, Documents, Supplier
+from access.models import Flavor, FlavorSpecification, Formula, ExperimentalLog, TSR, TSRLineItem, PurchaseOrderLineItem, Solvent, PurchaseOrder, NATART_CHOICES, Ingredient,get_next_rawmaterialcode, get_next_experimentalnum, ExperimentalFormula, SOLUBILITY_CHOICES, RISK_ASSESSMENT_CHOICES, ProductCategory,NutriInfo, NutriInfoTemp, SpecSheetInfo, COA, Documents, Supplier
+# from access.models import *
 from newqc.models import RMRetain
 from solutionfixer.models import SolutionStatus, Solution, convert_solution_into_formula
 
@@ -1073,17 +1074,6 @@ def start_rm_wizard_for_new_solution(request, solution_params): #this is for the
     NewRMFormWizard = make_new_rm_form_wizard(request)
     return NewRMFormWizard.as_view([NewRMForm1, NewRMForm2, NewRMForm3, NewRMForm4, NewRMForm5], initial_dict=initial)(request)
 
-
-
-# def validate_spec_name(name):
-#     if FlavorSpecification.objects.filter(name=name).count() != 0:
-#         raise ValidationError(u'A specification with that name already exists.')
-
-
-# class CustomerSpecificationNameField(forms.CharField):
-#     default_validators = [validate_spec_name]
-
-
 #use closure to get the flavor for which the form is being used
 def make_flavorspec_form(flavor):
     class FlavorSpecificationForm(forms.Form):
@@ -1106,7 +1096,6 @@ def make_flavorspec_form(flavor):
 
             return cleaned_data
 
-
     return FlavorSpecificationForm
 
 
@@ -1126,9 +1115,7 @@ def make_customerspec_form(flavor):
             if FlavorSpecification.objects.filter(flavor=flavor).filter(name=name).exclude(pk=pk).exists():
                 raise ValidationError("A specification with the name '%s' already exists" % name)
 
-
             return cleaned_data
-
 
     return CustomerSpecificationForm
 
@@ -1176,7 +1163,6 @@ class ErrorsCasFemaPreviewForm(forms.Form):
         return cleaned_data
 
 
-
 class NoInfoCasFemaPreviewForm(forms.Form):
     Checkbox = forms.BooleanField(initial=True, required=False)
     ing_pk = forms.IntegerField(initial=0, widget=forms.HiddenInput)
@@ -1197,37 +1183,6 @@ class ProductNumberForm(forms.Form):
 class IngredientStatementForm(forms.Form):
     ingredient_statement = forms.CharField(max_length=1000, widget=forms.TextInput(attrs={'size':100}))
 
-# class ReceivingLogForm(forms.Form):
-# #     edit_existing_receiving_log = forms.BooleanField(label="Edit Existing Receiving Log", required=False)
-#
-#     r_number = forms.IntegerField(label="R Number", initial=RMRetain.get_next_r_number)
-#     r_number.widget.attrs['class'] = 'form-control'
-#     r_number.widget.attrs['readonly'] = True
-#
-#     date_received = forms.DateField(label="Date Received", initial=date.today, widget=SelectDateWidget())
-#     date_received.widget.attrs['class'] = 'form-control'
-#
-#     amount_received = forms.IntegerField(label="Amount Received (lbs)")
-#     amount_received.widget.attrs['class'] = 'form-control'
-#
-#     trucking_company = forms.CharField(label="Trucking Company", max_length=60)
-#     trucking_company.widget.attrs['class'] = 'form-control'
-#
-#     supplier = forms.CharField(label="Supplier", max_length=60)
-#     supplier.widget.attrs['class'] = 'form-control'
-#
-#     supplier_lot = forms.CharField(label="Supplier Lot", max_length=60)
-#     supplier_lot.widget.attrs['class'] = 'form-control'
-#
-#     cp3_received = forms.BooleanField(label="CP3 Received", required=False)
-# #     cp3_received.widget.attrs['class'] = 'form-control'
-#     #allergens_approved = forms.BooleanField(label="Allergens Approved")
-#     kosher_group = forms.ChoiceField(label="Kosher Group", choices=KOSHER_GROUP_CHOICES)
-#     kosher_group.widget.attrs['class'] = 'form-control'
-#     #kosher_approved = forms.BooleanField(label="Kosher Approved")
-
-# class nutri_info_edit(ListView):
-#     model = NutriInfo
 class searchForm(forms.Form):
     rm_search = forms.CharField(label = 'RM_Code')
 
@@ -1288,7 +1243,7 @@ class spec_sheet_form(forms.ModelForm):
             'id', 'flavor', 'one_off_customer', 'source_path', 'date', 'supercedes', 'product_name', 'product_number', 'specification_code',
             'solubility', 'specific_gravity', 'flash_point', 'sieve', 'moisture', 'fat_content', 'salt_content', 'brix', 'bostwick_consistometer',
             'ph', 'water_activity', 'aerobic_plate_count', 'escherichia_coli', 'salmonella', 'yeast', 'mold', 'listeria', 'staphylococci', 'coliforms', 'standard_plate_count',
-            'description', 'ingredient_statement', 'shelf_life', 'storage',
+            'ingredient_statement', 'shelf_life', 'storage',
         ]
 
 class coa_form(forms.ModelForm):
@@ -1301,7 +1256,7 @@ class coa_form(forms.ModelForm):
             'id', 'flavor', 'one_off_customer', 'source_path', 'date', 'supercedes', 'product_name', 'product_number', 'specification_code',
             'solubility', 'specific_gravity', 'flash_point', 'sieve', 'moisture', 'fat_content', 'salt_content', 'brix', 'bostwick_consistometer',
             'ph', 'water_activity', 'aerobic_plate_count', 'escherichia_coli', 'salmonella', 'yeast', 'mold', 'listeria', 'staphylococci', 'coliforms', 'standard_plate_count',
-            'description', 'ingredient_statement', 'shelf_life', 'storage',
+            'ingredient_statement', 'shelf_life', 'storage',
         ]
         widgets = {
             'origin_lot': widgets.TextInput(),
@@ -1316,3 +1271,8 @@ class coa_form(forms.ModelForm):
 #         model = Documents
 #
 #
+#
+# class is_chemical_form(forms.ModelForm):
+#     class Meta:
+#         model = IngredientTemp
+#         fields = ['is_chemical']

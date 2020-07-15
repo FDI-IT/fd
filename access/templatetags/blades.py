@@ -55,7 +55,10 @@ class ObjectBlades():
                 elif hasattr(self, 'flavor'):
                     if type(self.flavor) == Flavor:
                         if blade_property == 'ocert':
-                            field_color = 'red'
+                            if val[1] == 'CERTIFIED': # val is a tuple (field, value)
+                                field_color = 'green'
+                            else:
+                                field_color = 'red'
                         else:
                             field_color = field_status_dict[self.flavor.get_field_status(blade_property)]
                 yield val + (field_color,)
@@ -113,9 +116,9 @@ class FlavorBlades(ObjectBlades):
     def ocert(self):
         if self.flavor.organic_certified_required == True:
             if self.flavor.organic_certification_number:
-                return ("OCERT Number", self.flavor.organic_certification_number)
+                return ("OCERT Status", self.flavor.organic_certification_number)
             else:
-                return ("OCERT Number", "PENDING")
+                return ("OCERT Status", "PENDING")
         elif self.flavor.organic_compliant_required == True:
             return ("OCERT Number", "Will not be certified")
 

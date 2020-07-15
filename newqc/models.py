@@ -684,7 +684,7 @@ class ReceivingLog(models.Model):
     cp3_received = models.BooleanField(blank=True, default=None)
 
     supplier_fk = models.ForeignKey(Supplier, null=True)
-    manufacturer_fk = models.ForeignKey(Manufacturer, null=True)
+    manufacturer_fk = models.ForeignKey(Manufacturer, null=True, related_name='manufacturer')
 
     def __unicode__(self):
         return '%s - %s' % (self.poli, self.amount_received)
@@ -712,6 +712,18 @@ class ReceivingLog(models.Model):
             except:
                 print 'Could not find manufacturer with name %s' % self.manufacturer
 
+    def save(self, *a, **kw):  # this checks for foreign keys and saves their ids before attempting to save
+        for field in self._meta.fields:
+            if isinstance(field, models.ForeignKey):  # this line is important, change it to whatever the field type is
+                if field.name in ['rm_retain',
+                                  'poli']:  # MIGHT HAVE TO REMOVE THIS WHEN ACTUALLY SETTING SUPPLIER AND MANUFACTURER FK
+                    id_attname = field.attname
+                    instance_attname = id_attname.rpartition("_id")[0]
+                    instance = getattr(self, instance_attname)
+                    instance_id = instance.pk
+                    setattr(self, id_attname, instance_id)
+
+        super(ReceivingLog, self).save(*a, **kw)
 
     # Not sure what this was for
     # def save(self, *a, **kw): #this checks for foreign keys and saves their ids before attempting to save
