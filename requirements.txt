@@ -9,7 +9,7 @@ pytz==2017.2
 django-reversion==2.0.10
 django-celery==3.2.1
 django-formfieldset==1.1
-Pillow==4.3.0
+Pillow==9.3.0
 redis==2.10.6
 ipython==5.5.0
 djangorestframework==3.6.4
